@@ -1,12 +1,16 @@
-// See https://svelte.dev/docs/kit/types#app.d.ts
-// for information about these interfaces
+export type Session = {
+	id: string;
+	user: import('$generated/types').User;
+};
+
 declare global {
 	namespace App {
-		// interface Error {}
-		// interface Locals {}
-		// interface PageData {}
-		// interface PageState {}
-		// interface Platform {}
+		interface Locals {
+			session?: Session | undefined;
+		}
+		interface PageData {
+			session?: Session | undefined;
+		}
 	}
 }
 
