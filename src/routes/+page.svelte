@@ -1,2 +1,87 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
+<script lang="ts">
+	import type { Organization } from '$generated/types';
+
+	interface Props {
+		data: {
+			session?: { id: string; user: { guid: string; nickname: string } };
+			publicOrgs: Organization[];
+			myOrgs: Organization[];
+		};
+	}
+
+	let { data }: Props = $props();
+
+	const session = $derived(data.session);
+	const publicOrgs = $derived(data.publicOrgs);
+	const myOrgs = $derived(data.myOrgs);
+</script>
+
+<svelte:head>
+	<title>API Builder - API-First Development</title>
+</svelte:head>
+
+<div class="page-container">
+	{#if session}
+		<!-- Logged in view -->
+		<div class="mb-10">
+			<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+				<h1 class="text-2xl font-bold text-ab-dark-blue">My Organizations</h1>
+				<a href="/org/create" class="btn-primary mt-4 sm:mt-0 inline-block text-center">
+					Create Organization
+				</a>
+			</div>
+
+			{#if myOrgs.length === 0}
+				<p class="text-ab-gray">You are not a member of any organizations yet.</p>
+			{:else}
+				<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+					{#each myOrgs as org (org.guid)}
+						<a href="/{org.key}" class="card hover:shadow-lg transition-shadow">
+							<h3 class="font-semibold text-ab-dark-blue">{org.name}</h3>
+							<p class="text-sm text-ab-gray mt-1">{org.namespace}</p>
+							<span class="inline-block mt-2 text-xs font-medium px-2 py-0.5 rounded-full {org.visibility === 'public' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}">
+								{org.visibility}
+							</span>
+						</a>
+					{/each}
+				</div>
+			{/if}
+		</div>
+	{:else}
+		<!-- Hero for logged out users -->
+		<div class="text-center py-16 sm:py-24">
+			<h1 class="text-4xl sm:text-5xl font-bold text-ab-dark-blue mb-6">
+				API Builder
+			</h1>
+			<p class="text-lg sm:text-xl text-ab-gray max-w-2xl mx-auto mb-8">
+				Design APIs with a simple, elegant interface. Generate client libraries, server stubs, and documentation from your API specifications.
+			</p>
+			<div class="flex flex-col sm:flex-row gap-4 justify-center">
+				<a href="/doc" class="btn-primary">
+					Documentation
+				</a>
+				<a href="/login" class="btn-secondary">
+					Login
+				</a>
+			</div>
+		</div>
+	{/if}
+
+	<!-- Public Organizations -->
+	{#if publicOrgs.length > 0}
+		<div>
+			<h2 class="text-xl font-bold text-ab-dark-blue mb-4">Public Organizations</h2>
+			<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+				{#each publicOrgs as org (org.guid)}
+					<a href="/{org.key}" class="card hover:shadow-lg transition-shadow">
+						<h3 class="font-semibold text-ab-dark-blue">{org.name}</h3>
+						<p class="text-sm text-ab-gray mt-1">{org.namespace}</p>
+						<span class="inline-block mt-2 text-xs font-medium px-2 py-0.5 rounded-full bg-green-100 text-green-800">
+							{org.visibility}
+						</span>
+					</a>
+				{/each}
+			</div>
+		</div>
+	{/if}
+</div>
