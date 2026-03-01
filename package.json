@@ -23,6 +23,7 @@
 	"dependencies": {
 		"@sveltejs/adapter-cloudflare": "^7.2.8",
 		"@tailwindcss/forms": "^0.5.11",
+		"@tailwindcss/postcss": "^4.2.1",
 		"autoprefixer": "^10.4.27",
 		"marked": "^17.0.3",
 		"postcss": "^8.5.6",

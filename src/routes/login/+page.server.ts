@@ -1,6 +1,6 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
-import { authenticateEmail, getSessionHeaders } from '$lib/server/api';
+import { authenticateEmail } from '$lib/server/api';
 import { handleApiCall } from '$lib/api/error-handler';
 import { SESSION_COOKIE, config } from '$lib/config';
 import type { Authentication } from '$generated/types';

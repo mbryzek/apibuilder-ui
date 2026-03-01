@@ -19,15 +19,20 @@ export const actions: Actions = {
 		const formData = await request.formData();
 		const email = formData.get('email') as string;
 		const nickname = formData.get('nickname') as string;
-		const name = (formData.get('name') as string) || undefined;
+		const name = (formData.get('name') as string) || '';
 
 		if (!email || !nickname) {
 			return fail(400, { errors: [{ message: 'Email and nickname are required' }] });
 		}
 
+		const form: { email: string; nickname: string; name?: string } = { email, nickname };
+		if (name) {
+			form.name = name;
+		}
+
 		const headers = getSessionHeaders(locals.session.id);
 		const response = await handleApiCall<User>(
-			() => updateUser(locals.session!.user.guid, { email, nickname, name }, headers),
+			() => updateUser(locals.session!.user.guid, form, headers),
 		);
 
 		if ('data' in response) {

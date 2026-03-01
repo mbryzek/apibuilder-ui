@@ -19,16 +19,24 @@ export const actions: Actions = {
 		const formData = await request.formData();
 		const name = formData.get('name') as string;
 		const namespace = formData.get('namespace') as string;
-		const key = (formData.get('key') as string) || undefined;
-		const visibility = (formData.get('visibility') as string) || undefined;
+		const key = (formData.get('key') as string) || '';
+		const visibility = (formData.get('visibility') as string) || '';
 
 		if (!name || !namespace) {
 			return fail(400, { errors: [{ message: 'Name and namespace are required' }] });
 		}
 
+		const form: { name: string; namespace: string; key?: string; visibility?: string } = { name, namespace };
+		if (key) {
+			form.key = key;
+		}
+		if (visibility) {
+			form.visibility = visibility;
+		}
+
 		const headers = getSessionHeaders(locals.session.id);
 		const response = await handleApiCall<Organization>(
-			() => createOrganization({ name, namespace, key, visibility }, headers),
+			() => createOrganization(form, headers),
 		);
 
 		if ('data' in response) {
