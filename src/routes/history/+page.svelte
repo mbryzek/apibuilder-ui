@@ -44,7 +44,7 @@
 									{change.organization.key}/{change.application.key}
 								</a>
 							</td>
-							<td class="py-3 hidden sm:table-cell text-sm text-ab-dark-blue">
+							<td class="py-3 pr-4 hidden sm:table-cell text-sm text-ab-dark-blue whitespace-nowrap">
 								{change.from_version.version} &rarr; {change.to_version.version}
 							</td>
 							<td class="py-3 text-sm">

@@ -41,7 +41,7 @@
 				<tbody>
 					{#each changes as change (change.guid)}
 						<tr class="border-b border-gray-100 hover:bg-ab-light-gray/50 transition-colors">
-							<td class="py-3 hidden sm:table-cell text-sm text-ab-dark-blue">
+							<td class="py-3 pr-4 hidden sm:table-cell text-sm text-ab-dark-blue whitespace-nowrap">
 								<a href="/{data.orgKey}/{data.appKey}/{change.from_version.version}" class="text-ab-blue hover:text-ab-dark-blue">
 									{change.from_version.version}
 								</a>
