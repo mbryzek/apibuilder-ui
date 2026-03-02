@@ -21,5 +21,5 @@ export const load: PageServerLoad = async ({ cookies }) => {
 		throw redirect(303, '/?flash=' + encodeURIComponent('Logged in as dev') + '&flash_type=success');
 	}
 
-	throw redirect(303, '/login?flash=' + encodeURIComponent('Dev login failed') + '&flash_type=error');
+	throw redirect(303, '/login?flash=' + encodeURIComponent('Developer login not enabled') + '&flash_type=error');
 };

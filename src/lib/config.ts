@@ -1,9 +1,9 @@
 export const SESSION_COOKIE = 'session_id';
 
 export const config = {
-	apiBaseUrl: import.meta.env['VITE_API_BASE_URL'] || 'https://api.apibuilder.io',
+	apiBaseUrl: import.meta.env['VITE_API_BASE_URL'] || 'http://localhost:9001',
 	appBaseUrl: import.meta.env['VITE_APP_BASE_URL'] || 'http://localhost:5173',
-	githubClientId: import.meta.env['VITE_GITHUB_CLIENT_ID'] || '60aafb7d025ff883bcc2',
+	githubClientId: import.meta.env['VITE_GITHUB_CLIENT_ID'] || '',
 	environment: import.meta.env['VITE_ENVIRONMENT'] || 'development',
 	isProduction: import.meta.env['VITE_ENVIRONMENT'] === 'production' || import.meta.env.PROD,
 } as const;
