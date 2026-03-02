@@ -60,7 +60,9 @@
 
 			<div>
 				<dt class="text-sm font-semibold text-ab-gray">Service URI</dt>
-				<dd class="text-ab-dark-blue mt-1">{gws.service.uri}</dd>
+				<dd class="mt-1">
+					<a href="/generators/services/{gws.service.guid}" class="text-ab-blue hover:text-ab-dark-blue">{gws.service.uri}</a>
+				</dd>
 			</div>
 		</dl>
 	</div>

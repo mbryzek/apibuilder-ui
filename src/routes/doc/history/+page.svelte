@@ -1,0 +1,88 @@
+<svelte:head>
+	<title>History - API Builder</title>
+</svelte:head>
+
+<div>
+	<h1 class="text-2xl font-bold text-ab-dark-blue mb-6">History</h1>
+
+	<div class="card mb-6">
+		<p class="text-ab-dark-blue mb-3">
+			This project is based on practical learnings from scaling the Gilt
+			technology organization across code, people, teams, and
+			practices. At the time we started on this project, Gilt had over
+			100 active committers, a distributed micro services architecture
+			with over 300 independent applications, and significant revenue and
+			traffic.
+		</p>
+
+		<p class="text-ab-dark-blue mb-3">
+			The idea for apibuilder stems from our team's realization that, in
+			order to continue iterating and growing, we needed a new approach
+			to handle the complexity of a growing microservice architecture.
+		</p>
+
+		<p class="text-ab-dark-blue mb-3">
+			As developers, we were constantly building new APIs, spending a lot
+			of time writing clients and learning the intricacies of services
+			provided by other teams. By spending more time up front on API
+			design, and using standardized client libraries, we could free up
+			our time to focus on building the services and less time in the
+			integration tasks.
+		</p>
+
+		<p class="text-ab-dark-blue mb-3">
+			We explored what was available on the market - trying different
+			projects to hand write interfaces for a few systems we were
+			actively building. We looked at protobufs, thrift, avro, swagger,
+			apiary, raml and others before identifying our key requirements:
+		</p>
+
+		<ul class="list-disc list-inside text-ab-dark-blue space-y-3 ml-2">
+			<li>
+				Incredibly nice clients w/ no dependencies - the developer
+				experience using apibuilder clients is amazing - we want developers to
+				love apibuilder clients so much they no longer want to write their own
+				client libraries.
+			</li>
+			<li>Zero runtime dependencies / changes in production code.</li>
+			<li>
+				<strong>JSON</strong>: HTTP/JSON is everywhere. By focusing on this standard,
+				we can ensure that the tooling we provide is available to all web
+				developers - seamlessly including native application, web, and
+				backend developers.
+			</li>
+			<li>
+				<strong>Resource first</strong>: Specifically api.json starts with a list of
+				resources instead of operations as we want to encourage the
+				identification of resources as early as possible in the
+				development process. This has proven to be very valuable with
+				the rise of new approaches (like GraphQL) that are themselves
+				resource first.
+			</li>
+			<li>
+				<strong>Simple documentation</strong>: Upload a JSON file and you have
+				documentation. We want documentation to be first class, simple and
+				immediate. Using apibuilder just for documentation is one of our core
+				intended use cases.
+			</li>
+			<li>
+				<strong>Simple and terse schema</strong>: We wanted a web developer to be able
+				to learn the schema by looking at a few simple examples. We also
+				are writing the JSON by hand and need it to be terse and
+				clear.
+			</li>
+			<li>
+				<strong>No code annotations</strong>: we found that too many annotations made
+				it difficult to see the code. Especially in a micro-services
+				environment, we want to keep our applications simple and
+				pure.
+			</li>
+			<li>
+				<strong>Compatibility with existing tools</strong>: We borrowed everything we
+				could from other projects and thus where possible we adopted
+				standards from existing work. This allows API Builder to be fully
+				compatible with other frameworks including Swagger and Avro.
+			</li>
+		</ul>
+	</div>
+</div>

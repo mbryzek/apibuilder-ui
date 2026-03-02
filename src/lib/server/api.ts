@@ -233,7 +233,7 @@ export function postCode(orgKey: string, appKey: string, version: string, genera
 
 // === Generators ===
 
-export function getGenerators(headers: Headers, params?: { key?: string; limit?: number; offset?: number }): Promise<globalThis.Response> {
+export function getGenerators(headers: Headers, params?: { key?: string; service_guid?: string; limit?: number; offset?: number }): Promise<globalThis.Response> {
 	return get('/generators', headers, params);
 }
 
@@ -245,6 +245,10 @@ export function getGeneratorByKey(key: string, headers: Headers): Promise<global
 
 export function getGeneratorServices(headers: Headers, params?: { guid?: string; uri?: string; generator_key?: string; limit?: number; offset?: number }): Promise<globalThis.Response> {
 	return get('/generator_services', headers, params);
+}
+
+export function getGeneratorServiceByGuid(guid: string, headers: Headers): Promise<globalThis.Response> {
+	return get(`/generator_services/${guid}`, headers);
 }
 
 export function createGeneratorService(form: { uri: string }, headers: Headers): Promise<globalThis.Response> {
