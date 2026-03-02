@@ -151,7 +151,7 @@
 						href="/login"
 						class="bg-white text-ab-blue font-semibold px-5 py-2 rounded-full hover:scale-110 transition-all duration-200 ease-out text-sm"
 					>
-						Log in with GitHub
+						Login
 					</a>
 				{/if}
 			</div>
@@ -259,7 +259,7 @@
 					class="block px-3 py-2 mt-2 text-center bg-white text-ab-blue font-semibold rounded-full hover:scale-105 transition-all duration-200 ease-out"
 					onclick={closeMobileMenu}
 				>
-					Log in with GitHub
+					Login
 				</a>
 			{/if}
 		</div>

@@ -14,7 +14,6 @@
 	let { data, form }: Props = $props();
 
 	let isSubmitting = $state(false);
-	let showLegacyLogin = $state(false);
 
 	const errors = $derived(form?.errors ?? []);
 	const githubUrl = $derived(
@@ -22,13 +21,6 @@
 			? `https://github.com/login/oauth/authorize?scope=user:email&client_id=${data.githubClientId}&redirect_uri=${encodeURIComponent(data.appBaseUrl + '/login/github/callback')}`
 			: '',
 	);
-
-	// Show legacy form automatically if there are form errors (user just submitted it)
-	$effect(() => {
-		if (errors.length > 0) {
-			showLegacyLogin = true;
-		}
-	});
 </script>
 
 <svelte:head>
@@ -49,9 +41,7 @@
 				</svg>
 				Sign in with GitHub
 			</a>
-		{/if}
 
-		{#if showLegacyLogin}
 			<div class="relative my-8">
 				<div class="absolute inset-0 flex items-center">
 					<div class="w-full border-t border-gray-200"></div>
@@ -60,81 +50,67 @@
 					<span class="px-4 bg-white text-ab-gray">or</span>
 				</div>
 			</div>
-
-			{#if errors.length > 0}
-				<div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
-					{#each errors as error}
-						<p class="text-red-800 text-sm">{error.message}</p>
-					{/each}
-				</div>
-			{/if}
-
-			<p class="text-sm text-ab-gray italic mb-4">
-				Note: this login method is deprecated. New users should register via GitHub.
-			</p>
-
-			<form
-				method="POST"
-				use:enhance={() => {
-					isSubmitting = true;
-					return async ({ update }) => {
-						isSubmitting = false;
-						await update();
-					};
-				}}
-			>
-				<input type="hidden" name="redirectTo" value={data.redirectTo} />
-
-				<div class="space-y-4">
-					<div>
-						<label for="email" class="block text-sm font-medium text-ab-dark-blue mb-1">Email</label>
-						<input
-							type="email"
-							id="email"
-							name="email"
-							required
-							autocomplete="email"
-							class="w-full input-field px-3 py-2 border rounded-lg"
-						/>
-					</div>
-
-					<div>
-						<label for="password" class="block text-sm font-medium text-ab-dark-blue mb-1">Password</label>
-						<input
-							type="password"
-							id="password"
-							name="password"
-							required
-							autocomplete="current-password"
-							class="w-full input-field px-3 py-2 border rounded-lg"
-						/>
-					</div>
-
-					<button
-						type="submit"
-						disabled={isSubmitting}
-						class="w-full btn-primary"
-					>
-						{isSubmitting ? 'Signing in...' : 'Sign in'}
-					</button>
-				</div>
-			</form>
-
-			<p class="mt-4 text-center text-sm text-ab-gray">
-				<a href="/login/forgot-password" class="text-ab-blue hover:text-ab-dark-blue transition-colors">
-					Forgot password?
-				</a>
-			</p>
-		{:else}
-			<p class="mt-6 text-center text-sm">
-				<button
-					type="button"
-					class="text-ab-blue hover:text-ab-dark-blue transition-colors"
-					onclick={() => showLegacyLogin = true}
-				>
-					Legacy Sign in
-				</button>
-			</p>
 		{/if}
+
+		{#if errors.length > 0}
+			<div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+				{#each errors as error}
+					<p class="text-red-800 text-sm">{error.message}</p>
+				{/each}
+			</div>
+		{/if}
+
+		<form
+			method="POST"
+			use:enhance={() => {
+				isSubmitting = true;
+				return async ({ update }) => {
+					isSubmitting = false;
+					await update();
+				};
+			}}
+		>
+			<input type="hidden" name="redirectTo" value={data.redirectTo} />
+
+			<div class="space-y-4">
+				<div>
+					<label for="email" class="block text-sm font-medium text-ab-dark-blue mb-1">Email</label>
+					<input
+						type="email"
+						id="email"
+						name="email"
+						required
+						autocomplete="email"
+						class="w-full input-field px-3 py-2 border rounded-lg"
+					/>
+				</div>
+
+				<div>
+					<label for="password" class="block text-sm font-medium text-ab-dark-blue mb-1">Password</label>
+					<input
+						type="password"
+						id="password"
+						name="password"
+						required
+						autocomplete="current-password"
+						class="w-full input-field px-3 py-2 border rounded-lg"
+					/>
+				</div>
+
+				<button
+					type="submit"
+					disabled={isSubmitting}
+					class="w-full btn-primary"
+				>
+					{isSubmitting ? 'Signing in...' : 'Sign in'}
+				</button>
+			</div>
+		</form>
+
+		<p class="mt-4 text-center text-sm text-ab-gray">
+			<a href="/login/forgot-password" class="text-ab-blue hover:text-ab-dark-blue transition-colors">
+				Forgot password?
+			</a>
+		</p>
 	</div>
 </div>
