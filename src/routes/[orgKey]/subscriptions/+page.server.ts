@@ -4,7 +4,6 @@ import { getSubscriptions, createSubscription, deleteSubscription, getSessionHea
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth, requireAuthForAction } from '$lib/server/auth';
 import type { Subscription } from '$generated/types';
-import { Publication } from '$generated/types';
 
 export const load: PageServerLoad = async (event) => {
 	const session = requireAuth(event);

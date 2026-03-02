@@ -1,9 +1,9 @@
 import type { PageServerLoad, Actions } from './$types';
 import { fail } from '@sveltejs/kit';
-import { getMemberships, getMembershipRequests, createMembershipRequest, getSessionHeaders } from '$lib/server/api';
+import { getMemberships, getMembershipRequests, createMembershipRequest, getOrganizationByKey, getSessionHeaders } from '$lib/server/api';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth, requireAuthForAction } from '$lib/server/auth';
-import type { Membership, MembershipRequest } from '$generated/types';
+import type { Membership, MembershipRequest, Organization } from '$generated/types';
 
 export const load: PageServerLoad = async (event) => {
 	const session = requireAuth(event);
@@ -26,13 +26,19 @@ export const load: PageServerLoad = async (event) => {
 };
 
 export const actions: Actions = {
-	default: async ({ locals, parent }) => {
+	default: async ({ locals, params }) => {
 		const session = requireAuthForAction(locals);
 		const headers = getSessionHeaders(session.id);
-		const { org } = await parent();
+
+		const orgResponse = await handleApiCall<Organization>(
+			() => getOrganizationByKey(params.orgKey, headers),
+		);
+		if (!('data' in orgResponse)) {
+			return fail(400, { errors: [{ message: 'Organization not found' }] });
+		}
 
 		const response = await handleApiCall<MembershipRequest>(
-			() => createMembershipRequest(org.guid, session.user.guid, 'member', headers),
+			() => createMembershipRequest(orgResponse.data.guid, session.user.guid, 'member', headers),
 		);
 
 		if ('data' in response) {

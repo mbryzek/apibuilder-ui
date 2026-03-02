@@ -4,10 +4,11 @@ import {
 	getMemberships, deleteMembership, getUsers,
 	createMembershipRequest, acceptMembershipRequest,
 	getMembershipRequests, getSessionHeaders,
+	getOrganizationByKey,
 } from '$lib/server/api';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth, requireAuthForAction } from '$lib/server/auth';
-import type { Membership, User, MembershipRequest } from '$generated/types';
+import type { Membership, User, MembershipRequest, Organization } from '$generated/types';
 
 export const load: PageServerLoad = async (event) => {
 	const session = requireAuth(event);
@@ -36,7 +37,7 @@ export const load: PageServerLoad = async (event) => {
 };
 
 export const actions: Actions = {
-	addMember: async ({ request, params, locals, parent }) => {
+	addMember: async ({ request, params, locals }) => {
 		const session = requireAuthForAction(locals);
 		const headers = getSessionHeaders(session.id);
 		const formData = await request.formData();
@@ -68,12 +69,15 @@ export const actions: Actions = {
 			return fail(400, { errors: [{ message: `User not found: ${emailOrNickname}` }] });
 		}
 
-		// Get org guid from parent layout data
-		const { org } = await parent();
+		const orgResponse = await handleApiCall<Organization>(
+			() => getOrganizationByKey(params.orgKey, headers),
+		);
+		if (!('data' in orgResponse)) {
+			return fail(400, { errors: [{ message: 'Organization not found' }] });
+		}
 
-		// Create membership request and accept it
 		const requestResponse = await handleApiCall<MembershipRequest>(
-			() => createMembershipRequest(org.guid, user!.guid, role, headers),
+			() => createMembershipRequest(orgResponse.data.guid, user!.guid, role, headers),
 		);
 
 		if ('data' in requestResponse) {
@@ -110,15 +114,21 @@ export const actions: Actions = {
 		return { success: true };
 	},
 
-	makeAdmin: async ({ request, locals, parent }) => {
+	makeAdmin: async ({ request, locals, params }) => {
 		const session = requireAuthForAction(locals);
 		const headers = getSessionHeaders(session.id);
 		const formData = await request.formData();
 		const userGuid = formData.get('user_guid') as string;
-		const { org } = await parent();
+
+		const orgResponse = await handleApiCall<Organization>(
+			() => getOrganizationByKey(params.orgKey, headers),
+		);
+		if (!('data' in orgResponse)) {
+			return fail(400, { errors: [{ message: 'Organization not found' }] });
+		}
 
 		const requestResponse = await handleApiCall<MembershipRequest>(
-			() => createMembershipRequest(org.guid, userGuid, 'admin', headers),
+			() => createMembershipRequest(orgResponse.data.guid, userGuid, 'admin', headers),
 		);
 
 		if ('data' in requestResponse) {
