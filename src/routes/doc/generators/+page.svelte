@@ -3,72 +3,269 @@
 </svelte:head>
 
 <div>
-	<h1 class="text-2xl font-bold text-ab-dark-blue mb-6">Code Generators</h1>
+	<h1 class="text-2xl font-bold text-ab-dark-blue mb-4">Code Generators</h1>
 
-	<div class="card mb-6">
-		<p class="text-ab-dark-blue mb-3">
-			Generating the code for high-quality client libraries to access
-			services described in API Builder is one of our primary goals. API Builder
-			supports client generation in multiple languages, and depending on community interest
-			additional languages can be contributed over time.
-		</p>
+	<p class="text-ab-dark-blue mb-4 text-lg leading-relaxed">
+		API Builder generates high-quality client libraries and server stubs from your API specification.
+		The generated code is designed to be indistinguishable from hand-written code — minimal dependencies,
+		single-file output, and readable enough to review like any other PR.
+	</p>
 
-		<p class="text-ab-dark-blue mb-3">
-			We spend a lot of time designing exactly how we want developers to
-			interact with the client libraries, and are proud of how simple
-			the current client libraries are to use and read. A few
-			specific principles guiding our work:
-		</p>
-
-		<ol class="list-decimal list-inside text-ab-dark-blue mb-4 space-y-3 ml-2">
+	<div class="card mb-8">
+		<h2 class="text-lg font-semibold text-ab-dark-blue mb-3">Design Principles</h2>
+		<ul class="space-y-3 text-ab-dark-blue ml-2">
 			<li>
-				<strong>Minimal Dependencies</strong>: Where possible, we prefer
-				client libraries that use native dependencies of web frameworks
-				(e.g. clients for Play Framework that require zero additional
-				dependencies). Where impossible, we take extra care to
-				minimize needed dependencies and to use the
-				most standard dependencies possible.
+				<strong>Minimal dependencies</strong> — Client libraries use native framework dependencies where possible.
+				When not, we use the most standard options available.
 			</li>
 			<li>
-				<strong>Readability</strong>: Each client library is first written by
-				hand. We then automate the generation of that hand-written
-				client. The goal is to make the generated client
-				indistinguishable from a hand-written one. We will never reach
-				100%, but we believe we are very close.
+				<strong>Readable output</strong> — Every generator starts as a hand-written client that we then automate.
+				The goal is generated code you'd be proud to commit.
 			</li>
 			<li>
-				<strong>Single File</strong>: When you download a client from API Builder,
-				you will download one fully contained, fully functional
-				file. This makes it simple to either drop the file directly into
-				your project, or to build a library with the standard tooling necessary to
-				share the client.
+				<strong>Single file</strong> — Download one fully contained, fully functional file.
+				Drop it into your project or package it as a library.
 			</li>
-		</ol>
-
-		<ul class="list-disc list-inside text-ab-dark-blue space-y-1 ml-2">
-			<li><a href="/generators" class="text-ab-blue hover:text-ab-dark-blue">Available code generators</a></li>
-			<li><a href="/doc/attributes" class="text-ab-blue hover:text-ab-dark-blue">Attributes for code generators</a></li>
-			<li><a href="https://github.com/apicollective/apibuilder-generator" class="text-ab-blue hover:text-ab-dark-blue">Source code for provided code generators (separate git repository)</a></li>
 		</ul>
 	</div>
 
+	<!-- Generators by Language -->
+	<h2 class="text-xl font-bold text-ab-dark-blue mb-6">Available Generators</h2>
+
+	<!-- Scala -->
 	<div class="card mb-6">
-		<h2 class="text-lg font-semibold text-ab-dark-blue mb-3">Notes for Play 2.x Client</h2>
-		<ul class="list-disc list-inside text-ab-dark-blue space-y-1 ml-2">
-			<li><a href="/doc/playRoutesFile" class="text-ab-blue hover:text-ab-dark-blue">Play routes</a></li>
-			<li><a href="/doc/playUnionTypes" class="text-ab-blue hover:text-ab-dark-blue">Play union types</a></li>
-			<li><a href="https://github.com/apicollective/apibuilder/tree/main/client-tests/play_2_4" class="text-ab-blue hover:text-ab-dark-blue">Play 2.4 sample project</a></li>
-			<li><a href="https://github.com/apicollective/apibuilder/tree/main/client-tests/play_2_3" class="text-ab-blue hover:text-ab-dark-blue">Play 2.3 sample project</a></li>
-			<li><a href="https://github.com/apicollective/apibuilder/tree/main/client-tests/play_2_2" class="text-ab-blue hover:text-ab-dark-blue">Play 2.2 sample project</a></li>
+		<h3 class="text-lg font-semibold text-ab-blue mb-3 flex items-center gap-2">
+			<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-ab-blue text-white text-xs font-bold">S</span>
+			Scala
+		</h3>
+		<ul class="space-y-2 text-ab-dark-blue ml-2">
+			<li>
+				<a href="/generators/show/play_2_9_scala_3_client" class="text-ab-blue hover:text-ab-dark-blue underline font-medium">Play 2.9 / Scala 3 Client</a>
+				— Latest Play Framework client with Scala 3 support
+			</li>
+			<li>
+				<a href="/generators/show/http4s_0_23" class="text-ab-blue hover:text-ab-dark-blue underline font-medium">Http4s 0.23 Client</a>
+				— Functional HTTP client for the Typelevel ecosystem
+			</li>
+			<li>
+				<a href="/generators/show/anorm_2_9_scala_3_parsers" class="text-ab-blue hover:text-ab-dark-blue underline font-medium">Anorm 2.9 / Scala 3 Parsers</a>
+				— Database parsers for Play Anorm
+			</li>
+			<li>
+				<a href="/generators/show/scala_models" class="text-ab-blue hover:text-ab-dark-blue underline font-medium">Scala Models</a>
+				— Standalone model and enum generation
+			</li>
+			<li>
+				<a href="/generators/show/scala_mock" class="text-ab-blue hover:text-ab-dark-blue underline font-medium">Scala Mock Client</a>
+				— Mock clients for testing
+			</li>
+		</ul>
+		<details class="mt-3">
+			<summary class="text-ab-gray cursor-pointer text-sm hover:text-ab-dark-blue">Older Scala versions</summary>
+			<ul class="space-y-1 text-ab-dark-blue ml-2 mt-2 text-sm">
+				<li><a href="/generators/show/play_2_8_client" class="text-ab-blue hover:text-ab-dark-blue underline">Play 2.8 Client</a></li>
+				<li><a href="/generators/show/play_2_6_client" class="text-ab-blue hover:text-ab-dark-blue underline">Play 2.6 Client</a></li>
+				<li><a href="/generators/show/http4s_0_22" class="text-ab-blue hover:text-ab-dark-blue underline">Http4s 0.22</a></li>
+				<li><a href="/generators/show/anorm_2_8_parsers" class="text-ab-blue hover:text-ab-dark-blue underline">Anorm 2.8 Parsers</a></li>
+				<li><a href="/generators/show/anorm_2_6_parsers" class="text-ab-blue hover:text-ab-dark-blue underline">Anorm 2.6 Parsers</a></li>
+				<li><a href="/generators/show/async_http_2_5_client" class="text-ab-blue hover:text-ab-dark-blue underline">Async Http Client 2.5</a></li>
+			</ul>
+		</details>
+	</div>
+
+	<!-- Kotlin / Android -->
+	<div class="card mb-6">
+		<h3 class="text-lg font-semibold text-ab-blue mb-3 flex items-center gap-2">
+			<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-ab-blue text-white text-xs font-bold">K</span>
+			Kotlin &amp; Android
+		</h3>
+		<ul class="space-y-2 text-ab-dark-blue ml-2">
+			<li>
+				<a href="/generators/show/android_kotlin_rx2_client" class="text-ab-blue hover:text-ab-dark-blue underline font-medium">Android Kotlin RxJava2 Client</a>
+				— Kotlin models with Retrofit 2 + RxJava2
+			</li>
+			<li>
+				<a href="/generators/show/android_client" class="text-ab-blue hover:text-ab-dark-blue underline font-medium">Android Java Client</a>
+				— Java models with Retrofit 2
+			</li>
+			<li>
+				<a href="/generators/show/android_rx2_client" class="text-ab-blue hover:text-ab-dark-blue underline font-medium">Android RxJava2 Client</a>
+				— Java models with Retrofit 2 + RxJava2
+			</li>
 		</ul>
 	</div>
 
+	<!-- Java / Spring -->
 	<div class="card mb-6">
-		<h2 class="text-lg font-semibold text-ab-dark-blue mb-3">Notes for Ning Client</h2>
-		<ul class="list-disc list-inside text-ab-dark-blue space-y-1 ml-2">
-			<li><a href="https://github.com/apicollective/apibuilder/tree/main/client-tests/ning_1_9_scala_2_11" class="text-ab-blue hover:text-ab-dark-blue">Ning 1.9 / Scala 2.11 sample project</a></li>
-			<li><a href="https://github.com/apicollective/apibuilder/tree/main/client-tests/ning_1_8_scala_2_11" class="text-ab-blue hover:text-ab-dark-blue">Ning 1.8 / Scala 2.11 sample project</a></li>
-			<li><a href="https://github.com/apicollective/apibuilder/tree/main/client-tests/ning_1_8_scala_2_10" class="text-ab-blue hover:text-ab-dark-blue">Ning 1.8 / Scala 2.10 sample project</a></li>
+		<h3 class="text-lg font-semibold text-ab-blue mb-3 flex items-center gap-2">
+			<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-ab-blue text-white text-xs font-bold">J</span>
+			Java &amp; Spring
+		</h3>
+		<ul class="space-y-2 text-ab-dark-blue ml-2">
+			<li>
+				<a href="/generators/show/java_client_spring_6" class="text-ab-blue hover:text-ab-dark-blue underline font-medium">Java WebClient (Spring 6)</a>
+				— Spring 6 WebClient with Jakarta validation <span class="text-xs bg-blue-100 text-ab-blue px-2 py-0.5 rounded-full">BETA</span>
+			</li>
+			<li>
+				<a href="/generators/show/bml_lombok_spring_6" class="text-ab-blue hover:text-ab-dark-blue underline font-medium">Lombok Models (Spring 6)</a>
+				— Jakarta JPA models with Lombok <span class="text-xs bg-blue-100 text-ab-blue px-2 py-0.5 rounded-full">BETA</span>
+			</li>
+			<li>
+				<a href="/generators/show/jpa_repository_spring_6" class="text-ab-blue hover:text-ab-dark-blue underline font-medium">JPA Repositories (Spring 6)</a>
+				— Spring Data JPA repositories with Jakarta
+			</li>
+			<li>
+				<a href="/generators/show/java_models" class="text-ab-blue hover:text-ab-dark-blue underline font-medium">Java Models</a>
+				— Standalone Java model generation
+			</li>
+			<li>
+				<a href="/generators/show/java_aws_lambda_pojo_client" class="text-ab-blue hover:text-ab-dark-blue underline font-medium">AWS Lambda POJOs</a>
+				— Java POJO models for AWS Lambda
+			</li>
 		</ul>
+	</div>
+
+	<!-- TypeScript / JavaScript -->
+	<div class="card mb-6">
+		<h3 class="text-lg font-semibold text-ab-blue mb-3 flex items-center gap-2">
+			<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-ab-blue text-white text-xs font-bold">T</span>
+			TypeScript &amp; JavaScript
+		</h3>
+		<ul class="space-y-2 text-ab-dark-blue ml-2">
+			<li>
+				<a href="/generators/show/ts_declarations" class="text-ab-blue hover:text-ab-dark-blue underline font-medium">TypeScript Declarations</a>
+				— Type definitions for TypeScript projects
+			</li>
+			<li>
+				<a href="/generators/show/ts_sdk" class="text-ab-blue hover:text-ab-dark-blue underline font-medium">TypeScript SDK</a>
+				— Full TypeScript client SDK
+			</li>
+			<li>
+				<a href="/generators/show/js_isomorphic" class="text-ab-blue hover:text-ab-dark-blue underline font-medium">JavaScript (Isomorphic)</a>
+				— ES6 client for Node and browser
+			</li>
+			<li>
+				<a href="/generators/show/jsdoc" class="text-ab-blue hover:text-ab-dark-blue underline font-medium">JSDoc 3 Types</a>
+				— JSDoc type definitions
+			</li>
+		</ul>
+	</div>
+
+	<!-- GraphQL -->
+	<div class="card mb-6">
+		<h3 class="text-lg font-semibold text-ab-blue mb-3 flex items-center gap-2">
+			<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-ab-blue text-white text-xs font-bold">G</span>
+			GraphQL
+		</h3>
+		<ul class="space-y-2 text-ab-dark-blue ml-2">
+			<li>
+				<a href="/generators/show/graphql_apollo" class="text-ab-blue hover:text-ab-dark-blue underline font-medium">GraphQL Apollo Server</a>
+				— Schema + Apollo Server adapters
+				(<a href="https://github.com/apicollective/apibuilder-examples/tree/main/graphql/users" class="text-ab-blue hover:text-ab-dark-blue underline text-sm">example</a>)
+			</li>
+			<li>
+				<a href="/generators/show/graphql" class="text-ab-blue hover:text-ab-dark-blue underline font-medium">GraphQL Schema</a>
+				— Standalone schema generation
+			</li>
+			<li>
+				<a href="/generators/show/graphql_schema_generator" class="text-ab-blue hover:text-ab-dark-blue underline font-medium">GraphQL for Java</a>
+				— Schema for use with graphql-java
+			</li>
+		</ul>
+	</div>
+
+	<!-- Other Languages -->
+	<div class="card mb-6">
+		<h3 class="text-lg font-semibold text-ab-blue mb-3 flex items-center gap-2">
+			<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-ab-blue text-white text-xs font-bold">+</span>
+			More Languages
+		</h3>
+		<ul class="space-y-2 text-ab-dark-blue ml-2">
+			<li>
+				<a href="/generators/show/go_1_5_client" class="text-ab-blue hover:text-ab-dark-blue underline font-medium">Go Client</a>
+				— Native net/http client for Go
+			</li>
+			<li>
+				<a href="/generators/show/dart" class="text-ab-blue hover:text-ab-dark-blue underline font-medium">Dart / Flutter Client</a>
+				— Client for Dart and Flutter apps
+			</li>
+			<li>
+				<a href="/generators/show/elm_v2" class="text-ab-blue hover:text-ab-dark-blue underline font-medium">Elm Client (V2)</a>
+				— Type-safe Elm client generation
+			</li>
+			<li>
+				<a href="/generators/show/csharp" class="text-ab-blue hover:text-ab-dark-blue underline font-medium">C# Client</a>
+				— .NET client generation
+			</li>
+			<li>
+				<a href="/generators/show/ruby_client" class="text-ab-blue hover:text-ab-dark-blue underline font-medium">Ruby Client</a>
+				— Ruby HTTP client
+			</li>
+		</ul>
+	</div>
+
+	<!-- Infrastructure / Schema -->
+	<div class="card mb-6">
+		<h3 class="text-lg font-semibold text-ab-blue mb-3 flex items-center gap-2">
+			<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-ab-blue text-white text-xs font-bold">⚙</span>
+			Infrastructure &amp; Schema
+		</h3>
+		<ul class="space-y-2 text-ab-dark-blue ml-2">
+			<li>
+				<a href="/generators/show/openapi_3" class="text-ab-blue hover:text-ab-dark-blue underline font-medium">OpenAPI 3.0</a>
+				— Export to OpenAPI 3.0 spec
+			</li>
+			<li>
+				<a href="/generators/show/swagger_json" class="text-ab-blue hover:text-ab-dark-blue underline font-medium">Swagger JSON</a>
+				— Export to Swagger 2.0
+			</li>
+			<li>
+				<a href="/generators/show/json_schema" class="text-ab-blue hover:text-ab-dark-blue underline font-medium">JSON Schema</a>
+				— JSON Schema from service definition
+			</li>
+			<li>
+				<a href="/generators/show/psql_ddl" class="text-ab-blue hover:text-ab-dark-blue underline font-medium">PostgreSQL DDL</a>
+				— Database schema generation
+			</li>
+			<li>
+				<a href="/generators/show/csv_client" class="text-ab-blue hover:text-ab-dark-blue underline font-medium">CSV Export</a>
+				— API info in CSV format (endpoints, models)
+			</li>
+			<li>
+				<a href="/generators/show/appsync-cloudformation" class="text-ab-blue hover:text-ab-dark-blue underline font-medium">AWS AppSync CloudFormation</a>
+				— Deploy AppSync backend from your API
+			</li>
+			<li>
+				<a href="/generators/show/lambda-node" class="text-ab-blue hover:text-ab-dark-blue underline font-medium">AWS Lambda (Node.js)</a>
+				— Lambda service scaffolding
+			</li>
+		</ul>
+	</div>
+
+	<!-- Scala-specific docs -->
+	<div class="card mb-6">
+		<h2 class="text-lg font-semibold text-ab-dark-blue mb-3">Scala / Play Framework Docs</h2>
+		<ul class="space-y-1 text-ab-dark-blue ml-2">
+			<li><a href="/doc/playRoutesFile" class="text-ab-blue hover:text-ab-dark-blue underline">Play routes file generation</a></li>
+			<li><a href="/doc/playUnionTypes" class="text-ab-blue hover:text-ab-dark-blue underline">Play union type handling</a></li>
+		</ul>
+	</div>
+
+	<!-- Links -->
+	<div class="card mb-8">
+		<h2 class="text-lg font-semibold text-ab-dark-blue mb-3">Resources</h2>
+		<ul class="space-y-2 text-ab-dark-blue ml-2">
+			<li><a href="/generators" class="text-ab-blue hover:text-ab-dark-blue underline">Browse all generators</a> — Full list with status and details</li>
+			<li><a href="/doc/attributes" class="text-ab-blue hover:text-ab-dark-blue underline">Generator attributes</a> — Configure generator behavior per-service</li>
+			<li><a href="https://github.com/apicollective/apibuilder-generator" class="text-ab-blue hover:text-ab-dark-blue underline">Generator source code</a> — Build your own or contribute</li>
+			<li><a href="https://github.com/apicollective/apibuilder-examples" class="text-ab-blue hover:text-ab-dark-blue underline">Examples repository</a> — Working examples for multiple generators</li>
+		</ul>
+	</div>
+
+	<!-- CTA -->
+	<div class="mt-12 mb-8 text-center">
+		<p class="text-ab-dark-blue mb-4">Want to build your own generator?</p>
+		<p class="text-ab-gray mb-4 text-sm">Generators are REST services that accept a service description and return a string. It's that simple.</p>
+		<a href="https://github.com/apicollective/apibuilder-generator" class="btn-primary inline-block">View Generator Source</a>
 	</div>
 </div>
