@@ -1,6 +1,6 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail, error } from '@sveltejs/kit';
-import { getGeneratorServiceByGuid, getGenerators, deleteGeneratorService, getSessionHeaders } from '$lib/server/api';
+import { getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuthForAction } from '$lib/server/auth';
 import type { GeneratorService, GeneratorWithService } from '$generated/types';
@@ -9,7 +9,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	const headers = locals.session ? getSessionHeaders(locals.session.id) : {};
 
 	const serviceResponse = await handleApiCall<GeneratorService>(
-		() => getGeneratorServiceByGuid(params.guid, headers),
+		() => locals.apiClient.getGeneratorServiceByGuid(params.guid, { headers }),
 	);
 
 	if (!('data' in serviceResponse)) {
@@ -19,7 +19,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	const service = serviceResponse.data;
 
 	const generatorsResponse = await handleApiCall<GeneratorWithService[]>(
-		() => getGenerators(headers, { service_guid: params.guid, limit: 100 }),
+		() => locals.apiClient.getGeneratorWithServices({ serviceGuid: params.guid, limit: 100, offset: 0, headers }),
 	);
 
 	const generators = 'data' in generatorsResponse ? generatorsResponse.data : [];
@@ -36,7 +36,7 @@ export const actions: Actions = {
 		const headers = getSessionHeaders(session.id);
 
 		const response = await handleApiCall<void>(
-			() => deleteGeneratorService(params.guid, headers),
+			() => locals.apiClient.deleteGeneratorServiceByGuid(params.guid, { headers }),
 		);
 
 		if ('errors' in response) {

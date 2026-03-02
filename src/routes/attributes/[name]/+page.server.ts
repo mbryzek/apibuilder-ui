@@ -1,6 +1,6 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail, error } from '@sveltejs/kit';
-import { getAttributes, deleteAttribute, getSessionHeaders } from '$lib/server/api';
+import { getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuthForAction } from '$lib/server/auth';
 import type { ApiAttribute } from '$generated/types';
@@ -9,7 +9,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	const headers = locals.session ? getSessionHeaders(locals.session.id) : {};
 
 	const response = await handleApiCall<ApiAttribute[]>(
-		() => getAttributes(headers, { name: params.name }),
+		() => locals.apiClient.getAttributes({ name: params.name, limit: 100, offset: 0, headers }),
 	);
 
 	if (!('data' in response) || response.data.length === 0) {
@@ -27,7 +27,7 @@ export const actions: Actions = {
 		const headers = getSessionHeaders(session.id);
 
 		const response = await handleApiCall<void>(
-			() => deleteAttribute(params.name, headers),
+			() => locals.apiClient.deleteAttributeByName(params.name, { headers }),
 		);
 
 		if ('errors' in response) {

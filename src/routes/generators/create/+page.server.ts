@@ -1,6 +1,6 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
-import { createGeneratorService, getSessionHeaders } from '$lib/server/api';
+import { getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth, requireAuthForAction } from '$lib/server/auth';
 import type { GeneratorService } from '$generated/types';
@@ -22,7 +22,7 @@ export const actions: Actions = {
 		}
 
 		const response = await handleApiCall<GeneratorService>(
-			() => createGeneratorService({ uri }, headers),
+			() => locals.apiClient.createGeneratorService({ body: { uri }, headers }),
 		);
 
 		if ('data' in response) {

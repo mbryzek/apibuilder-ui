@@ -1,5 +1,5 @@
 import type { PageServerLoad } from './$types';
-import { getAttributes, getSessionHeaders } from '$lib/server/api';
+import { getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import type { ApiAttribute } from '$generated/types';
 
@@ -10,7 +10,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 	const offset = Number(url.searchParams.get('offset') || '0');
 
 	const response = await handleApiCall<ApiAttribute[]>(
-		() => getAttributes(headers, { limit: LIMIT, offset }),
+		() => locals.apiClient.getAttributes({ limit: LIMIT, offset, headers }),
 	);
 
 	const attributes = 'data' in response ? response.data : [];

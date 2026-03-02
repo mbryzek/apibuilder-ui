@@ -1,9 +1,10 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
-import { createOrganization, getSessionHeaders } from '$lib/server/api';
+import { getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth } from '$lib/server/auth';
 import type { Organization } from '$generated/types';
+import { Visibility } from '$generated/types';
 
 export const load: PageServerLoad = async (event) => {
 	requireAuth(event);
@@ -26,17 +27,14 @@ export const actions: Actions = {
 			return fail(400, { errors: [{ message: 'Name and namespace are required' }] });
 		}
 
-		const form: { name: string; namespace: string; key?: string; visibility?: string } = { name, namespace };
+		const form: { name: string; namespace: string; key?: string; visibility: Visibility } = { name, namespace, visibility: (visibility || 'organization') as Visibility };
 		if (key) {
 			form.key = key;
-		}
-		if (visibility) {
-			form.visibility = visibility;
 		}
 
 		const headers = getSessionHeaders(locals.session.id);
 		const response = await handleApiCall<Organization>(
-			() => createOrganization(form, headers),
+			() => locals.apiClient.createOrganization({ body: form, headers }),
 		);
 
 		if ('data' in response) {

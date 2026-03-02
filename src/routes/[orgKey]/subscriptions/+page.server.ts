@@ -1,6 +1,6 @@
 import type { PageServerLoad, Actions } from './$types';
 import { fail } from '@sveltejs/kit';
-import { getSubscriptions, createSubscription, deleteSubscription, getSessionHeaders } from '$lib/server/api';
+import { getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth, requireAuthForAction } from '$lib/server/auth';
 import type { Subscription } from '$generated/types';
@@ -11,7 +11,7 @@ export const load: PageServerLoad = async (event) => {
 	const headers = getSessionHeaders(session.id);
 
 	const response = await handleApiCall<Subscription[]>(
-		() => getSubscriptions(headers, { organization_key: event.params.orgKey, user_guid: session.user.guid }),
+		() => event.locals.apiClient.getSubscriptions({ organizationKey: event.params.orgKey, userGuid: session.user.guid, limit: 100, offset: 0, headers }),
 	);
 
 	return {
@@ -33,18 +33,21 @@ export const actions: Actions = {
 
 		if (subscriptionGuid) {
 			const response = await handleApiCall<void>(
-				() => deleteSubscription(subscriptionGuid, headers),
+				() => locals.apiClient.deleteSubscriptionByGuid(subscriptionGuid, { headers }),
 			);
 			if ('errors' in response) {
 				return fail(400, { errors: response.errors });
 			}
 		} else {
 			const response = await handleApiCall<Subscription>(
-				() => createSubscription({
-					organization_key: params.orgKey,
-					user_guid: session.user.guid,
-					publication,
-				}, headers),
+				() => locals.apiClient.createSubscription({
+					body: {
+						organization_key: params.orgKey,
+						user_guid: session.user.guid,
+						publication: publication as Publication,
+					},
+					headers,
+				}),
 			);
 			if ('errors' in response) {
 				return fail(400, { errors: response.errors });

@@ -1,9 +1,9 @@
 import type { PageServerLoad, Actions } from './$types';
 import { error, fail } from '@sveltejs/kit';
-import { getMembershipRequests, acceptMembershipRequest, declineMembershipRequest, getSessionHeaders } from '$lib/server/api';
+import { getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth, requireAdminForAction } from '$lib/server/auth';
-import type { MembershipRequest, Membership } from '$generated/types';
+import type { MembershipRequest } from '$generated/types';
 
 export const load: PageServerLoad = async (event) => {
 	const session = requireAuth(event);
@@ -14,7 +14,7 @@ export const load: PageServerLoad = async (event) => {
 	const headers = getSessionHeaders(session.id);
 
 	const response = await handleApiCall<MembershipRequest[]>(
-		() => getMembershipRequests(headers, { org_key: event.params.orgKey }),
+		() => event.locals.apiClient.getMembershipRequests({ orgKey: event.params.orgKey, limit: 100, offset: 0, headers }),
 	);
 
 	return {
@@ -33,8 +33,8 @@ export const actions: Actions = {
 			return fail(400, { errors: [{ message: 'Invalid request' }] });
 		}
 
-		const response = await handleApiCall<Membership>(
-			() => acceptMembershipRequest(guid, headers),
+		const response = await handleApiCall<void>(
+			() => locals.apiClient.createMembershipRequestAcceptByGuid(guid, { headers }),
 		);
 
 		if ('errors' in response) {
@@ -55,7 +55,7 @@ export const actions: Actions = {
 		}
 
 		const response = await handleApiCall<void>(
-			() => declineMembershipRequest(guid, headers),
+			() => locals.apiClient.createMembershipRequestDeclineByGuid(guid, { headers }),
 		);
 
 		if ('errors' in response) {

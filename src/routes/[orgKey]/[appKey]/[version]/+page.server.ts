@@ -1,6 +1,6 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
-import { createWatch, deleteWatch, deleteVersion, getSessionHeaders } from '$lib/server/api';
+import { getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuthForAction } from '$lib/server/auth';
 import type { Watch } from '$generated/types';
@@ -16,11 +16,14 @@ export const actions: Actions = {
 		const headers = getSessionHeaders(session.id);
 
 		const response = await handleApiCall<Watch>(
-			() => createWatch({
-				user_guid: session.user.guid,
-				organization_key: params.orgKey,
-				application_key: params.appKey,
-			}, headers),
+			() => locals.apiClient.createWatch({
+				body: {
+					user_guid: session.user.guid,
+					organization_key: params.orgKey,
+					application_key: params.appKey,
+				},
+				headers,
+			}),
 		);
 
 		if ('data' in response) {
@@ -38,7 +41,7 @@ export const actions: Actions = {
 		const watchGuid = formData.get('watch_guid') as string;
 
 		if (watchGuid) {
-			await handleApiCall<void>(() => deleteWatch(watchGuid, headers));
+			await handleApiCall<void>(() => locals.apiClient.deleteWatchByGuid(watchGuid, { headers }));
 		}
 
 		throw redirect(303, `/${params.orgKey}/${params.appKey}/${params.version}`);
@@ -49,7 +52,7 @@ export const actions: Actions = {
 		const headers = getSessionHeaders(session.id);
 
 		const response = await handleApiCall<void>(
-			() => deleteVersion(params.orgKey, params.appKey, params.version, headers),
+			() => locals.apiClient.deleteVersionByApplicationKeyAndVersion({ orgKey: params.orgKey, applicationKey: params.appKey, version: params.version, headers }),
 		);
 
 		if ('data' in response) {

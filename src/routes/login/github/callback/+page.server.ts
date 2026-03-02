@@ -1,12 +1,12 @@
 import type { PageServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
-import { authenticateGithub, exchangeGithubCode } from '$lib/server/api';
+import { exchangeGithubCode } from '$lib/server/github';
 import { handleApiCall } from '$lib/api/error-handler';
 import { SESSION_COOKIE, config } from '$lib/config';
 import { env } from '$env/dynamic/private';
 import type { Authentication } from '$generated/types';
 
-export const load: PageServerLoad = async ({ url, cookies }) => {
+export const load: PageServerLoad = async ({ url, cookies, locals }) => {
 	const code = url.searchParams.get('code');
 
 	if (!code) {
@@ -24,7 +24,7 @@ export const load: PageServerLoad = async ({ url, cookies }) => {
 	}
 
 	const response = await handleApiCall<Authentication>(
-		() => authenticateGithub(accessToken),
+		() => locals.apiClient.createUserAuthenticateGithub(accessToken, { headers: {} }),
 	);
 
 	if ('data' in response && response.data) {

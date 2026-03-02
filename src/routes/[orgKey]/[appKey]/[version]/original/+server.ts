@@ -1,6 +1,6 @@
 import type { RequestHandler } from './$types';
 import { error } from '@sveltejs/kit';
-import { getVersion, getSessionHeaders } from '$lib/server/api';
+import { getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import type { Version } from '$generated/types';
 
@@ -8,7 +8,7 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 	const headers = locals.session ? getSessionHeaders(locals.session.id) : {};
 
 	const response = await handleApiCall<Version>(
-		() => getVersion(params.orgKey, params.appKey, params.version, headers),
+		() => locals.apiClient.getVersionByApplicationKeyAndVersion({ orgKey: params.orgKey, applicationKey: params.appKey, version: params.version, headers }),
 	);
 
 	if (!('data' in response) || !response.data.original) {

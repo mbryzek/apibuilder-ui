@@ -1,5 +1,5 @@
 import type { PageServerLoad } from './$types';
-import { getGenerators, getSessionHeaders } from '$lib/server/api';
+import { getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import type { GeneratorWithService } from '$generated/types';
 
@@ -10,7 +10,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 	const offset = Number(url.searchParams.get('offset') || '0');
 
 	const response = await handleApiCall<GeneratorWithService[]>(
-		() => getGenerators(headers, { limit: LIMIT, offset }),
+		() => locals.apiClient.getGeneratorWithServices({ limit: LIMIT, offset, headers }),
 	);
 
 	const generators = 'data' in response ? response.data : [];

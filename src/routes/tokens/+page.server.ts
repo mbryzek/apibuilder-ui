@@ -1,5 +1,5 @@
 import type { PageServerLoad } from './$types';
-import { getTokens, getSessionHeaders } from '$lib/server/api';
+import { getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth } from '$lib/server/auth';
 import type { Token } from '$generated/types';
@@ -12,7 +12,7 @@ export const load: PageServerLoad = async (event) => {
 	const offset = Number(event.url.searchParams.get('offset') || '0');
 
 	const response = await handleApiCall<Token[]>(
-		() => getTokens(session.user.guid, headers, { limit: LIMIT, offset }),
+		() => event.locals.apiClient.getTokensUsersByUserGuid({ userGuid: session.user.guid, limit: LIMIT, offset, headers }),
 	);
 
 	const tokens = 'data' in response ? response.data : [];

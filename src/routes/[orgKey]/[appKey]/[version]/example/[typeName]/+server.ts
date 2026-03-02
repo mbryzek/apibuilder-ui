@@ -1,6 +1,6 @@
 import type { RequestHandler } from './$types';
 import { error } from '@sveltejs/kit';
-import { getExample, getSessionHeaders } from '$lib/server/api';
+import { getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 
 export const GET: RequestHandler = async ({ params, locals, url }) => {
@@ -9,8 +9,13 @@ export const GET: RequestHandler = async ({ params, locals, url }) => {
 	const optionalFields = url.searchParams.get('optional_fields') === 'true';
 
 	const response = await handleApiCall<unknown>(
-		() => getExample(params.orgKey, params.appKey, params.version, params.typeName, headers, {
-			optional_fields: optionalFields,
+		() => locals.apiClient.getVersionExampleByApplicationKeyAndVersionAndTypeName({
+			orgKey: params.orgKey,
+			applicationKey: params.appKey,
+			version: params.version,
+			typeName: params.typeName,
+			optionalFields,
+			headers,
 		}),
 	);
 

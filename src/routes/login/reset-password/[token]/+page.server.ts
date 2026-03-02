@@ -1,6 +1,5 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
-import { resetPassword } from '$lib/server/api';
 import { handleApiCall } from '$lib/api/error-handler';
 import { SESSION_COOKIE, config } from '$lib/config';
 import type { Authentication } from '$generated/types';
@@ -10,7 +9,7 @@ export const load: PageServerLoad = async ({ params }) => {
 };
 
 export const actions: Actions = {
-	default: async ({ request, params, cookies }) => {
+	default: async ({ request, params, cookies, locals }) => {
 		const formData = await request.formData();
 		const password = formData.get('password') as string;
 		const confirmPassword = formData.get('confirm_password') as string;
@@ -24,7 +23,7 @@ export const actions: Actions = {
 		}
 
 		const response = await handleApiCall<Authentication>(
-			() => resetPassword(params.token, password),
+			() => locals.apiClient.createPasswordReset({ body: { token: params.token, password }, headers: {} }),
 		);
 
 		if ('data' in response && response.data) {

@@ -1,6 +1,6 @@
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
-import { getGeneratorByKey, getSessionHeaders } from '$lib/server/api';
+import { getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import type { GeneratorWithService } from '$generated/types';
 
@@ -8,7 +8,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	const headers = locals.session ? getSessionHeaders(locals.session.id) : {};
 
 	const response = await handleApiCall<GeneratorWithService>(
-		() => getGeneratorByKey(params.key, headers),
+		() => locals.apiClient.getGeneratorWithServiceByKey(params.key, { headers }),
 	);
 
 	if (!('data' in response)) {

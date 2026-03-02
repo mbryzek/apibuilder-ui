@@ -1,9 +1,8 @@
 import type { Actions } from './$types';
-import { requestPasswordReset } from '$lib/server/api';
 import { handleApiCall } from '$lib/api/error-handler';
 
 export const actions: Actions = {
-	default: async ({ request }) => {
+	default: async ({ request, locals }) => {
 		const formData = await request.formData();
 		const email = formData.get('email') as string;
 
@@ -12,7 +11,7 @@ export const actions: Actions = {
 		}
 
 		await handleApiCall<void>(
-			() => requestPasswordReset(email),
+			() => locals.apiClient.createPasswordResetRequest({ body: { email }, headers: {} }),
 		);
 
 		// Always show success regardless of whether email exists

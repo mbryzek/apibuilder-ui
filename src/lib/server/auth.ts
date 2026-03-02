@@ -1,6 +1,6 @@
 import { redirect, error } from '@sveltejs/kit';
 import type { RequestEvent } from '@sveltejs/kit';
-import { getMemberships, getSessionHeaders } from '$lib/server/api';
+import { getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import type { Membership } from '$generated/types';
 import { MembershipRole } from '$generated/types';
@@ -25,7 +25,7 @@ export async function requireAdminForAction(locals: App.Locals, orgKey: string):
 	const session = requireAuthForAction(locals);
 	const headers = getSessionHeaders(session.id);
 	const response = await handleApiCall<Membership[]>(
-		() => getMemberships({ org_key: orgKey, user_guid: session.user.guid, role: MembershipRole.Admin }, headers),
+		() => locals.apiClient.getMemberships({ orgKey, userGuid: session.user.guid, role: MembershipRole.Admin, limit: 100, offset: 0, headers }),
 	);
 	if (!('data' in response) || response.data.length === 0) {
 		throw error(403, 'Forbidden');

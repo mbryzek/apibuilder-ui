@@ -1,9 +1,10 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
-import { updateOrganization, deleteOrganization, getSessionHeaders } from '$lib/server/api';
+import { getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth, requireAdminForAction } from '$lib/server/auth';
 import type { Organization } from '$generated/types';
+import { Visibility } from '$generated/types';
 
 export const load: PageServerLoad = async (event) => {
 	requireAuth(event);
@@ -25,12 +26,11 @@ export const actions: Actions = {
 			return fail(400, { errors: [{ message: 'Name and namespace are required' }] });
 		}
 
-		const form: { name: string; namespace: string; key?: string; visibility?: string } = { name, namespace };
+		const form: { name: string; namespace: string; key?: string; visibility: Visibility } = { name, namespace, visibility: (visibility || 'organization') as Visibility };
 		if (key) form.key = key;
-		if (visibility) form.visibility = visibility;
 
 		const response = await handleApiCall<Organization>(
-			() => updateOrganization(params.orgKey, form, headers),
+			() => locals.apiClient.updateOrganizationByKey({ key: params.orgKey, body: form, headers }),
 		);
 
 		if ('data' in response) {
@@ -51,7 +51,7 @@ export const actions: Actions = {
 		const headers = getSessionHeaders(session.id);
 
 		const response = await handleApiCall<void>(
-			() => deleteOrganization(params.orgKey, headers),
+			() => locals.apiClient.deleteOrganizationByKey(params.orgKey, { headers }),
 		);
 
 		if ('data' in response) {

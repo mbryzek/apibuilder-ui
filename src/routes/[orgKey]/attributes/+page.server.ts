@@ -1,6 +1,6 @@
 import type { PageServerLoad, Actions } from './$types';
 import { fail } from '@sveltejs/kit';
-import { getOrgAttributes, putOrgAttribute, deleteOrgAttribute, getAttributes, getSessionHeaders } from '$lib/server/api';
+import { getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth, requireAdminForAction } from '$lib/server/auth';
 import type { AttributeValue, ApiAttribute } from '$generated/types';
@@ -11,10 +11,10 @@ export const load: PageServerLoad = async (event) => {
 
 	const [orgAttrsResponse, allAttrsResponse] = await Promise.all([
 		handleApiCall<AttributeValue[]>(
-			() => getOrgAttributes(event.params.orgKey, headers),
+			() => event.locals.apiClient.getOrganizationsAttributesByKey({ key: event.params.orgKey, limit: 100, offset: 0, headers }),
 		),
 		handleApiCall<ApiAttribute[]>(
-			() => getAttributes(headers, { limit: 100 }),
+			() => event.locals.apiClient.getAttributes({ limit: 100, offset: 0, headers }),
 		),
 	]);
 
@@ -37,7 +37,7 @@ export const actions: Actions = {
 		}
 
 		const response = await handleApiCall<AttributeValue>(
-			() => putOrgAttribute(params.orgKey, name, { value }, headers),
+			() => locals.apiClient.updateOrganizationAttributesByKeyAndName({ key: params.orgKey, name, body: { value }, headers }),
 		);
 
 		if ('data' in response) {
@@ -62,7 +62,7 @@ export const actions: Actions = {
 		}
 
 		const response = await handleApiCall<void>(
-			() => deleteOrgAttribute(params.orgKey, name, headers),
+			() => locals.apiClient.deleteOrganizationAttributesByKeyAndName({ key: params.orgKey, name, headers }),
 		);
 
 		if ('errors' in response) {

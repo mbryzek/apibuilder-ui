@@ -1,11 +1,6 @@
 import type { PageServerLoad, Actions } from './$types';
 import { fail } from '@sveltejs/kit';
-import {
-	getMemberships, deleteMembership, getUsers,
-	createMembershipRequest, acceptMembershipRequest,
-	getMembershipRequests, getSessionHeaders,
-	getOrganizationByKey,
-} from '$lib/server/api';
+import { getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth, requireAdminForAction } from '$lib/server/auth';
 import type { Membership, User, MembershipRequest, Organization } from '$generated/types';
@@ -14,17 +9,17 @@ import { MembershipRole } from '$generated/types';
 export const load: PageServerLoad = async (event) => {
 	const session = requireAuth(event);
 	const headers = getSessionHeaders(session.id);
-	const { params, parent } = event;
+	const { params, parent, locals } = event;
 	const { isAdmin } = await parent();
 
 	const membershipsResponse = await handleApiCall<Membership[]>(
-		() => getMemberships({ org_key: params.orgKey, limit: 100 }, headers),
+		() => locals.apiClient.getMemberships({ orgKey: params.orgKey, limit: 100, offset: 0, headers }),
 	);
 
 	let pendingRequestsCount = 0;
 	if (isAdmin) {
 		const requestsResponse = await handleApiCall<MembershipRequest[]>(
-			() => getMembershipRequests(headers, { org_key: params.orgKey }),
+			() => locals.apiClient.getMembershipRequests({ orgKey: params.orgKey, limit: 100, offset: 0, headers }),
 		);
 		if ('data' in requestsResponse) {
 			pendingRequestsCount = requestsResponse.data.length;
@@ -44,7 +39,7 @@ export const actions: Actions = {
 		const formData = await request.formData();
 		const emailOrNickname = (formData.get('email_or_nickname') as string)?.trim();
 		const roleRaw = formData.get('role') as string;
-		const role = Object.values(MembershipRole).includes(roleRaw as MembershipRole) ? roleRaw : 'member';
+		const role = Object.values(MembershipRole).includes(roleRaw as MembershipRole) ? roleRaw as MembershipRole : MembershipRole.Member;
 
 		if (!emailOrNickname) {
 			return fail(400, { errors: [{ message: 'Email or nickname is required' }] });
@@ -52,7 +47,7 @@ export const actions: Actions = {
 
 		// Find user by email or nickname
 		const usersResponse = await handleApiCall<User[]>(
-			() => getUsers(headers, { email: emailOrNickname }),
+			() => locals.apiClient.getUsers({ email: emailOrNickname, headers }),
 		);
 
 		let user: User | undefined;
@@ -60,7 +55,7 @@ export const actions: Actions = {
 			user = usersResponse.data[0];
 		} else {
 			const nicknameResponse = await handleApiCall<User[]>(
-				() => getUsers(headers, { nickname: emailOrNickname }),
+				() => locals.apiClient.getUsers({ nickname: emailOrNickname, headers }),
 			);
 			if ('data' in nicknameResponse && nicknameResponse.data.length > 0) {
 				user = nicknameResponse.data[0];
@@ -72,19 +67,19 @@ export const actions: Actions = {
 		}
 
 		const orgResponse = await handleApiCall<Organization>(
-			() => getOrganizationByKey(params.orgKey, headers),
+			() => locals.apiClient.getOrganizationByKey(params.orgKey, { headers }),
 		);
 		if (!('data' in orgResponse)) {
 			return fail(400, { errors: [{ message: 'Organization not found' }] });
 		}
 
 		const requestResponse = await handleApiCall<MembershipRequest>(
-			() => createMembershipRequest(orgResponse.data.guid, user!.guid, role, headers),
+			() => locals.apiClient.createMembershipRequest({ orgGuid: orgResponse.data.guid, userGuid: user!.guid, role: role as MembershipRole, headers }),
 		);
 
 		if ('data' in requestResponse) {
-			const acceptResponse = await handleApiCall<Membership>(
-				() => acceptMembershipRequest(requestResponse.data.guid, headers),
+			const acceptResponse = await handleApiCall<void>(
+				() => locals.apiClient.createMembershipRequestAcceptByGuid(requestResponse.data.guid, { headers }),
 			);
 			if ('errors' in acceptResponse) {
 				return fail(400, { errors: acceptResponse.errors });
@@ -111,7 +106,7 @@ export const actions: Actions = {
 		}
 
 		const response = await handleApiCall<void>(
-			() => deleteMembership(guid, headers),
+			() => locals.apiClient.deleteMembershipByGuid(guid, { headers }),
 		);
 
 		if ('errors' in response) {
@@ -132,19 +127,19 @@ export const actions: Actions = {
 		}
 
 		const orgResponse = await handleApiCall<Organization>(
-			() => getOrganizationByKey(params.orgKey, headers),
+			() => locals.apiClient.getOrganizationByKey(params.orgKey, { headers }),
 		);
 		if (!('data' in orgResponse)) {
 			return fail(400, { errors: [{ message: 'Organization not found' }] });
 		}
 
 		const requestResponse = await handleApiCall<MembershipRequest>(
-			() => createMembershipRequest(orgResponse.data.guid, userGuid, 'admin', headers),
+			() => locals.apiClient.createMembershipRequest({ orgGuid: orgResponse.data.guid, userGuid, role: MembershipRole.Admin, headers }),
 		);
 
 		if ('data' in requestResponse) {
-			const acceptResponse = await handleApiCall<Membership>(
-				() => acceptMembershipRequest(requestResponse.data.guid, headers),
+			const acceptResponse = await handleApiCall<void>(
+				() => locals.apiClient.createMembershipRequestAcceptByGuid(requestResponse.data.guid, { headers }),
 			);
 			if ('errors' in acceptResponse) {
 				return fail(400, { errors: acceptResponse.errors });
@@ -171,13 +166,13 @@ export const actions: Actions = {
 		}
 
 		const membershipsResponse = await handleApiCall<Membership[]>(
-			() => getMemberships({ org_key: params.orgKey, user_guid: userGuid, role: 'admin' }, headers),
+			() => locals.apiClient.getMemberships({ orgKey: params.orgKey, userGuid, role: MembershipRole.Admin, limit: 100, offset: 0, headers }),
 		);
 
 		if ('data' in membershipsResponse) {
 			for (const m of membershipsResponse.data) {
 				const deleteResponse = await handleApiCall<void>(
-					() => deleteMembership(m.guid, headers),
+					() => locals.apiClient.deleteMembershipByGuid(m.guid, { headers }),
 				);
 				if ('errors' in deleteResponse) {
 					return fail(400, { errors: deleteResponse.errors });

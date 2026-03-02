@@ -1,9 +1,10 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
-import { createVersion, getSessionHeaders } from '$lib/server/api';
+import { getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth, requireAuthForAction } from '$lib/server/auth';
 import type { Version } from '$generated/types';
+import { OriginalType, Visibility } from '$generated/types';
 
 export const load: PageServerLoad = async (event) => {
 	requireAuth(event);
@@ -30,9 +31,9 @@ export const actions: Actions = {
 			return fail(400, { errors: [{ message: 'Uploaded file is empty' }], appKey, visibility, specType });
 		}
 
-		const originalForm: { data: string; type?: string } = { data };
+		const originalForm: { data: string; type?: OriginalType } = { data };
 		if (specType) {
-			originalForm.type = specType;
+			originalForm.type = specType as OriginalType;
 		}
 
 		const targetAppKey = appKey || deriveAppKeyFromSpec(data);
@@ -41,7 +42,7 @@ export const actions: Actions = {
 		}
 
 		const response = await handleApiCall<Version>(
-			() => createVersion(params.orgKey, targetAppKey, { original_form: originalForm, visibility }, headers),
+			() => locals.apiClient.createVersionByVersion({ orgKey: params.orgKey, applicationKey: targetAppKey, version: '', body: { original_form: originalForm, visibility: visibility as Visibility }, headers }),
 		);
 
 		if ('data' in response) {

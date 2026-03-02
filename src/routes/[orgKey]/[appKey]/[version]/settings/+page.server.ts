@@ -1,11 +1,6 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
-import {
-	updateApplication,
-	deleteApplication,
-	moveApplication,
-	getSessionHeaders,
-} from '$lib/server/api';
+import { getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth, requireAdminForAction } from '$lib/server/auth';
 import type { Application } from '$generated/types';
@@ -27,10 +22,15 @@ export const actions: Actions = {
 		}
 
 		const response = await handleApiCall<Application>(
-			() => updateApplication(params.orgKey, params.appKey, {
-				name: formData.get('name') as string,
-				visibility: visibility as Application['visibility'],
-			}, headers),
+			() => locals.apiClient.updateApplicationByApplicationKey({
+				orgKey: params.orgKey,
+				applicationKey: params.appKey,
+				body: {
+					name: formData.get('name') as string,
+					visibility: visibility as Application['visibility'],
+				},
+				headers,
+			}),
 		);
 
 		if ('data' in response) {
@@ -51,7 +51,12 @@ export const actions: Actions = {
 		}
 
 		const response = await handleApiCall<Application>(
-			() => moveApplication(params.orgKey, params.appKey, { org_key: newOrgKey }, headers),
+			() => locals.apiClient.createApplicationMoveByApplicationKey({
+				orgKey: params.orgKey,
+				applicationKey: params.appKey,
+				body: { org_key: newOrgKey },
+				headers,
+			}),
 		);
 
 		if ('data' in response) {
@@ -66,7 +71,11 @@ export const actions: Actions = {
 		const headers = getSessionHeaders(session.id);
 
 		const response = await handleApiCall<void>(
-			() => deleteApplication(params.orgKey, params.appKey, headers),
+			() => locals.apiClient.deleteApplicationByApplicationKey({
+				orgKey: params.orgKey,
+				applicationKey: params.appKey,
+				headers,
+			}),
 		);
 
 		if ('data' in response) {

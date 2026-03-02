@@ -1,13 +1,12 @@
 import type { PageServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
-import { getSessionById } from '$lib/server/api';
 import { handleApiCall } from '$lib/api/error-handler';
 import { SESSION_COOKIE, config } from '$lib/config';
 import type { Authentication } from '$generated/types';
 
-export const load: PageServerLoad = async ({ cookies }) => {
+export const load: PageServerLoad = async ({ cookies, locals }) => {
 	const response = await handleApiCall<Authentication>(
-		() => getSessionById('dev', {}),
+		() => locals.apiClient.getAuthenticationSessionById('dev', { headers: {} }),
 	);
 
 	if ('data' in response && response.data) {

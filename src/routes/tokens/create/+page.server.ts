@@ -1,6 +1,6 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
-import { createToken, getSessionHeaders } from '$lib/server/api';
+import { getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth, requireAuthForAction } from '$lib/server/auth';
 import type { Token } from '$generated/types';
@@ -23,7 +23,7 @@ export const actions: Actions = {
 		}
 
 		const response = await handleApiCall<Token>(
-			() => createToken(form, headers),
+			() => locals.apiClient.createToken({ body: form, headers }),
 		);
 
 		if ('data' in response) {

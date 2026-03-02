@@ -1,6 +1,5 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
-import { authenticateEmail } from '$lib/server/api';
 import { handleApiCall } from '$lib/api/error-handler';
 import { SESSION_COOKIE, config } from '$lib/config';
 import type { Authentication } from '$generated/types';
@@ -17,7 +16,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 };
 
 export const actions: Actions = {
-	default: async ({ request, cookies, url }) => {
+	default: async ({ request, cookies, url, locals }) => {
 		const formData = await request.formData();
 		const email = formData.get('email') as string;
 		const password = formData.get('password') as string;
@@ -28,7 +27,7 @@ export const actions: Actions = {
 		}
 
 		const response = await handleApiCall<Authentication>(
-			() => authenticateEmail(email, password),
+			() => locals.apiClient.createUserAuthenticate({ email, password, headers: {} }),
 		);
 
 		if ('data' in response && response.data) {

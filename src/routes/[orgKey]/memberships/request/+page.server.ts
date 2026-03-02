@@ -1,24 +1,25 @@
 import type { PageServerLoad, Actions } from './$types';
 import { fail } from '@sveltejs/kit';
-import { getMemberships, getMembershipRequests, createMembershipRequest, getOrganizationByKey, getSessionHeaders } from '$lib/server/api';
+import { getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth, requireAuthForAction } from '$lib/server/auth';
 import type { Membership, MembershipRequest, Organization } from '$generated/types';
+import { MembershipRole } from '$generated/types';
 
 export const load: PageServerLoad = async (event) => {
 	const session = requireAuth(event);
 	const headers = getSessionHeaders(session.id);
-	const { params } = event;
+	const { params, locals } = event;
 
 	// Check if already a member
 	const membershipsResponse = await handleApiCall<Membership[]>(
-		() => getMemberships({ org_key: params.orgKey, user_guid: session.user.guid }, headers),
+		() => locals.apiClient.getMemberships({ orgKey: params.orgKey, userGuid: session.user.guid, limit: 100, offset: 0, headers }),
 	);
 	const isMember = 'data' in membershipsResponse && membershipsResponse.data.length > 0;
 
 	// Check if already requested
 	const requestsResponse = await handleApiCall<MembershipRequest[]>(
-		() => getMembershipRequests(headers, { org_key: params.orgKey, user_guid: session.user.guid }),
+		() => locals.apiClient.getMembershipRequests({ orgKey: params.orgKey, userGuid: session.user.guid, limit: 100, offset: 0, headers }),
 	);
 	const hasPendingRequest = 'data' in requestsResponse && requestsResponse.data.length > 0;
 
@@ -31,14 +32,14 @@ export const actions: Actions = {
 		const headers = getSessionHeaders(session.id);
 
 		const orgResponse = await handleApiCall<Organization>(
-			() => getOrganizationByKey(params.orgKey, headers),
+			() => locals.apiClient.getOrganizationByKey(params.orgKey, { headers }),
 		);
 		if (!('data' in orgResponse)) {
 			return fail(400, { errors: [{ message: 'Organization not found' }] });
 		}
 
 		const response = await handleApiCall<MembershipRequest>(
-			() => createMembershipRequest(orgResponse.data.guid, session.user.guid, 'member', headers),
+			() => locals.apiClient.createMembershipRequest({ orgGuid: orgResponse.data.guid, userGuid: session.user.guid, role: MembershipRole.Member, headers }),
 		);
 
 		if ('data' in response) {

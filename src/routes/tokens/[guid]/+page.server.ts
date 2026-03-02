@@ -1,6 +1,6 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail, error } from '@sveltejs/kit';
-import { getCleartextToken, deleteToken, getSessionHeaders } from '$lib/server/api';
+import { getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth, requireAuthForAction } from '$lib/server/auth';
 import type { CleartextToken } from '$generated/types';
@@ -10,7 +10,7 @@ export const load: PageServerLoad = async (event) => {
 	const headers = getSessionHeaders(session.id);
 
 	const response = await handleApiCall<CleartextToken>(
-		() => getCleartextToken(event.params.guid, headers),
+		() => event.locals.apiClient.getTokenCleartextByGuid(event.params.guid, { headers }),
 	);
 
 	if (!('data' in response)) {
@@ -29,7 +29,7 @@ export const actions: Actions = {
 		const headers = getSessionHeaders(session.id);
 
 		const response = await handleApiCall<void>(
-			() => deleteToken(params.guid, headers),
+			() => locals.apiClient.deleteTokenByGuid(params.guid, { headers }),
 		);
 
 		if ('errors' in response) {

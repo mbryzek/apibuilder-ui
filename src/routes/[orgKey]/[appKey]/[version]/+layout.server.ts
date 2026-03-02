@@ -1,6 +1,6 @@
 import type { LayoutServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
-import { getVersion, getApplicationVersions, getWatches, getSessionHeaders } from '$lib/server/api';
+import { getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import type { Version, ApplicationMetadataVersion, Watch } from '$generated/types';
 
@@ -8,7 +8,7 @@ export const load: LayoutServerLoad = async ({ params, locals }) => {
 	const headers = locals.session ? getSessionHeaders(locals.session.id) : {};
 
 	const versionResponse = await handleApiCall<Version>(
-		() => getVersion(params.orgKey, params.appKey, params.version, headers),
+		() => locals.apiClient.getVersionByApplicationKeyAndVersion({ orgKey: params.orgKey, applicationKey: params.appKey, version: params.version, headers }),
 	);
 
 	if (!('data' in versionResponse)) {
@@ -20,14 +20,17 @@ export const load: LayoutServerLoad = async ({ params, locals }) => {
 	// Fetch version list and watch status in parallel
 	const [versionsResponse, watchResponse] = await Promise.all([
 		handleApiCall<ApplicationMetadataVersion[]>(
-			() => getApplicationVersions(params.orgKey, params.appKey, headers, { limit: 100 }),
+			() => locals.apiClient.getApplicationsMetadataAndVersionsByApplicationKey({ orgKey: params.orgKey, applicationKey: params.appKey, limit: 100, offset: 0, headers }),
 		),
 		locals.session
 			? handleApiCall<Watch[]>(
-					() => getWatches(headers, {
-						user_guid: locals.session!.user.guid,
-						organization_key: params.orgKey,
-						application_key: params.appKey,
+					() => locals.apiClient.getWatches({
+						userGuid: locals.session!.user.guid,
+						organizationKey: params.orgKey,
+						applicationKey: params.appKey,
+						limit: 100,
+						offset: 0,
+						headers,
 					}),
 				)
 			: Promise.resolve(null),
