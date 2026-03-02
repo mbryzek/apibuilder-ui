@@ -1,6 +1,6 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
-import { getSessionHeaders } from '$lib/api/clients';
+import { getSessionHeaders, createVersion } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth, requireAuthForAction } from '$lib/server/auth';
 import type { Version } from '$generated/types';
@@ -33,7 +33,15 @@ export const actions: Actions = {
 
 		const originalForm: { data: string; type?: OriginalType } = { data };
 		if (specType) {
+			if (!Object.values(OriginalType).includes(specType as OriginalType)) {
+				return fail(400, { errors: [{ message: `Invalid spec type: ${specType}` }], appKey, visibility, specType });
+			}
 			originalForm.type = specType as OriginalType;
+		}
+
+		const validatedVisibility = (visibility || 'organization') as string;
+		if (!Object.values(Visibility).includes(validatedVisibility as Visibility)) {
+			return fail(400, { errors: [{ message: `Invalid visibility: ${validatedVisibility}` }], appKey, visibility, specType });
 		}
 
 		const targetAppKey = appKey || deriveAppKeyFromSpec(data);
@@ -42,7 +50,7 @@ export const actions: Actions = {
 		}
 
 		const response = await handleApiCall<Version>(
-			() => locals.apiClient.createVersionByVersion({ orgKey: params.orgKey, applicationKey: targetAppKey, version: '', body: { original_form: originalForm, visibility: visibility as Visibility }, headers }),
+			() => createVersion(locals.apiClient, { orgKey: params.orgKey, applicationKey: targetAppKey, body: { original_form: originalForm, visibility: validatedVisibility as Visibility }, headers }),
 		);
 
 		if ('data' in response) {

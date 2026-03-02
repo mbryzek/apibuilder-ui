@@ -37,19 +37,28 @@ export async function handleApiCall<T>(
 ): Promise<ApiResponse<T>> {
 	try {
 		const data = await apiCall();
+		// The generated client returns parsed data directly without exposing the
+		// HTTP status code, so we use 200 as the default for successful responses.
 		return { status: 200, data };
 	} catch (error) {
 		// Handle ErrorsResponse (409 validation errors)
 		if (error instanceof ErrorsResponse) {
-			const apiErrors = await error.errors();
-			const parsedErrors: ApiErrorItem[] = apiErrors.map((e) => ({
-				message: e.message,
-				...(e.code && { field: e.code }),
-			}));
-			return {
-				status: error.response.status,
-				errors: parsedErrors.length > 0 ? parsedErrors : [{ message: 'Validation error' }],
-			};
+			try {
+				const apiErrors = await error.errors();
+				const parsedErrors: ApiErrorItem[] = apiErrors.map((e) => ({
+					message: e.message,
+					...(e.code && { field: e.code }),
+				}));
+				return {
+					status: error.response.status,
+					errors: parsedErrors.length > 0 ? parsedErrors : [{ message: 'Validation error' }],
+				};
+			} catch {
+				return {
+					status: error.response.status,
+					errors: [{ message: 'Validation error' }],
+				};
+			}
 		}
 
 		// Handle VoidResponse (204 is success, 401/404 are errors)

@@ -1,17 +1,17 @@
 code:
   apicollective:
     apibuilder-api:
-      version: latest
+      version: 0.16.74
       generators:
         - generator: typescript
           target: ./src/generated
     apibuilder-common:
-      version: latest
+      version: 0.16.74
       generators:
         - generator: typescript
           target: ./src/generated
     apibuilder-generator:
-      version: latest
+      version: 0.16.74
       generators:
         - generator: typescript
           target: ./src/generated

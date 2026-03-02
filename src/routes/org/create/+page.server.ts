@@ -27,7 +27,12 @@ export const actions: Actions = {
 			return fail(400, { errors: [{ message: 'Name and namespace are required' }] });
 		}
 
-		const form: { name: string; namespace: string; key?: string; visibility: Visibility } = { name, namespace, visibility: (visibility || 'organization') as Visibility };
+		const resolvedVisibility = visibility || 'organization';
+		if (!Object.values(Visibility).includes(resolvedVisibility as Visibility)) {
+			return fail(400, { errors: [{ message: `Invalid visibility: ${resolvedVisibility}` }] });
+		}
+
+		const form: { name: string; namespace: string; key?: string; visibility: Visibility } = { name, namespace, visibility: resolvedVisibility as Visibility };
 		if (key) {
 			form.key = key;
 		}

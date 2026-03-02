@@ -25,7 +25,7 @@ export async function requireAdminForAction(locals: App.Locals, orgKey: string):
 	const session = requireAuthForAction(locals);
 	const headers = getSessionHeaders(session.id);
 	const response = await handleApiCall<Membership[]>(
-		() => locals.apiClient.getMemberships({ orgKey, userGuid: session.user.guid, role: MembershipRole.Admin, limit: 100, offset: 0, headers }),
+		() => locals.apiClient.getMemberships({ orgKey, userGuid: session.user.guid, role: MembershipRole.Admin, limit: 1, offset: 0, headers }),
 	);
 	if (!('data' in response) || response.data.length === 0) {
 		throw error(403, 'Forbidden');
