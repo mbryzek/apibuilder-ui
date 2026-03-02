@@ -18,7 +18,7 @@
 	const errors = $derived(form?.errors ?? []);
 	const githubUrl = $derived(
 		data.githubClientId
-			? `https://github.com/login/oauth/authorize?client_id=${data.githubClientId}&redirect_uri=${encodeURIComponent(data.appBaseUrl + '/login/github/callback')}`
+			? `https://github.com/login/oauth/authorize?scope=user:email&client_id=${data.githubClientId}&redirect_uri=${encodeURIComponent(data.appBaseUrl + '/login/github/callback')}`
 			: '',
 	);
 </script>

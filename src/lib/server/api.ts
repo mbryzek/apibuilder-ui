@@ -73,6 +73,26 @@ export function authenticateGithub(token: string): Promise<globalThis.Response> 
 	return post('/users/authenticate_github', {}, { token });
 }
 
+export async function exchangeGithubCode(code: string, githubClientSecret: string): Promise<string> {
+	const response = await fetch('https://github.com/login/oauth/access_token', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			'Accept': 'application/json',
+		},
+		body: JSON.stringify({
+			client_id: config.githubClientId,
+			client_secret: githubClientSecret,
+			code,
+		}),
+	});
+	const data = await response.json();
+	if (data.error) {
+		throw new Error(data.error_description || data.error);
+	}
+	return data.access_token;
+}
+
 // === Users ===
 
 export function getUsers(headers: Headers, params?: { guid?: string; email?: string; nickname?: string }): Promise<globalThis.Response> {
