@@ -3,16 +3,24 @@
 </svelte:head>
 
 <div>
-	<h1 class="text-2xl font-bold text-ab-dark-blue mb-6">API Tokens</h1>
+	<h1 class="text-2xl font-bold text-ab-dark-blue mb-4">API Tokens</h1>
 
-	<p class="text-ab-dark-blue mb-4">
-		API Builder provides a complete REST API to all of the data - and
-		everything you see in the user interface is displayed by
-		interacting directly with the API. By default, all public
-		information is available via the API:
+	<p class="text-ab-dark-blue mb-8 text-lg leading-relaxed">
+		Everything in the API Builder UI is powered by a public REST API. Use API tokens to
+		authenticate and access private data programmatically.
 	</p>
 
-	<pre class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto mb-6">{@html `<code>curl https://api.apibuilder.io/organizations
+	<!-- Public Access -->
+	<div class="mb-10">
+		<h2 class="text-lg font-bold text-ab-blue mb-4 flex items-center gap-2">
+			<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-ab-blue text-white text-xs">1</span>
+			Public Data (No Token Required)
+		</h2>
+		<div class="card">
+			<p class="text-ab-dark-blue mb-3">
+				All public information is available without authentication:
+			</p>
+			<pre class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto"><code>{@html `curl https://api.apibuilder.io/organizations
 
   [
     {
@@ -21,39 +29,56 @@
       "name": "API Collective",
       "namespace": "io",
       "visibility": "public",
-      "domains": [],
-      "audit": {
-        "created_at": "2017-06-24T14:25:01.918Z",
-        "created_by": {
-          "guid": "b0c45ffe-8ab2-4bbd-8742-8d16adbd1dc4"
-        },
-        "updated_at": "2017-06-24T14:58:07.459Z",
-        "updated_by": {
-          "guid": "b0c45ffe-8ab2-4bbd-8742-8d16adbd1dc4"
-        }
-      }
-    },
-    ...
-  ]</code>`}</pre>
+      ...
+    }
+  ]`}</code></pre>
+		</div>
+	</div>
 
-	<p class="text-ab-dark-blue mb-4">
-		Authentication is
-		via <a href="/tokens" class="text-ab-blue hover:text-ab-dark-blue">API tokens</a> and
-		is needed if you have any data in API Builder that is not public.
-	</p>
+	<!-- Create Token -->
+	<div class="mb-10">
+		<h2 class="text-lg font-bold text-ab-blue mb-4 flex items-center gap-2">
+			<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-ab-blue text-white text-xs">2</span>
+			Create a Token
+		</h2>
+		<div class="card">
+			<p class="text-ab-dark-blue">
+				Generate a token from your <a href="/tokens" class="text-ab-blue hover:text-ab-dark-blue underline">API tokens page</a>.
+				Tokens grant access to your private organizations, applications, and generated code.
+			</p>
+		</div>
+	</div>
 
-	<p class="text-ab-dark-blue mb-4">
-		Once you have your API token, verify that it is valid:
-	</p>
+	<!-- Verify Token -->
+	<div class="mb-10">
+		<h2 class="text-lg font-bold text-ab-blue mb-4 flex items-center gap-2">
+			<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-ab-blue text-white text-xs">3</span>
+			Verify Your Token
+		</h2>
+		<div class="card">
+			<p class="text-ab-dark-blue mb-3">
+				Confirm your token works by fetching your organization:
+			</p>
+			<pre class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto mb-3"><code>{@html `curl -u API_TOKEN: https://api.apibuilder.io/&lt;your-org-key&gt;`}</code></pre>
+			<p class="text-ab-dark-blue text-sm">
+				You should see your private applications in the response.
+			</p>
+		</div>
+	</div>
 
-	<pre class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto mb-4">{@html `<code>curl -u API_TOKEN: https://api.apibuilder.io/&lt;your organization id&gt;</code>`}</pre>
+	<!-- Full API Docs -->
+	<div class="card mb-8">
+		<h2 class="text-lg font-semibold text-ab-dark-blue mb-3">Full API Reference</h2>
+		<p class="text-ab-dark-blue">
+			The complete API Builder API is documented at
+			<a href="/apicollective/apibuilder-api" class="text-ab-blue hover:text-ab-dark-blue underline">apicollective/apibuilder-api</a> —
+			every endpoint available in the UI is available via the API.
+		</p>
+	</div>
 
-	<p class="text-ab-dark-blue mb-6">
-		You should now see your private applications in the response.
-	</p>
-
-	<p class="text-ab-dark-blue">
-		Full documentation of the API Builder API is available online at
-		<a href="/apicollective/apibuilder-api" class="text-ab-blue hover:text-ab-dark-blue">apicollective/apibuilder-api</a>.
-	</p>
+	<!-- CTA -->
+	<div class="mt-12 mb-8 text-center">
+		<p class="text-ab-dark-blue mb-4">Ready to automate your workflow?</p>
+		<a href="/tokens" class="btn-primary inline-block">Manage Tokens</a>
+	</div>
 </div>

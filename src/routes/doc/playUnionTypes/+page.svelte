@@ -3,44 +3,35 @@
 </svelte:head>
 
 <div>
-	<h1 class="text-2xl font-bold text-ab-dark-blue mb-6">Play Union Types</h1>
+	<h1 class="text-2xl font-bold text-ab-dark-blue mb-4">Play Union Types</h1>
 
-	<p class="text-ab-dark-blue mb-4">
-		API Builder provides support for declaring your own union types
-		(sometimes referred to as sum or algebraic types). The basic idea
-		is that you can express that a particular variable is one of a
-		known set of types.
+	<p class="text-ab-dark-blue mb-4 text-lg leading-relaxed">
+		Model type-safe alternatives with union types. Express that a variable is exactly one of a known
+		set of types — the generated Play clients handle serialization and deserialization automatically.
 	</p>
 
 	<p class="text-ab-dark-blue mb-4">
-		As an example, in an ecommerce system, you might want to accept
-		orders from both registered users (people who actually have a
-		username and password with your service) and also from guest users
-		(e.g. people who have never visited your application before). One
-		way to model this is to define two types, Registered User and
-		Guest User, a single union type User that can be either a
-		Registered User or a Guest User, and then to model your order as
-		having a User.
+		For example, in an ecommerce system you might accept orders from both registered users (with
+		a username and password) and guest users (first-time visitors). Define a
+		<code class="bg-gray-100 px-1 rounded">registered_user</code> type and a
+		<code class="bg-gray-100 px-1 rounded">guest_user</code> type, then combine them into a single
+		<code class="bg-gray-100 px-1 rounded">user</code> union type and reference it from your order model.
 	</p>
 
 	<p class="text-ab-dark-blue mb-6">
-		Union types, especially when combined with expressive programming
-		languages like Scala, can prove to be very useful and pragmatic
-		tools for modeling problems like this.
-	</p>
-
-	<p class="text-ab-dark-blue mb-4">
-		Over the wire, union types in the play 2_x clients are
-		represented in one of two ways based on the presence of the discriminator field.
+		Over the wire, union types in the Play 2.x clients are represented in one of two ways based on the
+		presence of a discriminator field.
 	</p>
 
 	<div class="card mb-6">
-		<h2 class="text-lg font-semibold text-ab-dark-blue mb-3">With a discriminator</h2>
+		<h2 class="text-lg font-semibold text-ab-blue mb-3 flex items-center gap-2">
+			<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-ab-blue text-white text-xs font-bold">D</span>
+			With a discriminator
+		</h2>
 
 		<p class="text-ab-dark-blue mb-4">
-			Union type is serialized as a JSON Object with the discriminator
-			field injected. For example, assume the discriminator field is set
-			to "type":
+			The union type is serialized as a JSON object with the discriminator field injected.
+			For example, with the discriminator set to <code class="bg-gray-100 px-1 rounded">"type"</code>:
 		</p>
 
 		<p class="text-ab-dark-blue mb-2">Example serializations:</p>
@@ -59,12 +50,14 @@
 	</div>
 
 	<div class="card mb-6">
-		<h2 class="text-lg font-semibold text-ab-dark-blue mb-3">Without a discriminator</h2>
+		<h2 class="text-lg font-semibold text-ab-blue mb-3 flex items-center gap-2">
+			<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-ab-blue text-white text-xs font-bold">W</span>
+			Without a discriminator
+		</h2>
 
 		<p class="text-ab-dark-blue mb-4">
-			Union type is serialized as a JSON Object with one element. The
-			key is the name of the type and the value is the JSON
-			serialization of the actual object.
+			The union type is serialized as a JSON object with one element — the key is the type name
+			and the value is the serialized object.
 		</p>
 
 		<p class="text-ab-dark-blue mb-2">Example serializations:</p>
@@ -85,17 +78,24 @@
 	</div>
 
 	<div class="card mb-6">
-		<h2 class="text-lg font-semibold text-ab-dark-blue mb-3">Example Applications</h2>
+		<h2 class="text-lg font-semibold text-ab-blue mb-3 flex items-center gap-2">
+			<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-ab-blue text-white text-xs font-bold">&#x2699;</span>
+			Example Applications
+		</h2>
 
 		<p class="text-ab-dark-blue mb-3">
-			We also maintain example applications that demonstrate the use of
-			the union types with and without discriminators. For more
-			information:
+			Working examples demonstrating union types with and without discriminators:
 		</p>
 
 		<ul class="list-disc list-inside space-y-2 text-ab-dark-blue">
-			<li><a href="https://github.com/apicollective/apibuilder-generator/tree/main/example-union-types-discriminator" class="text-ab-blue hover:text-ab-dark-blue">Example with discriminator</a></li>
-			<li><a href="https://github.com/apicollective/apibuilder-generator/tree/main/example-union-types" class="text-ab-blue hover:text-ab-dark-blue">Example without discriminator</a></li>
+			<li><a href="https://github.com/apicollective/apibuilder-generator/tree/main/example-union-types-discriminator" class="text-ab-blue hover:text-ab-dark-blue underline">Example with discriminator</a></li>
+			<li><a href="https://github.com/apicollective/apibuilder-generator/tree/main/example-union-types" class="text-ab-blue hover:text-ab-dark-blue underline">Example without discriminator</a></li>
 		</ul>
+	</div>
+
+	<!-- CTA -->
+	<div class="mt-12 mb-8 text-center">
+		<p class="text-ab-dark-blue mb-4">Ready to define your own union types?</p>
+		<a href="/doc/apiJson" class="btn-primary inline-block">View api.json Specification</a>
 	</div>
 </div>
