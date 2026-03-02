@@ -27,17 +27,6 @@
 	const orgKey = $derived(version.organization.key);
 	const appKey = $derived(version.application.key);
 
-	const sidebarProps = $derived({
-		orgKey,
-		appKey,
-		version: version.version,
-		appName: service.name,
-		isMember: data.isMember,
-		isAdmin: data.isAdmin,
-		isWatching: data.isWatching,
-		isLoggedIn: data.session !== undefined,
-		...(data.watchGuid != null ? { watchGuid: data.watchGuid } : {}),
-	});
 </script>
 
 <svelte:head>
@@ -45,7 +34,17 @@
 </svelte:head>
 
 <div class="flex gap-10">
-	<AppSidebar {...sidebarProps} />
+	<AppSidebar
+		{orgKey}
+		{appKey}
+		version={version.version}
+		appName={service.name}
+		isMember={data.isMember}
+		isAdmin={data.isAdmin}
+		isWatching={data.isWatching}
+		watchGuid={data.watchGuid}
+		isLoggedIn={data.session !== undefined}
+	/>
 	<div class="flex-1 min-w-0">
 		<!-- App header -->
 		<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">

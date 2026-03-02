@@ -15,25 +15,19 @@
 
 	let { data, children }: Props = $props();
 
-	// Detect version routes: /{orgKey}/{appKey}/{version} (3+ path segments)
-	// Exclude /upload to avoid matching /{orgKey}/upload as an app route
-	const isAppVersionRoute = $derived(
-		/^\/[^/]+\/[^/]+\/[^/]+/.test($page.url.pathname) &&
-		!$page.url.pathname.includes('/upload')
-	);
+	// Version layout provides its own AppSidebar, so skip OrgSidebar when version data is present
+	const isAppVersionRoute = $derived('service' in $page.data);
 </script>
 
-{#if isAppVersionRoute}
-	<div class="page-container">
+<div class="page-container">
+	{#if isAppVersionRoute}
 		{@render children()}
-	</div>
-{:else}
-	<div class="page-container">
+	{:else}
 		<div class="flex gap-10">
 			<OrgSidebar orgKey={data.org.key} isMember={data.isMember} isAdmin={data.isAdmin} />
 			<div class="flex-1 min-w-0">
 				{@render children()}
 			</div>
 		</div>
-	</div>
-{/if}
+	{/if}
+</div>
