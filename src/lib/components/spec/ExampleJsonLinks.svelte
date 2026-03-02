@@ -8,44 +8,25 @@
 
 	let copiedLabel = $state('');
 
-	function copyToClipboard(text: string): boolean {
-		try {
-			const textarea = document.createElement('textarea');
-			textarea.value = text;
-			textarea.style.position = 'fixed';
-			textarea.style.opacity = '0';
-			document.body.appendChild(textarea);
-			textarea.select();
-			document.execCommand('copy');
-			document.body.removeChild(textarea);
-			return true;
-		} catch {
-			return false;
-		}
-	}
-
-	async function copyExample(optionalFields: boolean) {
+	function copyExample(optionalFields: boolean) {
 		const label = optionalFields ? 'full' : 'minimal';
 		copiedLabel = '';
-		try {
-			const url = `${baseUrl}/${typeName}${optionalFields ? '?optional_fields=true' : ''}`;
-			const res = await fetch(url);
-			if (!res.ok) throw new Error(`Failed to fetch: ${res.status}`);
-			const text = await res.text();
-			let copied = false;
-			try {
-				await navigator.clipboard.writeText(text);
-				copied = true;
-			} catch {
-				copied = copyToClipboard(text);
-			}
-			if (copied) {
-				copiedLabel = label;
-				setTimeout(() => { if (copiedLabel === label) copiedLabel = ''; }, 3000);
-			}
-		} catch (e) {
+
+		const url = `${baseUrl}/${typeName}${optionalFields ? '?optional_fields=true' : ''}`;
+		const blobPromise = fetch(url)
+			.then((res) => {
+				if (!res.ok) throw new Error(`Failed to fetch: ${res.status}`);
+				return res.text();
+			})
+			.then((text) => new Blob([text], { type: 'text/plain' }));
+
+		const item = new ClipboardItem({ 'text/plain': blobPromise });
+		navigator.clipboard.write([item]).then(() => {
+			copiedLabel = label;
+			setTimeout(() => { if (copiedLabel === label) copiedLabel = ''; }, 3000);
+		}).catch((e) => {
 			console.error('copyExample failed:', e);
-		}
+		});
 	}
 </script>
 

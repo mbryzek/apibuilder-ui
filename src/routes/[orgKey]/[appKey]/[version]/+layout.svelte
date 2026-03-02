@@ -70,6 +70,8 @@
 			<span class="text-gray-300">|</span>
 		{/if}
 
+		<a href="/{orgKey}/{appKey}/{version.version}/history" class="text-ab-blue hover:text-ab-dark-blue">History</a>
+		<span class="text-gray-300">|</span>
 		<a href="/{orgKey}/{appKey}/{version.version}/original" class="text-ab-blue hover:text-ab-dark-blue">Original</a>
 		<span class="text-gray-300">|</span>
 		<a href="/{orgKey}/{appKey}/{version.version}/service.json" class="text-ab-blue hover:text-ab-dark-blue">service.json</a>

@@ -31,6 +31,15 @@
 		{ id: 'annotations', label: 'Annotations', count: service.annotations?.length ?? 0 },
 	].filter((t) => t.count > 0));
 
+	const validTabIds = ['resources', 'models', 'enums', 'unions', 'interfaces', 'headers', 'imports', 'annotations'];
+
+	function getTabFromHash(): string | null {
+		if (typeof window === 'undefined') return null;
+		const hash = window.location.hash.slice(1);
+		if (validTabIds.includes(hash)) return hash;
+		return null;
+	}
+
 	let searchQuery = $state('');
 	let activeTab = $state(getTabFromHash() ?? '');
 
@@ -78,15 +87,6 @@
 
 	const defaultTab = $derived(filteredTabs.length > 0 ? filteredTabs[0]!.id : 'resources');
 	const currentTab = $derived(activeTab && filteredTabs.some((t) => t.id === activeTab) ? activeTab : defaultTab);
-
-	const validTabIds = ['resources', 'models', 'enums', 'unions', 'interfaces', 'headers', 'imports', 'annotations'];
-
-	function getTabFromHash(): string | null {
-		if (typeof window === 'undefined') return null;
-		const hash = window.location.hash.slice(1);
-		if (validTabIds.includes(hash)) return hash;
-		return null;
-	}
 
 	function setTabHash(tabId: string) {
 		history.replaceState(null, '', `#${tabId}`);
