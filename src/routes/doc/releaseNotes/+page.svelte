@@ -7,6 +7,43 @@
 
 	<div class="space-y-6">
 
+		<div class="card mb-6 border-l-4 border-ab-blue">
+			<h3 class="text-lg font-semibold text-ab-dark-blue mb-3">Mar 1, 2026</h3>
+			<ul class="list-disc list-inside space-y-2 text-ab-dark-blue">
+				<li>
+					<strong class="text-ab-blue">Fields on Union Types</strong> — Union type entries now support an optional <code class="bg-gray-100 px-1.5 py-0.5 rounded text-sm">fields</code> property,
+					enabling inline field definitions directly on union members. API Builder also auto-creates models for union types
+					not found elsewhere — a powerful bit of syntactic sugar. This change is 100% backward compatible.
+					<details class="mt-2 ml-4">
+						<summary class="text-ab-blue cursor-pointer text-sm hover:text-ab-dark-blue">Example</summary>
+						<pre class="bg-gray-50 rounded p-3 mt-2 text-sm overflow-x-auto"><code>{
+  "unions": {
+    "task_type": {
+      "discriminator": "discriminator",
+      "types": [
+        { "type": "game" },
+        { "type": "merge_person", "fields": [
+          { "name": "user_id", "type": "string" },
+          { "name": "person_id", "type": "string" }
+        ]}
+      ]
+    }
+  }
+}</code></pre>
+					</details>
+				</li>
+			</ul>
+		</div>
+
+		<div class="card mb-6">
+			<h3 class="text-lg font-semibold text-ab-dark-blue mb-3">Oct 11, 2025</h3>
+			<ul class="list-disc list-inside space-y-2 text-ab-dark-blue">
+				<li><strong>Upgraded to Play 3</strong> — Full migration of the API Builder backend to Play Framework 3, including Scala 3 support throughout.</li>
+				<li>Fix to version filter for more reliable version lookups</li>
+				<li>Infrastructure migration to Argo CD</li>
+			</ul>
+		</div>
+
 		<div class="card mb-6">
 			<h3 class="text-lg font-semibold text-ab-dark-blue mb-3">Jul 10, 2024</h3>
 			<ul class="list-disc list-inside space-y-2 text-ab-dark-blue">
