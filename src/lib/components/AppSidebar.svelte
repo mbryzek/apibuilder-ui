@@ -144,6 +144,28 @@
 					</li>
 				{/each}
 			</ul>
+
+			<!-- Org links -->
+			{#if orgLinks.length > 0}
+				<div class="border-t border-gray-200 mt-3 pt-3">
+					<span class="block text-xs font-medium text-ab-gray uppercase mb-1">{orgKey}</span>
+					<ul class="space-y-1">
+						{#each orgLinks as link (link.href)}
+							<li>
+								<a
+									href={link.href}
+									class="block py-1.5 text-sm font-medium transition-colors {isActive(link.href)
+										? 'text-ab-blue font-semibold'
+										: 'text-ab-gray hover:text-ab-dark-blue'}"
+									onclick={() => (mobileOpen = false)}
+								>
+									{link.label}
+								</a>
+							</li>
+						{/each}
+					</ul>
+				</div>
+			{/if}
 		</div>
 	{/if}
 </div>
