@@ -6,37 +6,31 @@
 	const currentYear = new Date().getFullYear();
 </script>
 
-<footer class="bg-ab-dark-blue mt-auto">
-	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-		<div class="flex flex-col md:flex-row justify-between gap-8">
+<footer class="mt-auto border-t border-gray-200">
+	<div class="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10 py-8">
+		<div class="flex flex-col sm:flex-row justify-between items-center gap-4">
 			<!-- Brand -->
-			<div class="text-white">
-				<p class="text-lg font-bold mb-2">API Builder</p>
-				<p class="text-sm text-white/50">API-first development tools</p>
-			</div>
+			<a href="/" class="text-ab-dark-blue font-bold text-lg tracking-wide">
+				API <span class="font-light">|</span> BUILDER
+			</a>
+
+			<!-- Copyright -->
+			<p class="text-ab-gray text-sm">&copy; {currentYear} API Builder.</p>
 
 			<!-- Links -->
-			<div class="flex flex-col sm:flex-row gap-8">
-				<div>
-					<p class="text-xs font-semibold text-white/40 uppercase tracking-wider mb-3">Resources</p>
-					<div class="flex flex-col gap-2">
-						<a href="/doc" class="text-white/70 hover:text-white transition-colors text-sm">Documentation</a>
-						<a
-							href="https://github.com/apicollective/apibuilder"
-							target="_blank"
-							rel="noopener noreferrer"
-							class="text-white/70 hover:text-white transition-colors text-sm"
-						>
-							GitHub
-						</a>
-					</div>
-				</div>
+			<div class="flex items-center gap-6">
+				<a href="/doc" class="text-ab-gray hover:text-ab-blue transition-colors text-sm">
+					Documentation
+				</a>
+				<a
+					href="https://github.com/apicollective/apibuilder"
+					target="_blank"
+					rel="noopener noreferrer"
+					class="text-ab-gray hover:text-ab-blue transition-colors text-sm"
+				>
+					GitHub
+				</a>
 			</div>
-		</div>
-
-		<!-- Bottom bar -->
-		<div class="border-t border-white/10 mt-8 pt-6">
-			<p class="text-white/40 text-xs">&copy; {currentYear} API Builder. All rights reserved.</p>
 		</div>
 	</div>
 </footer>

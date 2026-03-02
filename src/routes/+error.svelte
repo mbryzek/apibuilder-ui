@@ -6,9 +6,9 @@
 	<title>Error {page.status} - API Builder</title>
 </svelte:head>
 
-<div class="flex flex-col items-center justify-center min-h-[50vh] text-center px-4">
-	<h1 class="text-6xl font-bold text-ab-dark-blue mb-4">{page.status}</h1>
-	<p class="text-xl text-ab-dark-gray mb-6">
+<div class="flex flex-col items-center justify-center min-h-[50vh] text-center px-6">
+	<h1 class="text-7xl font-light text-ab-dark-blue mb-6">{page.status}</h1>
+	<p class="text-xl text-ab-dark-gray mb-8">
 		{#if page.status === 404}
 			The page you're looking for doesn't exist.
 		{:else if page.status === 403}

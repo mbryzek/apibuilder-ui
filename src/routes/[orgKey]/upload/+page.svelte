@@ -58,7 +58,7 @@
 					name="file"
 					accept=".json,.avdl,.yaml,.yml"
 					required
-					class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-ab-blue file:text-white hover:file:bg-ab-dark-blue file:cursor-pointer"
+					class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-ab-blue file:text-white hover:file:bg-ab-light-blue file:cursor-pointer"
 					onchange={(e) => {
 						const input = e.currentTarget as HTMLInputElement;
 						fileName = input.files?.[0]?.name ?? '';

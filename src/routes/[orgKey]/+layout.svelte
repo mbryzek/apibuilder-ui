@@ -16,7 +16,7 @@
 </script>
 
 <div class="page-container">
-	<div class="flex gap-8">
+	<div class="flex gap-10">
 		<OrgSidebar orgKey={data.org.key} isMember={data.isMember} isAdmin={data.isAdmin} />
 		<div class="flex-1 min-w-0">
 			{@render children()}

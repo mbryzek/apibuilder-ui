@@ -30,7 +30,7 @@
 </script>
 
 <div class="page-container">
-	<div class="flex flex-col md:flex-row gap-8">
+	<div class="flex flex-col md:flex-row gap-10">
 		<nav class="md:w-56 shrink-0" aria-label="Documentation">
 			<button
 				class="md:hidden w-full text-left text-ab-blue font-semibold py-2 mb-2"

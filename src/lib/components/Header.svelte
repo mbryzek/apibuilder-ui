@@ -53,13 +53,13 @@
 	></button>
 {/if}
 
-<header class="bg-ab-dark-blue shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1)] relative z-40">
+<header class="bg-ab-blue shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1)] relative z-40">
 	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 		<div class="flex justify-between items-center h-16">
 			<!-- Brand -->
 			<div class="flex items-center">
-				<a href="/" class="text-white text-lg sm:text-xl font-bold">
-					API Builder
+				<a href="/" class="text-white text-lg sm:text-xl font-bold tracking-wide">
+					API <span class="font-light">|</span> BUILDER
 				</a>
 			</div>
 
@@ -85,7 +85,7 @@
 							type="text"
 							name="q"
 							placeholder="Search..."
-							class="rounded-md border-0 bg-white/10 text-white placeholder-white/50 text-sm px-3 py-1.5 focus:bg-white/20 focus:ring-1 focus:ring-ab-light-blue transition-colors w-40 lg:w-56"
+							class="rounded-md border-0 bg-white/10 text-white placeholder-white/50 text-sm px-3 py-1.5 focus:bg-white/20 focus:ring-1 focus:ring-white/50 transition-colors w-40 lg:w-56"
 						/>
 					</form>
 
@@ -149,9 +149,9 @@
 				{:else}
 					<a
 						href="/login"
-						class="bg-ab-blue text-white font-semibold px-4 py-2 rounded-lg hover:bg-ab-light-blue transition-colors text-sm"
+						class="bg-white text-ab-blue font-semibold px-5 py-2 rounded-full hover:scale-110 transition-all duration-200 ease-out text-sm"
 					>
-						Login
+						Log in with GitHub
 					</a>
 				{/if}
 			</div>
@@ -159,7 +159,7 @@
 			<!-- Mobile Menu Button -->
 			<button
 				type="button"
-				class="md:hidden text-white hover:text-ab-light-blue transition-colors duration-200 p-2"
+				class="md:hidden text-white hover:text-white/80 transition-colors duration-200 p-2"
 				aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
 				aria-expanded={mobileMenuOpen}
 				aria-controls="mobile-menu"
@@ -185,10 +185,10 @@
 		id="mobile-menu"
 		class="md:hidden overflow-hidden transition-all duration-300 ease-in-out {mobileMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'}"
 	>
-		<div class="px-4 pt-2 pb-4 space-y-1 bg-ab-dark-blue border-t border-ab-light-blue/20">
+		<div class="px-4 pt-2 pb-4 space-y-1 bg-ab-blue border-t border-white/20">
 			<a
 				href="/doc"
-				class="block px-3 py-2 text-white hover:text-ab-light-blue hover:bg-ab-dark-blue/80 rounded-md transition-colors"
+				class="block px-3 py-2 text-white hover:text-white hover:bg-white/10 rounded-md transition-colors"
 				onclick={closeMobileMenu}
 			>
 				Docs
@@ -197,7 +197,7 @@
 				href="https://github.com/apicollective/apibuilder"
 				target="_blank"
 				rel="noopener noreferrer"
-				class="block px-3 py-2 text-white hover:text-ab-light-blue hover:bg-ab-dark-blue/80 rounded-md transition-colors"
+				class="block px-3 py-2 text-white hover:text-white hover:bg-white/10 rounded-md transition-colors"
 				onclick={closeMobileMenu}
 			>
 				GitHub
@@ -210,44 +210,44 @@
 						type="text"
 						name="q"
 						placeholder="Search..."
-						class="w-full rounded-md border-0 bg-white/10 text-white placeholder-white/50 text-sm px-3 py-1.5 focus:bg-white/20 focus:ring-1 focus:ring-ab-light-blue"
+						class="w-full rounded-md border-0 bg-white/10 text-white placeholder-white/50 text-sm px-3 py-1.5 focus:bg-white/20 focus:ring-1 focus:ring-white/50"
 					/>
 				</form>
 
-				<hr class="border-ab-light-blue/20" />
+				<hr class="border-white/20" />
 				<a
 					href="/generators"
-					class="block px-3 py-2 text-white hover:text-ab-light-blue hover:bg-ab-dark-blue/80 rounded-md transition-colors"
+					class="block px-3 py-2 text-white hover:text-white hover:bg-white/10 rounded-md transition-colors"
 					onclick={closeMobileMenu}
 				>
 					Generators
 				</a>
 				<a
 					href="/attributes"
-					class="block px-3 py-2 text-white hover:text-ab-light-blue hover:bg-ab-dark-blue/80 rounded-md transition-colors"
+					class="block px-3 py-2 text-white hover:text-white hover:bg-white/10 rounded-md transition-colors"
 					onclick={closeMobileMenu}
 				>
 					Attributes
 				</a>
 				<a
 					href="/account/profile"
-					class="block px-3 py-2 text-white hover:text-ab-light-blue hover:bg-ab-dark-blue/80 rounded-md transition-colors"
+					class="block px-3 py-2 text-white hover:text-white hover:bg-white/10 rounded-md transition-colors"
 					onclick={closeMobileMenu}
 				>
 					Account
 				</a>
 				<a
 					href="/tokens"
-					class="block px-3 py-2 text-white hover:text-ab-light-blue hover:bg-ab-dark-blue/80 rounded-md transition-colors"
+					class="block px-3 py-2 text-white hover:text-white hover:bg-white/10 rounded-md transition-colors"
 					onclick={closeMobileMenu}
 				>
 					Tokens
 				</a>
-				<hr class="border-ab-light-blue/20" />
+				<hr class="border-white/20" />
 				<form method="POST" action="/logout">
 					<button
 						type="submit"
-						class="block w-full text-left px-3 py-2 text-white hover:text-ab-light-blue hover:bg-ab-dark-blue/80 rounded-md transition-colors"
+						class="block w-full text-left px-3 py-2 text-white hover:text-white hover:bg-white/10 rounded-md transition-colors"
 						onclick={closeMobileMenu}
 					>
 						Logout
@@ -256,10 +256,10 @@
 			{:else}
 				<a
 					href="/login"
-					class="block px-3 py-2 mt-2 text-center bg-ab-blue text-white font-semibold rounded-md hover:bg-ab-light-blue transition-colors"
+					class="block px-3 py-2 mt-2 text-center bg-white text-ab-blue font-semibold rounded-full hover:scale-105 transition-all duration-200 ease-out"
 					onclick={closeMobileMenu}
 				>
-					Login
+					Log in with GitHub
 				</a>
 			{/if}
 		</div>
