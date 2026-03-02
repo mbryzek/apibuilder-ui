@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { SpecEnum } from '$generated/types';
 	import DeprecationBadge from './DeprecationBadge.svelte';
+	import ExampleJsonLinks from './ExampleJsonLinks.svelte';
 
 	interface Props {
 		enums: SpecEnum[];
@@ -50,12 +51,9 @@
 					</table>
 				</div>
 				{#if exampleBaseUrl}
-					<p class="text-xs text-ab-gray mt-2">
-						Example JSON:
-						<a href="{exampleBaseUrl}/{enumDef.name}" target="_blank" class="text-ab-blue hover:text-ab-dark-blue">Minimal</a>
-						|
-						<a href="{exampleBaseUrl}/{enumDef.name}?optional_fields=true" target="_blank" class="text-ab-blue hover:text-ab-dark-blue">Full</a>
-					</p>
+					<div class="mt-2">
+						<ExampleJsonLinks baseUrl={exampleBaseUrl} typeName={enumDef.name} />
+					</div>
 				{/if}
 			</div>
 		{/each}
