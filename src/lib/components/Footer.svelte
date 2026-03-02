@@ -9,7 +9,7 @@
 <footer class="mt-auto border-t border-gray-200">
 	<div class="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10 py-8">
 		<div class="flex flex-col sm:flex-row justify-between items-center gap-4">
-			<p class="text-ab-gray text-sm">&copy; {currentYear} API Builder.</p>
+			<p class="text-ab-gray text-sm">&copy; {currentYear} API Builder</p>
 			<div class="text-white">
 			</div>
 

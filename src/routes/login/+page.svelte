@@ -51,6 +51,7 @@
 			</a>
 		{/if}
 
+		{#if showLegacyLogin}
 			<div class="relative my-8">
 				<div class="absolute inset-0 flex items-center">
 					<div class="w-full border-t border-gray-200"></div>
@@ -133,18 +134,7 @@
 				>
 					Legacy Sign in
 				</button>
-<<<<<<< HEAD
-			</div>
-		</form>
-
-		<p class="mt-6 text-center text-sm text-ab-gray">
-			<a href="/login/forgot-password" class="text-ab-blue hover:text-ab-dark-blue transition-colors">
-				Forgot password?
-			</a>
-		</p>
-=======
 			</p>
 		{/if}
->>>>>>> rewrite
 	</div>
 </div>
