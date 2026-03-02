@@ -1,0 +1,7 @@
+code:
+  apicollective:
+    apibuilder-api:
+      version: latest
+      generators:
+        - generator: typescript
+          target: ./src/generated

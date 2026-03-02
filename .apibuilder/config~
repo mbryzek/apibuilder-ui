@@ -1,0 +1,44 @@
+code:
+  bryzek:
+    platform:
+      version: latest
+      generators:
+        - generator: typescript
+          target: ./src/generated
+          attributes:
+            - name: "filter"
+              value:
+                types:
+                  - user_reference
+                  - person
+                resources:
+                  - person
+                  - tenant_session
+                  - user
+                  - user_preferences
+                  - phone
+    platform-storage:
+      version: latest
+      generators:
+        - generator: typescript
+          target: ./src/generated
+          attributes:
+            - name: "filter"
+              value:
+                types:
+                  - file
+    platform-error:
+      version: latest
+      generators:
+        - generator: typescript
+          target: ./src/generated
+    rallyd-api:
+      version: latest
+      generators:
+        - generator: typescript
+          target: ./src/generated
+    rallyd-admin:
+      version: latest
+      generators:
+        - generator: typescript
+          target: ./src/generated
