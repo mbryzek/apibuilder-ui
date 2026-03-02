@@ -26,7 +26,6 @@
 	const versions = $derived(data.versions);
 	const orgKey = $derived(version.organization.key);
 	const appKey = $derived(version.application.key);
-
 </script>
 
 <svelte:head>
