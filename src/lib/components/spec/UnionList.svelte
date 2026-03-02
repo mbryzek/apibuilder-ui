@@ -2,6 +2,7 @@
 	import type { SpecUnion, Service } from '$generated/types';
 	import TypeLink from './TypeLink.svelte';
 	import DeprecationBadge from './DeprecationBadge.svelte';
+	import ExampleJsonLinks from './ExampleJsonLinks.svelte';
 
 	interface Props {
 		unions: SpecUnion[];
@@ -68,12 +69,9 @@
 					</table>
 				</div>
 				{#if exampleBaseUrl}
-					<p class="text-xs text-ab-gray mt-2">
-						Example JSON:
-						<a href="{exampleBaseUrl}/{union.name}" target="_blank" class="text-ab-blue hover:text-ab-dark-blue">Minimal</a>
-						|
-						<a href="{exampleBaseUrl}/{union.name}?optional_fields=true" target="_blank" class="text-ab-blue hover:text-ab-dark-blue">Full</a>
-					</p>
+					<div class="mt-2">
+						<ExampleJsonLinks baseUrl={exampleBaseUrl} typeName={union.name} />
+					</div>
 				{/if}
 			</div>
 		{/each}

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Model, Service } from '$generated/types';
 	import DeprecationBadge from './DeprecationBadge.svelte';
+	import ExampleJsonLinks from './ExampleJsonLinks.svelte';
 	import FieldsTable from './FieldsTable.svelte';
 
 	interface Props {
@@ -32,12 +33,9 @@
 				{/if}
 				<FieldsTable fields={model.fields} {service} />
 				{#if exampleBaseUrl}
-					<p class="text-xs text-ab-gray mt-2">
-						Example JSON:
-						<a href="{exampleBaseUrl}/{model.name}" target="_blank" class="text-ab-blue hover:text-ab-dark-blue">Minimal</a>
-						|
-						<a href="{exampleBaseUrl}/{model.name}?optional_fields=true" target="_blank" class="text-ab-blue hover:text-ab-dark-blue">Full</a>
-					</p>
+					<div class="mt-2">
+						<ExampleJsonLinks baseUrl={exampleBaseUrl} typeName={model.name} />
+					</div>
 				{/if}
 			</div>
 		{/each}
