@@ -11,8 +11,6 @@
 		<div class="flex flex-col md:flex-row justify-between gap-8">
 			<!-- Brand -->
 			<div class="text-white">
-				<p class="text-lg font-bold mb-2">API Builder</p>
-				<p class="text-sm text-white/50">API-first development tools</p>
 			</div>
 
 			<!-- Links -->
