@@ -33,7 +33,7 @@
 
 <div>
 	<!-- App header -->
-	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
 		<div>
 			<h1 class="text-2xl font-bold text-ab-dark-blue">{service.name}</h1>
 			{#if service.description}
@@ -43,7 +43,7 @@
 	</div>
 
 	<!-- Action bar -->
-	<div class="flex flex-wrap items-center gap-3 mb-6 text-sm">
+	<div class="flex flex-wrap items-center gap-3 mb-8 text-sm">
 		<!-- Version selector -->
 		<div class="flex items-center gap-2">
 			<label for="version-select" class="text-ab-gray font-medium">Version:</label>
@@ -73,6 +73,8 @@
 		<a href="/{orgKey}/{appKey}/{version.version}/original" class="text-ab-blue hover:text-ab-dark-blue">Original</a>
 		<span class="text-gray-300">|</span>
 		<a href="/{orgKey}/{appKey}/{version.version}/service.json" class="text-ab-blue hover:text-ab-dark-blue">service.json</a>
+		<span class="text-gray-300">|</span>
+		<a href="/{orgKey}/{appKey}/{version.version}/history" class="text-ab-blue hover:text-ab-dark-blue">History</a>
 
 		{#if data.isMember}
 			<span class="text-gray-300">|</span>

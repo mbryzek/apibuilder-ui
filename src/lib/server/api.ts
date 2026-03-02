@@ -93,6 +93,10 @@ export async function exchangeGithubCode(code: string, githubClientSecret: strin
 	return data.access_token;
 }
 
+export function createUser(form: { email: string; password: string; nickname?: string; name?: string }): Promise<globalThis.Response> {
+	return post('/users', {}, form);
+}
+
 // === Users ===
 
 export function getUsers(headers: Headers, params?: { guid?: string; email?: string; nickname?: string }): Promise<globalThis.Response> {

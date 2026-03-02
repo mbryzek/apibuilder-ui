@@ -23,7 +23,7 @@
 </svelte:head>
 
 <div>
-	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
 		<h1 class="text-2xl font-bold text-ab-dark-blue">{org.name}</h1>
 		{#if data.isMember}
 			<a href="/{org.key}/upload" class="btn-primary mt-3 sm:mt-0 inline-block text-center">
