@@ -32,7 +32,7 @@
 	].filter((t) => t.count > 0));
 
 	let searchQuery = $state('');
-	let activeTab = $state('');
+	let activeTab = $state(getTabFromHash() ?? '');
 
 	const filteredModels = $derived(
 		searchQuery
@@ -79,6 +79,24 @@
 	const defaultTab = $derived(filteredTabs.length > 0 ? filteredTabs[0]!.id : 'resources');
 	const currentTab = $derived(activeTab && filteredTabs.some((t) => t.id === activeTab) ? activeTab : defaultTab);
 
+	const validTabIds = ['resources', 'models', 'enums', 'unions', 'interfaces', 'headers', 'imports', 'annotations'];
+
+	function getTabFromHash(): string | null {
+		if (typeof window === 'undefined') return null;
+		const hash = window.location.hash.slice(1);
+		if (validTabIds.includes(hash)) return hash;
+		return null;
+	}
+
+	function setTabHash(tabId: string) {
+		history.replaceState(null, '', `#${tabId}`);
+	}
+
+	function selectTab(tabId: string) {
+		activeTab = tabId;
+		setTabHash(tabId);
+	}
+
 	function findTabForName(name: string): string | null {
 		if (service.models.some((m) => m.name === name)) return 'models';
 		if (service.enums.some((e) => e.name === name)) return 'enums';
@@ -88,10 +106,17 @@
 		return null;
 	}
 
-	async function scrollToHash() {
+	async function handleHash() {
 		const hash = window.location.hash.slice(1);
 		if (!hash) return;
 
+		// Check if hash is a tab ID
+		if (validTabIds.includes(hash)) {
+			activeTab = hash;
+			return;
+		}
+
+		// Otherwise treat as a type name to scroll to
 		const tab = findTabForName(hash);
 		if (tab) {
 			activeTab = tab;
@@ -104,9 +129,9 @@
 	}
 
 	onMount(() => {
-		scrollToHash();
-		window.addEventListener('hashchange', scrollToHash);
-		return () => window.removeEventListener('hashchange', scrollToHash);
+		handleHash();
+		window.addEventListener('hashchange', handleHash);
+		return () => window.removeEventListener('hashchange', handleHash);
 	});
 </script>
 
@@ -128,7 +153,7 @@
 				class="px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap {currentTab === tab.id
 					? 'border-ab-blue text-ab-blue'
 					: 'border-transparent text-ab-gray hover:text-ab-dark-gray hover:border-gray-300'}"
-				onclick={() => (activeTab = tab.id)}
+				onclick={() => selectTab(tab.id)}
 			>
 				{tab.label}
 				<span class="ml-1 text-xs {currentTab === tab.id ? 'text-ab-blue' : 'text-ab-gray'}">({tab.count})</span>
