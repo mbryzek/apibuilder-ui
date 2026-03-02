@@ -7,8 +7,9 @@ import {
 	getOrganizationByKey,
 } from '$lib/server/api';
 import { handleApiCall } from '$lib/api/error-handler';
-import { requireAuth, requireAuthForAction } from '$lib/server/auth';
+import { requireAuth, requireAdminForAction } from '$lib/server/auth';
 import type { Membership, User, MembershipRequest, Organization } from '$generated/types';
+import { MembershipRole } from '$generated/types';
 
 export const load: PageServerLoad = async (event) => {
 	const session = requireAuth(event);
@@ -38,11 +39,12 @@ export const load: PageServerLoad = async (event) => {
 
 export const actions: Actions = {
 	addMember: async ({ request, params, locals }) => {
-		const session = requireAuthForAction(locals);
+		const session = await requireAdminForAction(locals, params.orgKey);
 		const headers = getSessionHeaders(session.id);
 		const formData = await request.formData();
 		const emailOrNickname = (formData.get('email_or_nickname') as string)?.trim();
-		const role = (formData.get('role') as string) || 'member';
+		const roleRaw = formData.get('role') as string;
+		const role = Object.values(MembershipRole).includes(roleRaw as MembershipRole) ? roleRaw : 'member';
 
 		if (!emailOrNickname) {
 			return fail(400, { errors: [{ message: 'Email or nickname is required' }] });
@@ -97,11 +99,16 @@ export const actions: Actions = {
 		return fail(500, { errors: [{ message: 'An unexpected error occurred' }] });
 	},
 
-	removeMember: async ({ request, locals }) => {
-		const session = requireAuthForAction(locals);
+	removeMember: async ({ request, locals, params }) => {
+		await requireAdminForAction(locals, params.orgKey);
+		const session = locals.session!;
 		const headers = getSessionHeaders(session.id);
 		const formData = await request.formData();
-		const guid = formData.get('guid') as string;
+		const guid = formData.get('guid');
+
+		if (!guid || typeof guid !== 'string') {
+			return fail(400, { errors: [{ message: 'Invalid request' }] });
+		}
 
 		const response = await handleApiCall<void>(
 			() => deleteMembership(guid, headers),
@@ -115,10 +122,14 @@ export const actions: Actions = {
 	},
 
 	makeAdmin: async ({ request, locals, params }) => {
-		const session = requireAuthForAction(locals);
+		const session = await requireAdminForAction(locals, params.orgKey);
 		const headers = getSessionHeaders(session.id);
 		const formData = await request.formData();
-		const userGuid = formData.get('user_guid') as string;
+		const userGuid = formData.get('user_guid');
+
+		if (!userGuid || typeof userGuid !== 'string') {
+			return fail(400, { errors: [{ message: 'Invalid request' }] });
+		}
 
 		const orgResponse = await handleApiCall<Organization>(
 			() => getOrganizationByKey(params.orgKey, headers),
@@ -149,21 +160,28 @@ export const actions: Actions = {
 	},
 
 	revokeAdmin: async ({ request, locals, params }) => {
-		const session = requireAuthForAction(locals);
+		await requireAdminForAction(locals, params.orgKey);
+		const session = locals.session!;
 		const headers = getSessionHeaders(session.id);
 		const formData = await request.formData();
-		const userGuid = formData.get('user_guid') as string;
+		const userGuid = formData.get('user_guid');
 
-		// Find admin membership for this user and remove it
+		if (!userGuid || typeof userGuid !== 'string') {
+			return fail(400, { errors: [{ message: 'Invalid request' }] });
+		}
+
 		const membershipsResponse = await handleApiCall<Membership[]>(
 			() => getMemberships({ org_key: params.orgKey, user_guid: userGuid, role: 'admin' }, headers),
 		);
 
 		if ('data' in membershipsResponse) {
 			for (const m of membershipsResponse.data) {
-				await handleApiCall<void>(
+				const deleteResponse = await handleApiCall<void>(
 					() => deleteMembership(m.guid, headers),
 				);
+				if ('errors' in deleteResponse) {
+					return fail(400, { errors: deleteResponse.errors });
+				}
 			}
 			return { success: true };
 		}

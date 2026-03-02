@@ -2,7 +2,7 @@ import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
 import { updateOrganization, deleteOrganization, getSessionHeaders } from '$lib/server/api';
 import { handleApiCall } from '$lib/api/error-handler';
-import { requireAuth, requireAuthForAction } from '$lib/server/auth';
+import { requireAuth, requireAdminForAction } from '$lib/server/auth';
 import type { Organization } from '$generated/types';
 
 export const load: PageServerLoad = async (event) => {
@@ -12,7 +12,7 @@ export const load: PageServerLoad = async (event) => {
 
 export const actions: Actions = {
 	update: async ({ request, params, locals }) => {
-		const session = requireAuthForAction(locals);
+		const session = await requireAdminForAction(locals, params.orgKey);
 		const headers = getSessionHeaders(session.id);
 		const formData = await request.formData();
 
@@ -46,7 +46,8 @@ export const actions: Actions = {
 	},
 
 	delete: async ({ params, locals }) => {
-		const session = requireAuthForAction(locals);
+		await requireAdminForAction(locals, params.orgKey);
+		const session = locals.session!;
 		const headers = getSessionHeaders(session.id);
 
 		const response = await handleApiCall<void>(

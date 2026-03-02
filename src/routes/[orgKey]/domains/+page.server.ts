@@ -2,7 +2,7 @@ import type { PageServerLoad, Actions } from './$types';
 import { fail } from '@sveltejs/kit';
 import { createDomain, deleteDomain, getSessionHeaders } from '$lib/server/api';
 import { handleApiCall } from '$lib/api/error-handler';
-import { requireAuth, requireAuthForAction } from '$lib/server/auth';
+import { requireAuth, requireAdminForAction } from '$lib/server/auth';
 import type { Domain } from '$generated/types';
 
 export const load: PageServerLoad = async (event) => {
@@ -12,7 +12,7 @@ export const load: PageServerLoad = async (event) => {
 
 export const actions: Actions = {
 	addDomain: async ({ request, params, locals }) => {
-		const session = requireAuthForAction(locals);
+		const session = await requireAdminForAction(locals, params.orgKey);
 		const headers = getSessionHeaders(session.id);
 		const formData = await request.formData();
 		const name = (formData.get('name') as string)?.trim();
@@ -37,10 +37,14 @@ export const actions: Actions = {
 	},
 
 	removeDomain: async ({ request, params, locals }) => {
-		const session = requireAuthForAction(locals);
+		const session = await requireAdminForAction(locals, params.orgKey);
 		const headers = getSessionHeaders(session.id);
 		const formData = await request.formData();
-		const name = formData.get('name') as string;
+		const name = formData.get('name');
+
+		if (!name || typeof name !== 'string') {
+			return fail(400, { errors: [{ message: 'Invalid request' }] });
+		}
 
 		const response = await handleApiCall<void>(
 			() => deleteDomain(params.orgKey, name, headers),

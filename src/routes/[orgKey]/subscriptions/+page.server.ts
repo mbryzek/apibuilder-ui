@@ -4,6 +4,7 @@ import { getSubscriptions, createSubscription, deleteSubscription, getSessionHea
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth, requireAuthForAction } from '$lib/server/auth';
 import type { Subscription } from '$generated/types';
+import { Publication } from '$generated/types';
 
 export const load: PageServerLoad = async (event) => {
 	const session = requireAuth(event);
@@ -23,11 +24,14 @@ export const actions: Actions = {
 		const session = requireAuthForAction(locals);
 		const headers = getSessionHeaders(session.id);
 		const formData = await request.formData();
-		const publication = formData.get('publication') as string;
+		const publication = formData.get('publication');
 		const subscriptionGuid = formData.get('subscription_guid') as string | null;
 
+		if (!publication || typeof publication !== 'string' || !Object.values(Publication).includes(publication as Publication)) {
+			return fail(400, { errors: [{ message: 'Invalid publication' }] });
+		}
+
 		if (subscriptionGuid) {
-			// Unsubscribe
 			const response = await handleApiCall<void>(
 				() => deleteSubscription(subscriptionGuid, headers),
 			);
@@ -35,7 +39,6 @@ export const actions: Actions = {
 				return fail(400, { errors: response.errors });
 			}
 		} else {
-			// Subscribe
 			const response = await handleApiCall<Subscription>(
 				() => createSubscription({
 					organization_key: params.orgKey,
