@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { goto } from '$app/navigation';
+	import AppSidebar from '$lib/components/AppSidebar.svelte';
 	import type { Organization, Version, ApplicationMetadataVersion, Service } from '$generated/types';
 
 	interface Props {
@@ -25,27 +26,39 @@
 	const versions = $derived(data.versions);
 	const orgKey = $derived(version.organization.key);
 	const appKey = $derived(version.application.key);
+
+	const sidebarProps = $derived({
+		orgKey,
+		appKey,
+		version: version.version,
+		appName: service.name,
+		isMember: data.isMember,
+		isAdmin: data.isAdmin,
+		isWatching: data.isWatching,
+		isLoggedIn: data.session !== undefined,
+		...(data.watchGuid != null ? { watchGuid: data.watchGuid } : {}),
+	});
 </script>
 
 <svelte:head>
 	<title>{service.name} {version.version} - {data.org.name} - API Builder</title>
 </svelte:head>
 
-<div>
-	<!-- App header -->
-	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
-		<div>
-			<h1 class="text-2xl font-bold text-ab-dark-blue">{service.name}</h1>
-			{#if service.description}
-				<p class="text-ab-gray mt-1">{service.description}</p>
-			{/if}
+<div class="flex gap-10">
+	<AppSidebar {...sidebarProps} />
+	<div class="flex-1 min-w-0">
+		<!-- App header -->
+		<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+			<div>
+				<h1 class="text-2xl font-bold text-ab-dark-blue">{service.name}</h1>
+				{#if service.description}
+					<p class="text-ab-gray mt-1">{service.description}</p>
+				{/if}
+			</div>
 		</div>
-	</div>
 
-	<!-- Action bar -->
-	<div class="flex flex-wrap items-center gap-3 mb-8 text-sm">
 		<!-- Version selector -->
-		<div class="flex items-center gap-2">
+		<div class="flex items-center gap-2 mb-8 text-sm">
 			<label for="version-select" class="text-ab-gray font-medium">Version:</label>
 			<select
 				id="version-select"
@@ -62,70 +75,37 @@
 			</select>
 		</div>
 
-		<span class="text-gray-300 hidden sm:inline">|</span>
-
-		<!-- Links -->
-		{#if data.isMember}
-			<a href="/{orgKey}/upload" class="text-ab-blue hover:text-ab-dark-blue">Upload new version</a>
-			<span class="text-gray-300">|</span>
+		<!-- Info bar -->
+		{#if service.base_url || service.info.contact || service.info.license}
+			<div class="bg-ab-light-gray rounded-lg p-4 mb-6 text-sm space-y-1">
+				{#if service.base_url}
+					<p><span class="font-medium text-ab-dark-gray">Base URL:</span> <code class="text-ab-blue">{service.base_url}</code></p>
+				{/if}
+				{#if service.info.contact}
+					<p>
+						<span class="font-medium text-ab-dark-gray">Contact:</span>
+						{#if service.info.contact.name}{service.info.contact.name}{/if}
+						{#if service.info.contact.email}
+							<a href="mailto:{service.info.contact.email}" class="text-ab-blue hover:text-ab-dark-blue">{service.info.contact.email}</a>
+						{/if}
+						{#if service.info.contact.url}
+							<a href={service.info.contact.url} class="text-ab-blue hover:text-ab-dark-blue" target="_blank" rel="noopener">{service.info.contact.url}</a>
+						{/if}
+					</p>
+				{/if}
+				{#if service.info.license}
+					<p>
+						<span class="font-medium text-ab-dark-gray">License:</span>
+						{#if service.info.license.url}
+							<a href={service.info.license.url} class="text-ab-blue hover:text-ab-dark-blue" target="_blank" rel="noopener">{service.info.license.name}</a>
+						{:else}
+							{service.info.license.name}
+						{/if}
+					</p>
+				{/if}
+			</div>
 		{/if}
 
-		<a href="/{orgKey}/{appKey}/{version.version}/original" class="text-ab-blue hover:text-ab-dark-blue" data-sveltekit-preload-data="off">Original</a>
-		<span class="text-gray-300">|</span>
-		<a href="/{orgKey}/{appKey}/{version.version}/service.json" class="text-ab-blue hover:text-ab-dark-blue" data-sveltekit-preload-data="off">service.json</a>
-		<span class="text-gray-300">|</span>
-		<a href="/{orgKey}/{appKey}/{version.version}/history" class="text-ab-blue hover:text-ab-dark-blue">History</a>
-
-		{#if data.isMember}
-			<span class="text-gray-300">|</span>
-			<a href="/{orgKey}/{appKey}/{version.version}/settings" class="text-ab-blue hover:text-ab-dark-blue">Settings</a>
-		{/if}
-
-		{#if data.session}
-			<span class="text-gray-300">|</span>
-			{#if data.isWatching}
-				<form method="POST" action="/{orgKey}/{appKey}/{version.version}?/unwatch" class="inline">
-					<input type="hidden" name="watch_guid" value={data.watchGuid ?? ''} />
-					<button type="submit" class="text-ab-blue hover:text-ab-dark-blue">Unwatch</button>
-				</form>
-			{:else}
-				<form method="POST" action="/{orgKey}/{appKey}/{version.version}?/watch" class="inline">
-					<button type="submit" class="text-ab-blue hover:text-ab-dark-blue">Watch</button>
-				</form>
-			{/if}
-		{/if}
+		{@render children()}
 	</div>
-
-	<!-- Info bar -->
-	{#if service.base_url || service.info.contact || service.info.license}
-		<div class="bg-ab-light-gray rounded-lg p-4 mb-6 text-sm space-y-1">
-			{#if service.base_url}
-				<p><span class="font-medium text-ab-dark-gray">Base URL:</span> <code class="text-ab-blue">{service.base_url}</code></p>
-			{/if}
-			{#if service.info.contact}
-				<p>
-					<span class="font-medium text-ab-dark-gray">Contact:</span>
-					{#if service.info.contact.name}{service.info.contact.name}{/if}
-					{#if service.info.contact.email}
-						<a href="mailto:{service.info.contact.email}" class="text-ab-blue hover:text-ab-dark-blue">{service.info.contact.email}</a>
-					{/if}
-					{#if service.info.contact.url}
-						<a href={service.info.contact.url} class="text-ab-blue hover:text-ab-dark-blue" target="_blank" rel="noopener">{service.info.contact.url}</a>
-					{/if}
-				</p>
-			{/if}
-			{#if service.info.license}
-				<p>
-					<span class="font-medium text-ab-dark-gray">License:</span>
-					{#if service.info.license.url}
-						<a href={service.info.license.url} class="text-ab-blue hover:text-ab-dark-blue" target="_blank" rel="noopener">{service.info.license.name}</a>
-					{:else}
-						{service.info.license.name}
-					{/if}
-				</p>
-			{/if}
-		</div>
-	{/if}
-
-	{@render children()}
 </div>
