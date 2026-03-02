@@ -23,7 +23,7 @@
 	<title>{service.uri} - Generator Services - API Builder</title>
 </svelte:head>
 
-<div>
+<div class="page-container">
 	<div class="mb-6">
 		<a href="/generators" class="text-ab-blue hover:text-ab-dark-blue text-sm">&larr; Back to Generators</a>
 	</div>

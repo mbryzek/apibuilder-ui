@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount, tick } from 'svelte';
 	import type { Service } from '$generated/types';
 	import ResourceList from './ResourceList.svelte';
 	import ModelList from './ModelList.svelte';
@@ -8,9 +9,10 @@
 
 	interface Props {
 		service: Service;
+		exampleBaseUrl?: string;
 	}
 
-	let { service }: Props = $props();
+	let { service, exampleBaseUrl }: Props = $props();
 
 	interface Tab {
 		id: string;
@@ -29,15 +31,99 @@
 		{ id: 'annotations', label: 'Annotations', count: service.annotations?.length ?? 0 },
 	].filter((t) => t.count > 0));
 
-	const defaultTab = $derived(tabs.length > 0 ? tabs[0]!.id : 'resources');
+	let searchQuery = $state('');
 	let activeTab = $state('');
-	const currentTab = $derived(activeTab || defaultTab);
+
+	const filteredModels = $derived(
+		searchQuery
+			? service.models.filter((m) => m.name.toLowerCase().includes(searchQuery.toLowerCase()))
+			: service.models,
+	);
+
+	const filteredEnums = $derived(
+		searchQuery
+			? service.enums.filter((e) => e.name.toLowerCase().includes(searchQuery.toLowerCase()))
+			: service.enums,
+	);
+
+	const filteredUnions = $derived(
+		searchQuery
+			? service.unions.filter((u) => u.name.toLowerCase().includes(searchQuery.toLowerCase()))
+			: service.unions,
+	);
+
+	const filteredInterfaces = $derived(
+		searchQuery
+			? (service.interfaces ?? []).filter((i) => i.name.toLowerCase().includes(searchQuery.toLowerCase()))
+			: (service.interfaces ?? []),
+	);
+
+	const filteredResources = $derived(
+		searchQuery
+			? service.resources.filter((r) => r.type.toLowerCase().includes(searchQuery.toLowerCase()))
+			: service.resources,
+	);
+
+	const filteredTabs = $derived<Tab[]>(
+		searchQuery
+			? [
+					{ id: 'resources', label: 'Resources', count: filteredResources.length },
+					{ id: 'models', label: 'Models', count: filteredModels.length },
+					{ id: 'enums', label: 'Enums', count: filteredEnums.length },
+					{ id: 'unions', label: 'Unions', count: filteredUnions.length },
+					{ id: 'interfaces', label: 'Interfaces', count: filteredInterfaces.length },
+				].filter((t) => t.count > 0)
+			: tabs,
+	);
+
+	const defaultTab = $derived(filteredTabs.length > 0 ? filteredTabs[0]!.id : 'resources');
+	const currentTab = $derived(activeTab && filteredTabs.some((t) => t.id === activeTab) ? activeTab : defaultTab);
+
+	function findTabForName(name: string): string | null {
+		if (service.models.some((m) => m.name === name)) return 'models';
+		if (service.enums.some((e) => e.name === name)) return 'enums';
+		if (service.unions.some((u) => u.name === name)) return 'unions';
+		if ((service.interfaces ?? []).some((i) => i.name === name)) return 'interfaces';
+		if (service.resources.some((r) => r.type === name)) return 'resources';
+		return null;
+	}
+
+	async function scrollToHash() {
+		const hash = window.location.hash.slice(1);
+		if (!hash) return;
+
+		const tab = findTabForName(hash);
+		if (tab) {
+			activeTab = tab;
+			await tick();
+			const el = document.getElementById(hash);
+			if (el) {
+				el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+			}
+		}
+	}
+
+	onMount(() => {
+		scrollToHash();
+		window.addEventListener('hashchange', scrollToHash);
+		return () => window.removeEventListener('hashchange', scrollToHash);
+	});
 </script>
+
+<!-- Search bar -->
+<div class="mb-4">
+	<input
+		type="text"
+		placeholder="Filter types by name..."
+		bind:value={searchQuery}
+		class="w-full sm:w-80 input-field px-3 py-2 border rounded-lg text-sm"
+	/>
+</div>
 
 <!-- Tab navigation -->
 <div class="border-b border-gray-200 mb-6 overflow-x-auto">
 	<nav class="flex space-x-1 min-w-max" aria-label="Spec sections">
-		{#each tabs as tab (tab.id)}
+		{#each filteredTabs as tab (tab.id)}
 			<button
 				class="px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap {currentTab === tab.id
 					? 'border-ab-blue text-ab-blue'
@@ -54,15 +140,15 @@
 <!-- Tab content -->
 <div>
 	{#if currentTab === 'resources'}
-		<ResourceList resources={service.resources} {service} />
+		<ResourceList resources={filteredResources} {service} />
 	{:else if currentTab === 'models'}
-		<ModelList models={service.models} {service} />
+		<ModelList models={filteredModels} {service} exampleBaseUrl={exampleBaseUrl ?? ''} />
 	{:else if currentTab === 'enums'}
-		<EnumList enums={service.enums} />
+		<EnumList enums={filteredEnums} exampleBaseUrl={exampleBaseUrl ?? ''} />
 	{:else if currentTab === 'unions'}
-		<UnionList unions={service.unions} {service} />
+		<UnionList unions={filteredUnions} {service} exampleBaseUrl={exampleBaseUrl ?? ''} />
 	{:else if currentTab === 'interfaces'}
-		<InterfaceList interfaces={service.interfaces ?? []} {service} />
+		<InterfaceList interfaces={filteredInterfaces} {service} />
 	{:else if currentTab === 'headers'}
 		{#if service.headers.length > 0}
 			<div class="overflow-x-auto">

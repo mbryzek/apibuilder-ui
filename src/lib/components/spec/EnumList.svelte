@@ -4,9 +4,10 @@
 
 	interface Props {
 		enums: SpecEnum[];
+		exampleBaseUrl?: string;
 	}
 
-	let { enums }: Props = $props();
+	let { enums, exampleBaseUrl }: Props = $props();
 </script>
 
 {#if enums.length > 0}
@@ -48,6 +49,14 @@
 						</tbody>
 					</table>
 				</div>
+				{#if exampleBaseUrl}
+					<p class="text-xs text-ab-gray mt-2">
+						Example JSON:
+						<a href="{exampleBaseUrl}/{enumDef.name}" target="_blank" class="text-ab-blue hover:text-ab-dark-blue">Minimal</a>
+						|
+						<a href="{exampleBaseUrl}/{enumDef.name}?optional_fields=true" target="_blank" class="text-ab-blue hover:text-ab-dark-blue">Full</a>
+					</p>
+				{/if}
 			</div>
 		{/each}
 	</div>

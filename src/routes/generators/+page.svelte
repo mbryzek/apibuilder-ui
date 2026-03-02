@@ -12,14 +12,28 @@
 
 	let { data }: Props = $props();
 
-	const generators = $derived(data.generators);
+	let searchQuery = $state('');
+
+	const filtered = $derived(
+		searchQuery
+			? data.generators.filter((gws) => {
+					const q = searchQuery.toLowerCase();
+					return (
+						gws.generator.key.toLowerCase().includes(q) ||
+						gws.generator.name.toLowerCase().includes(q) ||
+						(gws.generator.language ?? '').toLowerCase().includes(q) ||
+						(gws.generator.description ?? '').toLowerCase().includes(q)
+					);
+				})
+			: data.generators,
+	);
 </script>
 
 <svelte:head>
 	<title>Generators - API Builder</title>
 </svelte:head>
 
-<div>
+<div class="page-container">
 	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
 		<h1 class="text-2xl font-bold text-ab-dark-blue">Generators</h1>
 		<a href="/generators/create" class="btn-primary mt-3 sm:mt-0 inline-block text-center">
@@ -27,8 +41,17 @@
 		</a>
 	</div>
 
-	{#if generators.length === 0}
-		<p class="text-ab-gray">No generators found.</p>
+	<div class="mb-4">
+		<input
+			type="text"
+			placeholder="Filter generators..."
+			bind:value={searchQuery}
+			class="w-full sm:w-80 input-field px-3 py-2 border rounded-lg text-sm"
+		/>
+	</div>
+
+	{#if filtered.length === 0}
+		<p class="text-ab-gray">{searchQuery ? 'No generators match your filter.' : 'No generators found.'}</p>
 	{:else}
 		<div class="overflow-x-auto">
 			<table class="w-full text-left">
@@ -41,7 +64,7 @@
 					</tr>
 				</thead>
 				<tbody>
-					{#each generators as gws (gws.generator.key)}
+					{#each filtered as gws (gws.generator.key)}
 						<tr class="border-b border-gray-100 hover:bg-ab-light-gray/50 transition-colors">
 							<td class="py-3">
 								<a href="/generators/{gws.generator.key}" class="text-ab-blue hover:text-ab-dark-blue font-medium">
@@ -57,6 +80,8 @@
 			</table>
 		</div>
 
-		<Pagination offset={data.offset} limit={25} hasMore={data.hasMore} baseUrl="/generators" />
+		{#if !searchQuery}
+			<Pagination offset={data.offset} limit={25} hasMore={data.hasMore} baseUrl="/generators" />
+		{/if}
 	{/if}
 </div>

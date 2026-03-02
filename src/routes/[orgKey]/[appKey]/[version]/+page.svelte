@@ -1,10 +1,11 @@
 <script lang="ts">
-	import type { Service } from '$generated/types';
+	import type { Service, Version } from '$generated/types';
 	import SpecTabs from '$lib/components/spec/SpecTabs.svelte';
 
 	interface Props {
 		data: {
 			service: Service;
+			version: Version;
 		};
 		form: {
 			errors?: { message: string }[];
@@ -14,6 +15,8 @@
 	let { data, form }: Props = $props();
 
 	const service = $derived(data.service);
+	const version = $derived(data.version);
+	const exampleBaseUrl = $derived(`/${version.organization.key}/${version.application.key}/${version.version}/example`);
 </script>
 
 {#if form?.errors}
@@ -24,4 +27,4 @@
 	</div>
 {/if}
 
-<SpecTabs {service} />
+<SpecTabs {service} {exampleBaseUrl} />

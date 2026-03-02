@@ -6,9 +6,10 @@
 	interface Props {
 		unions: SpecUnion[];
 		service: Service;
+		exampleBaseUrl?: string;
 	}
 
-	let { unions, service }: Props = $props();
+	let { unions, service, exampleBaseUrl }: Props = $props();
 </script>
 
 {#if unions.length > 0}
@@ -66,6 +67,14 @@
 						</tbody>
 					</table>
 				</div>
+				{#if exampleBaseUrl}
+					<p class="text-xs text-ab-gray mt-2">
+						Example JSON:
+						<a href="{exampleBaseUrl}/{union.name}" target="_blank" class="text-ab-blue hover:text-ab-dark-blue">Minimal</a>
+						|
+						<a href="{exampleBaseUrl}/{union.name}?optional_fields=true" target="_blank" class="text-ab-blue hover:text-ab-dark-blue">Full</a>
+					</p>
+				{/if}
 			</div>
 		{/each}
 	</div>

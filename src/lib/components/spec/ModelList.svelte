@@ -6,9 +6,10 @@
 	interface Props {
 		models: Model[];
 		service: Service;
+		exampleBaseUrl?: string;
 	}
 
-	let { models, service }: Props = $props();
+	let { models, service, exampleBaseUrl }: Props = $props();
 </script>
 
 {#if models.length > 0}
@@ -30,6 +31,14 @@
 					</p>
 				{/if}
 				<FieldsTable fields={model.fields} {service} />
+				{#if exampleBaseUrl}
+					<p class="text-xs text-ab-gray mt-2">
+						Example JSON:
+						<a href="{exampleBaseUrl}/{model.name}" target="_blank" class="text-ab-blue hover:text-ab-dark-blue">Minimal</a>
+						|
+						<a href="{exampleBaseUrl}/{model.name}?optional_fields=true" target="_blank" class="text-ab-blue hover:text-ab-dark-blue">Full</a>
+					</p>
+				{/if}
 			</div>
 		{/each}
 	</div>
