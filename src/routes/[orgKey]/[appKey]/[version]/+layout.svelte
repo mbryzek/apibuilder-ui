@@ -46,13 +46,11 @@
 	/>
 	<div class="flex-1 min-w-0">
 		<!-- App header -->
-		<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
-			<div>
-				<h1 class="text-2xl font-bold text-ab-dark-blue">{service.name}</h1>
-				{#if service.description}
-					<p class="text-ab-gray mt-1">{service.description}</p>
-				{/if}
-			</div>
+		<div class="mb-6">
+			<h1 class="text-2xl font-bold text-ab-dark-blue">{service.name}</h1>
+			{#if service.description}
+				<p class="text-ab-gray mt-1">{service.description}</p>
+			{/if}
 		</div>
 
 		<!-- Version selector -->

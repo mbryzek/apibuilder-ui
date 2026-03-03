@@ -63,8 +63,49 @@
 	let orgExpanded = $state(false);
 </script>
 
+{#snippet watchToggle(iconSize: string, padding: string)}
+	{#if isLoggedIn}
+		<form
+			method="POST"
+			action="{versionBase}?/{isWatching ? 'unwatch' : 'watch'}"
+			use:enhance
+		>
+			{#if isWatching && watchGuid}
+				<input type="hidden" name="watch_guid" value={watchGuid} />
+			{/if}
+			<button
+				type="submit"
+				title={isWatching ? 'Unwatch this application' : 'Watch this application'}
+				class="{padding} transition-colors {isWatching
+					? 'text-ab-blue'
+					: 'text-ab-gray hover:text-ab-blue'}"
+			>
+				<svg
+					aria-hidden="true"
+					class="{iconSize}"
+					viewBox="0 0 24 24"
+					stroke="currentColor"
+					stroke-width="1.5"
+					fill={isWatching ? 'currentColor' : 'none'}
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178z"
+					/>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+					/>
+				</svg>
+			</button>
+		</form>
+	{/if}
+{/snippet}
+
 <!-- Mobile nav -->
-<div class="md:hidden mb-4">
+<nav class="md:hidden mb-4" aria-label="Application navigation">
 	<button
 		type="button"
 		class="flex items-center gap-2 text-sm font-medium text-ab-blue"
@@ -93,29 +134,7 @@
 				>
 					{appName}
 				</a>
-				{#if isLoggedIn}
-					<form
-						method="POST"
-						action="{versionBase}?/{isWatching ? 'unwatch' : 'watch'}"
-						use:enhance
-					>
-						{#if isWatching && watchGuid}
-							<input type="hidden" name="watch_guid" value={watchGuid} />
-						{/if}
-						<button
-							type="submit"
-							title={isWatching ? 'Unwatch this application' : 'Watch this application'}
-							class="p-0.5 transition-colors {isWatching
-								? 'text-ab-blue'
-								: 'text-ab-gray hover:text-ab-blue'}"
-						>
-							<svg aria-hidden="true" class="w-4 h-4" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill={isWatching ? 'currentColor' : 'none'}>
-								<path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178z" />
-								<path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-							</svg>
-						</button>
-					</form>
-				{/if}
+				{@render watchToggle('w-4 h-4', 'p-0.5')}
 			</div>
 
 			<!-- Upload link -->
@@ -170,10 +189,10 @@
 			{/if}
 		</div>
 	{/if}
-</div>
+</nav>
 
 <!-- Desktop sidebar -->
-<nav class="hidden md:block w-56 shrink-0">
+<nav class="hidden md:block w-56 shrink-0" aria-label="Application navigation">
 	<div class="sticky top-4">
 		<!-- App name + watch toggle -->
 		<div class="flex items-center justify-between mb-4">
@@ -183,29 +202,7 @@
 			>
 				{appName}
 			</a>
-			{#if isLoggedIn}
-				<form
-					method="POST"
-					action="{versionBase}?/{isWatching ? 'unwatch' : 'watch'}"
-					use:enhance
-				>
-					{#if isWatching && watchGuid}
-						<input type="hidden" name="watch_guid" value={watchGuid} />
-					{/if}
-					<button
-						type="submit"
-						title={isWatching ? 'Unwatch this application' : 'Watch this application'}
-						class="p-1 transition-colors {isWatching
-							? 'text-ab-blue'
-							: 'text-ab-gray hover:text-ab-blue'}"
-					>
-						<svg aria-hidden="true" class="w-5 h-5" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill={isWatching ? 'currentColor' : 'none'}>
-							<path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178z" />
-							<path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-						</svg>
-					</button>
-				</form>
-			{/if}
+			{@render watchToggle('w-5 h-5', 'p-1')}
 		</div>
 
 		<!-- Upload button -->

@@ -15,8 +15,8 @@
 
 	let { data, children }: Props = $props();
 
-	// Version layout provides its own AppSidebar, so skip OrgSidebar when version data is present
-	const isAppVersionRoute = $derived('service' in $page.data);
+	// Version routes have their own AppSidebar; skip OrgSidebar for them
+	const isAppVersionRoute = $derived($page.route.id?.includes('/[version]') ?? false);
 </script>
 
 <div class="page-container">
