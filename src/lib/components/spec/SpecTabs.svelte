@@ -10,9 +10,10 @@
 	interface Props {
 		service: Service;
 		exampleBaseUrl?: string;
+		searchQuery?: string;
 	}
 
-	let { service, exampleBaseUrl }: Props = $props();
+	let { service, exampleBaseUrl, searchQuery = '' }: Props = $props();
 
 	interface Tab {
 		id: string;
@@ -31,7 +32,6 @@
 		{ id: 'annotations', label: 'Annotations', count: service.annotations?.length ?? 0 },
 	].filter((t) => t.count > 0));
 
-	let searchQuery = $state('');
 	let activeTab = $state('');
 
 	const filteredModels = $derived(
@@ -109,20 +109,6 @@
 		return () => window.removeEventListener('hashchange', scrollToHash);
 	});
 </script>
-
-<!-- Search bar -->
-<div class="mb-5 relative">
-	<svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ab-gray pointer-events-none" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-		<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-	</svg>
-	<input
-		type="text"
-		aria-label="Filter types by name"
-		placeholder="Filter types by name..."
-		bind:value={searchQuery}
-		class="w-full sm:w-80 input-field pl-9 pr-3 py-2 border rounded-lg text-sm"
-	/>
-</div>
 
 <!-- Tab navigation -->
 <div class="mb-6 overflow-x-auto">
