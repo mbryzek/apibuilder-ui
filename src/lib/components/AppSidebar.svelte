@@ -137,18 +137,7 @@
 				{@render watchToggle('w-4 h-4', 'p-0.5')}
 			</div>
 
-			<!-- Upload link -->
-			{#if isMember}
-				<a
-					href="/{orgKey}/upload"
-					class="block py-1.5 text-sm font-medium text-ab-blue hover:text-ab-dark-blue transition-colors"
-					onclick={() => (mobileOpen = false)}
-				>
-					+ Upload
-				</a>
-			{/if}
-
-			<!-- Nav links -->
+				<!-- Nav links -->
 			<ul class="space-y-1">
 				{#each navLinks as link (link.href)}
 					<li>
@@ -204,16 +193,6 @@
 			</a>
 			{@render watchToggle('w-5 h-5', 'p-1')}
 		</div>
-
-		<!-- Upload button -->
-		{#if isMember}
-			<a
-				href="/{orgKey}/upload"
-				class="block w-full text-center px-3 py-2 text-sm font-medium rounded-md border border-ab-blue text-ab-blue hover:bg-ab-blue hover:text-white transition-colors mb-4"
-			>
-				+ Upload
-			</a>
-		{/if}
 
 		<!-- Nav links -->
 		<ul class="space-y-1">

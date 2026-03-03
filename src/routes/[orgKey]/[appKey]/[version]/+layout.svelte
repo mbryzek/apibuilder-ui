@@ -46,10 +46,19 @@
 	/>
 	<div class="flex-1 min-w-0">
 		<!-- App header -->
-		<div class="mb-6">
-			<h1 class="text-2xl font-bold text-ab-dark-blue">{service.name}</h1>
-			{#if service.description}
-				<p class="text-ab-gray mt-1">{service.description}</p>
+		<div class="mb-6 flex items-start justify-between gap-4">
+			<div>
+				{#if service.description}
+					<p class="text-ab-gray">{service.description}</p>
+				{/if}
+			</div>
+			{#if data.isMember}
+				<a
+					href="/{orgKey}/upload"
+					class="shrink-0 px-3 py-1 text-xs font-medium rounded-md border border-ab-blue text-ab-blue hover:bg-ab-blue hover:text-white transition-colors"
+				>
+					+ Upload
+				</a>
 			{/if}
 		</div>
 
