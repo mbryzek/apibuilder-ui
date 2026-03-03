@@ -3,13 +3,18 @@ import { getApplications, getMembershipRequests, getSessionHeaders } from '$lib/
 import { handleApiCall } from '$lib/api/error-handler';
 import type { Application, MembershipRequest } from '$generated/types';
 
-export const load: PageServerLoad = async ({ params, parent, locals }) => {
+const LIMIT = 25;
+
+export const load: PageServerLoad = async ({ params, parent, locals, url }) => {
 	const { isAdmin } = await parent();
 	const headers = locals.session ? getSessionHeaders(locals.session.id) : {};
+	const offset = Number(url.searchParams.get('offset') || '0');
 
 	const appsResponse = await handleApiCall<Application[]>(
-		() => getApplications(params.orgKey, headers, { has_version: true, limit: 100 }),
+		() => getApplications(params.orgKey, headers, { has_version: true, limit: LIMIT, offset }),
 	);
+
+	const applications = 'data' in appsResponse ? appsResponse.data : [];
 
 	let hasPendingRequests = false;
 	if (isAdmin && locals.session) {
@@ -22,7 +27,9 @@ export const load: PageServerLoad = async ({ params, parent, locals }) => {
 	}
 
 	return {
-		applications: 'data' in appsResponse ? appsResponse.data : [],
+		applications,
+		offset,
+		hasMore: applications.length >= LIMIT,
 		hasPendingRequests,
 	};
 };
