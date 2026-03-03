@@ -111,27 +111,33 @@
 </script>
 
 <!-- Search bar -->
-<div class="mb-4">
+<div class="mb-5 relative">
+	<svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ab-gray pointer-events-none" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+		<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+	</svg>
 	<input
 		type="text"
+		aria-label="Filter types by name"
 		placeholder="Filter types by name..."
 		bind:value={searchQuery}
-		class="w-full sm:w-80 input-field px-3 py-2 border rounded-lg text-sm"
+		class="w-full sm:w-80 input-field pl-9 pr-3 py-2 border rounded-lg text-sm"
 	/>
 </div>
 
 <!-- Tab navigation -->
-<div class="border-b border-gray-200 mb-6 overflow-x-auto">
-	<nav class="flex space-x-1 min-w-max" aria-label="Spec sections">
+<div class="mb-6 overflow-x-auto">
+	<nav class="flex gap-2 min-w-max" role="tablist" aria-label="Spec sections">
 		{#each filteredTabs as tab (tab.id)}
 			<button
-				class="px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap {currentTab === tab.id
-					? 'border-ab-blue text-ab-blue'
-					: 'border-transparent text-ab-gray hover:text-ab-dark-gray hover:border-gray-300'}"
+				role="tab"
+				aria-selected={currentTab === tab.id}
+				class="px-4 py-1.5 text-sm font-medium rounded-full transition-colors whitespace-nowrap {currentTab === tab.id
+					? 'bg-ab-blue text-white'
+					: 'bg-gray-100 text-ab-gray hover:bg-gray-200 hover:text-ab-dark-gray'}"
 				onclick={() => (activeTab = tab.id)}
 			>
 				{tab.label}
-				<span class="ml-1 text-xs {currentTab === tab.id ? 'text-ab-blue' : 'text-ab-gray'}">({tab.count})</span>
+				<span class="ml-0.5 text-xs opacity-75">{tab.count}</span>
 			</button>
 		{/each}
 	</nav>
@@ -151,34 +157,36 @@
 		<InterfaceList interfaces={filteredInterfaces} {service} />
 	{:else if currentTab === 'headers'}
 		{#if service.headers.length > 0}
-			<div class="overflow-x-auto">
-				<table class="w-full text-sm text-left">
-					<thead>
-						<tr class="border-b border-gray-200">
-							<th class="pb-2 pr-4 font-semibold text-ab-gray">Name</th>
-							<th class="pb-2 pr-4 font-semibold text-ab-gray">Type</th>
-							<th class="pb-2 pr-4 font-semibold text-ab-gray">Required</th>
-							<th class="pb-2 font-semibold text-ab-gray">Description</th>
-						</tr>
-					</thead>
-					<tbody>
-						{#each service.headers as header}
-							<tr class="border-b border-gray-100">
-								<td class="py-2 pr-4 font-mono text-sm">{header.name}</td>
-								<td class="py-2 pr-4 font-mono text-sm">{header.type}</td>
-								<td class="py-2 pr-4">{header.required ? 'yes' : 'no'}</td>
-								<td class="py-2 text-ab-dark-gray">{header.description ?? ''}</td>
+			<div class="border border-gray-200 rounded-lg overflow-hidden">
+				<div class="overflow-x-auto">
+					<table class="w-full text-sm text-left">
+						<thead>
+							<tr class="bg-ab-light-gray border-b border-gray-200">
+								<th class="pl-4 py-3 pr-6 font-semibold text-ab-gray">Name</th>
+								<th class="py-3 pr-6 font-semibold text-ab-gray">Type</th>
+								<th class="py-3 pr-6 font-semibold text-ab-gray">Required</th>
+								<th class="py-3 pr-4 font-semibold text-ab-gray">Description</th>
 							</tr>
-						{/each}
-					</tbody>
-				</table>
+						</thead>
+						<tbody>
+							{#each service.headers as header}
+								<tr class="border-b border-gray-100 last:border-b-0">
+									<td class="pl-4 py-2.5 pr-6 font-mono text-sm">{header.name}</td>
+									<td class="py-2.5 pr-6 font-mono text-sm">{header.type}</td>
+									<td class="py-2.5 pr-6">{header.required ? 'yes' : 'no'}</td>
+									<td class="py-2.5 pr-4 text-ab-dark-gray">{header.description ?? ''}</td>
+								</tr>
+							{/each}
+						</tbody>
+					</table>
+				</div>
 			</div>
 		{/if}
 	{:else if currentTab === 'imports'}
 		{#if service.imports.length > 0}
 			<div class="space-y-4">
 				{#each service.imports as imp}
-					<div class="bg-ab-light-gray rounded-lg p-4">
+					<div class="border border-gray-200 rounded-lg p-4">
 						<a
 							href="/{imp.organization.key}/{imp.application.key}/{imp.version}"
 							class="text-ab-blue hover:text-ab-dark-blue font-medium"
@@ -204,23 +212,25 @@
 		{/if}
 	{:else if currentTab === 'annotations'}
 		{#if service.annotations && service.annotations.length > 0}
-			<div class="overflow-x-auto">
-				<table class="w-full text-sm text-left">
-					<thead>
-						<tr class="border-b border-gray-200">
-							<th class="pb-2 pr-4 font-semibold text-ab-gray">Name</th>
-							<th class="pb-2 font-semibold text-ab-gray">Description</th>
-						</tr>
-					</thead>
-					<tbody>
-						{#each service.annotations as annotation}
-							<tr class="border-b border-gray-100">
-								<td class="py-2 pr-4 font-mono text-sm">{annotation.name}</td>
-								<td class="py-2 text-ab-dark-gray">{annotation.description ?? ''}</td>
+			<div class="border border-gray-200 rounded-lg overflow-hidden">
+				<div class="overflow-x-auto">
+					<table class="w-full text-sm text-left">
+						<thead>
+							<tr class="bg-ab-light-gray border-b border-gray-200">
+								<th class="pl-4 py-3 pr-6 font-semibold text-ab-gray">Name</th>
+								<th class="py-3 pr-4 font-semibold text-ab-gray">Description</th>
 							</tr>
-						{/each}
-					</tbody>
-				</table>
+						</thead>
+						<tbody>
+							{#each service.annotations as annotation}
+								<tr class="border-b border-gray-100 last:border-b-0">
+									<td class="pl-4 py-2.5 pr-6 font-mono text-sm">{annotation.name}</td>
+									<td class="py-2.5 pr-4 text-ab-dark-gray">{annotation.description ?? ''}</td>
+								</tr>
+							{/each}
+						</tbody>
+					</table>
+				</div>
 			</div>
 		{/if}
 	{/if}

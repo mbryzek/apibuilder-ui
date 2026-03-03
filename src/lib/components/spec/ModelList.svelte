@@ -14,29 +14,31 @@
 </script>
 
 {#if models.length > 0}
-	<div class="space-y-8">
+	<div class="space-y-6">
 		{#each models as model}
-			<div id={model.name} class="scroll-mt-16">
-				<div class="flex items-center gap-2 mb-2">
-					<h3 class="text-lg font-bold text-ab-dark-blue">{model.name}</h3>
-					{#if model.deprecation}
-						<DeprecationBadge deprecation={model.deprecation} />
+			<div id={model.name} class="scroll-mt-16 border border-gray-200 rounded-lg overflow-hidden">
+				<div class="bg-ab-light-gray px-4 py-3 flex items-center justify-between gap-2">
+					<div class="flex items-center gap-2 min-w-0">
+						<h3 class="text-base font-bold text-ab-dark-blue font-mono truncate">{model.name}</h3>
+						{#if model.deprecation}
+							<DeprecationBadge deprecation={model.deprecation} />
+						{/if}
+					</div>
+					{#if exampleBaseUrl}
+						<ExampleJsonLinks baseUrl={exampleBaseUrl} typeName={model.name} />
 					{/if}
 				</div>
-				{#if model.description}
-					<p class="text-sm text-ab-dark-gray mb-3">{model.description}</p>
-				{/if}
-				{#if model.interfaces && model.interfaces.length > 0}
-					<p class="text-xs text-ab-gray mb-2">
-						Implements: {model.interfaces.join(', ')}
-					</p>
-				{/if}
-				<FieldsTable fields={model.fields} {service} />
-				{#if exampleBaseUrl}
-					<div class="mt-2">
-						<ExampleJsonLinks baseUrl={exampleBaseUrl} typeName={model.name} />
-					</div>
-				{/if}
+				<div class="px-4 py-3">
+					{#if model.description}
+						<p class="text-sm text-ab-dark-gray mb-3">{model.description}</p>
+					{/if}
+					{#if model.interfaces && model.interfaces.length > 0}
+						<p class="text-xs text-ab-gray mb-2">
+							Implements: {model.interfaces.join(', ')}
+						</p>
+					{/if}
+					<FieldsTable fields={model.fields} {service} />
+				</div>
 			</div>
 		{/each}
 	</div>
