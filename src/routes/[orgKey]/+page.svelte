@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Organization, Application } from '$generated/types';
+	import Pagination from '$lib/components/Pagination.svelte';
 
 	interface Props {
 		data: {
@@ -7,6 +8,8 @@
 			isMember: boolean;
 			isAdmin: boolean;
 			applications: Application[];
+			offset: number;
+			hasMore: boolean;
 			hasPendingRequests: boolean;
 			session?: { id: string; user: { guid: string } };
 		};
@@ -86,5 +89,6 @@
 				</tbody>
 			</table>
 		</div>
+		<Pagination offset={data.offset} limit={25} hasMore={data.hasMore} baseUrl="/{org.key}" />
 	{/if}
 </div>
