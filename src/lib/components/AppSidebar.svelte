@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { enhance } from '$app/forms';
 
 	interface Props {
 		orgKey: string;
@@ -9,8 +8,6 @@
 		appName: string;
 		isMember: boolean;
 		isAdmin: boolean;
-		isWatching: boolean;
-		watchGuid?: string | undefined;
 		isLoggedIn: boolean;
 	}
 
@@ -21,8 +18,6 @@
 		appName,
 		isMember,
 		isAdmin,
-		isWatching,
-		watchGuid,
 		isLoggedIn,
 	}: Props = $props();
 
@@ -63,47 +58,6 @@
 	let orgExpanded = $state(false);
 </script>
 
-{#snippet watchToggle(iconSize: string, padding: string)}
-	{#if isLoggedIn}
-		<form
-			method="POST"
-			action="{versionBase}?/{isWatching ? 'unwatch' : 'watch'}"
-			use:enhance
-		>
-			{#if isWatching && watchGuid}
-				<input type="hidden" name="watch_guid" value={watchGuid} />
-			{/if}
-			<button
-				type="submit"
-				title={isWatching ? 'Unwatch this application' : 'Watch this application'}
-				class="{padding} transition-colors {isWatching
-					? 'text-ab-blue'
-					: 'text-ab-gray hover:text-ab-blue'}"
-			>
-				<svg
-					aria-hidden="true"
-					class="{iconSize}"
-					viewBox="0 0 24 24"
-					stroke="currentColor"
-					stroke-width="1.5"
-					fill={isWatching ? 'currentColor' : 'none'}
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178z"
-					/>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-					/>
-				</svg>
-			</button>
-		</form>
-	{/if}
-{/snippet}
-
 <!-- Mobile nav -->
 <nav class="md:hidden mb-4" aria-label="Application navigation">
 	<button
@@ -125,28 +79,14 @@
 	</button>
 	{#if mobileOpen}
 		<div class="mt-2 border-l-2 border-ab-blue pl-3">
-			<!-- App name + watch -->
-			<div class="flex items-center gap-2 mb-2">
-				<a
-					href={versionBase}
-					class="text-sm font-bold text-ab-dark-blue hover:text-ab-blue transition-colors"
-					onclick={() => (mobileOpen = false)}
-				>
-					{appName}
-				</a>
-				{@render watchToggle('w-4 h-4', 'p-0.5')}
-			</div>
-
-			<!-- Upload link -->
-			{#if isMember}
-				<a
-					href="/{orgKey}/upload"
-					class="block py-1.5 text-sm font-medium text-ab-blue hover:text-ab-dark-blue transition-colors"
-					onclick={() => (mobileOpen = false)}
-				>
-					+ Upload
-				</a>
-			{/if}
+			<!-- App name -->
+			<a
+				href={versionBase}
+				class="block text-sm font-bold text-ab-dark-blue hover:text-ab-blue transition-colors mb-2"
+				onclick={() => (mobileOpen = false)}
+			>
+				{appName}
+			</a>
 
 			<!-- Nav links -->
 			<ul class="space-y-1">
@@ -194,26 +134,13 @@
 <!-- Desktop sidebar -->
 <nav class="hidden md:block w-56 shrink-0" aria-label="Application navigation">
 	<div class="sticky top-4">
-		<!-- App name + watch toggle -->
-		<div class="flex items-center justify-between mb-4">
-			<a
-				href={versionBase}
-				class="text-lg font-bold text-ab-dark-blue hover:text-ab-blue transition-colors truncate"
-			>
-				{appName}
-			</a>
-			{@render watchToggle('w-5 h-5', 'p-1')}
-		</div>
-
-		<!-- Upload button -->
-		{#if isMember}
-			<a
-				href="/{orgKey}/upload"
-				class="block w-full text-center px-3 py-2 text-sm font-medium rounded-md border border-ab-blue text-ab-blue hover:bg-ab-blue hover:text-white transition-colors mb-4"
-			>
-				+ Upload
-			</a>
-		{/if}
+		<!-- App name -->
+		<a
+			href={versionBase}
+			class="block text-lg font-bold text-ab-dark-blue hover:text-ab-blue transition-colors truncate mb-4"
+		>
+			{appName}
+		</a>
 
 		<!-- Nav links -->
 		<ul class="space-y-1">

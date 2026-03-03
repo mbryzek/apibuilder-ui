@@ -1,8 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { goto } from '$app/navigation';
 	import AppSidebar from '$lib/components/AppSidebar.svelte';
-	import type { Organization, Version, ApplicationMetadataVersion, Service } from '$generated/types';
+	import type { Organization, Version, Service } from '$generated/types';
 
 	interface Props {
 		data: {
@@ -11,7 +10,7 @@
 			isAdmin: boolean;
 			version: Version;
 			service: Service;
-			versions: ApplicationMetadataVersion[];
+			versions: { version: string }[];
 			isWatching: boolean;
 			watchGuid?: string;
 			session?: { id: string; user: { guid: string; email: string; nickname: string } };
@@ -23,7 +22,6 @@
 
 	const version = $derived(data.version);
 	const service = $derived(data.service);
-	const versions = $derived(data.versions);
 	const orgKey = $derived(version.organization.key);
 	const appKey = $derived(version.application.key);
 </script>
@@ -40,36 +38,12 @@
 		appName={service.name}
 		isMember={data.isMember}
 		isAdmin={data.isAdmin}
-		isWatching={data.isWatching}
-		watchGuid={data.watchGuid}
 		isLoggedIn={data.session !== undefined}
 	/>
 	<div class="flex-1 min-w-0">
-		<!-- App header -->
-		<div class="mb-6">
-			<h1 class="text-2xl font-bold text-ab-dark-blue">{service.name}</h1>
-			{#if service.description}
-				<p class="text-ab-gray mt-1">{service.description}</p>
-			{/if}
-		</div>
-
-		<!-- Version selector -->
-		<div class="flex items-center gap-2 mb-8 text-sm">
-			<label for="version-select" class="text-ab-gray font-medium">Version:</label>
-			<select
-				id="version-select"
-				class="input-field text-sm py-1"
-				value={version.version}
-				onchange={(e) => {
-					const target = e.currentTarget as HTMLSelectElement;
-					goto(`/${orgKey}/${appKey}/${target.value}`);
-				}}
-			>
-				{#each versions as v}
-					<option value={v.version}>{v.version}</option>
-				{/each}
-			</select>
-		</div>
+		{#if service.description}
+			<p class="text-ab-gray mb-4">{service.description}</p>
+		{/if}
 
 		<!-- Info bar -->
 		{#if service.base_url || service.info.contact || service.info.license}
