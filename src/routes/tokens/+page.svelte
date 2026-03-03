@@ -30,31 +30,21 @@
 	{#if tokens.length === 0}
 		<p class="text-ab-gray">No API tokens found.</p>
 	{:else}
-		<div class="overflow-x-auto">
-			<table class="w-full text-left">
-				<thead>
-					<tr class="border-b border-gray-200">
-						<th class="pb-3 text-sm font-semibold text-ab-gray">Token</th>
-						<th class="pb-3 text-sm font-semibold text-ab-gray hidden sm:table-cell">Description</th>
-						<th class="pb-3 text-sm font-semibold text-ab-gray hidden md:table-cell">Created</th>
-					</tr>
-				</thead>
-				<tbody>
-					{#each tokens as token (token.guid)}
-						<tr class="border-b border-gray-100 hover:bg-ab-light-gray/50 transition-colors">
-							<td class="py-3">
-								<a href="/tokens/{token.guid}" class="text-ab-blue hover:text-ab-dark-blue font-medium font-mono text-sm">
-									{token.masked_token}
-								</a>
-							</td>
-							<td class="py-3 hidden sm:table-cell text-sm text-ab-gray">{token.description ?? ''}</td>
-							<td class="py-3 hidden md:table-cell text-sm text-ab-gray">
-								{new Date(token.audit.created_at).toLocaleDateString()}
-							</td>
-						</tr>
-					{/each}
-				</tbody>
-			</table>
+		<div class="space-y-3">
+			{#each tokens as token (token.guid)}
+				<a
+					href="/tokens/{token.guid}"
+					class="block border border-gray-200 rounded-lg p-4 hover:border-ab-blue/30 hover:bg-ab-light-gray/50 transition-colors"
+				>
+					<div class="font-mono text-sm text-ab-blue font-medium">{token.masked_token}</div>
+					{#if token.description}
+						<p class="text-sm text-ab-dark-gray mt-1">{token.description}</p>
+					{/if}
+					<p class="text-xs text-ab-gray mt-1">
+						Created {new Date(token.audit.created_at).toLocaleDateString()}
+					</p>
+				</a>
+			{/each}
 		</div>
 
 		<Pagination offset={data.offset} limit={25} hasMore={data.hasMore} baseUrl="/tokens" />
