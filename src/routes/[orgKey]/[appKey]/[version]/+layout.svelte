@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { goto } from '$app/navigation';
+	import { enhance } from '$app/forms';
 	import AppSidebar from '$lib/components/AppSidebar.svelte';
-	import type { Organization, Version, ApplicationMetadataVersion, Service } from '$generated/types';
+	import type { Organization, Version, Service } from '$generated/types';
 
 	interface Props {
 		data: {
@@ -11,7 +11,7 @@
 			isAdmin: boolean;
 			version: Version;
 			service: Service;
-			versions: ApplicationMetadataVersion[];
+			versions: { version: string }[];
 			isWatching: boolean;
 			watchGuid?: string;
 			session?: { id: string; user: { guid: string; email: string; nickname: string } };
@@ -23,9 +23,9 @@
 
 	const version = $derived(data.version);
 	const service = $derived(data.service);
-	const versions = $derived(data.versions);
 	const orgKey = $derived(version.organization.key);
 	const appKey = $derived(version.application.key);
+	const versionBase = $derived(`/${orgKey}/${appKey}/${version.version}`);
 </script>
 
 <svelte:head>
@@ -40,44 +40,64 @@
 		appName={service.name}
 		isMember={data.isMember}
 		isAdmin={data.isAdmin}
-		isWatching={data.isWatching}
-		watchGuid={data.watchGuid}
 		isLoggedIn={data.session !== undefined}
 	/>
 	<div class="flex-1 min-w-0">
-		<!-- App header -->
+		<!-- App header with actions -->
 		<div class="mb-6 flex items-start justify-between gap-4">
 			<div>
 				{#if service.description}
 					<p class="text-ab-gray">{service.description}</p>
 				{/if}
 			</div>
-			{#if data.isMember}
-				<a
-					href="/{orgKey}/upload"
-					class="shrink-0 px-3 py-1 text-xs font-medium rounded-md border border-ab-blue text-ab-blue hover:bg-ab-blue hover:text-white transition-colors"
-				>
-					+ Upload
-				</a>
-			{/if}
-		</div>
-
-		<!-- Version selector -->
-		<div class="flex items-center gap-2 mb-8 text-sm">
-			<label for="version-select" class="text-ab-gray font-medium">Version:</label>
-			<select
-				id="version-select"
-				class="input-field text-sm py-1"
-				value={version.version}
-				onchange={(e) => {
-					const target = e.currentTarget as HTMLSelectElement;
-					goto(`/${orgKey}/${appKey}/${target.value}`);
-				}}
-			>
-				{#each versions as v}
-					<option value={v.version}>{v.version}</option>
-				{/each}
-			</select>
+			<div class="flex items-center gap-2 shrink-0">
+				{#if data.session}
+					<form
+						method="POST"
+						action="{versionBase}?/{data.isWatching ? 'unwatch' : 'watch'}"
+						use:enhance
+					>
+						{#if data.isWatching && data.watchGuid}
+							<input type="hidden" name="watch_guid" value={data.watchGuid} />
+						{/if}
+						<button
+							type="submit"
+							title={data.isWatching ? 'Unwatch this application' : 'Watch this application'}
+							class="p-1 transition-colors {data.isWatching
+								? 'text-ab-blue'
+								: 'text-ab-gray hover:text-ab-blue'}"
+						>
+							<svg
+								aria-hidden="true"
+								class="w-4 h-4"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+								stroke-width="1.5"
+								fill={data.isWatching ? 'currentColor' : 'none'}
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178z"
+								/>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+								/>
+							</svg>
+						</button>
+					</form>
+				{/if}
+				{#if data.isMember}
+					<a
+						href="/{orgKey}/upload"
+						class="px-3 py-1 text-xs font-medium rounded-md border border-ab-blue text-ab-blue hover:bg-ab-blue hover:text-white transition-colors"
+					>
+						+ Upload
+					</a>
+				{/if}
+			</div>
 		</div>
 
 		<!-- Info bar -->
