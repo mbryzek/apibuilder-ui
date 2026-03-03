@@ -172,25 +172,34 @@
 		{#if service.imports.length > 0}
 			<div class="space-y-4">
 				{#each service.imports as imp}
+					{@const impBase = `/${imp.organization.key}/${imp.application.key}/${imp.version}`}
 					<div class="border border-gray-200 rounded-lg p-4">
 						<a
-							href="/{imp.organization.key}/{imp.application.key}/{imp.version}"
+							href={impBase}
 							class="text-ab-blue hover:text-ab-dark-blue font-medium"
 						>
 							{imp.namespace}
 						</a>
 						<p class="text-xs text-ab-gray mt-1">Version: {imp.version}</p>
 						{#if imp.models.length > 0}
-							<p class="text-xs text-ab-gray">Models: {imp.models.join(', ')}</p>
+							<p class="text-xs text-ab-gray">Models:
+								{#each imp.models as model, i}<a href="{impBase}#{model}" class="text-ab-blue hover:text-ab-dark-blue">{model}</a>{#if i < imp.models.length - 1}, {/if}{/each}
+							</p>
 						{/if}
 						{#if imp.enums.length > 0}
-							<p class="text-xs text-ab-gray">Enums: {imp.enums.join(', ')}</p>
+							<p class="text-xs text-ab-gray">Enums:
+								{#each imp.enums as enumName, i}<a href="{impBase}#{enumName}" class="text-ab-blue hover:text-ab-dark-blue">{enumName}</a>{#if i < imp.enums.length - 1}, {/if}{/each}
+							</p>
 						{/if}
 						{#if imp.unions.length > 0}
-							<p class="text-xs text-ab-gray">Unions: {imp.unions.join(', ')}</p>
+							<p class="text-xs text-ab-gray">Unions:
+								{#each imp.unions as unionName, i}<a href="{impBase}#{unionName}" class="text-ab-blue hover:text-ab-dark-blue">{unionName}</a>{#if i < imp.unions.length - 1}, {/if}{/each}
+							</p>
 						{/if}
 						{#if imp.interfaces && imp.interfaces.length > 0}
-							<p class="text-xs text-ab-gray">Interfaces: {imp.interfaces.join(', ')}</p>
+							<p class="text-xs text-ab-gray">Interfaces:
+								{#each imp.interfaces as ifaceName, i}<a href="{impBase}#{ifaceName}" class="text-ab-blue hover:text-ab-dark-blue">{ifaceName}</a>{#if i < imp.interfaces.length - 1}, {/if}{/each}
+							</p>
 						{/if}
 					</div>
 				{/each}

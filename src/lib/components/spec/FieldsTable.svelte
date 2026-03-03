@@ -10,7 +10,7 @@
 
 	let { fields, service }: Props = $props();
 
-	const hasDescriptions = $derived(fields.some((f) => f.description || f.minimum !== undefined || f.maximum !== undefined || f.example));
+	const hasDetails = $derived(fields.some((f) => f.description || (f.default !== undefined && f.default !== null) || f.minimum !== undefined || f.maximum !== undefined || f.example));
 </script>
 
 {#if fields.length > 0}
@@ -20,7 +20,7 @@
 				<tr class="border-b border-gray-200">
 					<th class="pb-2 pr-6 font-semibold text-ab-gray">Field</th>
 					<th class="pb-2 pr-6 font-semibold text-ab-gray">Type</th>
-					{#if hasDescriptions}
+					{#if hasDetails}
 						<th class="pb-2 font-semibold text-ab-gray">Description</th>
 					{/if}
 				</tr>
@@ -39,17 +39,25 @@
 						</td>
 						<td class="py-2.5 pr-6 font-mono text-sm whitespace-nowrap align-top">
 							<TypeLink typeStr={field.type} {service} />
-							{#if field.default !== undefined && field.default !== null}
-								<span class="text-ab-gray text-xs ml-1">= {field.default}</span>
-							{/if}
 						</td>
-						{#if hasDescriptions}
+						{#if hasDetails}
 							<td class="py-2.5 text-ab-dark-gray align-top">
-								{field.description ?? ''}
+								{#if field.default !== undefined && field.default !== null}
+									<span class="text-xs text-ab-gray">default: {field.default}</span>
+									{#if field.description || field.minimum !== undefined || field.maximum !== undefined || field.example}
+										<span class="mx-0.5"></span>
+									{/if}
+								{/if}
 								{#if field.minimum !== undefined || field.maximum !== undefined}
-									<span class="text-xs text-ab-gray ml-1">
-										({#if field.minimum !== undefined}min: {field.minimum}{/if}{#if field.minimum !== undefined && field.maximum !== undefined}, {/if}{#if field.maximum !== undefined}max: {field.maximum}{/if})
+									<span class="text-xs text-ab-gray">
+										{#if field.minimum !== undefined}min: {field.minimum}{/if}{#if field.minimum !== undefined && field.maximum !== undefined}, {/if}{#if field.maximum !== undefined}max: {field.maximum}{/if}
 									</span>
+									{#if field.description || field.example}
+										<span class="mx-0.5"></span>
+									{/if}
+								{/if}
+								{#if field.description}
+									{field.description}
 								{/if}
 								{#if field.example}
 									<span class="text-xs text-ab-gray ml-1">e.g. {field.example}</span>

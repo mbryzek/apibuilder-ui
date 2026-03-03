@@ -12,15 +12,15 @@
 
 	let { unions, service, exampleBaseUrl }: Props = $props();
 
-	function hasAnyDescriptions(union: SpecUnion): boolean {
-		return union.types.some((t) => t.description);
+	function hasAnyDetails(union: SpecUnion): boolean {
+		return union.types.some((t) => t.description || t.default);
 	}
 </script>
 
 {#if unions.length > 0}
 	<div class="space-y-6">
 		{#each unions as union}
-			{@const showDescriptions = hasAnyDescriptions(union)}
+			{@const showDetails = hasAnyDetails(union)}
 			<div id={union.name} class="scroll-mt-16 border border-gray-200 rounded-lg overflow-hidden">
 				<div class="bg-ab-light-gray px-4 py-3 flex items-center justify-between gap-2">
 					<div class="flex items-center gap-2 min-w-0">
@@ -50,9 +50,9 @@
 							<thead>
 								<tr class="border-b border-gray-200">
 									<th class="pb-2 pr-6 font-semibold text-ab-gray">Type</th>
-									{#if showDescriptions}
-										<th class="pb-2 font-semibold text-ab-gray">Description</th>
-									{/if}
+									{#if showDetails}
+									<th class="pb-2 font-semibold text-ab-gray">Description</th>
+								{/if}
 								</tr>
 							</thead>
 							<tbody>
@@ -66,12 +66,19 @@
 											{#if unionType.deprecation}
 												<DeprecationBadge deprecation={unionType.deprecation} />
 											{/if}
-											{#if unionType.default}
-												<span class="block text-[11px] text-ab-success-green font-medium mt-0.5">default</span>
-											{/if}
-										</td>
-										{#if showDescriptions}
-											<td class="py-2.5 text-ab-dark-gray align-top">{unionType.description ?? ''}</td>
+											</td>
+										{#if showDetails}
+											<td class="py-2.5 text-ab-dark-gray align-top">
+												{#if unionType.default}
+													<span class="text-xs text-ab-gray">default</span>
+													{#if unionType.description}
+														<span class="mx-0.5"></span>
+													{/if}
+												{/if}
+												{#if unionType.description}
+													{unionType.description}
+												{/if}
+											</td>
 										{/if}
 									</tr>
 								{/each}
