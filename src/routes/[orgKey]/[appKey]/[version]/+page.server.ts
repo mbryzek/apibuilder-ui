@@ -53,7 +53,7 @@ export const actions: Actions = {
 		);
 
 		if ('data' in response) {
-			throw redirect(303, `/${params.orgKey}?flash=${encodeURIComponent('Version deleted')}&flash_type=success`);
+			throw redirect(303, `/${params.orgKey}/${params.appKey}?flash=${encodeURIComponent('Version deleted')}&flash_type=success`);
 		}
 
 		return fail(400, { errors: 'errors' in response ? response.errors : [{ message: 'Failed to delete version' }] });
