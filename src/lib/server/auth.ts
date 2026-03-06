@@ -21,6 +21,18 @@ export function requireAuthForAction(locals: App.Locals): NonNullable<App.Locals
 	return locals.session;
 }
 
+export async function requireMemberForAction(locals: App.Locals, orgKey: string): Promise<NonNullable<App.Locals['session']>> {
+	const session = requireAuthForAction(locals);
+	const headers = getSessionHeaders(session.id);
+	const response = await handleApiCall<Membership[]>(
+		() => getMemberships({ org_key: orgKey, user_guid: session.user.guid }, headers),
+	);
+	if (!('data' in response) || response.data.length === 0) {
+		throw error(403, 'Forbidden');
+	}
+	return session;
+}
+
 export async function requireAdminForAction(locals: App.Locals, orgKey: string): Promise<NonNullable<App.Locals['session']>> {
 	const session = requireAuthForAction(locals);
 	const headers = getSessionHeaders(session.id);

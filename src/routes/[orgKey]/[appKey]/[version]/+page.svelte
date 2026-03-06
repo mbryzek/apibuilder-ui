@@ -30,6 +30,8 @@
 	const exampleBaseUrl = $derived(`${versionBase}/example`);
 
 	let searchQuery = $state('');
+	let showDeleteConfirm = $state(false);
+	let isDeleting = $state(false);
 </script>
 
 {#if form?.errors}
@@ -115,8 +117,45 @@
 			>
 				+ Upload
 			</a>
+			{#if !showDeleteConfirm}
+				<button
+					type="button"
+					class="px-3.5 py-1.5 text-sm font-medium rounded-md border border-red-300 text-red-600 hover:bg-red-600 hover:text-white transition-colors"
+					onclick={() => (showDeleteConfirm = true)}
+				>
+					Delete Version
+				</button>
+			{/if}
 		{/if}
 	</div>
 </div>
+
+{#if showDeleteConfirm}
+	<div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+		<p class="text-sm text-red-700 font-medium mb-3">
+			Are you sure you want to delete version <strong>{version.version}</strong>? This action cannot be undone.
+		</p>
+		<div class="flex gap-3">
+			<form
+				method="POST"
+				action="{versionBase}?/deleteVersion"
+				use:enhance={() => {
+					isDeleting = true;
+					return async ({ update }) => {
+						isDeleting = false;
+						await update();
+					};
+				}}
+			>
+				<button type="submit" class="btn-danger" disabled={isDeleting}>
+					{isDeleting ? 'Deleting...' : 'Yes, Delete Version'}
+				</button>
+			</form>
+			<button class="btn-secondary" onclick={() => (showDeleteConfirm = false)}>
+				Cancel
+			</button>
+		</div>
+	</div>
+{/if}
 
 <SpecTabs {service} {exampleBaseUrl} {searchQuery} />
