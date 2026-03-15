@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import type { Organization } from '$generated/types';
-	import { Visibility } from '$generated/com-bryzek-bryzek-apibuilder-v0';
+	import { Visibility, OriginalType } from '$generated/com-bryzek-bryzek-apibuilder-v0';
 
 	interface Props {
 		data: {
@@ -79,8 +79,9 @@
 				class="input-field w-full"
 				value={form?.specType ?? ''}
 			>
-				<option value="api_json">api.json</option>
-				<option value="service_json">service.json</option>
+				{#each Object.values(OriginalType) as t}
+					<option value={t}>{t}</option>
+				{/each}
 			</select>
 		</div>
 
