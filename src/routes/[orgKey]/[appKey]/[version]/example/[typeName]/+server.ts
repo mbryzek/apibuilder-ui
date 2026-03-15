@@ -1,6 +1,7 @@
 import type { RequestHandler } from './$types';
 import { error } from '@sveltejs/kit';
-import { getExample, getSessionHeaders } from '$lib/server/api';
+import { getExample } from '$lib/api/legacy';
+import { getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 
 export const GET: RequestHandler = async ({ params, locals, url }) => {

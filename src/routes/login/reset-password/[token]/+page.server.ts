@@ -1,8 +1,9 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
-import { resetPassword, type TenantSession } from '$lib/server/api';
+import { resetPassword } from '$lib/api/legacy';
 import { handleApiCall } from '$lib/api/error-handler';
 import { SESSION_COOKIE, config } from '$lib/config';
+import type { Authentication } from '$generated/types';
 
 export const load: PageServerLoad = async ({ params }) => {
 	return { token: params.token };
@@ -22,7 +23,7 @@ export const actions: Actions = {
 			return fail(400, { errors: [{ message: 'Passwords do not match' }] });
 		}
 
-		const response = await handleApiCall<TenantSession>(
+		const response = await handleApiCall<Authentication>(
 			() => resetPassword(params.token, password),
 		);
 

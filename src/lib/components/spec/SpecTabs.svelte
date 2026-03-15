@@ -126,7 +126,7 @@
 				<span class="ml-0.5 text-xs opacity-75">{tab.count}</span>
 			</button>
 		{/each}
-	</nav>
+	</div>
 </div>
 
 <!-- Tab content -->

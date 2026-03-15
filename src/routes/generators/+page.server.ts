@@ -1,5 +1,6 @@
 import type { PageServerLoad } from './$types';
-import { getGenerators, getSessionHeaders } from '$lib/server/api';
+import { getGenerators } from '$lib/api/legacy';
+import { getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import type { GeneratorWithService } from '$generated/types';
 

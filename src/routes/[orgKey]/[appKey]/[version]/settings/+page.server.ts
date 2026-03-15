@@ -1,11 +1,7 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
-import {
-	updateApplication,
-	deleteApplication,
-	moveApplication,
-	getSessionHeaders,
-} from '$lib/server/api';
+import { updateApplication, deleteApplication, moveApplication } from '$lib/api/legacy';
+import { getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth, requireAdminForAction } from '$lib/server/auth';
 import type { Application } from '$generated/types';

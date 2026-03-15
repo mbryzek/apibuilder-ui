@@ -1,6 +1,7 @@
 import { redirect, error } from '@sveltejs/kit';
 import type { RequestEvent } from '@sveltejs/kit';
-import { getMemberships, getSessionHeaders } from '$lib/server/api';
+import { getMemberships } from '$lib/api/legacy';
+import { getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import type { Membership } from '$generated/types';
 import { MembershipRole } from '$generated/types';

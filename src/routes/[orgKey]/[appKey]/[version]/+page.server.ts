@@ -1,6 +1,7 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
-import { createWatch, deleteWatch, deleteVersion, getSessionHeaders } from '$lib/server/api';
+import { createWatch, deleteWatch, deleteVersion } from '$lib/api/legacy';
+import { getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuthForAction, requireMemberForAction } from '$lib/server/auth';
 import type { Watch } from '$generated/types';

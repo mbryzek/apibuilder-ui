@@ -1,6 +1,7 @@
 import type { PageServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
-import { confirmEmailVerification, getSessionHeaders } from '$lib/server/api';
+import { confirmEmailVerification } from '$lib/api/legacy';
+import { getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 
 export const load: PageServerLoad = async ({ params, locals }) => {

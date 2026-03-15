@@ -1,6 +1,7 @@
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
-import { getGeneratorByKey, getSessionHeaders } from '$lib/server/api';
+import { getGeneratorByKey } from '$lib/api/legacy';
+import { getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import type { GeneratorWithService } from '$generated/types';
 

@@ -1,6 +1,7 @@
 import type { LayoutServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
-import { getVersion, getApplicationVersions, getWatches, getSessionHeaders } from '$lib/server/api';
+import { getVersion, getApplicationVersions, getWatches } from '$lib/api/legacy';
+import { getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import type { Version, ApplicationMetadataVersion, Watch } from '$generated/types';
 

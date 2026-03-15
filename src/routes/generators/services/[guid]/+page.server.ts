@@ -1,6 +1,7 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail, error } from '@sveltejs/kit';
-import { getGeneratorServiceByGuid, getGenerators, deleteGeneratorService, getSessionHeaders } from '$lib/server/api';
+import { getGeneratorServiceByGuid, getGenerators, deleteGeneratorService } from '$lib/api/legacy';
+import { getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuthForAction } from '$lib/server/auth';
 import type { GeneratorService, GeneratorWithService } from '$generated/types';

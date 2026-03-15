@@ -1,6 +1,7 @@
 import type { PageServerLoad, Actions } from './$types';
 import { fail } from '@sveltejs/kit';
-import { getSubscriptions, createSubscription, deleteSubscription, getSessionHeaders } from '$lib/server/api';
+import { getSubscriptions, createSubscription, deleteSubscription } from '$lib/api/legacy';
+import { getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth, requireAuthForAction } from '$lib/server/auth';
 import type { Subscription } from '$generated/types';

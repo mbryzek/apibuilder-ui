@@ -1,6 +1,7 @@
 import type { PageServerLoad, Actions } from './$types';
 import { error, fail } from '@sveltejs/kit';
-import { getMembershipRequests, acceptMembershipRequest, declineMembershipRequest, getSessionHeaders } from '$lib/server/api';
+import { getMembershipRequests, acceptMembershipRequest, declineMembershipRequest } from '$lib/api/legacy';
+import { getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth, requireAdminForAction } from '$lib/server/auth';
 import type { MembershipRequest, Membership } from '$generated/types';

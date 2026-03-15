@@ -1,12 +1,14 @@
 import type { PageServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
-import { getSessionById, type TenantSession } from '$lib/server/api';
+import { clients, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { SESSION_COOKIE, config } from '$lib/config';
+import type { TenantSession } from '$generated/com-bryzek-platform-v0';
 
 export const load: PageServerLoad = async ({ cookies }) => {
+	const client = clients();
 	const response = await handleApiCall<TenantSession>(
-		() => getSessionById('dev'),
+		() => client.platform.getTenantSession(config.tenantId, { headers: getSessionHeaders('dev') }),
 	);
 
 	if ('data' in response && response.data) {

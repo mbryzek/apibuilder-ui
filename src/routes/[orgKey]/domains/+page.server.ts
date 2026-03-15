@@ -1,6 +1,7 @@
 import type { PageServerLoad, Actions } from './$types';
 import { fail } from '@sveltejs/kit';
-import { createDomain, deleteDomain, getSessionHeaders } from '$lib/server/api';
+import { createDomain, deleteDomain } from '$lib/api/legacy';
+import { getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth, requireAdminForAction } from '$lib/server/auth';
 import type { Domain } from '$generated/types';

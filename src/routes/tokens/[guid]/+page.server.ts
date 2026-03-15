@@ -1,6 +1,7 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail, error } from '@sveltejs/kit';
-import { getCleartextToken, deleteToken, getSessionHeaders } from '$lib/server/api';
+import { getCleartextToken, deleteToken } from '$lib/api/legacy';
+import { getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth, requireAuthForAction } from '$lib/server/auth';
 import type { CleartextToken } from '$generated/types';

@@ -1,6 +1,7 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
-import { createOrganization, getSessionHeaders } from '$lib/server/api';
+import { createOrganization } from '$lib/api/legacy';
+import { getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth } from '$lib/server/auth';
 import type { Organization } from '$generated/types';

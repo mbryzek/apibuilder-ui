@@ -1,5 +1,6 @@
 import type { PageServerLoad } from './$types';
-import { getAttributes, getSessionHeaders } from '$lib/server/api';
+import { getAttributes } from '$lib/api/legacy';
+import { getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import type { ApiAttribute } from '$generated/types';
 

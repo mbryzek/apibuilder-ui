@@ -1,6 +1,7 @@
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
-import { getCode, getSessionHeaders } from '$lib/server/api';
+import { getCode } from '$lib/api/legacy';
+import { getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import type { Code } from '$generated/types';
 

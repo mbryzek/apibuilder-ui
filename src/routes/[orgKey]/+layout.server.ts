@@ -1,6 +1,7 @@
 import type { LayoutServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
-import { getOrganizationByKey, getMemberships, getSessionHeaders } from '$lib/server/api';
+import { getOrganizationByKey, getMemberships } from '$lib/api/legacy';
+import { getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import type { Organization, Membership } from '$generated/types';
 import { MembershipRole } from '$generated/types';

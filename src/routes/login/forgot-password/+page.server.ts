@@ -1,5 +1,5 @@
 import type { Actions } from './$types';
-import { requestPasswordReset } from '$lib/server/api';
+import { requestPasswordReset } from '$lib/api/legacy';
 import { handleApiCall } from '$lib/api/error-handler';
 
 export const actions: Actions = {

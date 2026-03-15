@@ -1,5 +1,6 @@
 import type { PageServerLoad } from './$types';
-import { getOrganizations, getMemberships, getSessionHeaders } from '$lib/server/api';
+import { getOrganizations, getMemberships } from '$lib/api/legacy';
+import { getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import type { Organization, Membership } from '$generated/types';
 

@@ -3,9 +3,9 @@ import { fail } from '@sveltejs/kit';
 import {
 	getMemberships, deleteMembership, getUsers,
 	createMembershipRequest, acceptMembershipRequest,
-	getMembershipRequests, getSessionHeaders,
-	getOrganizationByKey,
-} from '$lib/server/api';
+	getMembershipRequests, getOrganizationByKey,
+} from '$lib/api/legacy';
+import { getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth, requireAdminForAction } from '$lib/server/auth';
 import type { Membership, User, MembershipRequest, Organization } from '$generated/types';

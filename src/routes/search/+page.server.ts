@@ -1,5 +1,6 @@
 import type { PageServerLoad } from './$types';
-import { searchItems, getSessionHeaders } from '$lib/server/api';
+import { searchItems } from '$lib/api/legacy';
+import { getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import type { Item } from '$generated/types';
 

@@ -1,6 +1,7 @@
 import type { RequestHandler } from './$types';
 import { error } from '@sveltejs/kit';
-import { getVersion, getSessionHeaders } from '$lib/server/api';
+import { getVersion } from '$lib/api/legacy';
+import { getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import type { Version } from '$generated/types';
 

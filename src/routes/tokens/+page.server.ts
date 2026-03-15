@@ -1,5 +1,6 @@
 import type { PageServerLoad } from './$types';
-import { getTokens, getSessionHeaders } from '$lib/server/api';
+import { getTokens } from '$lib/api/legacy';
+import { getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth } from '$lib/server/auth';
 import type { Token } from '$generated/types';

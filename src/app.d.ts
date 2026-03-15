@@ -1,6 +1,8 @@
+import type { User } from '$generated/com-bryzek-platform-v0';
+
 export type Session = {
 	id: string;
-	user: import('$lib/server/api').TenantSessionUser;
+	user: User;
 };
 
 declare global {
