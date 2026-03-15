@@ -38,7 +38,6 @@
 		appName={service.name}
 		isMember={data.isMember}
 		isAdmin={data.isAdmin}
-		isLoggedIn={data.session !== undefined}
 	/>
 	<div class="flex-1 min-w-0">
 		{#if service.description}

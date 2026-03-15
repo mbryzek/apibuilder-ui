@@ -112,7 +112,7 @@
 
 <!-- Tab navigation -->
 <div class="mb-6 overflow-x-auto">
-	<nav class="flex gap-2 min-w-max" role="tablist" aria-label="Spec sections">
+	<div class="flex gap-2 min-w-max" role="tablist" aria-label="Spec sections">
 		{#each filteredTabs as tab (tab.id)}
 			<button
 				role="tab"
