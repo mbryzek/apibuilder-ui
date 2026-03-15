@@ -20,6 +20,16 @@ code:
                   - tenant_session
                   - user
                   - phone
+    platform-storage:
+      version: latest
+      generators:
+        - generator: typescript
+          target: ./generated
+          attributes:
+            - name: "filter"
+              value:
+                types:
+                  - file
     platform-error:
       version: latest
       generators:
