@@ -18,6 +18,7 @@ export enum MembershipRole {
 
 export enum OriginalType {
   ApiJson = 'api_json',
+  ServiceJson = 'service_json',
 }
 
 export enum Publication {

@@ -57,7 +57,7 @@
 					type="file"
 					id="file"
 					name="file"
-					accept=".json,.avdl,.yaml,.yml"
+					accept=".json"
 					required
 					class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-ab-blue file:text-white hover:file:bg-ab-light-blue file:cursor-pointer"
 					onchange={(e) => {
@@ -79,10 +79,7 @@
 				class="input-field w-full"
 				value={form?.specType ?? ''}
 			>
-				<option value="">Auto-detect</option>
 				<option value="api_json">api.json</option>
-				<option value="swagger">Swagger / OpenAPI</option>
-				<option value="avro_idl">Avro IDL</option>
 				<option value="service_json">service.json</option>
 			</select>
 		</div>

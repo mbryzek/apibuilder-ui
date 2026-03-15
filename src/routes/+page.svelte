@@ -32,7 +32,10 @@
 			</div>
 
 			{#if myOrgs.length === 0}
-				<p class="text-ab-gray">You are not a member of any organizations yet.</p>
+				<div class="card text-center py-12">
+					<p class="text-ab-gray mb-4">You are not a member of any organizations yet.</p>
+					<a href="/org/create" class="btn-primary inline-block">Create your first organization</a>
+				</div>
 			{:else}
 				<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 					{#each myOrgs as org (org.guid)}
@@ -57,11 +60,11 @@
 				Design APIs with a simple, elegant interface. Generate client libraries, server stubs, and documentation from your API specifications.
 			</p>
 			<div class="flex flex-col sm:flex-row gap-6 justify-center">
-				<a href="/doc" class="btn-primary">
-					Documentation
+				<a href="/signup" class="btn-primary">
+					Get Started
 				</a>
 				<a href="/login" class="btn-secondary">
-					Get Started
+					Sign In
 				</a>
 			</div>
 		</div>
@@ -82,6 +85,11 @@
 					</a>
 				{/each}
 			</div>
+		</div>
+	{:else if !session}
+		<!-- Empty state for anonymous users -->
+		<div class="text-center py-8 text-ab-gray">
+			<p>No public organizations yet. <a href="/signup" class="text-ab-dark-blue underline">Sign up</a> to create one.</p>
 		</div>
 	{/if}
 </div>
