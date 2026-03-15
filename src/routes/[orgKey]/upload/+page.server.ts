@@ -1,10 +1,10 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
-import { createVersion } from '$lib/api/legacy';
-import { getSessionHeaders } from '$lib/api/clients';
+import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth, requireAuthForAction } from '$lib/server/auth';
 import type { Version } from '$generated/types';
+import type { OriginalForm } from '$generated/com-bryzek-bryzek-apibuilder-v0';
 
 export const load: PageServerLoad = async (event) => {
 	requireAuth(event);
@@ -16,6 +16,7 @@ export const actions: Actions = {
 		const session = requireAuthForAction(locals);
 		const headers = getSessionHeaders(session.id);
 		const formData = await request.formData();
+		const client = apiBuilderClient();
 
 		const appKey = (formData.get('app_key') as string)?.trim();
 		const visibility = (formData.get('visibility') as string) || 'organization';
@@ -31,10 +32,7 @@ export const actions: Actions = {
 			return fail(400, { errors: [{ message: 'Uploaded file is empty' }], appKey, visibility, specType });
 		}
 
-		const originalForm: { data: string; type?: string } = { data };
-		if (specType) {
-			originalForm.type = specType;
-		}
+		const originalForm = specType ? { data, type: specType } : { data };
 
 		const targetAppKey = appKey || deriveAppKeyFromSpec(data);
 		if (!targetAppKey) {
@@ -42,7 +40,12 @@ export const actions: Actions = {
 		}
 
 		const response = await handleApiCall<Version>(
-			() => createVersion(params.orgKey, targetAppKey, { original_form: originalForm, visibility }, headers),
+			() => client.createVersion({
+				orgKey: params.orgKey,
+				appKey: targetAppKey,
+				body: { original_form: originalForm as unknown as OriginalForm },
+				headers,
+			}) as unknown as Promise<Version>,
 		);
 
 		if ('data' in response) {

@@ -1,14 +1,13 @@
 import type { PageServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
-import { confirmEmailVerification } from '$lib/api/legacy';
-import { getSessionHeaders } from '$lib/api/clients';
+import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const headers = locals.session ? getSessionHeaders(locals.session.id) : {};
 
 	const response = await handleApiCall<void>(
-		() => confirmEmailVerification({ token: params.token }, headers),
+		() => apiBuilderClient().createEmailVerificationConfirmationForm({ body: { token: params.token }, headers }),
 	);
 
 	if ('data' in response) {

@@ -1,10 +1,9 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
-import { createGeneratorService } from '$lib/api/legacy';
-import { getSessionHeaders } from '$lib/api/clients';
+import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth, requireAuthForAction } from '$lib/server/auth';
-import type { GeneratorService } from '$generated/types';
+import type { GeneratorService } from '$generated/com-bryzek-bryzek-apibuilder-v0';
 
 export const load: PageServerLoad = async (event) => {
 	requireAuth(event);
@@ -23,7 +22,7 @@ export const actions: Actions = {
 		}
 
 		const response = await handleApiCall<GeneratorService>(
-			() => createGeneratorService({ uri }, headers),
+			() => apiBuilderClient().createGeneratorService({ body: { uri }, headers }),
 		);
 
 		if ('data' in response) {

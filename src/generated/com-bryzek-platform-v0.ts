@@ -168,6 +168,7 @@ export interface Person {
   birth?: BirthInfo;
   gender?: Gender;
   mobile_phone?: Phone;
+  work_phone?: string;
   time_zone: TimeZone;
   photo?: File;
 }
@@ -181,6 +182,7 @@ export interface PersonForm {
   birth?: BirthInfoForm;
   gender?: Gender;
   mobile_phone?: MobilePhoneForm;
+  work_phone?: string;
   time_zone?: TimeZone;
 }
 
@@ -194,6 +196,7 @@ export interface PersonPrimaryForm {
   /** What to call the user */
   nickname?: string;
   mobile_phone?: MobilePhoneForm;
+  work_phone?: string;
 }
 
 export interface PersonSecondaryForm {

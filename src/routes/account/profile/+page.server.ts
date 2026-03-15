@@ -1,16 +1,15 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
-import { updateUser, getUserByGuid } from '$lib/api/legacy';
-import { getSessionHeaders } from '$lib/api/clients';
+import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth } from '$lib/server/auth';
-import type { User } from '$generated/types';
+import type { User, UserForm } from '$generated/com-bryzek-bryzek-apibuilder-v0';
 
 export const load: PageServerLoad = async (event) => {
 	const session = requireAuth(event);
 	const headers = getSessionHeaders(session.id);
 	const response = await handleApiCall<User>(
-		() => getUserByGuid(session.user.id, headers),
+		() => apiBuilderClient().getUserById(session.user.id, { headers }),
 	);
 	const user = 'data' in response ? response.data : { email: session.user.person.email?.address ?? '', nickname: '', name: undefined };
 	return { user };
@@ -31,14 +30,14 @@ export const actions: Actions = {
 			return fail(400, { errors: [{ message: 'Email and nickname are required' }] });
 		}
 
-		const form: { email: string; nickname: string; name?: string } = { email, nickname };
+		const body: UserForm = { email, nickname };
 		if (name) {
-			form.name = name;
+			body.name = name;
 		}
 
 		const headers = getSessionHeaders(locals.session.id);
 		const response = await handleApiCall<User>(
-			() => updateUser(locals.session!.user.id, form, headers),
+			() => apiBuilderClient().updateUserById({ id: locals.session!.user.id, body, headers }),
 		);
 
 		if ('data' in response) {

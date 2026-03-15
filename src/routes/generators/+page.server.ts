@@ -1,8 +1,7 @@
 import type { PageServerLoad } from './$types';
-import { getGenerators } from '$lib/api/legacy';
-import { getSessionHeaders } from '$lib/api/clients';
+import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
-import type { GeneratorWithService } from '$generated/types';
+import type { GeneratorWithService } from '$generated/com-bryzek-bryzek-apibuilder-v0';
 
 const LIMIT = 25;
 
@@ -11,7 +10,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 	const offset = Number(url.searchParams.get('offset') || '0');
 
 	const response = await handleApiCall<GeneratorWithService[]>(
-		() => getGenerators(headers, { limit: LIMIT, offset }),
+		() => apiBuilderClient().getGeneratorWithServices({ limit: LIMIT, offset, headers }),
 	);
 
 	const generators = 'data' in response ? response.data : [];

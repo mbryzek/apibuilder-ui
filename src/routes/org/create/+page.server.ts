@@ -1,10 +1,9 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
-import { createOrganization } from '$lib/api/legacy';
-import { getSessionHeaders } from '$lib/api/clients';
+import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth } from '$lib/server/auth';
-import type { Organization } from '$generated/types';
+import type { Organization, OrganizationForm, Visibility } from '$generated/com-bryzek-bryzek-apibuilder-v0';
 
 export const load: PageServerLoad = async (event) => {
 	requireAuth(event);
@@ -21,23 +20,20 @@ export const actions: Actions = {
 		const name = formData.get('name') as string;
 		const namespace = formData.get('namespace') as string;
 		const key = (formData.get('key') as string) || '';
-		const visibility = (formData.get('visibility') as string) || '';
+		const visibility = (formData.get('visibility') as string) || 'organization';
 
 		if (!name || !namespace) {
 			return fail(400, { errors: [{ message: 'Name and namespace are required' }] });
 		}
 
-		const form: { name: string; namespace: string; key?: string; visibility?: string } = { name, namespace };
+		const body: OrganizationForm = { name, namespace, visibility: visibility as Visibility };
 		if (key) {
-			form.key = key;
-		}
-		if (visibility) {
-			form.visibility = visibility;
+			body.key = key;
 		}
 
 		const headers = getSessionHeaders(locals.session.id);
 		const response = await handleApiCall<Organization>(
-			() => createOrganization(form, headers),
+			() => apiBuilderClient().createOrganization({ body, headers }),
 		);
 
 		if ('data' in response) {

@@ -1,10 +1,9 @@
 import type { PageServerLoad, Actions } from './$types';
 import { error, fail } from '@sveltejs/kit';
-import { getMembershipRequests, acceptMembershipRequest, declineMembershipRequest } from '$lib/api/legacy';
-import { getSessionHeaders } from '$lib/api/clients';
+import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth, requireAdminForAction } from '$lib/server/auth';
-import type { MembershipRequest, Membership } from '$generated/types';
+import type { MembershipRequest, Membership } from '$generated/com-bryzek-bryzek-apibuilder-v0';
 
 export const load: PageServerLoad = async (event) => {
 	const session = requireAuth(event);
@@ -15,7 +14,7 @@ export const load: PageServerLoad = async (event) => {
 	const headers = getSessionHeaders(session.id);
 
 	const response = await handleApiCall<MembershipRequest[]>(
-		() => getMembershipRequests(headers, { org_key: event.params.orgKey }),
+		() => apiBuilderClient().getMembershipRequests({ orgKey: event.params.orgKey, limit: 25, offset: 0, headers }),
 	);
 
 	return {
@@ -35,7 +34,7 @@ export const actions: Actions = {
 		}
 
 		const response = await handleApiCall<Membership>(
-			() => acceptMembershipRequest(guid, headers),
+			() => apiBuilderClient().createMembershipRequestAcceptById(guid, { headers }),
 		);
 
 		if ('errors' in response) {
@@ -56,7 +55,7 @@ export const actions: Actions = {
 		}
 
 		const response = await handleApiCall<void>(
-			() => declineMembershipRequest(guid, headers),
+			() => apiBuilderClient().createMembershipRequestDeclineById(guid, { headers }),
 		);
 
 		if ('errors' in response) {

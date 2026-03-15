@@ -1,9 +1,8 @@
 import type { PageServerLoad } from './$types';
-import { getTokens } from '$lib/api/legacy';
-import { getSessionHeaders } from '$lib/api/clients';
+import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth } from '$lib/server/auth';
-import type { Token } from '$generated/types';
+import type { Token } from '$generated/com-bryzek-bryzek-apibuilder-v0';
 
 const LIMIT = 25;
 
@@ -13,7 +12,7 @@ export const load: PageServerLoad = async (event) => {
 	const offset = Number(event.url.searchParams.get('offset') || '0');
 
 	const response = await handleApiCall<Token[]>(
-		() => getTokens(session.user.id, headers, { limit: LIMIT, offset }),
+		() => apiBuilderClient().getTokensUsersByUserId({ userId: session.user.id, limit: LIMIT, offset, headers }),
 	);
 
 	const tokens = 'data' in response ? response.data : [];

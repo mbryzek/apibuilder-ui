@@ -1,15 +1,10 @@
 import type { PageServerLoad, Actions } from './$types';
 import { fail } from '@sveltejs/kit';
-import {
-	getMemberships, deleteMembership, getUsers,
-	createMembershipRequest, acceptMembershipRequest,
-	getMembershipRequests, getOrganizationByKey,
-} from '$lib/api/legacy';
-import { getSessionHeaders } from '$lib/api/clients';
+import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth, requireAdminForAction } from '$lib/server/auth';
-import type { Membership, User, MembershipRequest, Organization } from '$generated/types';
-import { MembershipRole } from '$generated/types';
+import type { Membership, User, MembershipRequest, Organization } from '$generated/com-bryzek-bryzek-apibuilder-v0';
+import { MembershipRole } from '$generated/com-bryzek-bryzek-apibuilder-v0';
 
 export const load: PageServerLoad = async (event) => {
 	const session = requireAuth(event);
@@ -18,13 +13,13 @@ export const load: PageServerLoad = async (event) => {
 	const { isAdmin } = await parent();
 
 	const membershipsResponse = await handleApiCall<Membership[]>(
-		() => getMemberships({ org_key: params.orgKey, limit: 100 }, headers),
+		() => apiBuilderClient().getMemberships({ orgKey: params.orgKey, limit: 100, offset: 0, headers }),
 	);
 
 	let pendingRequestsCount = 0;
 	if (isAdmin) {
 		const requestsResponse = await handleApiCall<MembershipRequest[]>(
-			() => getMembershipRequests(headers, { org_key: params.orgKey }),
+			() => apiBuilderClient().getMembershipRequests({ orgKey: params.orgKey, limit: 25, offset: 0, headers }),
 		);
 		if ('data' in requestsResponse) {
 			pendingRequestsCount = requestsResponse.data.length;
@@ -52,7 +47,7 @@ export const actions: Actions = {
 
 		// Find user by email or nickname
 		const usersResponse = await handleApiCall<User[]>(
-			() => getUsers(headers, { email: emailOrNickname }),
+			() => apiBuilderClient().getUsers({ email: emailOrNickname, headers }),
 		);
 
 		let user: User | undefined;
@@ -60,7 +55,7 @@ export const actions: Actions = {
 			user = usersResponse.data[0];
 		} else {
 			const nicknameResponse = await handleApiCall<User[]>(
-				() => getUsers(headers, { nickname: emailOrNickname }),
+				() => apiBuilderClient().getUsers({ nickname: emailOrNickname, headers }),
 			);
 			if ('data' in nicknameResponse && nicknameResponse.data.length > 0) {
 				user = nicknameResponse.data[0];
@@ -72,19 +67,19 @@ export const actions: Actions = {
 		}
 
 		const orgResponse = await handleApiCall<Organization>(
-			() => getOrganizationByKey(params.orgKey, headers),
+			() => apiBuilderClient().getOrganizationByKey(params.orgKey, { headers }),
 		);
 		if (!('data' in orgResponse)) {
 			return fail(400, { errors: [{ message: 'Organization not found' }] });
 		}
 
 		const requestResponse = await handleApiCall<MembershipRequest>(
-			() => createMembershipRequest(orgResponse.data.guid, user!.guid, role, headers),
+			() => apiBuilderClient().createMembershipRequest({ body: { org_guid: orgResponse.data.id, user_guid: user!.id, role: role as MembershipRole }, headers }),
 		);
 
 		if ('data' in requestResponse) {
 			const acceptResponse = await handleApiCall<Membership>(
-				() => acceptMembershipRequest(requestResponse.data.guid, headers),
+				() => apiBuilderClient().createMembershipRequestAcceptById(requestResponse.data.id, { headers }),
 			);
 			if ('errors' in acceptResponse) {
 				return fail(400, { errors: acceptResponse.errors });
@@ -111,7 +106,7 @@ export const actions: Actions = {
 		}
 
 		const response = await handleApiCall<void>(
-			() => deleteMembership(guid, headers),
+			() => apiBuilderClient().deleteMembershipById(guid, { headers }),
 		);
 
 		if ('errors' in response) {
@@ -132,19 +127,19 @@ export const actions: Actions = {
 		}
 
 		const orgResponse = await handleApiCall<Organization>(
-			() => getOrganizationByKey(params.orgKey, headers),
+			() => apiBuilderClient().getOrganizationByKey(params.orgKey, { headers }),
 		);
 		if (!('data' in orgResponse)) {
 			return fail(400, { errors: [{ message: 'Organization not found' }] });
 		}
 
 		const requestResponse = await handleApiCall<MembershipRequest>(
-			() => createMembershipRequest(orgResponse.data.guid, userGuid, 'admin', headers),
+			() => apiBuilderClient().createMembershipRequest({ body: { org_guid: orgResponse.data.id, user_guid: userGuid, role: MembershipRole.Admin }, headers }),
 		);
 
 		if ('data' in requestResponse) {
 			const acceptResponse = await handleApiCall<Membership>(
-				() => acceptMembershipRequest(requestResponse.data.guid, headers),
+				() => apiBuilderClient().createMembershipRequestAcceptById(requestResponse.data.id, { headers }),
 			);
 			if ('errors' in acceptResponse) {
 				return fail(400, { errors: acceptResponse.errors });
@@ -171,13 +166,13 @@ export const actions: Actions = {
 		}
 
 		const membershipsResponse = await handleApiCall<Membership[]>(
-			() => getMemberships({ org_key: params.orgKey, user_guid: userGuid, role: 'admin' }, headers),
+			() => apiBuilderClient().getMemberships({ orgKey: params.orgKey, userGuid, role: MembershipRole.Admin, limit: 100, offset: 0, headers }),
 		);
 
 		if ('data' in membershipsResponse) {
 			for (const m of membershipsResponse.data) {
 				const deleteResponse = await handleApiCall<void>(
-					() => deleteMembership(m.guid, headers),
+					() => apiBuilderClient().deleteMembershipById(m.id, { headers }),
 				);
 				if ('errors' in deleteResponse) {
 					return fail(400, { errors: deleteResponse.errors });

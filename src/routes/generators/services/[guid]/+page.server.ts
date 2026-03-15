@@ -1,16 +1,15 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail, error } from '@sveltejs/kit';
-import { getGeneratorServiceByGuid, getGenerators, deleteGeneratorService } from '$lib/api/legacy';
-import { getSessionHeaders } from '$lib/api/clients';
+import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuthForAction } from '$lib/server/auth';
-import type { GeneratorService, GeneratorWithService } from '$generated/types';
+import type { GeneratorService, GeneratorWithService } from '$generated/com-bryzek-bryzek-apibuilder-v0';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const headers = locals.session ? getSessionHeaders(locals.session.id) : {};
 
 	const serviceResponse = await handleApiCall<GeneratorService>(
-		() => getGeneratorServiceByGuid(params.guid, headers),
+		() => apiBuilderClient().getGeneratorServiceById(params.guid, { headers }),
 	);
 
 	if (!('data' in serviceResponse)) {
@@ -20,7 +19,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	const service = serviceResponse.data;
 
 	const generatorsResponse = await handleApiCall<GeneratorWithService[]>(
-		() => getGenerators(headers, { service_guid: params.guid, limit: 100 }),
+		() => apiBuilderClient().getGeneratorWithServices({ serviceGuid: params.guid, limit: 100, offset: 0, headers }),
 	);
 
 	const generators = 'data' in generatorsResponse ? generatorsResponse.data : [];
@@ -37,7 +36,7 @@ export const actions: Actions = {
 		const headers = getSessionHeaders(session.id);
 
 		const response = await handleApiCall<void>(
-			() => deleteGeneratorService(params.guid, headers),
+			() => apiBuilderClient().deleteGeneratorServiceById(params.guid, { headers }),
 		);
 
 		if ('errors' in response) {

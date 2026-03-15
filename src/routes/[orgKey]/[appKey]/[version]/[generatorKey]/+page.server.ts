@@ -1,15 +1,14 @@
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
-import { getCode } from '$lib/api/legacy';
-import { getSessionHeaders } from '$lib/api/clients';
+import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
-import type { Code } from '$generated/types';
+import type { Code } from '$generated/com-bryzek-bryzek-apibuilder-v0';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const headers = locals.session ? getSessionHeaders(locals.session.id) : {};
 
 	const codeResponse = await handleApiCall<Code>(
-		() => getCode(params.orgKey, params.appKey, params.version, params.generatorKey, headers),
+		() => apiBuilderClient().getCode({ orgKey: params.orgKey, appKey: params.appKey, version: params.version, generatorKey: params.generatorKey, headers }),
 	);
 
 	if (!('data' in codeResponse)) {

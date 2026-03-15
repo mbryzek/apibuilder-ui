@@ -1,10 +1,9 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
-import { createToken } from '$lib/api/legacy';
-import { getSessionHeaders } from '$lib/api/clients';
+import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth, requireAuthForAction } from '$lib/server/auth';
-import type { Token } from '$generated/types';
+import type { Token, TokenForm } from '$generated/com-bryzek-bryzek-apibuilder-v0';
 
 export const load: PageServerLoad = async (event) => {
 	requireAuth(event);
@@ -18,13 +17,13 @@ export const actions: Actions = {
 		const formData = await request.formData();
 		const description = formData.get('description') as string;
 
-		const form: { user_guid: string; description?: string } = { user_guid: session.user.id };
+		const body: TokenForm = { user_guid: session.user.id };
 		if (description) {
-			form.description = description;
+			body.description = description;
 		}
 
 		const response = await handleApiCall<Token>(
-			() => createToken(form, headers),
+			() => apiBuilderClient().createToken({ body, headers }),
 		);
 
 		if ('data' in response) {
