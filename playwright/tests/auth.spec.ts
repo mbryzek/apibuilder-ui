@@ -13,7 +13,7 @@ import {
 } from "../utils/test-helpers";
 
 test.describe("Signup", () => {
-  test("creates a new account and redirects to home", async ({ page }) => {
+  test("creates a new account and redirects to org create", async ({ page }) => {
     const email = generateRandomEmail();
     const password = "testpassword123";
 

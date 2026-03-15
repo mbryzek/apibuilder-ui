@@ -2,7 +2,7 @@
 	import { enhance } from '$app/forms';
 	import type { Organization } from '$generated/types';
 	import type { ApiErrorItem } from '$lib/api/error-handler';
-	import { Visibility } from '$generated/types';
+	import { Visibility } from '$generated/com-bryzek-bryzek-apibuilder-v0';
 
 	interface Props {
 		data: {

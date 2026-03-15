@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import type { Organization } from '$generated/types';
+	import { Visibility } from '$generated/com-bryzek-bryzek-apibuilder-v0';
 
 	interface Props {
 		data: {
@@ -109,8 +110,9 @@
 				class="input-field w-full"
 				value={form?.visibility ?? 'organization'}
 			>
-				<option value="organization">Organization</option>
-				<option value="public">Public</option>
+				{#each Object.values(Visibility) as v}
+					<option value={v}>{v}</option>
+				{/each}
 			</select>
 		</div>
 

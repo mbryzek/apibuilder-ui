@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { Visibility } from '$generated/types';
+	import { Visibility } from '$generated/com-bryzek-bryzek-apibuilder-v0';
 	import type { ApiErrorItem } from '$lib/api/error-handler';
 
 	interface Props {
@@ -83,8 +83,9 @@
 						name="visibility"
 						class="w-full input-field px-3 py-2 border rounded-lg"
 					>
-						<option value={Visibility.Organization}>Organization</option>
-						<option value={Visibility.Public}>Public</option>
+						{#each Object.values(Visibility) as v}
+							<option value={v} selected={v === Visibility.Organization}>{v}</option>
+						{/each}
 					</select>
 				</div>
 

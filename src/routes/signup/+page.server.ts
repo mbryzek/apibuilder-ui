@@ -46,7 +46,7 @@ export const actions: Actions = {
 				sameSite: 'lax',
 				maxAge: 60 * 60 * 24 * 365,
 			});
-			throw redirect(303, '/?flash=' + encodeURIComponent('Welcome to API Builder!') + '&flash_type=success');
+			throw redirect(303, '/org/create?flash=' + encodeURIComponent('Welcome to API Builder! Create your first organization to get started.') + '&flash_type=success');
 		}
 
 		throw redirect(303, '/login?flash=' + encodeURIComponent('Account created! Please sign in.') + '&flash_type=success');

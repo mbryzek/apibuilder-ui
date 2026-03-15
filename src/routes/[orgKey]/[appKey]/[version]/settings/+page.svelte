@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import type { Organization, Service } from '$generated/types';
+	import { Visibility } from '$generated/com-bryzek-bryzek-apibuilder-v0';
 
 	interface Props {
 		data: {
@@ -44,8 +45,9 @@
 			<input type="hidden" name="name" value={service.name} />
 			<div>
 				<select name="visibility" class="input-field w-full" value={data.org.visibility}>
-					<option value="organization">Organization — visible to members only</option>
-					<option value="public">Public — visible to everyone</option>
+					{#each Object.values(Visibility) as v}
+						<option value={v}>{v}</option>
+					{/each}
 				</select>
 			</div>
 			<button type="submit" class="btn-primary">Update Visibility</button>
