@@ -1,6 +1,6 @@
 code:
-  apicollective:
-    apibuilder-api:
+  bryzek:
+    bryzek-apibuilder:
       version: latest
       generators:
         - generator: typescript

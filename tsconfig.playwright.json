@@ -1,0 +1,19 @@
+{
+	"compilerOptions": {
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"target": "ES2021",
+		"lib": ["ES2021", "DOM"],
+		"types": ["@playwright/test", "node"],
+		"strict": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true,
+		"resolveJsonModule": true,
+		"isolatedModules": true,
+		"noEmit": true,
+		"allowImportingTsExtensions": true
+	},
+	"include": ["playwright/**/*.ts", "playwright.config.ts"],
+	"exclude": ["node_modules", "src/lib/**"]
+}
