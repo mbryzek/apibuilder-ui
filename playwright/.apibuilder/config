@@ -1,0 +1,22 @@
+code:
+  bryzek:
+    platform:
+      version: latest
+      generators:
+        - generator: typescript
+          target: ./generated
+          attributes:
+            - name: "filter"
+              value:
+                types:
+                  - user_reference
+                  - person
+                resources:
+                  - tenant_session
+                  - user
+                  - phone
+    platform-error:
+      version: latest
+      generators:
+        - generator: typescript
+          target: ./generated
