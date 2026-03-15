@@ -1860,7 +1860,7 @@ export class ApiClient {
     queryParts.push(`limit=${encodeURIComponent(String(params.limit))}`);
     queryParts.push(`offset=${encodeURIComponent(String(params.offset))}`);
     const queryString = queryParts.length > 0 ? '?' + queryParts.join('&') : '';
-    const url = `${this.baseUrl}/apibuilder/${params.orgKey}/${params.appKey}/versions${queryString}`;
+    const url = `${this.baseUrl}/apibuilder/${params.orgKey}/${params.appKey}${queryString}`;
 
       const response = await fetch(url, {
       method: 'GET',
@@ -1880,7 +1880,7 @@ export class ApiClient {
   }
 
   async getVersionByVersion(params: GetVersionByVersionOptions): Promise<Version> {
-    const url = `${this.baseUrl}/apibuilder/${params.orgKey}/${params.appKey}/versions/${params.version}`;
+    const url = `${this.baseUrl}/apibuilder/${params.orgKey}/${params.appKey}/${params.version}`;
 
       const response = await fetch(url, {
       method: 'GET',
@@ -1904,7 +1904,7 @@ export class ApiClient {
   }
 
   async createVersion(params: CreateVersionOptions): Promise<Version> {
-    const url = `${this.baseUrl}/apibuilder/${params.orgKey}/${params.appKey}/versions`;
+    const url = `${this.baseUrl}/apibuilder/${params.orgKey}/${params.appKey}`;
 
       const response = await fetch(url, {
       method: 'POST',
@@ -1929,7 +1929,7 @@ export class ApiClient {
   }
 
   async updateVersionByVersion(params: UpdateVersionByVersionOptions): Promise<Version> {
-    const url = `${this.baseUrl}/apibuilder/${params.orgKey}/${params.appKey}/versions/${params.version}`;
+    const url = `${this.baseUrl}/apibuilder/${params.orgKey}/${params.appKey}/${params.version}`;
 
       const response = await fetch(url, {
       method: 'PUT',
@@ -1954,7 +1954,7 @@ export class ApiClient {
   }
 
   async deleteVersionByVersion(params: DeleteVersionByVersionOptions): Promise<void> {
-    const url = `${this.baseUrl}/apibuilder/${params.orgKey}/${params.appKey}/versions/${params.version}`;
+    const url = `${this.baseUrl}/apibuilder/${params.orgKey}/${params.appKey}/${params.version}`;
 
       const response = await fetch(url, {
       method: 'DELETE',

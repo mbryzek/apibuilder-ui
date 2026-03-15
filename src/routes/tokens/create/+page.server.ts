@@ -27,7 +27,7 @@ export const actions: Actions = {
 		);
 
 		if ('data' in response) {
-			throw redirect(303, '/tokens');
+			throw redirect(303, `/tokens/${response.data.id}`);
 		}
 
 		if ('errors' in response) {
