@@ -17,7 +17,7 @@ export const actions: Actions = {
 
 		const response = await handleApiCall<Watch>(
 			() => createWatch({
-				user_guid: session.user.guid,
+				user_guid: session.user.id,
 				organization_key: params.orgKey,
 				application_key: params.appKey,
 			}, headers),

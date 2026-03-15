@@ -11,7 +11,7 @@ export const load: PageServerLoad = async (event) => {
 	const headers = getSessionHeaders(session.id);
 
 	const response = await handleApiCall<Subscription[]>(
-		() => getSubscriptions(headers, { organization_key: event.params.orgKey, user_guid: session.user.guid }),
+		() => getSubscriptions(headers, { organization_key: event.params.orgKey, user_guid: session.user.id }),
 	);
 
 	return {
@@ -42,7 +42,7 @@ export const actions: Actions = {
 			const response = await handleApiCall<Subscription>(
 				() => createSubscription({
 					organization_key: params.orgKey,
-					user_guid: session.user.guid,
+					user_guid: session.user.id,
 					publication,
 				}, headers),
 			);

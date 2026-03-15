@@ -12,13 +12,13 @@ export const load: PageServerLoad = async (event) => {
 
 	// Check if already a member
 	const membershipsResponse = await handleApiCall<Membership[]>(
-		() => getMemberships({ org_key: params.orgKey, user_guid: session.user.guid }, headers),
+		() => getMemberships({ org_key: params.orgKey, user_guid: session.user.id }, headers),
 	);
 	const isMember = 'data' in membershipsResponse && membershipsResponse.data.length > 0;
 
 	// Check if already requested
 	const requestsResponse = await handleApiCall<MembershipRequest[]>(
-		() => getMembershipRequests(headers, { org_key: params.orgKey, user_guid: session.user.guid }),
+		() => getMembershipRequests(headers, { org_key: params.orgKey, user_guid: session.user.id }),
 	);
 	const hasPendingRequest = 'data' in requestsResponse && requestsResponse.data.length > 0;
 
@@ -38,7 +38,7 @@ export const actions: Actions = {
 		}
 
 		const response = await handleApiCall<MembershipRequest>(
-			() => createMembershipRequest(orgResponse.data.guid, session.user.guid, 'member', headers),
+			() => createMembershipRequest(orgResponse.data.guid, session.user.id, 'member', headers),
 		);
 
 		if ('data' in response) {

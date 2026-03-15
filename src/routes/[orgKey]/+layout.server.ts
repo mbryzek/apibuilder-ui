@@ -21,7 +21,7 @@ export const load: LayoutServerLoad = async ({ params, locals }) => {
 
 	if (locals.session) {
 		const membershipsResponse = await handleApiCall<Membership[]>(
-			() => getMemberships({ org_key: params.orgKey, user_guid: locals.session!.user.guid }, headers),
+			() => getMemberships({ org_key: params.orgKey, user_guid: locals.session!.user.id }, headers),
 		);
 		if ('data' in membershipsResponse) {
 			isMember = membershipsResponse.data.length > 0;

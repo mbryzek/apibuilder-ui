@@ -1,16 +1,14 @@
 import type { Handle } from '@sveltejs/kit';
-import { getSessionById, getSessionHeaders } from '$lib/server/api';
+import { getSessionById, type TenantSession } from '$lib/server/api';
 import { handleApiCall } from '$lib/api/error-handler';
 import { SESSION_COOKIE, config } from '$lib/config';
-import type { Authentication } from '$generated/types';
 
 export const handle: Handle = async ({ event, resolve }) => {
 	const sessionId = event.cookies.get(SESSION_COOKIE) || undefined;
 
 	if (sessionId) {
-		const headers = getSessionHeaders(sessionId);
-		const response = await handleApiCall<Authentication>(
-			() => getSessionById(sessionId, headers),
+		const response = await handleApiCall<TenantSession>(
+			() => getSessionById(sessionId),
 			{
 				onUnauthorized: () => {
 					event.cookies.delete(SESSION_COOKIE, { path: '/' });

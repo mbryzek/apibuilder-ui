@@ -12,7 +12,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 	if (locals.session) {
 		const headers = getSessionHeaders(locals.session.id);
 		const membershipsResponse = await handleApiCall<Membership[]>(
-			() => getMemberships({ user_guid: locals.session!.user.guid }, headers),
+			() => getMemberships({ user_guid: locals.session!.user.id }, headers),
 		);
 		if ('data' in membershipsResponse) {
 			myOrgs = membershipsResponse.data.map((m) => m.organization);

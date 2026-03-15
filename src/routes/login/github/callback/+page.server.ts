@@ -1,10 +1,9 @@
 import type { PageServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
-import { authenticateGithub, exchangeGithubCode } from '$lib/server/api';
+import { authenticateGithub, exchangeGithubCode, type TenantSession } from '$lib/server/api';
 import { handleApiCall } from '$lib/api/error-handler';
 import { SESSION_COOKIE, config } from '$lib/config';
 import { env } from '$env/dynamic/private';
-import type { Authentication } from '$generated/types';
 
 export const load: PageServerLoad = async ({ url, cookies }) => {
 	const code = url.searchParams.get('code');
@@ -23,7 +22,7 @@ export const load: PageServerLoad = async ({ url, cookies }) => {
 		throw redirect(303, '/login?flash=' + encodeURIComponent(msg) + '&flash_type=error');
 	}
 
-	const response = await handleApiCall<Authentication>(
+	const response = await handleApiCall<TenantSession>(
 		() => authenticateGithub(accessToken),
 	);
 

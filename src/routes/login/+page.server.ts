@@ -1,9 +1,8 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
-import { authenticateEmail } from '$lib/server/api';
+import { authenticateEmail, type TenantSession } from '$lib/server/api';
 import { handleApiCall } from '$lib/api/error-handler';
 import { SESSION_COOKIE, config } from '$lib/config';
-import type { Authentication } from '$generated/types';
 
 export const load: PageServerLoad = async ({ locals, url }) => {
 	if (locals.session) {
@@ -27,7 +26,7 @@ export const actions: Actions = {
 			return fail(400, { errors: [{ message: 'Email and password are required' }] });
 		}
 
-		const response = await handleApiCall<Authentication>(
+		const response = await handleApiCall<TenantSession>(
 			() => authenticateEmail(email, password),
 		);
 

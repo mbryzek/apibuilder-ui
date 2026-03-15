@@ -1,6 +1,22 @@
 import { config } from '$lib/config';
 
+export interface TenantSessionUser {
+	id: string;
+	person: {
+		email?: { address: string };
+	};
+}
+
+export interface TenantSession {
+	session: { id: string };
+	user: TenantSessionUser;
+}
+
 type Headers = Record<string, string>;
+
+function devBypassHeaders(): Headers {
+	return config.isProduction ? {} : { 'X-Bypass-Rate-Limit': 'true' };
+}
 
 function buildUrl(path: string, params?: Record<string, string | number | boolean | undefined>): string {
 	const url = new URL(`${config.apiBaseUrl}${path}`);
@@ -56,21 +72,24 @@ export function getSessionHeaders(sessionId?: string): Headers {
 	if (!sessionId) {
 		return {};
 	}
-	return { Authorization: 'Session ' + sessionId };
+	return { session_id: sessionId };
 }
 
-// === Authentication ===
+// === Authentication (Platform tenant-scoped endpoints) ===
 
-export function getSessionById(sessionId: string, headers: Headers): Promise<globalThis.Response> {
-	return get(`/authentications/session/${sessionId}`, headers);
+export function getSessionById(sessionId: string): Promise<globalThis.Response> {
+	return get(`/tenant/${config.tenantId}/session`, { session_id: sessionId, ...devBypassHeaders() });
 }
 
 export function authenticateEmail(email: string, password: string): Promise<globalThis.Response> {
-	return post('/users/authenticate', {}, { email, password });
+	return post(`/tenant/${config.tenantId}/session/logins`, devBypassHeaders(), { email, password });
 }
 
-export function authenticateGithub(token: string): Promise<globalThis.Response> {
-	return post('/users/authenticate_github', {}, { token });
+export function createUser(form: { email: string; password: string; nickname?: string; name?: string }): Promise<globalThis.Response> {
+	const { email, password, name } = form;
+	const person: Record<string, string> = { email };
+	if (name) person['name'] = name;
+	return post(`/tenant/${config.tenantId}/session/signups`, devBypassHeaders(), { user: { person }, password });
 }
 
 export async function exchangeGithubCode(code: string, githubClientSecret: string): Promise<string> {
@@ -93,8 +112,8 @@ export async function exchangeGithubCode(code: string, githubClientSecret: strin
 	return data.access_token;
 }
 
-export function createUser(form: { email: string; password: string; nickname?: string; name?: string }): Promise<globalThis.Response> {
-	return post('/users', {}, form);
+export function authenticateGithub(token: string): Promise<globalThis.Response> {
+	return post('/users/authenticate_github', {}, { token });
 }
 
 // === Users ===

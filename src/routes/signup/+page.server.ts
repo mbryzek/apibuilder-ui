@@ -1,9 +1,8 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
-import { createUser, authenticateEmail } from '$lib/server/api';
+import { createUser, type TenantSession } from '$lib/server/api';
 import { handleApiCall } from '$lib/api/error-handler';
 import { SESSION_COOKIE, config } from '$lib/config';
-import type { Authentication, User } from '$generated/types';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	if (locals.session) {
@@ -27,21 +26,16 @@ export const actions: Actions = {
 		}
 
 		const form = name ? { email, password, name } : { email, password };
-		const createResponse = await handleApiCall<User>(
+		const response = await handleApiCall<TenantSession>(
 			() => createUser(form),
 		);
 
-		if ('errors' in createResponse) {
-			return fail(400, { errors: createResponse.errors, email, name });
+		if ('errors' in response) {
+			return fail(400, { errors: response.errors, email, name });
 		}
 
-		// Auto-login after successful signup
-		const authResponse = await handleApiCall<Authentication>(
-			() => authenticateEmail(email, password),
-		);
-
-		if ('data' in authResponse && authResponse.data) {
-			cookies.set(SESSION_COOKIE, authResponse.data.session.id, {
+		if ('data' in response && response.data) {
+			cookies.set(SESSION_COOKIE, response.data.session.id, {
 				path: '/',
 				httpOnly: true,
 				secure: config.isProduction,
@@ -51,7 +45,6 @@ export const actions: Actions = {
 			throw redirect(303, '/?flash=' + encodeURIComponent('Welcome to API Builder!') + '&flash_type=success');
 		}
 
-		// User created but auto-login failed — send to login page
 		throw redirect(303, '/login?flash=' + encodeURIComponent('Account created! Please sign in.') + '&flash_type=success');
 	},
 };

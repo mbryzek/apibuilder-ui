@@ -12,7 +12,7 @@ export const load: PageServerLoad = async (event) => {
 	const offset = Number(event.url.searchParams.get('offset') || '0');
 
 	const response = await handleApiCall<Token[]>(
-		() => getTokens(session.user.guid, headers, { limit: LIMIT, offset }),
+		() => getTokens(session.user.id, headers, { limit: LIMIT, offset }),
 	);
 
 	const tokens = 'data' in response ? response.data : [];

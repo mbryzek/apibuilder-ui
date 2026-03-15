@@ -1,13 +1,18 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
-import { updateUser, getSessionHeaders } from '$lib/server/api';
+import { updateUser, getUserByGuid, getSessionHeaders } from '$lib/server/api';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth } from '$lib/server/auth';
 import type { User } from '$generated/types';
 
 export const load: PageServerLoad = async (event) => {
 	const session = requireAuth(event);
-	return { user: session.user };
+	const headers = getSessionHeaders(session.id);
+	const response = await handleApiCall<User>(
+		() => getUserByGuid(session.user.id, headers),
+	);
+	const user = 'data' in response ? response.data : { email: session.user.person.email?.address ?? '', nickname: '', name: undefined };
+	return { user };
 };
 
 export const actions: Actions = {
@@ -32,7 +37,7 @@ export const actions: Actions = {
 
 		const headers = getSessionHeaders(locals.session.id);
 		const response = await handleApiCall<User>(
-			() => updateUser(locals.session!.user.guid, form, headers),
+			() => updateUser(locals.session!.user.id, form, headers),
 		);
 
 		if ('data' in response) {

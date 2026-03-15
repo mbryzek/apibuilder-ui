@@ -1,6 +1,6 @@
 export type Session = {
 	id: string;
-	user: import('$generated/types').User;
+	user: import('$lib/server/api').TenantSessionUser;
 };
 
 declare global {

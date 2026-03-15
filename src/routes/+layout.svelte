@@ -8,7 +8,7 @@
 	import type { Snippet } from 'svelte';
 
 	interface Props {
-		data: { session?: { id: string; user: { guid: string; nickname: string; email: string; name?: string } } };
+		data: { session?: { id: string; user: { id: string; person: { email?: { address: string } } } } };
 		children: Snippet;
 	}
 

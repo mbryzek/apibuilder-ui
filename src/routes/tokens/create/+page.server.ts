@@ -17,7 +17,7 @@ export const actions: Actions = {
 		const formData = await request.formData();
 		const description = formData.get('description') as string;
 
-		const form: { user_guid: string; description?: string } = { user_guid: session.user.guid };
+		const form: { user_guid: string; description?: string } = { user_guid: session.user.id };
 		if (description) {
 			form.description = description;
 		}
