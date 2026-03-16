@@ -1,21 +1,19 @@
 import type { PageServerLoad } from './$types';
-import { error } from '@sveltejs/kit';
-import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
+import { generatorClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
-import type { GeneratorWithService } from '$generated/com-bryzek-bryzek-apibuilder-v0';
+import { error } from '@sveltejs/kit';
+import type { Generator } from '$generated/com-bryzek-bryzek-apibuilder-generator-v0';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const headers = locals.session ? getSessionHeaders(locals.session.id) : {};
 
-	const response = await handleApiCall<GeneratorWithService>(
-		() => apiBuilderClient().getGeneratorWithServiceByKey(params.key, { headers }),
+	const response = await handleApiCall<Generator>(
+		() => generatorClient().getGeneratorByKey(params.key, { headers }),
 	);
 
-	if (!('data' in response)) {
-		throw error(response.status === 404 ? 404 : 500, 'Generator not found');
+	if ('data' in response) {
+		return { generator: response.data };
 	}
 
-	return {
-		generator: response.data,
-	};
+	throw error(404, 'Generator not found');
 };

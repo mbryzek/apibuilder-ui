@@ -58,27 +58,6 @@ export interface ApplicationMetadataVersion {
   version: string;
 }
 
-export interface Attribute {
-  id: string;
-  name: string;
-  description?: string;
-}
-
-export interface AttributeForm {
-  name: string;
-  description?: string;
-}
-
-export interface AttributeValue {
-  id: string;
-  attribute: Attribute;
-  value: string;
-}
-
-export interface AttributeValueForm {
-  value: string;
-}
-
 export interface Authentication {
   user: User;
   session: Session;
@@ -119,28 +98,6 @@ export interface Domain {
 
 export interface EmailVerificationConfirmationForm {
   token: string;
-}
-
-export interface Generator {
-  key: string;
-  name: string;
-  language?: string;
-  description?: string;
-  attributes?: string[];
-}
-
-export interface GeneratorService {
-  id: string;
-  uri: string;
-}
-
-export interface GeneratorServiceForm {
-  uri: string;
-}
-
-export interface GeneratorWithService {
-  service: GeneratorService;
-  generator: Generator;
 }
 
 export interface GithubAuthForm {
@@ -345,43 +302,6 @@ export interface GetApplicationMetadataVersionsOptions {
   headers?: Record<string, string>;
 }
 
-export interface GetAttributesOptions {
-  limit: number;
-  offset: number;
-  name?: string;
-  headers?: Record<string, string>;
-}
-
-export interface CreateAttributeOptions {
-  body: AttributeForm;
-  headers?: Record<string, string>;
-}
-
-export interface DeleteAttributeByNameOptions {
-  headers?: Record<string, string>;
-}
-
-export interface GetAttributeValuesOptions {
-  orgKey: string;
-  limit: number;
-  offset: number;
-  name?: string;
-  headers?: Record<string, string>;
-}
-
-export interface UpdateAttributeValueByNameOptions {
-  orgKey: string;
-  name: string;
-  body: AttributeValueForm;
-  headers?: Record<string, string>;
-}
-
-export interface DeleteAttributeValueByNameOptions {
-  orgKey: string;
-  name: string;
-  headers?: Record<string, string>;
-}
-
 export interface GetChangesOptions {
   limit: number;
   offset: number;
@@ -395,6 +315,7 @@ export interface GetCodeOptions {
   appKey: string;
   version: string;
   generatorKey: string;
+  attributes?: string;
   headers?: Record<string, string>;
 }
 
@@ -412,31 +333,6 @@ export interface DeleteDomainByNameOptions {
 
 export interface CreateEmailVerificationConfirmationFormOptions {
   body: EmailVerificationConfirmationForm;
-  headers?: Record<string, string>;
-}
-
-export interface GetGeneratorServiceByIdOptions {
-  headers?: Record<string, string>;
-}
-
-export interface CreateGeneratorServiceOptions {
-  body: GeneratorServiceForm;
-  headers?: Record<string, string>;
-}
-
-export interface DeleteGeneratorServiceByIdOptions {
-  headers?: Record<string, string>;
-}
-
-export interface GetGeneratorWithServicesOptions {
-  limit: number;
-  offset: number;
-  key?: string;
-  serviceGuid?: string;
-  headers?: Record<string, string>;
-}
-
-export interface GetGeneratorWithServiceByKeyOptions {
   headers?: Record<string, string>;
 }
 
@@ -595,13 +491,6 @@ export interface GetVersionByVersionOptions {
   orgKey: string;
   appKey: string;
   version: string;
-  headers?: Record<string, string>;
-}
-
-export interface CreateVersionOptions {
-  orgKey: string;
-  appKey: string;
-  body: VersionForm;
   headers?: Record<string, string>;
 }
 
@@ -817,148 +706,6 @@ export class ApiClient {
 
   }
 
-  async getAttributes(params: GetAttributesOptions): Promise<Attribute[]> {
-    const queryParts: string[] = [];
-    if (params.name !== undefined && params.name !== null) {
-      queryParts.push(`name=${encodeURIComponent(params.name)}`);
-    }
-    queryParts.push(`limit=${encodeURIComponent(String(params.limit))}`);
-    queryParts.push(`offset=${encodeURIComponent(String(params.offset))}`);
-    const queryString = queryParts.length > 0 ? '?' + queryParts.join('&') : '';
-    const url = `${this.baseUrl}/apibuilder/attributes${queryString}`;
-
-      const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
-    });
-
-    if (response.status === 200) {
-      const data = await response.json();
-      return data;
-    }
-
-    throw new ApiException(response, `Request failed with status ${response.status}`);
-
-  }
-
-  async createAttribute(params: CreateAttributeOptions): Promise<Attribute> {
-    const url = `${this.baseUrl}/apibuilder/attributes`;
-
-      const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
-      body: JSON.stringify(params.body),
-    });
-
-    if (response.status === 201) {
-      const data = await response.json();
-      return data;
-    }
-
-    if (response.status === 422) {
-      throw new ValidationErrorsResponse(response);
-    }
-
-    throw new ApiException(response, `Request failed with status ${response.status}`);
-
-  }
-
-  async deleteAttributeByName(name: string, options?: DeleteAttributeByNameOptions): Promise<void> {
-    const url = `${this.baseUrl}/apibuilder/attributes/${name}`;
-
-      const response = await fetch(url, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(options?.headers || {}),
-      },
-    });
-
-    if (response.status === 204) {
-      return;
-    }
-
-    throw new ApiException(response, `Request failed with status ${response.status}`);
-
-  }
-
-  async getAttributeValues(params: GetAttributeValuesOptions): Promise<AttributeValue[]> {
-    const queryParts: string[] = [];
-    if (params.name !== undefined && params.name !== null) {
-      queryParts.push(`name=${encodeURIComponent(params.name)}`);
-    }
-    queryParts.push(`limit=${encodeURIComponent(String(params.limit))}`);
-    queryParts.push(`offset=${encodeURIComponent(String(params.offset))}`);
-    const queryString = queryParts.length > 0 ? '?' + queryParts.join('&') : '';
-    const url = `${this.baseUrl}/apibuilder/organizations/${params.orgKey}/attributes${queryString}`;
-
-      const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
-    });
-
-    if (response.status === 200) {
-      const data = await response.json();
-      return data;
-    }
-
-    throw new ApiException(response, `Request failed with status ${response.status}`);
-
-  }
-
-  async updateAttributeValueByName(params: UpdateAttributeValueByNameOptions): Promise<AttributeValue> {
-    const url = `${this.baseUrl}/apibuilder/organizations/${params.orgKey}/attributes/${params.name}`;
-
-      const response = await fetch(url, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
-      body: JSON.stringify(params.body),
-    });
-
-    if (response.status === 200) {
-      const data = await response.json();
-      return data;
-    }
-
-    if (response.status === 422) {
-      throw new ValidationErrorsResponse(response);
-    }
-
-    throw new ApiException(response, `Request failed with status ${response.status}`);
-
-  }
-
-  async deleteAttributeValueByName(params: DeleteAttributeValueByNameOptions): Promise<void> {
-    const url = `${this.baseUrl}/apibuilder/organizations/${params.orgKey}/attributes/${params.name}`;
-
-      const response = await fetch(url, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
-    });
-
-    if (response.status === 204) {
-      return;
-    }
-
-    throw new ApiException(response, `Request failed with status ${response.status}`);
-
-  }
-
   async getChanges(params: GetChangesOptions): Promise<Change[]> {
     const queryParts: string[] = [];
     if (params.orgKey !== undefined && params.orgKey !== null) {
@@ -990,7 +737,12 @@ export class ApiClient {
   }
 
   async getCode(params: GetCodeOptions): Promise<Code> {
-    const url = `${this.baseUrl}/apibuilder/${params.orgKey}/${params.appKey}/${params.version}/${params.generatorKey}`;
+    const queryParts: string[] = [];
+    if (params.attributes !== undefined && params.attributes !== null) {
+      queryParts.push(`attributes=${encodeURIComponent(params.attributes)}`);
+    }
+    const queryString = queryParts.length > 0 ? '?' + queryParts.join('&') : '';
+    const url = `${this.baseUrl}/apibuilder/${params.orgKey}/${params.appKey}/${params.version}/${params.generatorKey}${queryString}`;
 
       const response = await fetch(url, {
       method: 'GET',
@@ -1075,128 +827,6 @@ export class ApiClient {
 
     if (response.status === 204) {
       return;
-    }
-
-    throw new ApiException(response, `Request failed with status ${response.status}`);
-
-  }
-
-  async getGeneratorServiceById(id: string, options?: GetGeneratorServiceByIdOptions): Promise<GeneratorService> {
-    const url = `${this.baseUrl}/apibuilder/generator/services/${id}`;
-
-      const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(options?.headers || {}),
-      },
-    });
-
-    if (response.status === 200) {
-      const data = await response.json();
-      return data;
-    }
-
-    if (response.status === 404) {
-      throw new VoidResponse(response);
-    }
-
-    throw new ApiException(response, `Request failed with status ${response.status}`);
-
-  }
-
-  async createGeneratorService(params: CreateGeneratorServiceOptions): Promise<GeneratorService> {
-    const url = `${this.baseUrl}/apibuilder/generator/services`;
-
-      const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
-      body: JSON.stringify(params.body),
-    });
-
-    if (response.status === 201) {
-      const data = await response.json();
-      return data;
-    }
-
-    if (response.status === 422) {
-      throw new ValidationErrorsResponse(response);
-    }
-
-    throw new ApiException(response, `Request failed with status ${response.status}`);
-
-  }
-
-  async deleteGeneratorServiceById(id: string, options?: DeleteGeneratorServiceByIdOptions): Promise<void> {
-    const url = `${this.baseUrl}/apibuilder/generator/services/${id}`;
-
-      const response = await fetch(url, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(options?.headers || {}),
-      },
-    });
-
-    if (response.status === 204) {
-      return;
-    }
-
-    throw new ApiException(response, `Request failed with status ${response.status}`);
-
-  }
-
-  async getGeneratorWithServices(params: GetGeneratorWithServicesOptions): Promise<GeneratorWithService[]> {
-    const queryParts: string[] = [];
-    if (params.key !== undefined && params.key !== null) {
-      queryParts.push(`key=${encodeURIComponent(params.key)}`);
-    }
-    if (params.serviceGuid !== undefined && params.serviceGuid !== null) {
-      queryParts.push(`service_guid=${encodeURIComponent(params.serviceGuid)}`);
-    }
-    queryParts.push(`limit=${encodeURIComponent(String(params.limit))}`);
-    queryParts.push(`offset=${encodeURIComponent(String(params.offset))}`);
-    const queryString = queryParts.length > 0 ? '?' + queryParts.join('&') : '';
-    const url = `${this.baseUrl}/apibuilder/generators${queryString}`;
-
-      const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
-    });
-
-    if (response.status === 200) {
-      const data = await response.json();
-      return data;
-    }
-
-    throw new ApiException(response, `Request failed with status ${response.status}`);
-
-  }
-
-  async getGeneratorWithServiceByKey(key: string, options?: GetGeneratorWithServiceByKeyOptions): Promise<GeneratorWithService> {
-    const url = `${this.baseUrl}/apibuilder/generators/${key}`;
-
-      const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(options?.headers || {}),
-      },
-    });
-
-    if (response.status === 200) {
-      const data = await response.json();
-      return data;
-    }
-
-    if (response.status === 404) {
-      throw new VoidResponse(response);
     }
 
     throw new ApiException(response, `Request failed with status ${response.status}`);
@@ -1897,31 +1527,6 @@ export class ApiClient {
 
     if (response.status === 404) {
       throw new VoidResponse(response);
-    }
-
-    throw new ApiException(response, `Request failed with status ${response.status}`);
-
-  }
-
-  async createVersion(params: CreateVersionOptions): Promise<Version> {
-    const url = `${this.baseUrl}/apibuilder/${params.orgKey}/${params.appKey}`;
-
-      const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
-      body: JSON.stringify(params.body),
-    });
-
-    if (response.status === 201) {
-      const data = await response.json();
-      return data;
-    }
-
-    if (response.status === 422) {
-      throw new ValidationErrorsResponse(response);
     }
 
     throw new ApiException(response, `Request failed with status ${response.status}`);

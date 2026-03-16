@@ -10,6 +10,11 @@ code:
       generators:
         - generator: typescript
           target: ./src/generated
+    bryzek-apibuilder-generator:
+      version: latest
+      generators:
+        - generator: typescript
+          target: ./src/generated
     platform:
       version: latest
       generators:

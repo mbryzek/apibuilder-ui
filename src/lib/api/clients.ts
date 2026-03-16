@@ -4,10 +4,11 @@
  */
 
 import { ApiClient as ApiBuilderClient } from "$generated/com-bryzek-bryzek-apibuilder-v0";
+import { ApiClient as GeneratorClient } from "$generated/com-bryzek-bryzek-apibuilder-generator-v0";
 import { ApiClient as PlatformClient } from "$generated/com-bryzek-platform-v0";
 import { config } from "$lib/config";
 
-export { ApiBuilderClient, PlatformClient };
+export { ApiBuilderClient, GeneratorClient, PlatformClient };
 
 export function clients() {
 	return {
@@ -18,6 +19,10 @@ export function clients() {
 
 export function apiBuilderClient(): ApiBuilderClient {
 	return new ApiBuilderClient(config.apiBaseUrl);
+}
+
+export function generatorClient(): GeneratorClient {
+	return new GeneratorClient(config.apiBaseUrl);
 }
 
 export function platformClient(): PlatformClient {

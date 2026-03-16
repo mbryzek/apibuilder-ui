@@ -114,13 +114,6 @@
 									Generators
 								</a>
 								<a
-									href="/attributes"
-									class="block px-4 py-2 text-sm text-gray-700 hover:bg-ab-light-gray transition-colors"
-									onclick={closeUserDropdown}
-								>
-									Attributes
-								</a>
-								<a
 									href="/account/profile"
 									class="block px-4 py-2 text-sm text-gray-700 hover:bg-ab-light-gray transition-colors"
 									onclick={closeUserDropdown}
@@ -221,13 +214,6 @@
 					onclick={closeMobileMenu}
 				>
 					Generators
-				</a>
-				<a
-					href="/attributes"
-					class="block px-3 py-2 text-white hover:text-white hover:bg-white/10 rounded-md transition-colors"
-					onclick={closeMobileMenu}
-				>
-					Attributes
 				</a>
 				<a
 					href="/account/profile"

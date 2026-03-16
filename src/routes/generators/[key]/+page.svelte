@@ -1,16 +1,15 @@
 <script lang="ts">
-	import type { GeneratorWithService } from '$generated/com-bryzek-bryzek-apibuilder-v0';
+	import type { Generator } from '$generated/com-bryzek-bryzek-apibuilder-generator-v0';
 
 	interface Props {
 		data: {
-			generator: GeneratorWithService;
+			generator: Generator;
 		};
 	}
 
 	let { data }: Props = $props();
 
-	const gws = $derived(data.generator);
-	const gen = $derived(gws.generator);
+	const gen = $derived(data.generator);
 </script>
 
 <svelte:head>
@@ -25,30 +24,21 @@
 	<h1 class="text-2xl font-bold text-ab-dark-blue mb-6">{gen.name}</h1>
 
 	<div class="card">
-		<dl class="space-y-4">
+		<dl class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 			<div>
 				<dt class="text-sm font-semibold text-ab-gray">Key</dt>
-				<dd class="text-ab-dark-blue mt-1">{gen.key}</dd>
+				<dd class="text-ab-dark-blue">{gen.key}</dd>
 			</div>
-
 			{#if gen.language}
 				<div>
 					<dt class="text-sm font-semibold text-ab-gray">Language</dt>
-					<dd class="text-ab-dark-blue mt-1">{gen.language}</dd>
+					<dd class="text-ab-dark-blue">{gen.language}</dd>
 				</div>
 			{/if}
-
-			{#if gen.description}
-				<div>
-					<dt class="text-sm font-semibold text-ab-gray">Description</dt>
-					<dd class="text-ab-dark-blue mt-1">{gen.description}</dd>
-				</div>
-			{/if}
-
 			{#if gen.attributes && gen.attributes.length > 0}
 				<div>
 					<dt class="text-sm font-semibold text-ab-gray">Attributes</dt>
-					<dd class="mt-1">
+					<dd>
 						<ul class="list-disc list-inside text-ab-dark-blue">
 							{#each gen.attributes as attr}
 								<li>{attr}</li>
@@ -57,13 +47,6 @@
 					</dd>
 				</div>
 			{/if}
-
-			<div>
-				<dt class="text-sm font-semibold text-ab-gray">Service URI</dt>
-				<dd class="mt-1">
-					<a href="/generators/services/{gws.service.id}" class="text-ab-blue hover:text-ab-dark-blue">{gws.service.uri}</a>
-				</dd>
-			</div>
 		</dl>
 	</div>
 </div>

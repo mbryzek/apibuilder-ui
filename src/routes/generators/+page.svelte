@@ -1,10 +1,10 @@
 <script lang="ts">
 	import Pagination from '$lib/components/Pagination.svelte';
-	import type { GeneratorWithService } from '$generated/com-bryzek-bryzek-apibuilder-v0';
+	import type { Generator } from '$generated/com-bryzek-bryzek-apibuilder-generator-v0';
 
 	interface Props {
 		data: {
-			generators: GeneratorWithService[];
+			generators: Generator[];
 			offset: number;
 			hasMore: boolean;
 		};
@@ -16,13 +16,12 @@
 
 	const filtered = $derived(
 		searchQuery
-			? data.generators.filter((gws) => {
+			? data.generators.filter((gen) => {
 					const q = searchQuery.toLowerCase();
 					return (
-						gws.generator.key.toLowerCase().includes(q) ||
-						gws.generator.name.toLowerCase().includes(q) ||
-						(gws.generator.language ?? '').toLowerCase().includes(q) ||
-						(gws.generator.description ?? '').toLowerCase().includes(q)
+						gen.key.toLowerCase().includes(q) ||
+						gen.name.toLowerCase().includes(q) ||
+						(gen.language ?? '').toLowerCase().includes(q)
 					);
 				})
 			: data.generators,
@@ -57,20 +56,18 @@
 						<th class="pb-3 text-sm font-semibold text-ab-gray">Key</th>
 						<th class="pb-3 text-sm font-semibold text-ab-gray hidden sm:table-cell">Name</th>
 						<th class="pb-3 text-sm font-semibold text-ab-gray hidden md:table-cell">Language</th>
-						<th class="pb-3 text-sm font-semibold text-ab-gray hidden lg:table-cell">Description</th>
 					</tr>
 				</thead>
 				<tbody>
-					{#each filtered as gws (gws.generator.key)}
+					{#each filtered as gen (gen.key)}
 						<tr class="border-b border-gray-100 hover:bg-ab-light-gray/50 transition-colors">
 							<td class="py-3">
-								<a href="/generators/{gws.generator.key}" class="text-ab-blue hover:text-ab-dark-blue font-medium">
-									{gws.generator.key}
+								<a href="/generators/{gen.key}" class="text-ab-blue hover:text-ab-dark-blue font-medium">
+									{gen.key}
 								</a>
 							</td>
-							<td class="py-3 hidden sm:table-cell text-ab-dark-blue">{gws.generator.name}</td>
-							<td class="py-3 hidden md:table-cell text-ab-gray">{gws.generator.language ?? '-'}</td>
-							<td class="py-3 hidden lg:table-cell text-sm text-ab-gray">{gws.generator.description ?? ''}</td>
+							<td class="py-3 hidden sm:table-cell text-ab-dark-blue">{gen.name}</td>
+							<td class="py-3 hidden md:table-cell text-ab-gray">{gen.language ?? '-'}</td>
 						</tr>
 					{/each}
 				</tbody>
