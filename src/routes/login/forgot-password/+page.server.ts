@@ -1,6 +1,7 @@
 import type { Actions } from './$types';
-import { apiBuilderClient } from '$lib/api/clients';
+import { platformClient } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
+import { config } from '$lib/config';
 
 export const actions: Actions = {
 	default: async ({ request }) => {
@@ -12,7 +13,10 @@ export const actions: Actions = {
 		}
 
 		await handleApiCall<void>(
-			() => apiBuilderClient().createPasswordResetRequestForm({ body: { email } }),
+			() => platformClient().createTenantSessionPasswordAndResets({
+				tenantId: config.tenantId,
+				body: { email },
+			}),
 		);
 
 		// Always show success regardless of whether email exists

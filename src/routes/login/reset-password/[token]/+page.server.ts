@@ -1,9 +1,9 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
-import { apiBuilderClient } from '$lib/api/clients';
+import { platformClient } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { SESSION_COOKIE, config } from '$lib/config';
-import type { Authentication } from '$generated/com-bryzek-bryzek-apibuilder-v0';
+import { isTenantSession, type SessionState } from '$generated/com-bryzek-platform-v0';
 
 export const load: PageServerLoad = async ({ params }) => {
 	return { token: params.token };
@@ -23,11 +23,14 @@ export const actions: Actions = {
 			return fail(400, { errors: [{ message: 'Passwords do not match' }] });
 		}
 
-		const response = await handleApiCall<Authentication>(
-			() => apiBuilderClient().createPasswordResetForm({ body: { token: params.token, password } }),
+		const response = await handleApiCall<SessionState>(
+			() => platformClient().createTenantSessionPasswordAndChanges({
+				tenantId: config.tenantId,
+				body: { id: params.token, password },
+			}),
 		);
 
-		if ('data' in response && response.data) {
+		if ('data' in response && response.data && isTenantSession(response.data)) {
 			cookies.set(SESSION_COOKIE, response.data.session.id, {
 				path: '/',
 				httpOnly: true,

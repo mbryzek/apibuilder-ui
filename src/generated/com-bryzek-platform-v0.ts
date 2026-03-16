@@ -122,6 +122,10 @@ export interface Email {
   verified_at?: ISODateTimeString;
 }
 
+export interface EmailVerification {
+
+}
+
 export interface LoginForm {
   email: string;
   password: string;
@@ -362,10 +366,14 @@ export function isSmsOptinRequestResultRateLimited(obj: SmsOptinRequestResult): 
 // API Client
 // ============================================================================
 
-import { UnauthorizedErrorsResponse } from './generated-error-unauthorized-errors-response.ts';
 import { VoidResponse } from './generated-error-void-response.ts';
+import { UnauthorizedErrorsResponse } from './generated-error-unauthorized-errors-response.ts';
 import { ValidationErrorsResponse } from './generated-error-validation-errors-response.ts';
 import { ApiException } from "./generated-util.ts";
+
+export interface UpdateEmailVerificationByTokenOptions {
+  headers?: Record<string, string>;
+}
 
 export interface CreatePhoneOptinAndResendByIdOptions {
   headers?: Record<string, string>;
@@ -474,6 +482,29 @@ export class ApiClient {
 
   constructor(baseUrl: string) {
     this.baseUrl = baseUrl;
+  }
+
+  async updateEmailVerificationByToken(token: string, options?: UpdateEmailVerificationByTokenOptions): Promise<void> {
+    const url = `${this.baseUrl}/email/verifications/${token}`;
+
+      const response = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(options?.headers || {}),
+      },
+    });
+
+    if (response.status === 204) {
+      return;
+    }
+
+    if (response.status === 404) {
+      throw new VoidResponse(response);
+    }
+
+    throw new ApiException(response, `Request failed with status ${response.status}`);
+
   }
 
   async createPhoneOptinAndResendById(id: string, options?: CreatePhoneOptinAndResendByIdOptions): Promise<SmsOptinRequestResult> {
