@@ -3,14 +3,15 @@ import { error } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import type { ApplicationMetadataVersion } from '$generated/com-bryzek-bryzek-apibuilder-v0';
-import type { Version, Watch } from '$generated/types';
+import type { Version, Watch } from '$generated/com-bryzek-bryzek-apibuilder-v0';
+import type { Service } from '$generated/types';
 
 export const load: LayoutServerLoad = async ({ params, locals }) => {
 	const headers = locals.session ? getSessionHeaders(locals.session.id) : {};
 	const client = apiBuilderClient();
 
-	const versionResponse = await handleApiCall<Version>(
-		() => client.getVersionByVersion({ orgKey: params.orgKey, appKey: params.appKey, version: params.version, headers }) as unknown as Promise<Version>,
+	const versionResponse = await handleApiCall<Version & { service: Service }>(
+		() => client.getVersionByVersion({ orgKey: params.orgKey, appKey: params.appKey, version: params.version, headers }) as unknown as Promise<Version & { service: Service }>,
 	);
 
 	if (!('data' in versionResponse)) {
@@ -47,6 +48,6 @@ export const load: LayoutServerLoad = async ({ params, locals }) => {
 		service: version.service,
 		versions,
 		isWatching: currentWatch !== null,
-		watchGuid: currentWatch?.guid,
+		watchGuid: currentWatch?.id,
 	};
 };

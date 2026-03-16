@@ -1,43 +1,40 @@
 <script lang="ts">
-	import type { Code } from '$generated/types';
+	import { page } from '$app/stores';
+	import type { Code } from '$generated/com-bryzek-bryzek-apibuilder-v0';
 
 	interface Props {
 		data: {
 			code: Code;
 			generatorKey: string;
-			version: { version: string; organization: { key: string }; application: { key: string } };
 		};
 	}
 
 	let { data }: Props = $props();
 
 	const code = $derived(data.code);
-	const generator = $derived(code.generator.generator);
 	const files = $derived(code.files);
 
 	let selectedFileIndex = $state(0);
 	const selectedFile = $derived(files.length > 0 ? files[selectedFileIndex] : null);
+
+	const orgKey = $derived($page.params.orgKey);
+	const appKey = $derived($page.params.appKey);
+	const versionName = $derived($page.params.version);
 </script>
 
 <svelte:head>
-	<title>{generator.name} - Generated Code - API Builder</title>
+	<title>{data.generatorKey} - Generated Code - API Builder</title>
 </svelte:head>
 
 <div>
 	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
 		<div>
-			<h2 class="text-xl font-bold text-ab-dark-blue">{generator.name}</h2>
-			{#if generator.description}
-				<p class="text-sm text-ab-gray mt-1">{generator.description}</p>
-			{/if}
-			{#if generator.language}
-				<p class="text-xs text-ab-gray mt-0.5">Language: {generator.language}</p>
-			{/if}
+			<h2 class="text-xl font-bold text-ab-dark-blue">{data.generatorKey}</h2>
 		</div>
 		{#if files.length > 0}
 			<div class="flex gap-2 mt-3 sm:mt-0">
 				<a
-					href="/{data.version.organization.key}/{data.version.application.key}/{data.version.version}/{data.generatorKey}/download"
+					href="/{orgKey}/{appKey}/{versionName}/{data.generatorKey}/download"
 					class="btn-secondary text-sm inline-block text-center"
 				>
 					Download Files
@@ -45,13 +42,6 @@
 			</div>
 		{/if}
 	</div>
-
-	{#if code.source}
-		<div class="bg-ab-light-gray rounded-lg p-4 mb-6 text-sm">
-			<span class="font-medium text-ab-dark-gray">Source:</span>
-			<code class="text-ab-blue">{code.source}</code>
-		</div>
-	{/if}
 
 	{#if files.length === 0}
 		<p class="text-ab-gray">No files generated.</p>
@@ -69,9 +59,6 @@
 							onclick={() => (selectedFileIndex = i)}
 						>
 							<span class="block truncate">{file.dir ? `${file.dir}/` : ''}{file.name}</span>
-							{#if file.flags && file.flags.length > 0}
-								<span class="text-xs opacity-75">[{file.flags.join(', ')}]</span>
-							{/if}
 						</button>
 					{/each}
 				</div>

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import type { Organization, MembershipRequest } from '$generated/types';
+	import type { Organization, MembershipRequest } from '$generated/com-bryzek-bryzek-apibuilder-v0';
 	import type { ApiErrorItem } from '$lib/api/error-handler';
 
 	interface Props {
@@ -37,7 +37,7 @@
 		<p class="text-ab-gray">No pending membership requests.</p>
 	{:else}
 		<div class="space-y-4">
-			{#each requests as req (req.guid)}
+			{#each requests as req (req.id)}
 				<div class="card flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
 					<div>
 						<div class="font-medium text-ab-dark-blue">{req.user.nickname}</div>
@@ -46,11 +46,11 @@
 					</div>
 					<div class="flex gap-2">
 						<form method="POST" action="?/accept" use:enhance={() => { isSubmitting = true; return async ({ update }) => { isSubmitting = false; await update(); }; }}>
-							<input type="hidden" name="guid" value={req.guid} />
+							<input type="hidden" name="guid" value={req.id} />
 							<button type="submit" class="btn-primary text-sm px-4 py-2" disabled={isSubmitting}>Accept</button>
 						</form>
 						<form method="POST" action="?/decline" use:enhance={() => { isSubmitting = true; return async ({ update }) => { isSubmitting = false; await update(); }; }}>
-							<input type="hidden" name="guid" value={req.guid} />
+							<input type="hidden" name="guid" value={req.id} />
 							<button type="submit" class="btn-secondary text-sm px-4 py-2" disabled={isSubmitting}>Decline</button>
 						</form>
 					</div>

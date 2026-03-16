@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Pagination from '$lib/components/Pagination.svelte';
-	import type { GeneratorWithService } from '$generated/types';
+	import type { GeneratorWithService } from '$generated/com-bryzek-bryzek-apibuilder-v0';
 
 	interface Props {
 		data: {

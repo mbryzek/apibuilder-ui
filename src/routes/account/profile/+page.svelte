@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import type { ApiErrorItem } from '$lib/api/error-handler';
-	import type { User } from '$generated/types';
+	import type { User } from '$generated/com-bryzek-bryzek-apibuilder-v0';
 
 	interface Props {
 		data: { user: User };

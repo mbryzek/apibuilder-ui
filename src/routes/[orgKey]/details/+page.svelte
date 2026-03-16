@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import type { Organization } from '$generated/types';
+	import type { Organization } from '$generated/com-bryzek-bryzek-apibuilder-v0';
 	import type { ApiErrorItem } from '$lib/api/error-handler';
 	import { Visibility } from '$generated/com-bryzek-bryzek-apibuilder-v0';
 

@@ -5,12 +5,12 @@ import type { Change } from '$generated/com-bryzek-bryzek-apibuilder-v0';
 
 const LIMIT = 25;
 
-export const load: PageServerLoad = async ({ url, locals, parent }) => {
+export const load: PageServerLoad = async ({ url, locals, parent, params }) => {
 	const { version } = await parent();
 	const headers = locals.session ? getSessionHeaders(locals.session.id) : {};
 	const offset = Number(url.searchParams.get('offset') || '0');
-	const orgKey = version.organization.key;
-	const appKey = version.application.key;
+	const orgKey = params.orgKey;
+	const appKey = params.appKey;
 	const client = apiBuilderClient();
 
 	const response = await handleApiCall<Change[]>(

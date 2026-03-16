@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type { Organization } from '$generated/types';
+	import type { Organization } from '$generated/com-bryzek-bryzek-apibuilder-v0';
 
 	interface Props {
 		data: {
-			session?: { id: string; user: { guid: string; nickname: string } };
+			session?: { id: string; user: { id: string; person: { email?: { address: string } } } };
 			publicOrgs?: Organization[];
 			myOrgs: Organization[];
 		};

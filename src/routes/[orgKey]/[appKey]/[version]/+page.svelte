@@ -1,18 +1,19 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { enhance } from '$app/forms';
-	import type { Service, Version } from '$generated/types';
+	import { page } from '$app/stores';
+	import type { Service } from '$generated/types';
 	import SpecTabs from '$lib/components/spec/SpecTabs.svelte';
 
 	interface Props {
 		data: {
 			service: Service;
-			version: Version;
+			version: { version: string };
 			versions: { version: string }[];
 			isMember: boolean;
 			isWatching: boolean;
 			watchGuid?: string;
-			session?: { id: string; user: { guid: string; email: string; nickname: string } };
+			session?: { id: string; user: { id: string; person: { email?: { address: string } } } };
 		};
 		form: {
 			errors?: { message: string }[];
@@ -24,8 +25,8 @@
 	const service = $derived(data.service);
 	const version = $derived(data.version);
 	const versions = $derived(data.versions);
-	const orgKey = $derived(version.organization.key);
-	const appKey = $derived(version.application.key);
+	const orgKey = $derived($page.params.orgKey);
+	const appKey = $derived($page.params.appKey);
 	const versionBase = $derived(`/${orgKey}/${appKey}/${version.version}`);
 	const exampleBaseUrl = $derived(`${versionBase}/example`);
 

@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import type { ApiAttribute } from '$generated/types';
+	import type { Attribute } from '$generated/com-bryzek-bryzek-apibuilder-v0';
 	import type { ApiErrorItem } from '$lib/api/error-handler';
 
 	interface Props {
 		data: {
-			attribute: ApiAttribute;
+			attribute: Attribute;
 		};
 		form: { errors?: ApiErrorItem[] } | null;
 	}

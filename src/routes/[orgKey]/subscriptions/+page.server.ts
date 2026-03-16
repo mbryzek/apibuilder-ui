@@ -25,15 +25,15 @@ export const actions: Actions = {
 		const headers = getSessionHeaders(session.id);
 		const formData = await request.formData();
 		const publication = formData.get('publication');
-		const subscriptionGuid = formData.get('subscription_guid') as string | null;
+		const subscriptionId = formData.get('subscription_id') as string | null;
 
 		if (!publication || typeof publication !== 'string' || !Object.values(Publication).includes(publication as Publication)) {
 			return fail(400, { errors: [{ message: 'Invalid publication' }] });
 		}
 
-		if (subscriptionGuid) {
+		if (subscriptionId) {
 			const response = await handleApiCall<void>(
-				() => apiBuilderClient().deleteSubscriptionById(subscriptionGuid, { headers }),
+				() => apiBuilderClient().deleteSubscriptionById(subscriptionId, { headers }),
 			);
 			if ('errors' in response) {
 				return fail(400, { errors: response.errors });

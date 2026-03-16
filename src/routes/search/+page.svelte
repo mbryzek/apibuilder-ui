@@ -2,7 +2,7 @@
 	import { onDestroy } from 'svelte';
 	import { goto } from '$app/navigation';
 	import Pagination from '$lib/components/Pagination.svelte';
-	import type { Item } from '$generated/types';
+	import type { Item } from '$generated/com-bryzek-bryzek-apibuilder-v0';
 
 	interface Props {
 		data: {
@@ -43,10 +43,7 @@
 	});
 
 	function itemUrl(item: Item): string {
-		if (item.detail.type === 'application_summary') {
-			return `/${item.detail.organization.key}/${item.detail.key}`;
-		}
-		return '#';
+		return `/${item.organization_key}/${item.application_key}`;
 	}
 </script>
 
@@ -76,7 +73,7 @@
 			<p class="text-ab-gray">No results found for "{data.q}".</p>
 		{:else}
 			<div class="space-y-3">
-				{#each items as item (item.guid)}
+				{#each items as item (item.id)}
 					<div class="card">
 						<a href={itemUrl(item)} class="text-ab-blue hover:text-ab-dark-blue font-medium">
 							{item.label}

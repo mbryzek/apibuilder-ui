@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import type { Organization, AttributeValue, ApiAttribute } from '$generated/types';
+	import type { Organization, AttributeValue, Attribute } from '$generated/com-bryzek-bryzek-apibuilder-v0';
 	import type { ApiErrorItem } from '$lib/api/error-handler';
 
 	interface Props {
@@ -8,7 +8,7 @@
 			org: Organization;
 			isAdmin: boolean;
 			orgAttributes: AttributeValue[];
-			allAttributes: ApiAttribute[];
+			allAttributes: Attribute[];
 		};
 		form: { errors?: ApiErrorItem[]; success?: boolean } | null;
 	}

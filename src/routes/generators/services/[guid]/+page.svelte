@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import type { GeneratorService, GeneratorWithService } from '$generated/types';
+	import type { GeneratorService, GeneratorWithService } from '$generated/com-bryzek-bryzek-apibuilder-v0';
 	import type { ApiErrorItem } from '$lib/api/error-handler';
 
 	interface Props {

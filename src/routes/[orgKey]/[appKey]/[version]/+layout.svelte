@@ -1,19 +1,21 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import { page } from '$app/stores';
 	import AppSidebar from '$lib/components/AppSidebar.svelte';
-	import type { Organization, Version, Service } from '$generated/types';
+	import type { Organization } from '$generated/com-bryzek-bryzek-apibuilder-v0';
+	import type { Service } from '$generated/types';
 
 	interface Props {
 		data: {
 			org: Organization;
 			isMember: boolean;
 			isAdmin: boolean;
-			version: Version;
+			version: { version: string };
 			service: Service;
 			versions: { version: string }[];
 			isWatching: boolean;
 			watchGuid?: string;
-			session?: { id: string; user: { guid: string; email: string; nickname: string } };
+			session?: { id: string; user: { id: string; person: { email?: { address: string } } } };
 		};
 		children: Snippet;
 	}
@@ -22,8 +24,8 @@
 
 	const version = $derived(data.version);
 	const service = $derived(data.service);
-	const orgKey = $derived(version.organization.key);
-	const appKey = $derived(version.application.key);
+	const orgKey = $derived($page.params.orgKey ?? '');
+	const appKey = $derived($page.params.appKey ?? '');
 </script>
 
 <svelte:head>

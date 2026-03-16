@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import type { Organization, Subscription } from '$generated/types';
-	import { Publication } from '$generated/types';
+	import type { Organization, Subscription } from '$generated/com-bryzek-bryzek-apibuilder-v0';
+	import { Publication } from '$generated/com-bryzek-bryzek-apibuilder-v0';
 	import type { ApiErrorItem } from '$lib/api/error-handler';
 
 	interface Props {
@@ -36,8 +36,8 @@
 		Object.values(Publication).filter((p) => data.isAdmin || !adminOnlyPublications.has(p)),
 	);
 
-	function getSubscriptionGuid(publication: string): string | undefined {
-		return subscriptions.find((s) => s.publication === publication)?.guid;
+	function getSubscriptionId(publication: string): string | undefined {
+		return subscriptions.find((s) => s.publication === publication)?.id;
 	}
 </script>
 
@@ -59,8 +59,8 @@
 
 	<div class="space-y-3">
 		{#each visiblePublications as publication (publication)}
-			{@const subGuid = getSubscriptionGuid(publication)}
-			{@const isSubscribed = !!subGuid}
+			{@const subId = getSubscriptionId(publication)}
+			{@const isSubscribed = !!subId}
 			<div class="flex items-center justify-between py-3 px-4 bg-white border border-gray-200 rounded-lg">
 				<div>
 					<div class="font-medium text-ab-dark-blue">{publicationLabels[publication] || publication}</div>
@@ -70,8 +70,8 @@
 				</div>
 				<form method="POST" action="?/toggle" use:enhance={() => { isSubmitting = true; return async ({ update }) => { isSubmitting = false; await update(); }; }}>
 					<input type="hidden" name="publication" value={publication} />
-					{#if subGuid}
-						<input type="hidden" name="subscription_guid" value={subGuid} />
+					{#if subId}
+						<input type="hidden" name="subscription_id" value={subId} />
 					{/if}
 					<button type="submit" class="{isSubscribed ? 'btn-secondary' : 'btn-primary'} text-sm px-4 py-2" disabled={isSubmitting}>
 						{isSubscribed ? 'Unsubscribe' : 'Subscribe'}

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { GeneratorWithService } from '$generated/types';
+	import type { GeneratorWithService } from '$generated/com-bryzek-bryzek-apibuilder-v0';
 
 	interface Props {
 		data: {
@@ -45,7 +45,7 @@
 				</div>
 			{/if}
 
-			{#if gen.attributes.length > 0}
+			{#if gen.attributes && gen.attributes.length > 0}
 				<div>
 					<dt class="text-sm font-semibold text-ab-gray">Attributes</dt>
 					<dd class="mt-1">
@@ -61,7 +61,7 @@
 			<div>
 				<dt class="text-sm font-semibold text-ab-gray">Service URI</dt>
 				<dd class="mt-1">
-					<a href="/generators/services/{gws.service.guid}" class="text-ab-blue hover:text-ab-dark-blue">{gws.service.uri}</a>
+					<a href="/generators/services/{gws.service.id}" class="text-ab-blue hover:text-ab-dark-blue">{gws.service.uri}</a>
 				</dd>
 			</div>
 		</dl>

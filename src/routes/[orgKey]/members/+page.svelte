@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import type { Organization, Membership } from '$generated/types';
-	import { MembershipRole } from '$generated/types';
+	import type { Organization, Membership } from '$generated/com-bryzek-bryzek-apibuilder-v0';
+	import { MembershipRole } from '$generated/com-bryzek-bryzek-apibuilder-v0';
 	import type { ApiErrorItem } from '$lib/api/error-handler';
 
 	interface Props {
@@ -19,7 +19,7 @@
 	const org = $derived(data.org);
 	const memberships = $derived(data.memberships);
 	let isSubmitting = $state(false);
-	let confirmRemoveGuid = $state<string | null>(null);
+	let confirmRemoveId = $state<string | null>(null);
 </script>
 
 <svelte:head>
@@ -75,7 +75,7 @@
 					</tr>
 				</thead>
 				<tbody>
-					{#each memberships as membership (membership.guid)}
+					{#each memberships as membership (membership.id)}
 						<tr class="border-b border-gray-100">
 							<td class="py-3">
 								<div class="font-medium text-ab-dark-blue">{membership.user.nickname}</div>
@@ -94,32 +94,32 @@
 									<div class="flex gap-2 justify-end">
 										{#if membership.role === MembershipRole.Admin}
 											<form method="POST" action="?/revokeAdmin" use:enhance={() => { isSubmitting = true; return async ({ update }) => { isSubmitting = false; await update(); }; }}>
-												<input type="hidden" name="user_guid" value={membership.user.guid} />
+												<input type="hidden" name="user_guid" value={membership.user.id} />
 												<button type="submit" class="text-sm text-ab-blue hover:text-ab-dark-blue" disabled={isSubmitting}>
 													Revoke Admin
 												</button>
 											</form>
 										{:else}
 											<form method="POST" action="?/makeAdmin" use:enhance={() => { isSubmitting = true; return async ({ update }) => { isSubmitting = false; await update(); }; }}>
-												<input type="hidden" name="user_guid" value={membership.user.guid} />
+												<input type="hidden" name="user_guid" value={membership.user.id} />
 												<button type="submit" class="text-sm text-ab-blue hover:text-ab-dark-blue" disabled={isSubmitting}>
 													Make Admin
 												</button>
 											</form>
 										{/if}
 
-										{#if confirmRemoveGuid === membership.guid}
-											<form method="POST" action="?/removeMember" use:enhance={() => { isSubmitting = true; return async ({ update }) => { isSubmitting = false; confirmRemoveGuid = null; await update(); }; }}>
-												<input type="hidden" name="guid" value={membership.guid} />
+										{#if confirmRemoveId === membership.id}
+											<form method="POST" action="?/removeMember" use:enhance={() => { isSubmitting = true; return async ({ update }) => { isSubmitting = false; confirmRemoveId = null; await update(); }; }}>
+												<input type="hidden" name="guid" value={membership.id} />
 												<button type="submit" class="text-sm text-red-600 hover:text-red-800 font-semibold" disabled={isSubmitting}>
 													Confirm Remove
 												</button>
 											</form>
-											<button type="button" class="text-sm text-ab-gray hover:text-ab-dark-blue" onclick={() => confirmRemoveGuid = null}>
+											<button type="button" class="text-sm text-ab-gray hover:text-ab-dark-blue" onclick={() => confirmRemoveId = null}>
 												Cancel
 											</button>
 										{:else}
-											<button type="button" class="text-sm text-red-600 hover:text-red-800" onclick={() => confirmRemoveGuid = membership.guid}>
+											<button type="button" class="text-sm text-red-600 hover:text-red-800" onclick={() => confirmRemoveId = membership.id}>
 												Remove
 											</button>
 										{/if}

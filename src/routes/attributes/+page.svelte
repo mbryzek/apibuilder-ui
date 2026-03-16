@@ -1,10 +1,10 @@
 <script lang="ts">
 	import Pagination from '$lib/components/Pagination.svelte';
-	import type { ApiAttribute } from '$generated/types';
+	import type { Attribute } from '$generated/com-bryzek-bryzek-apibuilder-v0';
 
 	interface Props {
 		data: {
-			attributes: ApiAttribute[];
+			attributes: Attribute[];
 			offset: number;
 			hasMore: boolean;
 		};
@@ -31,7 +31,7 @@
 		<p class="text-ab-gray">No attributes found.</p>
 	{:else}
 		<div class="space-y-3">
-			{#each attributes as attr (attr.guid)}
+			{#each attributes as attr (attr.id)}
 				<a
 					href="/attributes/{attr.name}"
 					class="block border border-gray-200 rounded-lg p-4 hover:border-ab-blue/30 hover:bg-ab-light-gray/50 transition-colors"

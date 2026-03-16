@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Organization, Application } from '$generated/types';
+	import type { Organization, Application } from '$generated/com-bryzek-bryzek-apibuilder-v0';
 	import Pagination from '$lib/components/Pagination.svelte';
 
 	interface Props {
@@ -11,7 +11,7 @@
 			offset: number;
 			hasMore: boolean;
 			hasPendingRequests: boolean;
-			session?: { id: string; user: { guid: string } };
+			session?: { id: string; user: { id: string; person: { email?: { address: string } } } };
 		};
 	}
 
@@ -62,11 +62,10 @@
 					<tr class="border-b border-gray-200">
 						<th class="pb-3 text-sm font-semibold text-ab-gray">Application</th>
 						<th class="pb-3 text-sm font-semibold text-ab-gray hidden sm:table-cell">Visibility</th>
-						<th class="pb-3 text-sm font-semibold text-ab-gray hidden md:table-cell">Updated</th>
 					</tr>
 				</thead>
 				<tbody>
-					{#each apps as app (app.guid)}
+					{#each apps as app (app.id)}
 						<tr class="border-b border-gray-100 hover:bg-ab-light-gray/50 transition-colors">
 							<td class="py-3">
 								<a href="/{org.key}/{app.key}/latest" class="text-ab-blue hover:text-ab-dark-blue font-medium">
@@ -80,9 +79,6 @@
 								<span class="inline-block text-xs font-medium px-2 py-0.5 rounded-full {app.visibility === 'public' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}">
 									{app.visibility}
 								</span>
-							</td>
-							<td class="py-3 text-sm text-ab-gray hidden md:table-cell">
-								{new Date(app.last_updated_at).toLocaleDateString()}
 							</td>
 						</tr>
 					{/each}
