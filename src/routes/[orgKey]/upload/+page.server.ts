@@ -3,8 +3,7 @@ import { redirect, fail } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth, requireAuthForAction } from '$lib/server/auth';
-import type { Version } from '$generated/types';
-import type { OriginalForm } from '$generated/com-bryzek-bryzek-apibuilder-v0';
+import type { Version, OriginalForm } from '$generated/com-bryzek-bryzek-apibuilder-v0';
 
 export const load: PageServerLoad = async (event) => {
 	requireAuth(event);
@@ -39,18 +38,20 @@ export const actions: Actions = {
 			return fail(400, { errors: [{ message: 'Please provide an application key or ensure your spec includes a name' }], appKey, visibility, specType });
 		}
 
+		const version = deriveVersionFromSpec(data) || '0.0.1';
+
 		const response = await handleApiCall<Version>(
-			() => client.createVersion({
+			() => client.updateVersionByVersion({
 				orgKey: params.orgKey,
 				appKey: targetAppKey,
-				body: { original_form: originalForm as unknown as OriginalForm },
+				version,
+				body: { original_form: originalForm as OriginalForm },
 				headers,
-			}) as unknown as Promise<Version>,
+			}),
 		);
 
 		if ('data' in response) {
-			const v = response.data;
-			throw redirect(303, `/${v.organization.key}/${v.application.key}/${v.version}`);
+			throw redirect(303, `/${params.orgKey}/${targetAppKey}/${response.data.version}`);
 		}
 
 		if ('errors' in response) {
@@ -71,4 +72,13 @@ function deriveAppKeyFromSpec(data: string): string | undefined {
 		// Not JSON, can't derive key
 	}
 	return undefined;
+}
+
+function deriveVersionFromSpec(data: string): string | undefined {
+	try {
+		const parsed = JSON.parse(data) as { version?: string };
+		return parsed.version || undefined;
+	} catch {
+		return undefined;
+	}
 }

@@ -45,7 +45,6 @@
 			items.push({ href: `/${orgKey}/details`, label: 'Org Details' });
 		}
 		if (isAdmin) {
-			items.push({ href: `/${orgKey}/attributes`, label: 'Attributes' });
 			items.push({ href: `/${orgKey}/domains`, label: 'Domains' });
 			items.push({ href: `/${orgKey}/members`, label: 'Members' });
 		}

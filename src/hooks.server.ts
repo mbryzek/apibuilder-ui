@@ -1,4 +1,4 @@
-import type { Handle } from '@sveltejs/kit';
+import { redirect, type Handle } from '@sveltejs/kit';
 import { clients, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { SESSION_COOKIE, config } from '$lib/config';
@@ -9,15 +9,22 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	if (sessionId) {
 		const client = clients();
+		let sessionInvalid = false;
 		const response = await handleApiCall<TenantSession>(
 			() => client.platform.getTenantSession(config.tenantId, { headers: getSessionHeaders(sessionId) }),
 			{
 				onUnauthorized: () => {
 					event.cookies.delete(SESSION_COOKIE, { path: '/' });
 					event.locals.session = undefined;
+					sessionInvalid = true;
 				},
 			},
 		);
+
+		if (sessionInvalid) {
+			const redirectTo = event.url.pathname + event.url.search;
+			throw redirect(303, '/login?redirect=' + encodeURIComponent(redirectTo));
+		}
 
 		if ('data' in response && response.data) {
 			event.locals.session = {

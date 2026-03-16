@@ -107,20 +107,6 @@
 						{#if userDropdownOpen}
 							<div class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50">
 								<a
-									href="/generators"
-									class="block px-4 py-2 text-sm text-gray-700 hover:bg-ab-light-gray transition-colors"
-									onclick={closeUserDropdown}
-								>
-									Generators
-								</a>
-								<a
-									href="/attributes"
-									class="block px-4 py-2 text-sm text-gray-700 hover:bg-ab-light-gray transition-colors"
-									onclick={closeUserDropdown}
-								>
-									Attributes
-								</a>
-								<a
 									href="/account/profile"
 									class="block px-4 py-2 text-sm text-gray-700 hover:bg-ab-light-gray transition-colors"
 									onclick={closeUserDropdown}
@@ -215,20 +201,6 @@
 				</form>
 
 				<hr class="border-white/20" />
-				<a
-					href="/generators"
-					class="block px-3 py-2 text-white hover:text-white hover:bg-white/10 rounded-md transition-colors"
-					onclick={closeMobileMenu}
-				>
-					Generators
-				</a>
-				<a
-					href="/attributes"
-					class="block px-3 py-2 text-white hover:text-white hover:bg-white/10 rounded-md transition-colors"
-					onclick={closeMobileMenu}
-				>
-					Attributes
-				</a>
 				<a
 					href="/account/profile"
 					class="block px-3 py-2 text-white hover:text-white hover:bg-white/10 rounded-md transition-colors"
