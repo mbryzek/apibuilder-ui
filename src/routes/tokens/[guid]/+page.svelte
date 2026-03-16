@@ -20,7 +20,7 @@
 	<title>API Token - API Builder</title>
 </svelte:head>
 
-<div>
+<div class="page-container">
 	<div class="mb-6">
 		<a href="/tokens" class="text-ab-blue hover:text-ab-dark-blue text-sm">&larr; Back to Tokens</a>
 	</div>

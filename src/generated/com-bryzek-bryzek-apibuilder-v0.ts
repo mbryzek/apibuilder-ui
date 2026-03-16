@@ -194,6 +194,7 @@ export interface Token {
   user: User;
   masked_token: string;
   description?: string;
+  created_at: ISODateTimeString;
 }
 
 export interface TokenForm {
