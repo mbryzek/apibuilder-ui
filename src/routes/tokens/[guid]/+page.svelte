@@ -15,12 +15,15 @@
 	let confirmDelete = $state(false);
 	let isSubmitting = $state(false);
 	let copied = $state(false);
+	let copyTimeout: ReturnType<typeof setTimeout> | undefined;
 
 	function handleCopy(): void {
 		if (data.cleartextToken) {
-			navigator.clipboard.writeText(data.cleartextToken);
-			copied = true;
-			setTimeout(() => { copied = false; }, 2000);
+			navigator.clipboard.writeText(data.cleartextToken).then(() => {
+				copied = true;
+				clearTimeout(copyTimeout);
+				copyTimeout = setTimeout(() => { copied = false; }, 2000);
+			});
 		}
 	}
 </script>
