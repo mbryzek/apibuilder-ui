@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import type { Organization } from '$generated/types';
+	import { Visibility, OriginalType } from '$generated/com-bryzek-bryzek-apibuilder-v0';
 
 	interface Props {
 		data: {
@@ -56,7 +57,7 @@
 					type="file"
 					id="file"
 					name="file"
-					accept=".json,.avdl,.yaml,.yml"
+					accept=".json"
 					required
 					class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-ab-blue file:text-white hover:file:bg-ab-light-blue file:cursor-pointer"
 					onchange={(e) => {
@@ -78,11 +79,9 @@
 				class="input-field w-full"
 				value={form?.specType ?? ''}
 			>
-				<option value="">Auto-detect</option>
-				<option value="api_json">api.json</option>
-				<option value="swagger">Swagger / OpenAPI</option>
-				<option value="avro_idl">Avro IDL</option>
-				<option value="service_json">service.json</option>
+				{#each Object.values(OriginalType) as t}
+					<option value={t}>{t}</option>
+				{/each}
 			</select>
 		</div>
 
@@ -109,8 +108,9 @@
 				class="input-field w-full"
 				value={form?.visibility ?? 'organization'}
 			>
-				<option value="organization">Organization</option>
-				<option value="public">Public</option>
+				{#each Object.values(Visibility) as v}
+					<option value={v}>{v}</option>
+				{/each}
 			</select>
 		</div>
 

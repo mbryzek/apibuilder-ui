@@ -1,9 +1,9 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
-import { resetPassword } from '$lib/server/api';
+import { apiBuilderClient } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { SESSION_COOKIE, config } from '$lib/config';
-import type { Authentication } from '$generated/types';
+import type { Authentication } from '$generated/com-bryzek-bryzek-apibuilder-v0';
 
 export const load: PageServerLoad = async ({ params }) => {
 	return { token: params.token };
@@ -24,7 +24,7 @@ export const actions: Actions = {
 		}
 
 		const response = await handleApiCall<Authentication>(
-			() => resetPassword(params.token, password),
+			() => apiBuilderClient().createPasswordResetForm({ body: { token: params.token, password } }),
 		);
 
 		if ('data' in response && response.data) {

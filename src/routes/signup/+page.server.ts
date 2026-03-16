@@ -1,9 +1,9 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
-import { createUser, authenticateEmail } from '$lib/server/api';
+import { clients, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { SESSION_COOKIE, config } from '$lib/config';
-import type { Authentication, User } from '$generated/types';
+import { isTenantSession, type SessionState } from '$generated/com-bryzek-platform-v0';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	if (locals.session) {
@@ -26,32 +26,29 @@ export const actions: Actions = {
 			return fail(400, { errors: [{ message: 'Email and password are required' }], email, name });
 		}
 
-		const form = name ? { email, password, name } : { email, password };
-		const createResponse = await handleApiCall<User>(
-			() => createUser(form),
+		const person: Record<string, string> = { email };
+		if (name) person['name'] = name;
+
+		const client = clients();
+		const response = await handleApiCall<SessionState>(
+			() => client.platform.createTenantSessionSignups({ tenantId: config.tenantId, body: { user: { person }, password }, headers: getSessionHeaders() }),
 		);
 
-		if ('errors' in createResponse) {
-			return fail(400, { errors: createResponse.errors, email, name });
+		if ('errors' in response) {
+			return fail(400, { errors: response.errors, email, name });
 		}
 
-		// Auto-login after successful signup
-		const authResponse = await handleApiCall<Authentication>(
-			() => authenticateEmail(email, password),
-		);
-
-		if ('data' in authResponse && authResponse.data) {
-			cookies.set(SESSION_COOKIE, authResponse.data.session.id, {
+		if ('data' in response && response.data && isTenantSession(response.data)) {
+			cookies.set(SESSION_COOKIE, response.data.session.id, {
 				path: '/',
 				httpOnly: true,
 				secure: config.isProduction,
 				sameSite: 'lax',
 				maxAge: 60 * 60 * 24 * 365,
 			});
-			throw redirect(303, '/?flash=' + encodeURIComponent('Welcome to API Builder!') + '&flash_type=success');
+			throw redirect(303, '/org/create?flash=' + encodeURIComponent('Welcome to API Builder! Create your first organization to get started.') + '&flash_type=success');
 		}
 
-		// User created but auto-login failed — send to login page
 		throw redirect(303, '/login?flash=' + encodeURIComponent('Account created! Please sign in.') + '&flash_type=success');
 	},
 };

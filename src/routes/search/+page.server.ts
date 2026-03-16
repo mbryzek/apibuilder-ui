@@ -1,7 +1,7 @@
 import type { PageServerLoad } from './$types';
-import { searchItems, getSessionHeaders } from '$lib/server/api';
+import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
-import type { Item } from '$generated/types';
+import type { Item } from '$generated/com-bryzek-bryzek-apibuilder-v0';
 
 const LIMIT = 25;
 
@@ -15,7 +15,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 
 	if (q) {
 		const response = await handleApiCall<Item[]>(
-			() => searchItems(headers, { q, limit: LIMIT, offset }),
+			() => apiBuilderClient().getItems({ q, limit: LIMIT, offset, headers }),
 		);
 		items = 'data' in response ? response.data : [];
 		hasMore = items.length >= LIMIT;

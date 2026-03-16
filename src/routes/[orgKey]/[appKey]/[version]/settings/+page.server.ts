@@ -1,14 +1,9 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
-import {
-	updateApplication,
-	deleteApplication,
-	moveApplication,
-	getSessionHeaders,
-} from '$lib/server/api';
+import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth, requireAdminForAction } from '$lib/server/auth';
-import type { Application } from '$generated/types';
+import type { Application, Visibility } from '$generated/com-bryzek-bryzek-apibuilder-v0';
 
 export const load: PageServerLoad = async (event) => {
 	requireAuth(event);
@@ -20,6 +15,7 @@ export const actions: Actions = {
 		const session = await requireAdminForAction(locals, params.orgKey);
 		const headers = getSessionHeaders(session.id);
 		const formData = await request.formData();
+		const client = apiBuilderClient();
 
 		const visibility = formData.get('visibility') as string;
 		if (!visibility) {
@@ -27,10 +23,15 @@ export const actions: Actions = {
 		}
 
 		const response = await handleApiCall<Application>(
-			() => updateApplication(params.orgKey, params.appKey, {
-				name: formData.get('name') as string,
-				visibility: visibility as Application['visibility'],
-			}, headers),
+			() => client.updateApplicationByAppKey({
+				orgKey: params.orgKey,
+				appKey: params.appKey,
+				body: {
+					name: formData.get('name') as string,
+					visibility: visibility as Visibility,
+				},
+				headers,
+			}),
 		);
 
 		if ('data' in response) {
@@ -44,6 +45,7 @@ export const actions: Actions = {
 		const session = await requireAdminForAction(locals, params.orgKey);
 		const headers = getSessionHeaders(session.id);
 		const formData = await request.formData();
+		const client = apiBuilderClient();
 
 		const newOrgKey = (formData.get('org_key') as string)?.trim();
 		if (!newOrgKey) {
@@ -51,7 +53,12 @@ export const actions: Actions = {
 		}
 
 		const response = await handleApiCall<Application>(
-			() => moveApplication(params.orgKey, params.appKey, { org_key: newOrgKey }, headers),
+			() => client.createApplicationMoveByAppKey({
+				orgKey: params.orgKey,
+				appKey: params.appKey,
+				body: { org_key: newOrgKey },
+				headers,
+			}),
 		);
 
 		if ('data' in response) {
@@ -64,9 +71,10 @@ export const actions: Actions = {
 	deleteApp: async ({ params, locals }) => {
 		const session = await requireAdminForAction(locals, params.orgKey);
 		const headers = getSessionHeaders(session.id);
+		const client = apiBuilderClient();
 
 		const response = await handleApiCall<void>(
-			() => deleteApplication(params.orgKey, params.appKey, headers),
+			() => client.deleteApplicationByAppKey({ orgKey: params.orgKey, appKey: params.appKey, headers }),
 		);
 
 		if ('data' in response) {

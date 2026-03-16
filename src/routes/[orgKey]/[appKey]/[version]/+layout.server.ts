@@ -1,14 +1,16 @@
 import type { LayoutServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
-import { getVersion, getApplicationVersions, getWatches, getSessionHeaders } from '$lib/server/api';
+import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
-import type { Version, ApplicationMetadataVersion, Watch } from '$generated/types';
+import type { ApplicationMetadataVersion } from '$generated/com-bryzek-bryzek-apibuilder-v0';
+import type { Version, Watch } from '$generated/types';
 
 export const load: LayoutServerLoad = async ({ params, locals }) => {
 	const headers = locals.session ? getSessionHeaders(locals.session.id) : {};
+	const client = apiBuilderClient();
 
 	const versionResponse = await handleApiCall<Version>(
-		() => getVersion(params.orgKey, params.appKey, params.version, headers),
+		() => client.getVersionByVersion({ orgKey: params.orgKey, appKey: params.appKey, version: params.version, headers }) as unknown as Promise<Version>,
 	);
 
 	if (!('data' in versionResponse)) {
@@ -20,15 +22,18 @@ export const load: LayoutServerLoad = async ({ params, locals }) => {
 	// Fetch version list and watch status in parallel
 	const [versionsResponse, watchResponse] = await Promise.all([
 		handleApiCall<ApplicationMetadataVersion[]>(
-			() => getApplicationVersions(params.orgKey, params.appKey, headers, { limit: 100 }),
+			() => client.getApplicationMetadataVersions({ orgKey: params.orgKey, appKey: params.appKey, limit: 100, offset: 0, headers }),
 		),
 		locals.session
 			? handleApiCall<Watch[]>(
-					() => getWatches(headers, {
-						user_guid: locals.session!.user.guid,
-						organization_key: params.orgKey,
-						application_key: params.appKey,
-					}),
+					() => client.getWatches({
+						userGuid: locals.session!.user.id,
+						organizationKey: params.orgKey,
+						applicationKey: params.appKey,
+						limit: 100,
+						offset: 0,
+						headers,
+					}) as unknown as Promise<Watch[]>,
 				)
 			: Promise.resolve(null),
 	]);

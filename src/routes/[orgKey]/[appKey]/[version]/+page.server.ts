@@ -1,6 +1,6 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
-import { createWatch, deleteWatch, deleteVersion, getSessionHeaders } from '$lib/server/api';
+import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuthForAction, requireMemberForAction } from '$lib/server/auth';
 import type { Watch } from '$generated/types';
@@ -14,13 +14,17 @@ export const actions: Actions = {
 	watch: async ({ params, locals }) => {
 		const session = requireAuthForAction(locals);
 		const headers = getSessionHeaders(session.id);
+		const client = apiBuilderClient();
 
 		const response = await handleApiCall<Watch>(
-			() => createWatch({
-				user_guid: session.user.guid,
-				organization_key: params.orgKey,
-				application_key: params.appKey,
-			}, headers),
+			() => client.createWatch({
+				body: {
+					user_guid: session.user.id,
+					organization_key: params.orgKey,
+					application_key: params.appKey,
+				},
+				headers,
+			}) as unknown as Promise<Watch>,
 		);
 
 		if ('data' in response) {
@@ -33,12 +37,13 @@ export const actions: Actions = {
 	unwatch: async ({ params, locals, request }) => {
 		const session = requireAuthForAction(locals);
 		const headers = getSessionHeaders(session.id);
+		const client = apiBuilderClient();
 
 		const formData = await request.formData();
 		const watchGuid = formData.get('watch_guid') as string;
 
 		if (watchGuid) {
-			await handleApiCall<void>(() => deleteWatch(watchGuid, headers));
+			await handleApiCall<void>(() => client.deleteWatchById(watchGuid, { headers }));
 		}
 
 		throw redirect(303, `/${params.orgKey}/${params.appKey}/${params.version}`);
@@ -47,9 +52,10 @@ export const actions: Actions = {
 	deleteVersion: async ({ params, locals }) => {
 		const session = await requireMemberForAction(locals, params.orgKey);
 		const headers = getSessionHeaders(session.id);
+		const client = apiBuilderClient();
 
 		const response = await handleApiCall<void>(
-			() => deleteVersion(params.orgKey, params.appKey, params.version, headers),
+			() => client.deleteVersionByVersion({ orgKey: params.orgKey, appKey: params.appKey, version: params.version, headers }),
 		);
 
 		if ('data' in response) {

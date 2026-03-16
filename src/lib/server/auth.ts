@@ -1,9 +1,9 @@
 import { redirect, error } from '@sveltejs/kit';
 import type { RequestEvent } from '@sveltejs/kit';
-import { getMemberships, getSessionHeaders } from '$lib/server/api';
+import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
-import type { Membership } from '$generated/types';
-import { MembershipRole } from '$generated/types';
+import type { Membership } from '$generated/com-bryzek-bryzek-apibuilder-v0';
+import { MembershipRole } from '$generated/com-bryzek-bryzek-apibuilder-v0';
 
 export function requireAuth(event: RequestEvent): NonNullable<App.Locals['session']> {
 	const { locals, url } = event;
@@ -25,7 +25,7 @@ export async function requireMemberForAction(locals: App.Locals, orgKey: string)
 	const session = requireAuthForAction(locals);
 	const headers = getSessionHeaders(session.id);
 	const response = await handleApiCall<Membership[]>(
-		() => getMemberships({ org_key: orgKey, user_guid: session.user.guid }, headers),
+		() => apiBuilderClient().getMemberships({ orgKey, userGuid: session.user.id, limit: 25, offset: 0, headers }),
 	);
 	if (!('data' in response) || response.data.length === 0) {
 		throw error(403, 'Forbidden');
@@ -37,7 +37,7 @@ export async function requireAdminForAction(locals: App.Locals, orgKey: string):
 	const session = requireAuthForAction(locals);
 	const headers = getSessionHeaders(session.id);
 	const response = await handleApiCall<Membership[]>(
-		() => getMemberships({ org_key: orgKey, user_guid: session.user.guid, role: MembershipRole.Admin }, headers),
+		() => apiBuilderClient().getMemberships({ orgKey, userGuid: session.user.id, role: MembershipRole.Admin, limit: 25, offset: 0, headers }),
 	);
 	if (!('data' in response) || response.data.length === 0) {
 		throw error(403, 'Forbidden');

@@ -8,7 +8,6 @@
 		appName: string;
 		isMember: boolean;
 		isAdmin: boolean;
-		isLoggedIn: boolean;
 	}
 
 	let {
@@ -18,7 +17,6 @@
 		appName,
 		isMember,
 		isAdmin,
-		isLoggedIn,
 	}: Props = $props();
 
 	const currentPath = $derived($page.url.pathname);

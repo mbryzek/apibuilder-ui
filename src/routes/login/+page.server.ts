@@ -1,9 +1,9 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
-import { authenticateEmail } from '$lib/server/api';
+import { clients, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { SESSION_COOKIE, config } from '$lib/config';
-import type { Authentication } from '$generated/types';
+import { isTenantSession, type SessionState } from '$generated/com-bryzek-platform-v0';
 
 export const load: PageServerLoad = async ({ locals, url }) => {
 	if (locals.session) {
@@ -27,11 +27,12 @@ export const actions: Actions = {
 			return fail(400, { errors: [{ message: 'Email and password are required' }] });
 		}
 
-		const response = await handleApiCall<Authentication>(
-			() => authenticateEmail(email, password),
+		const client = clients();
+		const response = await handleApiCall<SessionState>(
+			() => client.platform.createTenantSessionLogins({ tenantId: config.tenantId, body: { email, password }, headers: getSessionHeaders() }),
 		);
 
-		if ('data' in response && response.data) {
+		if ('data' in response && response.data && isTenantSession(response.data)) {
 			cookies.set(SESSION_COOKIE, response.data.session.id, {
 				path: '/',
 				httpOnly: true,

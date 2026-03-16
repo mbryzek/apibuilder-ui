@@ -1,6 +1,8 @@
+import type { User } from '$generated/com-bryzek-platform-v0';
+
 export type Session = {
 	id: string;
-	user: import('$generated/types').User;
+	user: User;
 };
 
 declare global {

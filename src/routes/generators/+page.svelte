@@ -34,11 +34,8 @@
 </svelte:head>
 
 <div class="page-container">
-	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+	<div class="mb-6">
 		<h1 class="text-2xl font-bold text-ab-dark-blue">Generators</h1>
-		<a href="/generators/create" class="btn-primary mt-3 sm:mt-0 inline-block text-center">
-			Register Generator
-		</a>
 	</div>
 
 	<div class="mb-4">

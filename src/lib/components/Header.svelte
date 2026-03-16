@@ -5,7 +5,7 @@
 	 */
 
 	interface Props {
-		session?: { id: string; user: { nickname: string; guid: string } } | undefined;
+		session?: { id: string; user: { id: string; person: { email?: { address: string } } } } | undefined;
 	}
 
 	let { session }: Props = $props();
@@ -98,7 +98,7 @@
 							aria-expanded={userDropdownOpen}
 							aria-haspopup="true"
 						>
-							{session.user.nickname}
+							{session.user.person.email?.address ?? ''}
 							<svg class="w-4 h-4 transition-transform {userDropdownOpen ? 'rotate-180' : ''}" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
 							</svg>

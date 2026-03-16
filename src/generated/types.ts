@@ -1,5 +1,12 @@
-// Generated types from apibuilder API specifications
-// apibuilder-api, apibuilder-spec, apibuilder-common, apibuilder-generator
+// Barrel file: re-exports and defines all types needed by the codebase.
+// Types from the old hand-written types.ts that are not yet covered by
+// the new generated clients live here until the API specs are updated.
+
+// Re-export types that exist in the new generated files
+// (Note: the generated shapes differ from the legacy ones used throughout
+// the codebase, so we keep the legacy definitions below instead of
+// re-exporting. When the codebase is migrated to the new generated
+// clients these can be removed.)
 
 // === ENUMS ===
 

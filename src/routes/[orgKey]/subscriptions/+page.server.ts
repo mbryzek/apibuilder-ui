@@ -1,17 +1,17 @@
 import type { PageServerLoad, Actions } from './$types';
 import { fail } from '@sveltejs/kit';
-import { getSubscriptions, createSubscription, deleteSubscription, getSessionHeaders } from '$lib/server/api';
+import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth, requireAuthForAction } from '$lib/server/auth';
-import type { Subscription } from '$generated/types';
-import { Publication } from '$generated/types';
+import type { Subscription } from '$generated/com-bryzek-bryzek-apibuilder-v0';
+import { Publication } from '$generated/com-bryzek-bryzek-apibuilder-v0';
 
 export const load: PageServerLoad = async (event) => {
 	const session = requireAuth(event);
 	const headers = getSessionHeaders(session.id);
 
 	const response = await handleApiCall<Subscription[]>(
-		() => getSubscriptions(headers, { organization_key: event.params.orgKey, user_guid: session.user.guid }),
+		() => apiBuilderClient().getSubscriptions({ limit: 100, offset: 0, organizationKey: event.params.orgKey, userGuid: session.user.id, headers }),
 	);
 
 	return {
@@ -33,18 +33,21 @@ export const actions: Actions = {
 
 		if (subscriptionGuid) {
 			const response = await handleApiCall<void>(
-				() => deleteSubscription(subscriptionGuid, headers),
+				() => apiBuilderClient().deleteSubscriptionById(subscriptionGuid, { headers }),
 			);
 			if ('errors' in response) {
 				return fail(400, { errors: response.errors });
 			}
 		} else {
 			const response = await handleApiCall<Subscription>(
-				() => createSubscription({
-					organization_key: params.orgKey,
-					user_guid: session.user.guid,
-					publication,
-				}, headers),
+				() => apiBuilderClient().createSubscription({
+					body: {
+						organization_key: params.orgKey,
+						user_guid: session.user.id,
+						publication: publication as Publication,
+					},
+					headers,
+				}),
 			);
 			if ('errors' in response) {
 				return fail(400, { errors: response.errors });

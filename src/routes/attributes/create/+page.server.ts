@@ -1,9 +1,9 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
-import { createAttribute, getSessionHeaders } from '$lib/server/api';
+import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth, requireAuthForAction } from '$lib/server/auth';
-import type { ApiAttribute } from '$generated/types';
+import type { Attribute, AttributeForm } from '$generated/com-bryzek-bryzek-apibuilder-v0';
 
 export const load: PageServerLoad = async (event) => {
 	requireAuth(event);
@@ -22,13 +22,13 @@ export const actions: Actions = {
 			return fail(400, { errors: [{ message: 'Name is required' }] });
 		}
 
-		const form: { name: string; description?: string } = { name };
+		const body: AttributeForm = { name };
 		if (description) {
-			form.description = description;
+			body.description = description;
 		}
 
-		const response = await handleApiCall<ApiAttribute>(
-			() => createAttribute(form, headers),
+		const response = await handleApiCall<Attribute>(
+			() => apiBuilderClient().createAttribute({ body, headers }),
 		);
 
 		if ('data' in response) {

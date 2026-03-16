@@ -1,10 +1,11 @@
 import type { PageServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
-import { authenticateGithub, exchangeGithubCode } from '$lib/server/api';
+import { exchangeGithubCode } from '$lib/api/github';
+import { apiBuilderClient } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { SESSION_COOKIE, config } from '$lib/config';
 import { env } from '$env/dynamic/private';
-import type { Authentication } from '$generated/types';
+import type { Authentication } from '$generated/com-bryzek-bryzek-apibuilder-v0';
 
 export const load: PageServerLoad = async ({ url, cookies }) => {
 	const code = url.searchParams.get('code');
@@ -24,7 +25,7 @@ export const load: PageServerLoad = async ({ url, cookies }) => {
 	}
 
 	const response = await handleApiCall<Authentication>(
-		() => authenticateGithub(accessToken),
+		() => apiBuilderClient().createGithubAuthForm({ body: { token: accessToken } }),
 	);
 
 	if ('data' in response && response.data) {

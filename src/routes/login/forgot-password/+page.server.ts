@@ -1,5 +1,5 @@
 import type { Actions } from './$types';
-import { requestPasswordReset } from '$lib/server/api';
+import { apiBuilderClient } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 
 export const actions: Actions = {
@@ -12,7 +12,7 @@ export const actions: Actions = {
 		}
 
 		await handleApiCall<void>(
-			() => requestPasswordReset(email),
+			() => apiBuilderClient().createPasswordResetRequestForm({ body: { email } }),
 		);
 
 		// Always show success regardless of whether email exists

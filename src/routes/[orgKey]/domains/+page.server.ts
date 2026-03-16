@@ -1,9 +1,9 @@
 import type { PageServerLoad, Actions } from './$types';
 import { fail } from '@sveltejs/kit';
-import { createDomain, deleteDomain, getSessionHeaders } from '$lib/server/api';
+import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth, requireAdminForAction } from '$lib/server/auth';
-import type { Domain } from '$generated/types';
+import type { Domain } from '$generated/com-bryzek-bryzek-apibuilder-v0';
 
 export const load: PageServerLoad = async (event) => {
 	requireAuth(event);
@@ -22,7 +22,7 @@ export const actions: Actions = {
 		}
 
 		const response = await handleApiCall<Domain>(
-			() => createDomain(params.orgKey, { name }, headers),
+			() => apiBuilderClient().createDomain({ orgKey: params.orgKey, body: { name }, headers }),
 		);
 
 		if ('data' in response) {
@@ -47,7 +47,7 @@ export const actions: Actions = {
 		}
 
 		const response = await handleApiCall<void>(
-			() => deleteDomain(params.orgKey, name, headers),
+			() => apiBuilderClient().deleteDomainByName({ orgKey: params.orgKey, name, headers }),
 		);
 
 		if ('errors' in response) {

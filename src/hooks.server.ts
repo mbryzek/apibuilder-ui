@@ -1,16 +1,16 @@
 import type { Handle } from '@sveltejs/kit';
-import { getSessionById, getSessionHeaders } from '$lib/server/api';
+import { clients, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { SESSION_COOKIE, config } from '$lib/config';
-import type { Authentication } from '$generated/types';
+import type { TenantSession } from '$generated/com-bryzek-platform-v0';
 
 export const handle: Handle = async ({ event, resolve }) => {
 	const sessionId = event.cookies.get(SESSION_COOKIE) || undefined;
 
 	if (sessionId) {
-		const headers = getSessionHeaders(sessionId);
-		const response = await handleApiCall<Authentication>(
-			() => getSessionById(sessionId, headers),
+		const client = clients();
+		const response = await handleApiCall<TenantSession>(
+			() => client.platform.getTenantSession(config.tenantId, { headers: getSessionHeaders(sessionId) }),
 			{
 				onUnauthorized: () => {
 					event.cookies.delete(SESSION_COOKIE, { path: '/' });
