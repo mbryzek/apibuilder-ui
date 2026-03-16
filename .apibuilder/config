@@ -27,6 +27,7 @@ code:
                   - user_reference
                   - person
                 resources:
+                  - email_verification
                   - tenant_session
                   - user
                   - phone
