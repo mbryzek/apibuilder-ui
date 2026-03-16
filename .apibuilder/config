@@ -1,5 +1,10 @@
 code:
   bryzek:
+    bryzek-apibuilder-spec:
+      version: latest
+      generators:
+        - generator: typescript
+          target: ./src/generated
     bryzek-apibuilder:
       version: latest
       generators:
