@@ -1,5 +1,5 @@
 import type { PageServerLoad, Actions } from './$types';
-import { redirect, fail, error } from '@sveltejs/kit';
+import { redirect, fail } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth, requireAuthForAction } from '$lib/server/auth';
@@ -13,13 +13,9 @@ export const load: PageServerLoad = async (event) => {
 		() => apiBuilderClient().getTokenCleartextById(event.params.guid, { headers }),
 	);
 
-	if (!('data' in response)) {
-		throw error(response.status === 404 ? 404 : 500, 'Token not found');
-	}
-
 	return {
 		tokenGuid: event.params.guid,
-		cleartextToken: response.data.token,
+		cleartextToken: 'data' in response ? response.data.token : null,
 	};
 };
 
