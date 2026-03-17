@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { Operation, Service } from '$generated/types';
 	import TypeLink from './TypeLink.svelte';
-	import DeprecationBadge from './DeprecationBadge.svelte';
 	import ParametersTable from './ParametersTable.svelte';
 	import ResponsesTable from './ResponsesTable.svelte';
 
@@ -37,9 +36,6 @@
 			{operation.method}
 		</span>
 		<code class="text-sm font-mono text-ab-dark-blue">{operation.path}</code>
-		{#if operation.deprecation}
-			<DeprecationBadge deprecation={operation.deprecation} />
-		{/if}
 	</div>
 
 	{#if operation.description}

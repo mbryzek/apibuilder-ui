@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { Field, Service } from '$generated/types';
 	import TypeLink from './TypeLink.svelte';
-	import DeprecationBadge from './DeprecationBadge.svelte';
 
 	interface Props {
 		fields: Field[];
@@ -30,9 +29,6 @@
 					<tr class="border-b border-gray-100 last:border-b-0">
 						<td class="py-2.5 pr-6 align-top">
 							<span class="font-mono text-sm">{field.name}</span>
-							{#if field.deprecation}
-								<DeprecationBadge deprecation={field.deprecation} />
-							{/if}
 							{#if field.required}
 								<span class="block text-[11px] text-ab-success-green font-medium mt-0.5">required</span>
 							{/if}

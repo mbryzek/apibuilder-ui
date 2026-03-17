@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { Resource, Service } from '$generated/types';
-	import DeprecationBadge from './DeprecationBadge.svelte';
 	import OperationDetail from './OperationDetail.svelte';
 
 	interface Props {
@@ -17,9 +16,6 @@
 			<div id={resource.type} class="scroll-mt-16">
 				<div class="flex items-center gap-2 mb-3">
 					<h3 class="text-lg font-bold text-ab-dark-blue">{resource.type}</h3>
-					{#if resource.deprecation}
-						<DeprecationBadge deprecation={resource.deprecation} />
-					{/if}
 				</div>
 				{#if resource.description}
 					<p class="text-sm text-ab-dark-gray mb-4">{resource.description}</p>

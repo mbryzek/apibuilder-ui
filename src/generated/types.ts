@@ -408,10 +408,6 @@ export interface SpecApplication {
 	key: string;
 }
 
-export interface Apidoc {
-	version: string;
-}
-
 export interface Info {
 	license?: License;
 	contact?: Contact;
@@ -428,28 +424,15 @@ export interface Contact {
 	email?: string;
 }
 
-export interface Deprecation {
-	description?: string;
-}
-
-export interface SpecAttribute {
-	name: string;
-	value: Record<string, unknown>;
-	description?: string;
-	deprecation?: Deprecation;
-}
-
 export interface Annotation {
 	name: string;
 	description?: string;
-	deprecation?: Deprecation;
 }
 
 export interface EnumValue {
 	name: string;
 	description?: string;
-	deprecation?: Deprecation;
-	attributes: SpecAttribute[];
+	attributes: Record<string, unknown>;
 	value?: string;
 }
 
@@ -457,22 +440,20 @@ export interface SpecEnum {
 	name: string;
 	plural: string;
 	description?: string;
-	deprecation?: Deprecation;
 	values: EnumValue[];
-	attributes: SpecAttribute[];
+	attributes: Record<string, unknown>;
 }
 
 export interface Field {
 	name: string;
 	type: string;
 	description?: string;
-	deprecation?: Deprecation;
 	default?: string;
 	required: boolean;
 	minimum?: number;
 	maximum?: number;
 	example?: string;
-	attributes: SpecAttribute[];
+	attributes: Record<string, unknown>;
 	annotations?: string[];
 }
 
@@ -480,16 +461,14 @@ export interface SpecInterface {
 	name: string;
 	plural: string;
 	description?: string;
-	deprecation?: Deprecation;
 	fields: Field[];
-	attributes: SpecAttribute[];
+	attributes: Record<string, unknown>;
 }
 
 export interface UnionType {
 	type: string;
 	description?: string;
-	deprecation?: Deprecation;
-	attributes: SpecAttribute[];
+	attributes: Record<string, unknown>;
 	default?: boolean;
 	discriminator_value?: string;
 }
@@ -497,11 +476,10 @@ export interface UnionType {
 export interface SpecUnion {
 	name: string;
 	plural: string;
-	discriminator?: string;
+	discriminator: string;
 	description?: string;
-	deprecation?: Deprecation;
 	types: UnionType[];
-	attributes: SpecAttribute[];
+	attributes: Record<string, unknown>;
 	interfaces?: string[];
 }
 
@@ -509,17 +487,15 @@ export interface Model {
 	name: string;
 	plural: string;
 	description?: string;
-	deprecation?: Deprecation;
 	fields: Field[];
-	attributes: SpecAttribute[];
+	attributes: Record<string, unknown>;
 	interfaces?: string[];
 }
 
 export interface Body {
 	type: string;
 	description?: string;
-	deprecation?: Deprecation;
-	attributes: SpecAttribute[];
+	attributes: Record<string, unknown>;
 }
 
 export interface Parameter {
@@ -527,13 +503,12 @@ export interface Parameter {
 	type: string;
 	location: ParameterLocation;
 	description?: string;
-	deprecation?: Deprecation;
 	required: boolean;
 	default?: string;
 	minimum?: number;
 	maximum?: number;
 	example?: string;
-	attributes?: SpecAttribute[];
+	attributes?: Record<string, unknown>;
 }
 
 export interface ResponseCode {
@@ -546,29 +521,26 @@ export interface Response {
 	type: string;
 	headers?: Header[];
 	description?: string;
-	deprecation?: Deprecation;
-	attributes?: SpecAttribute[];
+	attributes?: Record<string, unknown>;
 }
 
 export interface Header {
 	name: string;
 	type: string;
 	description?: string;
-	deprecation?: Deprecation;
 	required: boolean;
 	default?: string;
-	attributes: SpecAttribute[];
+	attributes: Record<string, unknown>;
 }
 
 export interface Operation {
 	method: Method;
 	path: string;
 	description?: string;
-	deprecation?: Deprecation;
 	body?: Body;
 	parameters: Parameter[];
 	responses: Response[];
-	attributes: SpecAttribute[];
+	attributes: Record<string, unknown>;
 }
 
 export interface Resource {
@@ -576,9 +548,8 @@ export interface Resource {
 	plural: string;
 	path?: string;
 	description?: string;
-	deprecation?: Deprecation;
 	operations: Operation[];
-	attributes: SpecAttribute[];
+	attributes: Record<string, unknown>;
 }
 
 export interface Import {
@@ -595,7 +566,6 @@ export interface Import {
 }
 
 export interface Service {
-	apidoc?: Apidoc;
 	name: string;
 	organization: SpecOrganization;
 	application: SpecApplication;
@@ -611,6 +581,6 @@ export interface Service {
 	unions: SpecUnion[];
 	models: Model[];
 	resources: Resource[];
-	attributes: SpecAttribute[];
+	attributes: Record<string, unknown>;
 	annotations?: Annotation[];
 }

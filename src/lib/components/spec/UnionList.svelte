@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { SpecUnion, Service } from '$generated/types';
 	import TypeLink from './TypeLink.svelte';
-	import DeprecationBadge from './DeprecationBadge.svelte';
 	import ExampleJsonLinks from './ExampleJsonLinks.svelte';
 
 	interface Props {
@@ -25,9 +24,6 @@
 				<div class="bg-ab-light-gray px-4 py-3 flex items-center justify-between gap-2">
 					<div class="flex items-center gap-2 min-w-0">
 						<h3 class="text-base font-bold text-ab-dark-blue font-mono truncate">{union.name}</h3>
-						{#if union.deprecation}
-							<DeprecationBadge deprecation={union.deprecation} />
-						{/if}
 					</div>
 					{#if exampleBaseUrl}
 						<ExampleJsonLinks baseUrl={exampleBaseUrl} typeName={union.name} />
@@ -37,9 +33,7 @@
 					{#if union.description}
 						<p class="text-sm text-ab-dark-gray mb-3">{union.description}</p>
 					{/if}
-					{#if union.discriminator}
-						<p class="text-xs text-ab-gray mb-2">Discriminator: <code class="font-mono">{union.discriminator}</code></p>
-					{/if}
+					<p class="text-xs text-ab-gray mb-2">Discriminator: <code class="font-mono">{union.discriminator}</code></p>
 					{#if union.interfaces && union.interfaces.length > 0}
 						<p class="text-xs text-ab-gray mb-2">
 							Implements: {union.interfaces.join(', ')}
@@ -62,9 +56,6 @@
 											<TypeLink typeStr={unionType.type} {service} />
 											{#if unionType.discriminator_value}
 												<span class="text-ab-gray text-xs ml-1">({unionType.discriminator_value})</span>
-											{/if}
-											{#if unionType.deprecation}
-												<DeprecationBadge deprecation={unionType.deprecation} />
 											{/if}
 											</td>
 										{#if showDetails}

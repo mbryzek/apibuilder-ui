@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { SpecEnum } from '$generated/types';
-	import DeprecationBadge from './DeprecationBadge.svelte';
 	import ExampleJsonLinks from './ExampleJsonLinks.svelte';
 
 	interface Props {
@@ -22,9 +21,6 @@
 				<div class="bg-ab-light-gray px-4 py-3 flex items-center justify-between gap-2">
 					<div class="flex items-center gap-2 min-w-0">
 						<h3 class="text-base font-bold text-ab-dark-blue font-mono truncate">{enumDef.name}</h3>
-						{#if enumDef.deprecation}
-							<DeprecationBadge deprecation={enumDef.deprecation} />
-						{/if}
 					</div>
 					{#if exampleBaseUrl}
 						<ExampleJsonLinks baseUrl={exampleBaseUrl} typeName={enumDef.name} />
@@ -51,9 +47,6 @@
 											{value.name}
 											{#if value.value && value.value !== value.name}
 												<span class="text-ab-gray text-xs ml-1">({value.value})</span>
-											{/if}
-											{#if value.deprecation}
-												<DeprecationBadge deprecation={value.deprecation} />
 											{/if}
 										</td>
 										{#if hasAnyDescriptions(enumDef)}
