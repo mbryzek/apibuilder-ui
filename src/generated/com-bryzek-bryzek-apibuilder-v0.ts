@@ -96,10 +96,6 @@ export interface Domain {
   name: string;
 }
 
-export interface EmailVerificationConfirmationForm {
-  token: string;
-}
-
 export interface GithubAuthForm {
   token: string;
 }
@@ -127,8 +123,8 @@ export interface MembershipRequest {
 }
 
 export interface MembershipRequestForm {
-  org_guid: string;
-  user_guid: string;
+  org_id: string;
+  user_id: string;
   role: MembershipRole;
 }
 
@@ -162,15 +158,6 @@ export interface OriginalForm {
   data: string;
 }
 
-export interface PasswordResetForm {
-  token: string;
-  password: string;
-}
-
-export interface PasswordResetRequestForm {
-  email: string;
-}
-
 export interface Session {
   id: string;
   expires_at: ISODateTimeString;
@@ -185,7 +172,7 @@ export interface Subscription {
 
 export interface SubscriptionForm {
   organization_key: string;
-  user_guid: string;
+  user_id: string;
   publication: Publication;
 }
 
@@ -198,7 +185,7 @@ export interface Token {
 }
 
 export interface TokenForm {
-  user_guid: string;
+  user_id: string;
   description?: string;
 }
 
@@ -241,7 +228,7 @@ export interface Watch {
 }
 
 export interface WatchForm {
-  user_guid: string;
+  user_id: string;
   organization_key: string;
   application_key: string;
 }
@@ -332,11 +319,6 @@ export interface DeleteDomainByNameOptions {
   headers?: Record<string, string>;
 }
 
-export interface CreateEmailVerificationConfirmationFormOptions {
-  body: EmailVerificationConfirmationForm;
-  headers?: Record<string, string>;
-}
-
 export interface CreateGithubAuthFormOptions {
   body: GithubAuthForm;
   headers?: Record<string, string>;
@@ -354,7 +336,7 @@ export interface GetMembershipsOptions {
   limit: number;
   offset: number;
   orgKey?: string;
-  userGuid?: string;
+  userId?: string;
   role?: MembershipRole;
   headers?: Record<string, string>;
 }
@@ -367,7 +349,7 @@ export interface GetMembershipRequestsOptions {
   limit: number;
   offset: number;
   orgKey?: string;
-  userGuid?: string;
+  userId?: string;
   headers?: Record<string, string>;
 }
 
@@ -410,21 +392,11 @@ export interface DeleteOrganizationByKeyOptions {
   headers?: Record<string, string>;
 }
 
-export interface CreatePasswordResetFormOptions {
-  body: PasswordResetForm;
-  headers?: Record<string, string>;
-}
-
-export interface CreatePasswordResetRequestFormOptions {
-  body: PasswordResetRequestForm;
-  headers?: Record<string, string>;
-}
-
 export interface GetSubscriptionsOptions {
   limit: number;
   offset: number;
   organizationKey?: string;
-  userGuid?: string;
+  userId?: string;
   publication?: Publication;
   headers?: Record<string, string>;
 }
@@ -459,7 +431,7 @@ export interface DeleteTokenByIdOptions {
 }
 
 export interface GetUsersOptions {
-  guid?: string;
+  id?: string;
   email?: string;
   nickname?: string;
   headers?: Record<string, string>;
@@ -513,7 +485,7 @@ export interface DeleteVersionByVersionOptions {
 export interface GetWatchesOptions {
   limit: number;
   offset: number;
-  userGuid?: string;
+  userId?: string;
   organizationKey?: string;
   applicationKey?: string;
   headers?: Record<string, string>;
@@ -814,26 +786,6 @@ export class ApiClient {
 
   }
 
-  async createEmailVerificationConfirmationForm(params: CreateEmailVerificationConfirmationFormOptions): Promise<void> {
-    const url = `${this.baseUrl}/apibuilder/email/verification/confirmations`;
-
-      const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
-      body: JSON.stringify(params.body),
-    });
-
-    if (response.status === 204) {
-      return;
-    }
-
-    throw new ApiException(response, `Request failed with status ${response.status}`);
-
-  }
-
   async createGithubAuthForm(params: CreateGithubAuthFormOptions): Promise<Authentication> {
     const url = `${this.baseUrl}/apibuilder/users/authenticate/github`;
 
@@ -894,8 +846,8 @@ export class ApiClient {
     if (params.orgKey !== undefined && params.orgKey !== null) {
       queryParts.push(`org_key=${encodeURIComponent(params.orgKey)}`);
     }
-    if (params.userGuid !== undefined && params.userGuid !== null) {
-      queryParts.push(`user_guid=${encodeURIComponent(params.userGuid)}`);
+    if (params.userId !== undefined && params.userId !== null) {
+      queryParts.push(`user_id=${encodeURIComponent(params.userId)}`);
     }
     if (params.role !== undefined && params.role !== null) {
       queryParts.push(`role=${encodeURIComponent(params.role)}`);
@@ -946,8 +898,8 @@ export class ApiClient {
     if (params.orgKey !== undefined && params.orgKey !== null) {
       queryParts.push(`org_key=${encodeURIComponent(params.orgKey)}`);
     }
-    if (params.userGuid !== undefined && params.userGuid !== null) {
-      queryParts.push(`user_guid=${encodeURIComponent(params.userGuid)}`);
+    if (params.userId !== undefined && params.userId !== null) {
+      queryParts.push(`user_id=${encodeURIComponent(params.userId)}`);
     }
     queryParts.push(`limit=${encodeURIComponent(String(params.limit))}`);
     queryParts.push(`offset=${encodeURIComponent(String(params.offset))}`);
@@ -1167,58 +1119,13 @@ export class ApiClient {
 
   }
 
-  async createPasswordResetForm(params: CreatePasswordResetFormOptions): Promise<Authentication> {
-    const url = `${this.baseUrl}/apibuilder/password/resets`;
-
-      const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
-      body: JSON.stringify(params.body),
-    });
-
-    if (response.status === 200) {
-      const data = await response.json();
-      return data;
-    }
-
-    if (response.status === 422) {
-      throw new ValidationErrorsResponse(response);
-    }
-
-    throw new ApiException(response, `Request failed with status ${response.status}`);
-
-  }
-
-  async createPasswordResetRequestForm(params: CreatePasswordResetRequestFormOptions): Promise<void> {
-    const url = `${this.baseUrl}/apibuilder/password/reset/requests`;
-
-      const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
-      body: JSON.stringify(params.body),
-    });
-
-    if (response.status === 204) {
-      return;
-    }
-
-    throw new ApiException(response, `Request failed with status ${response.status}`);
-
-  }
-
   async getSubscriptions(params: GetSubscriptionsOptions): Promise<Subscription[]> {
     const queryParts: string[] = [];
     if (params.organizationKey !== undefined && params.organizationKey !== null) {
       queryParts.push(`organization_key=${encodeURIComponent(params.organizationKey)}`);
     }
-    if (params.userGuid !== undefined && params.userGuid !== null) {
-      queryParts.push(`user_guid=${encodeURIComponent(params.userGuid)}`);
+    if (params.userId !== undefined && params.userId !== null) {
+      queryParts.push(`user_id=${encodeURIComponent(params.userId)}`);
     }
     if (params.publication !== undefined && params.publication !== null) {
       queryParts.push(`publication=${encodeURIComponent(params.publication)}`);
@@ -1383,8 +1290,8 @@ export class ApiClient {
 
   async getUsers(params: GetUsersOptions): Promise<User[]> {
     const queryParts: string[] = [];
-    if (params.guid !== undefined && params.guid !== null) {
-      queryParts.push(`guid=${encodeURIComponent(params.guid)}`);
+    if (params.id !== undefined && params.id !== null) {
+      queryParts.push(`id=${encodeURIComponent(params.id)}`);
     }
     if (params.email !== undefined && params.email !== null) {
       queryParts.push(`email=${encodeURIComponent(params.email)}`);
@@ -1580,8 +1487,8 @@ export class ApiClient {
 
   async getWatches(params: GetWatchesOptions): Promise<Watch[]> {
     const queryParts: string[] = [];
-    if (params.userGuid !== undefined && params.userGuid !== null) {
-      queryParts.push(`user_guid=${encodeURIComponent(params.userGuid)}`);
+    if (params.userId !== undefined && params.userId !== null) {
+      queryParts.push(`user_id=${encodeURIComponent(params.userId)}`);
     }
     if (params.organizationKey !== undefined && params.organizationKey !== null) {
       queryParts.push(`organization_key=${encodeURIComponent(params.organizationKey)}`);

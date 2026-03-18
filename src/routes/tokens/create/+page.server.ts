@@ -17,7 +17,7 @@ export const actions: Actions = {
 		const formData = await request.formData();
 		const description = formData.get('description') as string;
 
-		const body: TokenForm = { user_guid: session.user.id };
+		const body: TokenForm = { user_id: session.user.id };
 		if (description) {
 			body.description = description;
 		}

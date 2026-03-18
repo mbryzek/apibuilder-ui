@@ -8,7 +8,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 	if (locals.session) {
 		const headers = getSessionHeaders(locals.session.id);
 		const membershipsResponse = await handleApiCall<Membership[]>(
-			() => apiBuilderClient().getMemberships({ userGuid: locals.session!.user.id, limit: 100, offset: 0, headers }),
+			() => apiBuilderClient().getMemberships({ userId: locals.session!.user.id, limit: 100, offset: 0, headers }),
 		);
 		const myOrgs: Organization[] = 'data' in membershipsResponse
 			? membershipsResponse.data.map((m) => m.organization)

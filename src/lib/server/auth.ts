@@ -25,7 +25,7 @@ export async function requireMemberForAction(locals: App.Locals, orgKey: string)
 	const session = requireAuthForAction(locals);
 	const headers = getSessionHeaders(session.id);
 	const response = await handleApiCall<Membership[]>(
-		() => apiBuilderClient().getMemberships({ orgKey, userGuid: session.user.id, limit: 25, offset: 0, headers }),
+		() => apiBuilderClient().getMemberships({ orgKey, userId: session.user.id, limit: 25, offset: 0, headers }),
 	);
 	if (!('data' in response) || response.data.length === 0) {
 		throw error(403, 'Forbidden');
@@ -37,7 +37,7 @@ export async function requireAdminForAction(locals: App.Locals, orgKey: string):
 	const session = requireAuthForAction(locals);
 	const headers = getSessionHeaders(session.id);
 	const response = await handleApiCall<Membership[]>(
-		() => apiBuilderClient().getMemberships({ orgKey, userGuid: session.user.id, role: MembershipRole.Admin, limit: 25, offset: 0, headers }),
+		() => apiBuilderClient().getMemberships({ orgKey, userId: session.user.id, role: MembershipRole.Admin, limit: 25, offset: 0, headers }),
 	);
 	if (!('data' in response) || response.data.length === 0) {
 		throw error(403, 'Forbidden');

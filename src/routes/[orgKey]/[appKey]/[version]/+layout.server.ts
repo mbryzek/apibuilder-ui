@@ -28,7 +28,7 @@ export const load: LayoutServerLoad = async ({ params, locals }) => {
 		locals.session
 			? handleApiCall<Watch[]>(
 					() => client.getWatches({
-						userGuid: locals.session!.user.id,
+						userId: locals.session!.user.id,
 						organizationKey: params.orgKey,
 						applicationKey: params.appKey,
 						limit: 100,
