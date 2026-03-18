@@ -3,8 +3,8 @@ import { redirect, fail } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth, requireAdminForAction } from '$lib/server/auth';
-import type { Organization } from '$generated/com-bryzek-bryzek-apibuilder-v0';
-import { Visibility } from '$generated/com-bryzek-bryzek-apibuilder-v0';
+import type { Organization } from '$generated/com-bryzek-apibuilder-v0';
+import { Visibility } from '$generated/com-bryzek-apibuilder-v0';
 
 export const load: PageServerLoad = async (event) => {
 	requireAuth(event);
@@ -31,7 +31,7 @@ export const actions: Actions = {
 		if (visibility) form.visibility = visibility as Visibility;
 
 		const response = await handleApiCall<Organization>(
-			() => apiBuilderClient().updateOrganizationByKey({ key: params.orgKey, body: form as import('$generated/com-bryzek-bryzek-apibuilder-v0').OrganizationForm, headers }),
+			() => apiBuilderClient().updateOrganizationByKey({ key: params.orgKey, body: form as import('$generated/com-bryzek-apibuilder-v0').OrganizationForm, headers }),
 		);
 
 		if ('data' in response) {

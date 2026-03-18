@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Organization, Application } from '$generated/com-bryzek-bryzek-apibuilder-v0';
+	import type { Organization, Application } from '$generated/com-bryzek-apibuilder-v0';
 	import Pagination from '$lib/components/Pagination.svelte';
 
 	interface Props {

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Service } from '$generated/types';
+	import type { Service } from '$generated/com-bryzek-apibuilder-spec-v0';
 	import { resolveType } from '$lib/utils/type-resolver';
 
 	interface Props {

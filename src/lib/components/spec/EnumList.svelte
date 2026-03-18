@@ -1,16 +1,16 @@
 <script lang="ts">
-	import type { SpecEnum } from '$generated/types';
+	import type { Enum } from '$generated/com-bryzek-apibuilder-spec-v0';
 	import DeprecationBadge from './DeprecationBadge.svelte';
 	import ExampleJsonLinks from './ExampleJsonLinks.svelte';
 
 	interface Props {
-		enums: SpecEnum[];
+		enums: Enum[];
 		exampleBaseUrl?: string;
 	}
 
 	let { enums, exampleBaseUrl }: Props = $props();
 
-	function hasAnyDescriptions(enumDef: SpecEnum): boolean {
+	function hasAnyDescriptions(enumDef: Enum): boolean {
 		return enumDef.values.some((v) => v.description);
 	}
 </script>

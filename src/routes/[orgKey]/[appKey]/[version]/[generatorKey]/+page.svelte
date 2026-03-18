@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import type { Code } from '$generated/com-bryzek-bryzek-apibuilder-v0';
+	import type { Code } from '$generated/com-bryzek-apibuilder-v0';
 
 	interface Props {
 		data: {

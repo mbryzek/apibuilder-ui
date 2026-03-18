@@ -3,7 +3,7 @@ import { redirect, fail } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuthForAction, requireMemberForAction } from '$lib/server/auth';
-import type { Watch } from '$generated/types';
+import type { Watch } from '$generated/com-bryzek-apibuilder-v0';
 
 export const load: PageServerLoad = async () => {
 	// Data already loaded by layout
@@ -19,12 +19,12 @@ export const actions: Actions = {
 		const response = await handleApiCall<Watch>(
 			() => client.createWatch({
 				body: {
-					user_guid: session.user.id,
+					user_id: session.user.id,
 					organization_key: params.orgKey,
 					application_key: params.appKey,
 				},
 				headers,
-			}) as unknown as Promise<Watch>,
+			}),
 		);
 
 		if ('data' in response) {

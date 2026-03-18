@@ -2,13 +2,13 @@ import type { PageServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
-import type { Organization, Membership } from '$generated/com-bryzek-bryzek-apibuilder-v0';
+import type { Organization, Membership } from '$generated/com-bryzek-apibuilder-v0';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	if (locals.session) {
 		const headers = getSessionHeaders(locals.session.id);
 		const membershipsResponse = await handleApiCall<Membership[]>(
-			() => apiBuilderClient().getMemberships({ userGuid: locals.session!.user.id, limit: 100, offset: 0, headers }),
+			() => apiBuilderClient().getMemberships({ userId: locals.session!.user.id, limit: 100, offset: 0, headers }),
 		);
 		const myOrgs: Organization[] = 'data' in membershipsResponse
 			? membershipsResponse.data.map((m) => m.organization)

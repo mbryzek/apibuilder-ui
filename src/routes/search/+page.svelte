@@ -2,7 +2,7 @@
 	import { onDestroy } from 'svelte';
 	import { goto } from '$app/navigation';
 	import Pagination from '$lib/components/Pagination.svelte';
-	import type { Item } from '$generated/com-bryzek-bryzek-apibuilder-v0';
+	import type { Item } from '$generated/com-bryzek-apibuilder-v0';
 
 	interface Props {
 		data: {

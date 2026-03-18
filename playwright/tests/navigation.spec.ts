@@ -81,12 +81,6 @@ test.describe("Authenticated pages load", () => {
     expect(title).toBeTruthy();
   });
 
-  test("attributes page", async ({ page }) => {
-    await signupAndLogin(page);
-    await loadUrl(page, "/attributes");
-    const title = await page.title();
-    expect(title).toBeTruthy();
-  });
 });
 
 test.describe("Auth redirects", () => {

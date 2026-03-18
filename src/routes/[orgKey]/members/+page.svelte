@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import type { Organization, Membership } from '$generated/com-bryzek-bryzek-apibuilder-v0';
-	import { MembershipRole } from '$generated/com-bryzek-bryzek-apibuilder-v0';
+	import type { Organization, Membership } from '$generated/com-bryzek-apibuilder-v0';
+	import { MembershipRole } from '$generated/com-bryzek-apibuilder-v0';
 	import type { ApiErrorItem } from '$lib/api/error-handler';
 
 	interface Props {
@@ -94,14 +94,14 @@
 									<div class="flex gap-2 justify-end">
 										{#if membership.role === MembershipRole.Admin}
 											<form method="POST" action="?/revokeAdmin" use:enhance={() => { isSubmitting = true; return async ({ update }) => { isSubmitting = false; await update(); }; }}>
-												<input type="hidden" name="user_guid" value={membership.user.id} />
+												<input type="hidden" name="user_id" value={membership.user.id} />
 												<button type="submit" class="text-sm text-ab-blue hover:text-ab-dark-blue" disabled={isSubmitting}>
 													Revoke Admin
 												</button>
 											</form>
 										{:else}
 											<form method="POST" action="?/makeAdmin" use:enhance={() => { isSubmitting = true; return async ({ update }) => { isSubmitting = false; await update(); }; }}>
-												<input type="hidden" name="user_guid" value={membership.user.id} />
+												<input type="hidden" name="user_id" value={membership.user.id} />
 												<button type="submit" class="text-sm text-ab-blue hover:text-ab-dark-blue" disabled={isSubmitting}>
 													Make Admin
 												</button>
