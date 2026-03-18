@@ -20,6 +20,10 @@ export const load: LayoutServerLoad = async ({ params, locals }) => {
 
 	const version = versionResponse.data;
 
+	if (!version.service) {
+		throw error(500, 'Version service data is not available');
+	}
+
 	// Fetch version list and watch status in parallel
 	const [versionsResponse, watchResponse] = await Promise.all([
 		handleApiCall<ApplicationMetadataVersion[]>(
