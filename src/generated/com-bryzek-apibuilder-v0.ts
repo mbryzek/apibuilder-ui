@@ -215,7 +215,7 @@ export interface Validation {
 export interface Version {
   id: string;
   version: string;
-  original?: Original;
+  original: Original;
   service: Service;
 }
 
