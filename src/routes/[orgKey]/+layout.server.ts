@@ -2,8 +2,8 @@ import type { LayoutServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
-import type { Organization, Membership } from '$generated/com-bryzek-bryzek-apibuilder-v0';
-import { MembershipRole } from '$generated/com-bryzek-bryzek-apibuilder-v0';
+import type { Organization, Membership } from '$generated/com-bryzek-apibuilder-v0';
+import { MembershipRole } from '$generated/com-bryzek-apibuilder-v0';
 
 export const load: LayoutServerLoad = async ({ params, locals }) => {
 	const headers = locals.session ? getSessionHeaders(locals.session.id) : {};

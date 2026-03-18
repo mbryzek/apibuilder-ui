@@ -3,7 +3,7 @@ import { redirect, fail } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth, requireAuthForAction } from '$lib/server/auth';
-import type { Token, TokenForm } from '$generated/com-bryzek-bryzek-apibuilder-v0';
+import type { Token, TokenForm } from '$generated/com-bryzek-apibuilder-v0';
 
 export const load: PageServerLoad = async (event) => {
 	requireAuth(event);

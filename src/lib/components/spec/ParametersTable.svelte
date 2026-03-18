@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Parameter, Service } from '$generated/types';
+	import type { Parameter, Service } from '$generated/com-bryzek-apibuilder-spec-v0';
 	import TypeLink from './TypeLink.svelte';
 	import DeprecationBadge from './DeprecationBadge.svelte';
 

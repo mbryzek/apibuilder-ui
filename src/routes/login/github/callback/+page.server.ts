@@ -5,7 +5,7 @@ import { apiBuilderClient } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { SESSION_COOKIE, config } from '$lib/config';
 import { env } from '$env/dynamic/private';
-import type { Authentication } from '$generated/com-bryzek-bryzek-apibuilder-v0';
+import type { Authentication } from '$generated/com-bryzek-apibuilder-v0';
 
 export const load: PageServerLoad = async ({ url, cookies }) => {
 	const code = url.searchParams.get('code');

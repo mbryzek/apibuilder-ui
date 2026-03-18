@@ -2,8 +2,8 @@ import { redirect, error } from '@sveltejs/kit';
 import type { RequestEvent } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
-import type { Membership } from '$generated/com-bryzek-bryzek-apibuilder-v0';
-import { MembershipRole } from '$generated/com-bryzek-bryzek-apibuilder-v0';
+import type { Membership } from '$generated/com-bryzek-apibuilder-v0';
+import { MembershipRole } from '$generated/com-bryzek-apibuilder-v0';
 
 export function requireAuth(event: RequestEvent): NonNullable<App.Locals['session']> {
 	const { locals, url } = event;

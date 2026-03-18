@@ -2,7 +2,7 @@ import type { PageServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
-import type { Organization, Membership } from '$generated/com-bryzek-bryzek-apibuilder-v0';
+import type { Organization, Membership } from '$generated/com-bryzek-apibuilder-v0';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	if (locals.session) {

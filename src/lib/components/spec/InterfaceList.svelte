@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { SpecInterface, Service } from '$generated/types';
+	import type { Interface, Service } from '$generated/com-bryzek-apibuilder-spec-v0';
 	import DeprecationBadge from './DeprecationBadge.svelte';
 	import FieldsTable from './FieldsTable.svelte';
 
 	interface Props {
-		interfaces: SpecInterface[];
+		interfaces: Interface[];
 		service: Service;
 	}
 
