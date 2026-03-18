@@ -41,10 +41,6 @@ export interface Annotation {
   deprecation?: Deprecation;
 }
 
-export interface Apidoc {
-  version: string;
-}
-
 export interface Application {
   /** Unique key identifying this application */
   key: string;
@@ -237,8 +233,6 @@ export interface Response {
 }
 
 export interface Service {
-  /** Documents that this is an apibuilder document, noting the specific version used. Internally the version is then used for backwards compatibility when applicable as new features are added to apibuilder. Note naming refers to the original name of this project, 'apidoc', and is left here to avoid a breaking change for preexisting services. */
-  apidoc?: Apidoc;
   name: string;
   organization: Organization;
   application: Application;
