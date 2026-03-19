@@ -4,7 +4,7 @@
  */
 
 import { Util } from './generated-util.ts';
-import type { Error } from './com-bryzek-bryzek-apibuilder-generator-v0.ts';
+import type { Error } from './com-bryzek-apibuilder-generator-v0.ts';
 
 export class ErrorsResponse extends Error {
   constructor(public readonly response: Response) {

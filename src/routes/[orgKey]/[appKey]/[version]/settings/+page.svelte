@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import type { Organization } from '$generated/com-bryzek-bryzek-apibuilder-v0';
-	import type { Service } from '$generated/types';
-	import { Visibility } from '$generated/com-bryzek-bryzek-apibuilder-v0';
+	import type { Organization } from '$generated/com-bryzek-apibuilder-v0';
+	import type { Service } from '$generated/com-bryzek-apibuilder-spec-v0';
+	import { Visibility } from '$generated/com-bryzek-apibuilder-v0';
 
 	interface Props {
 		data: {

@@ -216,10 +216,6 @@
 				— Export to OpenAPI 3.0 spec
 			</li>
 			<li>
-				<a href="/generators/show/swagger_json" class="text-ab-blue hover:text-ab-dark-blue underline font-medium">Swagger JSON</a>
-				— Export to Swagger 2.0
-			</li>
-			<li>
 				<a href="/generators/show/json_schema" class="text-ab-blue hover:text-ab-dark-blue underline font-medium">JSON Schema</a>
 				— JSON Schema from service definition
 			</li>

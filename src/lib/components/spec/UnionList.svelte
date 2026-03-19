@@ -1,17 +1,17 @@
 <script lang="ts">
-	import type { SpecUnion, Service } from '$generated/types';
+	import type { Union, Service } from '$generated/com-bryzek-apibuilder-spec-v0';
 	import TypeLink from './TypeLink.svelte';
 	import ExampleJsonLinks from './ExampleJsonLinks.svelte';
 
 	interface Props {
-		unions: SpecUnion[];
+		unions: Union[];
 		service: Service;
 		exampleBaseUrl?: string;
 	}
 
 	let { unions, service, exampleBaseUrl }: Props = $props();
 
-	function hasAnyDetails(union: SpecUnion): boolean {
+	function hasAnyDetails(union: Union): boolean {
 		return union.types.some((t) => t.description || t.default);
 	}
 </script>

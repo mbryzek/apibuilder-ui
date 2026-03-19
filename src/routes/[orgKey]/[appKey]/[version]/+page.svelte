@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { enhance } from '$app/forms';
 	import { page } from '$app/stores';
-	import type { Service } from '$generated/types';
+	import type { Service } from '$generated/com-bryzek-apibuilder-spec-v0';
 	import SpecTabs from '$lib/components/spec/SpecTabs.svelte';
 
 	interface Props {

@@ -60,7 +60,7 @@
 
 			<li>
 				<span class="font-semibold">Multiple input formats</span> —
-				Author specs in api.json, Swagger, Avro, or other IDLs. Adding new input formats is straightforward.
+				Author specs in api.json. Adding new input formats is straightforward.
 			</li>
 
 			<li>

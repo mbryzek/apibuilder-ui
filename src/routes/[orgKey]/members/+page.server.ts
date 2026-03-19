@@ -3,8 +3,8 @@ import { fail } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth, requireAdminForAction } from '$lib/server/auth';
-import type { Membership, User, MembershipRequest, Organization } from '$generated/com-bryzek-bryzek-apibuilder-v0';
-import { MembershipRole } from '$generated/com-bryzek-bryzek-apibuilder-v0';
+import type { Membership, User, MembershipRequest, Organization } from '$generated/com-bryzek-apibuilder-v0';
+import { MembershipRole } from '$generated/com-bryzek-apibuilder-v0';
 
 export const load: PageServerLoad = async (event) => {
 	const session = requireAuth(event);
@@ -74,7 +74,7 @@ export const actions: Actions = {
 		}
 
 		const requestResponse = await handleApiCall<MembershipRequest>(
-			() => apiBuilderClient().createMembershipRequest({ body: { org_guid: orgResponse.data.id, user_guid: user!.id, role: role as MembershipRole }, headers }),
+			() => apiBuilderClient().createMembershipRequest({ body: { org_id: orgResponse.data.id, user_id: user!.id, role: role as MembershipRole }, headers }),
 		);
 
 		if ('data' in requestResponse) {
@@ -120,9 +120,9 @@ export const actions: Actions = {
 		const session = await requireAdminForAction(locals, params.orgKey);
 		const headers = getSessionHeaders(session.id);
 		const formData = await request.formData();
-		const userGuid = formData.get('user_guid');
+		const userId = formData.get('user_id');
 
-		if (!userGuid || typeof userGuid !== 'string') {
+		if (!userId || typeof userId !== 'string') {
 			return fail(400, { errors: [{ message: 'Invalid request' }] });
 		}
 
@@ -134,7 +134,7 @@ export const actions: Actions = {
 		}
 
 		const requestResponse = await handleApiCall<MembershipRequest>(
-			() => apiBuilderClient().createMembershipRequest({ body: { org_guid: orgResponse.data.id, user_guid: userGuid, role: MembershipRole.Admin }, headers }),
+			() => apiBuilderClient().createMembershipRequest({ body: { org_id: orgResponse.data.id, user_id: userId, role: MembershipRole.Admin }, headers }),
 		);
 
 		if ('data' in requestResponse) {
@@ -159,14 +159,14 @@ export const actions: Actions = {
 		const session = locals.session!;
 		const headers = getSessionHeaders(session.id);
 		const formData = await request.formData();
-		const userGuid = formData.get('user_guid');
+		const userId = formData.get('user_id');
 
-		if (!userGuid || typeof userGuid !== 'string') {
+		if (!userId || typeof userId !== 'string') {
 			return fail(400, { errors: [{ message: 'Invalid request' }] });
 		}
 
 		const membershipsResponse = await handleApiCall<Membership[]>(
-			() => apiBuilderClient().getMemberships({ orgKey: params.orgKey, userGuid, role: MembershipRole.Admin, limit: 100, offset: 0, headers }),
+			() => apiBuilderClient().getMemberships({ orgKey: params.orgKey, userId, role: MembershipRole.Admin, limit: 100, offset: 0, headers }),
 		);
 
 		if ('data' in membershipsResponse) {

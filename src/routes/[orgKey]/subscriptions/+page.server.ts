@@ -3,15 +3,15 @@ import { fail } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth, requireAuthForAction } from '$lib/server/auth';
-import type { Subscription } from '$generated/com-bryzek-bryzek-apibuilder-v0';
-import { Publication } from '$generated/com-bryzek-bryzek-apibuilder-v0';
+import type { Subscription } from '$generated/com-bryzek-apibuilder-v0';
+import { Publication } from '$generated/com-bryzek-apibuilder-v0';
 
 export const load: PageServerLoad = async (event) => {
 	const session = requireAuth(event);
 	const headers = getSessionHeaders(session.id);
 
 	const response = await handleApiCall<Subscription[]>(
-		() => apiBuilderClient().getSubscriptions({ limit: 100, offset: 0, organizationKey: event.params.orgKey, userGuid: session.user.id, headers }),
+		() => apiBuilderClient().getSubscriptions({ limit: 100, offset: 0, organizationKey: event.params.orgKey, userId: session.user.id, headers }),
 	);
 
 	return {
@@ -43,7 +43,7 @@ export const actions: Actions = {
 				() => apiBuilderClient().createSubscription({
 					body: {
 						organization_key: params.orgKey,
-						user_guid: session.user.id,
+						user_id: session.user.id,
 						publication: publication as Publication,
 					},
 					headers,

@@ -21,9 +21,6 @@
 				Describe your service in <a href="/doc/apiJson" class="text-ab-blue hover:text-ab-dark-blue underline">api.json</a> —
 				a clean JSON format that guides you toward well-structured REST APIs through convention over configuration.
 			</p>
-			<p class="text-ab-dark-blue mb-3">
-				Also supports <strong>Swagger 2.0</strong> and <strong>Avro IDL</strong> as input formats.
-			</p>
 			<p class="text-ab-dark-blue text-sm">
 				See the <a href="https://app.apibuilder.io/apicollective/apibuilder-api/latest" class="text-ab-blue hover:text-ab-dark-blue underline">API Builder API spec</a> for a real-world example.
 			</p>

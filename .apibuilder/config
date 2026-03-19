@@ -1,16 +1,16 @@
 code:
   bryzek:
-    bryzek-apibuilder-spec:
+    apibuilder-spec:
       version: latest
       generators:
         - generator: typescript
           target: ./src/generated
-    bryzek-apibuilder:
+    apibuilder:
       version: latest
       generators:
         - generator: typescript
           target: ./src/generated
-    bryzek-apibuilder-generator:
+    apibuilder-generator:
       version: latest
       generators:
         - generator: typescript
