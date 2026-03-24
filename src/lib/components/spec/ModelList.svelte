@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { Model, Service } from '$generated/com-bryzek-apibuilder-spec';
-	import DeprecationBadge from './DeprecationBadge.svelte';
 	import ExampleJsonLinks from './ExampleJsonLinks.svelte';
 	import FieldsTable from './FieldsTable.svelte';
 
@@ -20,9 +19,6 @@
 				<div class="bg-ab-light-gray px-4 py-3 flex items-center justify-between gap-2">
 					<div class="flex items-center gap-2 min-w-0">
 						<h3 class="text-base font-bold text-ab-dark-blue font-mono truncate">{model.name}</h3>
-						{#if model.deprecation}
-							<DeprecationBadge deprecation={model.deprecation} />
-						{/if}
 					</div>
 					{#if exampleBaseUrl}
 						<ExampleJsonLinks baseUrl={exampleBaseUrl} typeName={model.name} />

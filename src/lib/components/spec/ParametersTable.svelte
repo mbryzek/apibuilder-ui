@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { Parameter, Service } from '$generated/com-bryzek-apibuilder-spec';
 	import TypeLink from './TypeLink.svelte';
-	import DeprecationBadge from './DeprecationBadge.svelte';
 
 	interface Props {
 		parameters: Parameter[];
@@ -30,9 +29,6 @@
 					<tr class="border-b border-gray-100 last:border-b-0">
 						<td class="py-2.5 pr-6 align-top">
 							<span class="font-mono text-sm">{param.name}</span>
-							{#if param.deprecation}
-								<DeprecationBadge deprecation={param.deprecation} />
-							{/if}
 							{#if param.required}
 								<span class="block text-[11px] text-ab-success-green font-medium mt-0.5">required</span>
 							{/if}

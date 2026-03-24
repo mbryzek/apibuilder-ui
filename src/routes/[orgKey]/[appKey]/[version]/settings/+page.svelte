@@ -21,7 +21,7 @@
 
 	let isDeleting = $state(false);
 	let showDeleteConfirm = $state(false);
-	let isMoving = $state(false);
+
 </script>
 
 <svelte:head>
@@ -52,32 +52,6 @@
 				</select>
 			</div>
 			<button type="submit" class="btn-primary">Update Visibility</button>
-		</form>
-	</div>
-
-	<!-- Move to different org -->
-	<div class="card">
-		<h3 class="text-lg font-semibold text-ab-dark-blue mb-4">Move Application</h3>
-		<p class="text-sm text-ab-gray mb-4">Move this application to a different organization.</p>
-		<form
-			method="POST"
-			action="?/move"
-			use:enhance={() => {
-				isMoving = true;
-				return async ({ update }) => {
-					isMoving = false;
-					await update();
-				};
-			}}
-			class="space-y-4"
-		>
-			<div>
-				<label for="org_key" class="block text-sm font-medium text-gray-700 mb-1">New Organization Key</label>
-				<input type="text" id="org_key" name="org_key" class="input-field w-full" required placeholder="e.g. my-other-org" />
-			</div>
-			<button type="submit" class="btn-secondary" disabled={isMoving}>
-				{isMoving ? 'Moving...' : 'Move Application'}
-			</button>
 		</form>
 	</div>
 

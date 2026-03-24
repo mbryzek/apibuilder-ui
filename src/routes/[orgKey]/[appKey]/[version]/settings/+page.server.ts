@@ -41,33 +41,6 @@ export const actions: Actions = {
 		return fail(Math.max(response.status, 400), { errors: 'errors' in response ? response.errors : [{ message: 'Failed to update' }] });
 	},
 
-	move: async ({ request, params, locals }) => {
-		const session = await requireAdminForAction(locals, params.orgKey);
-		const headers = getSessionHeaders(session.id);
-		const formData = await request.formData();
-		const client = apiBuilderClient();
-
-		const newOrgKey = (formData.get('org_key') as string)?.trim();
-		if (!newOrgKey) {
-			return fail(400, { errors: [{ message: 'Organization key is required' }] });
-		}
-
-		const response = await handleApiCall<Application>(
-			() => client.createApplicationMoveByAppKey({
-				orgKey: params.orgKey,
-				appKey: params.appKey,
-				body: { org_key: newOrgKey },
-				headers,
-			}),
-		);
-
-		if ('data' in response) {
-			throw redirect(303, `/${newOrgKey}/${response.data.key}/${params.version}?flash=${encodeURIComponent('Application moved')}&flash_type=success`);
-		}
-
-		return fail(Math.max(response.status, 400), { errors: 'errors' in response ? response.errors : [{ message: 'Failed to move' }] });
-	},
-
 	deleteApp: async ({ params, locals }) => {
 		const session = await requireAdminForAction(locals, params.orgKey);
 		const headers = getSessionHeaders(session.id);
