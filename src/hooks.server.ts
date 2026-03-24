@@ -2,7 +2,7 @@ import { redirect, type Handle } from '@sveltejs/kit';
 import { clients, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { SESSION_COOKIE, config } from '$lib/config';
-import type { TenantSession } from '$generated/com-bryzek-platform-v0';
+import type { TenantSession } from '$generated/com-bryzek-platform';
 
 export const handle: Handle = async ({ event, resolve }) => {
 	const sessionId = event.cookies.get(SESSION_COOKIE) || undefined;

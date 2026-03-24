@@ -3,7 +3,7 @@ import { redirect, fail } from '@sveltejs/kit';
 import { clients, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { SESSION_COOKIE, config } from '$lib/config';
-import { isTenantSession, type SessionState } from '$generated/com-bryzek-platform-v0';
+import { isTenantSession, type SessionState } from '$generated/com-bryzek-platform';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	if (locals.session) {

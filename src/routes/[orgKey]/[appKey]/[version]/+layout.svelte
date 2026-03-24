@@ -2,8 +2,8 @@
 	import type { Snippet } from 'svelte';
 	import { page } from '$app/stores';
 	import AppSidebar from '$lib/components/AppSidebar.svelte';
-	import type { Organization } from '$generated/com-bryzek-apibuilder-v0';
-	import type { Service } from '$generated/com-bryzek-apibuilder-spec-v0';
+	import type { Organization } from '$generated/com-bryzek-apibuilder';
+	import type { Service } from '$generated/com-bryzek-apibuilder-spec';
 
 	interface Props {
 		data: {

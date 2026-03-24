@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import OrgSidebar from '$lib/components/OrgSidebar.svelte';
-	import type { Organization } from '$generated/com-bryzek-apibuilder-v0';
+	import type { Organization } from '$generated/com-bryzek-apibuilder';
 	import type { Snippet } from 'svelte';
 
 	interface Props {

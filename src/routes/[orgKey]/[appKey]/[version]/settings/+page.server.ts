@@ -3,7 +3,7 @@ import { redirect, fail } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth, requireAdminForAction } from '$lib/server/auth';
-import type { Application, Visibility } from '$generated/com-bryzek-apibuilder-v0';
+import type { Application, Visibility } from '$generated/com-bryzek-apibuilder';
 
 export const load: PageServerLoad = async (event) => {
 	requireAuth(event);
@@ -39,33 +39,6 @@ export const actions: Actions = {
 		}
 
 		return fail(Math.max(response.status, 400), { errors: 'errors' in response ? response.errors : [{ message: 'Failed to update' }] });
-	},
-
-	move: async ({ request, params, locals }) => {
-		const session = await requireAdminForAction(locals, params.orgKey);
-		const headers = getSessionHeaders(session.id);
-		const formData = await request.formData();
-		const client = apiBuilderClient();
-
-		const newOrgKey = (formData.get('org_key') as string)?.trim();
-		if (!newOrgKey) {
-			return fail(400, { errors: [{ message: 'Organization key is required' }] });
-		}
-
-		const response = await handleApiCall<Application>(
-			() => client.createApplicationMoveByAppKey({
-				orgKey: params.orgKey,
-				appKey: params.appKey,
-				body: { org_key: newOrgKey },
-				headers,
-			}),
-		);
-
-		if ('data' in response) {
-			throw redirect(303, `/${newOrgKey}/${response.data.key}/${params.version}?flash=${encodeURIComponent('Application moved')}&flash_type=success`);
-		}
-
-		return fail(Math.max(response.status, 400), { errors: 'errors' in response ? response.errors : [{ message: 'Failed to move' }] });
 	},
 
 	deleteApp: async ({ params, locals }) => {

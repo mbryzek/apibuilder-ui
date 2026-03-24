@@ -1,7 +1,6 @@
 <script lang="ts">
-	import type { Union, Service } from '$generated/com-bryzek-apibuilder-spec-v0';
+	import type { Union, Service } from '$generated/com-bryzek-apibuilder-spec';
 	import TypeLink from './TypeLink.svelte';
-	import DeprecationBadge from './DeprecationBadge.svelte';
 	import ExampleJsonLinks from './ExampleJsonLinks.svelte';
 
 	interface Props {
@@ -25,9 +24,6 @@
 				<div class="bg-ab-light-gray px-4 py-3 flex items-center justify-between gap-2">
 					<div class="flex items-center gap-2 min-w-0">
 						<h3 class="text-base font-bold text-ab-dark-blue font-mono truncate">{union.name}</h3>
-						{#if union.deprecation}
-							<DeprecationBadge deprecation={union.deprecation} />
-						{/if}
 					</div>
 					{#if exampleBaseUrl}
 						<ExampleJsonLinks baseUrl={exampleBaseUrl} typeName={union.name} />
@@ -62,9 +58,6 @@
 											<TypeLink typeStr={unionType.type} {service} />
 											{#if unionType.discriminator_value}
 												<span class="text-ab-gray text-xs ml-1">({unionType.discriminator_value})</span>
-											{/if}
-											{#if unionType.deprecation}
-												<DeprecationBadge deprecation={unionType.deprecation} />
 											{/if}
 											</td>
 										{#if showDetails}

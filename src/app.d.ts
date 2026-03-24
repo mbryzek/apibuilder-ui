@@ -1,4 +1,4 @@
-import type { User } from '$generated/com-bryzek-platform-v0';
+import type { User } from '$generated/com-bryzek-platform';
 
 export type Session = {
 	id: string;

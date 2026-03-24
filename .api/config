@@ -1,0 +1,32 @@
+bryzek:
+  - generators:
+      typescript: ./src/generated
+    attributes:
+      filter:
+        types:
+          - user_reference
+          - person
+        resources:
+          - email_verification
+          - tenant_session
+          - user
+          - phone
+    applications:
+      platform:
+
+  - generators:
+      typescript: ./src/generated
+    attributes:
+      filter:
+        types:
+          - file
+    applications:
+      platform-storage:
+
+  - generators:
+      typescript: ./src/generated
+    applications:
+      apibuilder-spec:
+      apibuilder:
+      apibuilder-generator:
+      platform-error:

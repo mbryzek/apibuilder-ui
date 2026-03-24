@@ -7,7 +7,7 @@ import { ValidationErrorsResponse } from "$generated/generated-error-validation-
 import { UnauthorizedErrorsResponse } from "$generated/generated-error-unauthorized-errors-response";
 import { VoidResponse } from "$generated/generated-error-void-response";
 import { ApiException } from "$generated/generated-util";
-import type { ValidationError } from "$generated/com-bryzek-platform-error-v0";
+import type { ValidationError } from "$generated/com-bryzek-platform-error";
 
 // ============================================================================
 // Response Types

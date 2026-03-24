@@ -1,0 +1,28 @@
+bryzek:
+  - generators:
+      typescript: ./generated
+    attributes:
+      filter:
+        types:
+          - user_reference
+          - person
+        resources:
+          - tenant_session
+          - user
+          - phone
+    applications:
+      platform:
+
+  - generators:
+      typescript: ./generated
+    attributes:
+      filter:
+        types:
+          - file
+    applications:
+      platform-storage:
+
+  - generators:
+      typescript: ./generated
+    applications:
+      platform-error:

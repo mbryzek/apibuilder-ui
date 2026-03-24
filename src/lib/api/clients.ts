@@ -3,9 +3,9 @@
  * Direct access to generated API clients
  */
 
-import { ApiClient as ApiBuilderClient } from "$generated/com-bryzek-apibuilder-v0";
-import { ApiClient as GeneratorClient } from "$generated/com-bryzek-apibuilder-generator-v0";
-import { ApiClient as PlatformClient } from "$generated/com-bryzek-platform-v0";
+import { ApiClient as ApiBuilderClient } from "$generated/com-bryzek-apibuilder";
+import { ApiClient as GeneratorClient } from "$generated/com-bryzek-apibuilder-generator";
+import { ApiClient as PlatformClient } from "$generated/com-bryzek-platform";
 import { config } from "$lib/config";
 
 export { ApiBuilderClient, GeneratorClient, PlatformClient };

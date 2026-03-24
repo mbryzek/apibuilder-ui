@@ -2,7 +2,7 @@ import type { PageServerLoad } from './$types';
 import { generatorClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { error } from '@sveltejs/kit';
-import type { Generator } from '$generated/com-bryzek-apibuilder-generator-v0';
+import type { Generator } from '$generated/com-bryzek-apibuilder-generator';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const headers = locals.session ? getSessionHeaders(locals.session.id) : {};

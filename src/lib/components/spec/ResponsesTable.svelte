@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Response, Service } from '$generated/com-bryzek-apibuilder-spec-v0';
+	import type { Response, Service } from '$generated/com-bryzek-apibuilder-spec';
 	import TypeLink from './TypeLink.svelte';
 
 	interface Props {

@@ -3,7 +3,7 @@ import { redirect, fail } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuthForAction, requireMemberForAction } from '$lib/server/auth';
-import type { Watch } from '$generated/com-bryzek-apibuilder-v0';
+import type { Watch } from '$generated/com-bryzek-apibuilder';
 
 export const load: PageServerLoad = async () => {
 	// Data already loaded by layout
