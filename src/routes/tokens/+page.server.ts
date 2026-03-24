@@ -2,7 +2,7 @@ import type { PageServerLoad } from './$types';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth } from '$lib/server/auth';
-import type { Token } from '$generated/com-bryzek-apibuilder-v0';
+import type { Token } from '$generated/com-bryzek-apibuilder';
 
 const LIMIT = 25;
 

@@ -3,7 +3,7 @@ import { error, fail } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth, requireAdminForAction } from '$lib/server/auth';
-import type { MembershipRequest, Membership } from '$generated/com-bryzek-apibuilder-v0';
+import type { MembershipRequest, Membership } from '$generated/com-bryzek-apibuilder';
 
 export const load: PageServerLoad = async (event) => {
 	const session = requireAuth(event);

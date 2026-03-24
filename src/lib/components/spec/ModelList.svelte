@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Model, Service } from '$generated/com-bryzek-apibuilder-spec-v0';
+	import type { Model, Service } from '$generated/com-bryzek-apibuilder-spec';
 	import DeprecationBadge from './DeprecationBadge.svelte';
 	import ExampleJsonLinks from './ExampleJsonLinks.svelte';
 	import FieldsTable from './FieldsTable.svelte';

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Enum } from '$generated/com-bryzek-apibuilder-spec-v0';
+	import type { Enum } from '$generated/com-bryzek-apibuilder-spec';
 	import DeprecationBadge from './DeprecationBadge.svelte';
 	import ExampleJsonLinks from './ExampleJsonLinks.svelte';
 

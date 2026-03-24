@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Deprecation } from '$generated/com-bryzek-apibuilder-spec-v0';
+	import type { Deprecation } from '$generated/com-bryzek-apibuilder-spec';
 
 	interface Props {
 		deprecation?: Deprecation;

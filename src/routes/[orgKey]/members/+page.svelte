@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import type { Organization, Membership } from '$generated/com-bryzek-apibuilder-v0';
-	import { MembershipRole } from '$generated/com-bryzek-apibuilder-v0';
+	import type { Organization, Membership } from '$generated/com-bryzek-apibuilder';
+	import { MembershipRole } from '$generated/com-bryzek-apibuilder';
 	import type { ApiErrorItem } from '$lib/api/error-handler';
 
 	interface Props {

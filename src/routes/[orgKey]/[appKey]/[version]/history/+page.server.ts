@@ -1,7 +1,7 @@
 import type { PageServerLoad } from './$types';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
-import type { Change } from '$generated/com-bryzek-apibuilder-v0';
+import type { Change } from '$generated/com-bryzek-apibuilder';
 
 const LIMIT = 25;
 

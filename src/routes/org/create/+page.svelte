@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { Visibility } from '$generated/com-bryzek-apibuilder-v0';
+	import { Visibility } from '$generated/com-bryzek-apibuilder';
 	import type { ApiErrorItem } from '$lib/api/error-handler';
 
 	interface Props {

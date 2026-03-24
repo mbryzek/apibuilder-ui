@@ -2,7 +2,7 @@ import type { RequestHandler } from './$types';
 import { error } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
-import type { Version } from '$generated/com-bryzek-apibuilder-v0';
+import type { Version } from '$generated/com-bryzek-apibuilder';
 
 export const GET: RequestHandler = async ({ params, locals }) => {
 	const headers = locals.session ? getSessionHeaders(locals.session.id) : {};
