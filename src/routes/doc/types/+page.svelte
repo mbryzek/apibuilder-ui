@@ -120,6 +120,25 @@
 		</div>
 	</div>
 
+	<!-- Binary -->
+	<div class="card mb-6">
+		<h2 class="text-lg font-semibold text-ab-blue mb-4 flex items-center gap-2">
+			<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-ab-blue text-white text-xs">⬡</span>
+			Binary
+		</h2>
+		<div class="ml-2">
+			<div id="bytes">
+				<h3 class="font-semibold text-ab-dark-blue">bytes</h3>
+				<p class="text-ab-dark-blue text-sm mb-1">
+					Represents binary data as a byte array. In JSON, encoded as a base64 string.
+					Maps to <em>Array[Byte]</em> in Scala, <em>bytea</em> in PostgreSQL.
+					Not allowed in URL path parameters.
+				</p>
+				<code class="text-sm text-ab-gray">"aGVsbG8="</code>
+			</div>
+		</div>
+	</div>
+
 	<!-- Special -->
 	<div class="card mb-6">
 		<h2 class="text-lg font-semibold text-ab-blue mb-4 flex items-center gap-2">

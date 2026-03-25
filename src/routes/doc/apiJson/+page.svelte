@@ -20,7 +20,6 @@
 				</h3>
 				<ul class="space-y-0.5 ml-6">
 					<li><a href="#name" class="text-ab-blue hover:text-ab-dark-blue underline">name</a></li>
-					<li><a href="#apidoc" class="text-ab-blue hover:text-ab-dark-blue underline">apidoc</a></li>
 					<li><a href="#info" class="text-ab-blue hover:text-ab-dark-blue underline">info</a></li>
 					<li><a href="#contact" class="text-ab-blue hover:text-ab-dark-blue underline">contact</a></li>
 					<li><a href="#license" class="text-ab-blue hover:text-ab-dark-blue underline">license</a></li>
@@ -67,9 +66,6 @@
 					<li><a href="#header" class="text-ab-blue hover:text-ab-dark-blue underline">Header</a></li>
 					<li><a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a></li>
 					<li><a href="#annotation" class="text-ab-blue hover:text-ab-dark-blue underline">Annotation</a></li>
-					<li><a href="#deprecation" class="text-ab-blue hover:text-ab-dark-blue underline">Deprecation</a></li>
-					<li><a href="#templates" class="text-ab-blue hover:text-ab-dark-blue underline">Templates</a></li>
-					<li><a href="#template_declaration" class="text-ab-blue hover:text-ab-dark-blue underline">Template Declaration</a></li>
 				</ul>
 			</div>
 		</div>
@@ -93,7 +89,6 @@
 		<div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto mb-4">
 			{@html `<pre><code>{
   "name": <em>string</em>,
-  "apidoc": <em>JSON Object of <a href="#apidoc" class="text-ab-blue hover:text-ab-dark-blue underline">Apidoc</a> (optional)</em>,
   "info": <em>JSON Object of <a href="#info" class="text-ab-blue hover:text-ab-dark-blue underline">Info</a> (optional)</em>,
   "namespace": <em>string (optional)</em>,
   "base_url": <em>string (optional)</em>,
@@ -106,15 +101,13 @@
   "unions": <em>JSON Object of <a href="#union" class="text-ab-blue hover:text-ab-dark-blue underline">Union</a> (optional)</em>,
   "resources": <em>JSON Object of <a href="#resource" class="text-ab-blue hover:text-ab-dark-blue underline">Resource</a> (optional)</em>,
   "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>,
-  "annotations": <em>JSON Object of <a href="#annotation" class="text-ab-blue hover:text-ab-dark-blue underline">Annotation</a> (optional)</em>,
-  "templates": <em>JSON Object of <a href="#templates" class="text-ab-blue hover:text-ab-dark-blue underline">Templates</a> (optional and experimental)</em>
+  "annotations": <em>JSON Object of <a href="#annotation" class="text-ab-blue hover:text-ab-dark-blue underline">Annotation</a> (optional)</em>
 }</code></pre>`}
 		</div>
 
 		<p class="text-ab-dark-blue mb-2">where:</p>
 		<ul class="list-disc pl-6 text-ab-dark-blue mb-4 space-y-2">
 			<li><em>name</em>: the human readable name of this service. Used for display, and as the basis for generating a unique key for URL.</li>
-			<li><em>apidoc</em>: optionally specify the specific version of API Builder for which your service is written. If not provided, we automatically default to the current production version. See <a href="#apidoc" class="text-ab-blue hover:text-ab-dark-blue underline">Apidoc</a></li>
 			<li><em>info</em>: optionally specify additional metadata about this service (e.g. contact info, license). See <a href="#info" class="text-ab-blue hover:text-ab-dark-blue underline">Info</a></li>
 			<li id="namespace"><em>namespace</em>: specifies the namespace for this service. Namespace is primarily used when other services import definitions from your service and in the code generators when defining things like package names. If not specified, we will automatically generate a namespace based on [organization namespace].[formatted service name].[major version number]. Note that by default API Builder includes the major version number in the package name which allows service authors and clients to interact with multiple versions of the service where changes have been made in a non backwards compatible way.</li>
 			<li id="base_url"><em>baseUrl</em>: the base URL where this service is hosted. Must start with http.</li>
@@ -194,25 +187,6 @@
 		</ul>
 	</div>
 
-	<!-- Apidoc -->
-	<div class="card mb-6" id="apidoc">
-		<h3 class="text-lg font-semibold text-ab-blue mb-3">Apidoc declaration</h3>
-		<p class="text-ab-dark-blue mb-4">
-			The apidoc node is represented as a JSON object of the form:
-		</p>
-
-		<div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto mb-4">
-			{@html `<pre><code>{
-  "version": <em>string</em>
-}</code></pre>`}
-		</div>
-
-		<p class="text-ab-dark-blue mb-2">where:</p>
-		<ul class="list-disc pl-6 text-ab-dark-blue mb-4 space-y-2">
-			<li><em>version</em>: specifies the version of the API Builder specification that this file is written for. The latest version can be found by visiting <a href="https://app.apibuilder.io/apicollective/apibuilder-spec/latest" class="text-ab-blue hover:text-ab-dark-blue underline">https://app.apibuilder.io/apicollective/apibuilder-spec/latest</a>.</li>
-		</ul>
-	</div>
-
 	<!-- ================================================================== -->
 	<!-- TYPES -->
 	<!-- ================================================================== -->
@@ -234,8 +208,7 @@
     "plural": <em>string (optional)</em>,
     "description": <em>string (optional)</em>,
     "values": <em>JSON Array of <a href="#enumValue" class="text-ab-blue hover:text-ab-dark-blue underline">EnumValue</a></em>,
-    "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>,
-    "deprecation": <em>JSON Object of <a href="#deprecation" class="text-ab-blue hover:text-ab-dark-blue underline">Deprecation</a> (optional)</em>
+    "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>
   }
 }</code></pre>`}
 		</div>
@@ -247,7 +220,6 @@
 			<li><em>description</em>: optional longer description for this enum.</li>
 			<li><em>values</em>: JSON Array of EnumValue objects. Each element defines a valid value and an optional description. See <a href="#enumValue" class="text-ab-blue hover:text-ab-dark-blue underline">EnumValue</a>.</li>
 			<li><em>attributes</em>: JSON array defining additional meta data about this enum for use by generators. See <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a></li>
-			<li><em>deprecation</em>: JSON Object that indicates that this object is deprecated.</li>
 		</ul>
 	</div>
 
@@ -263,8 +235,7 @@
   "name": <em>string</em>,
   "value": <em>string (optional)</em>,
   "description": <em>string (optional)</em>,
-  "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>,
-  "deprecation": <em>JSON Object of <a href="#deprecation" class="text-ab-blue hover:text-ab-dark-blue underline">Deprecation</a> (optional)</em>
+  "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>
 }</code></pre>`}
 		</div>
 
@@ -274,7 +245,6 @@
 			<li><em>value</em>: the actual string representation of this value when serializing. If not specified, defaults to 'name'.</li>
 			<li><em>description</em>: optional description for what this enum value provides. Supports <a href="https://help.github.com/articles/github-flavored-markdown/" class="text-ab-blue hover:text-ab-dark-blue underline">GFM</a>.</li>
 			<li><em>attributes</em>: JSON array defining additional meta data about this enum value for use by generators. See <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a></li>
-			<li><em>deprecation</em>: JSON Object that indicates that this object is deprecated.</li>
 		</ul>
 	</div>
 
@@ -292,9 +262,7 @@
     "plural": <em>string (optional)</em>,
     "interfaces": <em>JSON Array of type string where each value indicates the name of a declared interface (optional)</em>,
     "fields": <em>JSON Array of <a href="#field" class="text-ab-blue hover:text-ab-dark-blue underline">Field</a></em>,
-    "templates": <em>JSON Array of <a href="#template_declaration" class="text-ab-blue hover:text-ab-dark-blue underline">Template Declaration</a> (optional)</em>,
-    "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>,
-    "deprecation": <em>JSON Object of <a href="#deprecation" class="text-ab-blue hover:text-ab-dark-blue underline">Deprecation</a> (optional)</em>
+    "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>
   }
 }</code></pre>`}
 		</div>
@@ -306,7 +274,6 @@
 			<li><em>description</em>: optional description for what this model provides. Supports <a href="https://help.github.com/articles/github-flavored-markdown/" class="text-ab-blue hover:text-ab-dark-blue underline">GFM</a>.</li>
 			<li><em>fields</em>: indicates that one or more fields is required. See <a href="#field" class="text-ab-blue hover:text-ab-dark-blue underline">Field</a>.</li>
 			<li><em>attributes</em>: JSON array defining additional meta data about this model for use by generators. See <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a></li>
-			<li><em>deprecation</em>: JSON Object that indicates that this object is deprecated.</li>
 		</ul>
 	</div>
 
@@ -328,8 +295,7 @@
   "minimum": <em>long (optional)</em>,
   "maximum": <em>long (optional)</em>,
   "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>,
-  "annotations": <em>JSON Array of type string where each value indicates the name of a declared annotation (optional)</em>,
-  "deprecation": <em>JSON Object of <a href="#deprecation" class="text-ab-blue hover:text-ab-dark-blue underline">Deprecation</a> (optional)</em>
+  "annotations": <em>JSON Array of type string where each value indicates the name of a declared annotation (optional)</em>
 }</code></pre>`}
 		</div>
 
@@ -344,7 +310,6 @@
 			<li><em>minimum</em>: optional - For a string, refers to the minimum length. For an array, the minimum number of elements in the array. For example, a value of 1 for an array would indicate the array must have at least 1 element.</li>
 			<li><em>maximum</em>: optional - For a string, refers to the maximum length. For an array, the maximum number of elements in the array. For example, a value of 1 for an array would indicate the array must have at most 1 element.</li>
 			<li><em>attributes</em>: JSON array defining additional meta data about this field for use by generators. See <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a></li>
-			<li><em>deprecation</em>: JSON Object that indicates that this object is deprecated.</li>
 		</ul>
 
 		<p class="text-ab-dark-blue mb-4">
@@ -365,8 +330,7 @@
     "description": <em>string (optional)</em>,
     "plural": <em>string (optional)</em>,
     "fields": <em>JSON Array of <a href="#field" class="text-ab-blue hover:text-ab-dark-blue underline">Field</a> (optional)</em>,
-    "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>,
-    "deprecation": <em>JSON Object of <a href="#deprecation" class="text-ab-blue hover:text-ab-dark-blue underline">Deprecation</a> (optional)</em>
+    "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>
   }
 }</code></pre>`}
 		</div>
@@ -378,7 +342,6 @@
 			<li><em>description</em>: optional description for what this model provides. Supports <a href="https://help.github.com/articles/github-flavored-markdown/" class="text-ab-blue hover:text-ab-dark-blue underline">GFM</a>.</li>
 			<li><em>fields</em>: JSON Array of 0 or more <a href="#field" class="text-ab-blue hover:text-ab-dark-blue underline">Fields</a>.</li>
 			<li><em>attributes</em>: JSON array defining additional meta data about this model for use by generators. See <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a></li>
-			<li><em>deprecation</em>: JSON Object that indicates that this object is deprecated.</li>
 		</ul>
 
 		<p class="text-ab-dark-blue mb-4">
@@ -398,12 +361,11 @@
   "name": {
     "plural": <em>string (optional)</em>,
     "fields": <em>JSON Array of <a href="#field" class="text-ab-blue hover:text-ab-dark-blue underline">Field</a> (optional)</em>,
-    "discriminator": <em>string (optional)</em>,
+    "discriminator": <em>string</em>,
     "description": <em>string (optional)</em>,
     "interfaces": <em>JSON Array of type string where each value indicates the name of a declared interface (optional)</em>,
     "types": <em>JSON Array of <a href="#unionType" class="text-ab-blue hover:text-ab-dark-blue underline">UnionType</a></em>,
-    "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>,
-    "deprecation": <em>JSON Object of <a href="#deprecation" class="text-ab-blue hover:text-ab-dark-blue underline">Deprecation</a> (optional)</em>
+    "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>
   }
 }</code></pre>`}
 		</div>
@@ -413,11 +375,10 @@
 			<li><em>name</em>: specifies the name of the union. Names must be alphanumeric and start with a letter. Valid characters are a-z, A-Z, 0-9 and _ characters. The name must be unique in the set of names assigned to enums, unions, or models. Note you may define an interface and a union of the same name, but in this case it is required to list that interface in the interfaces field.</li>
 			<li><em>fields</em>: Optional JSON Array of 0 or more <a href="#field" class="text-ab-blue hover:text-ab-dark-blue underline">Fields</a>. If specified, API Builder will create a model named after the type with these specified fields. This is syntactic sugar for creating the model yourself and then referencing here as the type.</li>
 			<li><em>plural</em>: specifies the optional, plural form of the name. By default, we will pluralize the name using a basic set of english heuristics. The plural is used as a default in cases where it is more natural to specify web services. For example, the default path for a resource will be the plural.</li>
-			<li><em>discriminator</em>: specifies an optional, but recommended, name for a type discriminator field which can then be used in serialization / deserialization to identify the type of object. For example, if not specified, a code generator may serialize the union type into a JSON structure of {`{ "type": object }`}. If a discriminator is provided, the same code generator can flatten the JSON representation to, for example: {`{ "discriminator": "xxx", "field1": "yyy" }`}. If provided, the name of the discriminator field must be unique across all of the fields across all of the types of this union. See <a href="/doc/playUnionTypes" class="text-ab-blue hover:text-ab-dark-blue underline">Play Union Types</a> for more information and examples.</li>
+			<li><em>discriminator</em>: specifies the name for a type discriminator field used in serialization / deserialization to identify the type of object. For example, a code generator can flatten the JSON representation to: {`{ "discriminator": "xxx", "field1": "yyy" }`}. The name of the discriminator field must be unique across all of the fields across all of the types of this union. See <a href="/doc/playUnionTypes" class="text-ab-blue hover:text-ab-dark-blue underline">Play Union Types</a> for more information and examples.</li>
 			<li><em>description</em>: optional description for what this union provides. Supports <a href="https://help.github.com/articles/github-flavored-markdown/" class="text-ab-blue hover:text-ab-dark-blue underline">GFM</a>.</li>
 			<li><em>types</em>: Specifies the individual types that are part of this union type. See <a href="#unionType" class="text-ab-blue hover:text-ab-dark-blue underline">UnionType</a>.</li>
 			<li><em>attributes</em>: JSON array defining additional meta data about this union for use by generators. See <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a></li>
-			<li><em>deprecation</em>: JSON Object that indicates that this object is deprecated.</li>
 		</ul>
 	</div>
 
@@ -434,8 +395,7 @@
   "description": <em>string (optional)</em>,
   "default": <em>boolean (optional)</em>,
   "discriminator_value": <em>string (optional)</em>,
-  "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>,
-  "deprecation": <em>JSON Object of <a href="#deprecation" class="text-ab-blue hover:text-ab-dark-blue underline">Deprecation</a> (optional)</em>
+  "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>
 }</code></pre>`}
 		</div>
 
@@ -446,7 +406,6 @@
 			<li><em>default</em>: If true, indicates that this type should be used as the default when deserializing union types. This field is only used by union types that require a discriminator and sets the default value for that discriminator during deserialization.</li>
 			<li><em>discriminator_value</em>: The discriminator value defines the string to use in the discriminator field to identify this type. If not specified, the discriminator value will default to the name of the type itself.</li>
 			<li><em>attributes</em>: JSON array defining additional meta data about this union type for use by generators. See <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a></li>
-			<li><em>deprecation</em>: JSON Object that indicates that this object is deprecated.</li>
 		</ul>
 	</div>
 
@@ -471,9 +430,7 @@
     "path": <em>string (optional)</em>,
     "description": <em>string (optional)</em>,
     "operations": <em>JSON Array of <a href="#operation" class="text-ab-blue hover:text-ab-dark-blue underline">Operation</a></em>,
-    "templates": <em>JSON Array of <a href="#template_declaration" class="text-ab-blue hover:text-ab-dark-blue underline">Template Declaration</a> (optional)</em>,
-    "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>,
-    "deprecation": <em>JSON Object of <a href="#deprecation" class="text-ab-blue hover:text-ab-dark-blue underline">Deprecation</a> (optional)</em>
+    "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>
   }
 }</code></pre>`}
 		</div>
@@ -485,7 +442,6 @@
 			<li><em>description</em>: optional description for what this resource provides. Supports <a href="https://help.github.com/articles/github-flavored-markdown/" class="text-ab-blue hover:text-ab-dark-blue underline">GFM</a>.</li>
 			<li><em>operations</em>: one or more operations is required. See <a href="#operation" class="text-ab-blue hover:text-ab-dark-blue underline">Operation</a>.</li>
 			<li><em>attributes</em>: JSON array defining additional meta data about this resource for use by generators. See <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a></li>
-			<li><em>deprecation</em>: JSON Object that indicates that this object is deprecated.</li>
 		</ul>
 	</div>
 
@@ -504,8 +460,7 @@
   "body": <em>JSON Object of <a href="#body" class="text-ab-blue hover:text-ab-dark-blue underline">Body</a> (optional)</em>,
   "parameters": <em>JSON Array of <a href="#parameter" class="text-ab-blue hover:text-ab-dark-blue underline">Parameter</a> (optional)</em>,
   "responses": <em>JSON Object of <a href="#response" class="text-ab-blue hover:text-ab-dark-blue underline">Response</a> (optional)</em>,
-  "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>,
-  "deprecation": <em>JSON Object of <a href="#deprecation" class="text-ab-blue hover:text-ab-dark-blue underline">Deprecation</a> (optional)</em>
+  "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>
 }</code></pre>`}
 		</div>
 
@@ -518,7 +473,6 @@
 			<li><em>parameters</em>: optional JSON Array of the parameters to this method. By default, for GET and DELETE methods, parameters are assumed to be in the path or in the query. For other methods, parameters are assumed to be in the path or form body, unless you have explicitly specified a body in which case parameters can be provided in the path or the query. See <a href="#parameter" class="text-ab-blue hover:text-ab-dark-blue underline">Parameter</a>.</li>
 			<li><em>responses</em>: optional JSON Object of HTTP Response Code to Response. If not provided, an HTTP NoContent response is assumed. Only responses for HTTP status codes that are interesting should be documented. See <a href="#response" class="text-ab-blue hover:text-ab-dark-blue underline">Response</a>.</li>
 			<li><em>attributes</em>: JSON array defining additional meta data about this operation for use by generators. See <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a></li>
-			<li><em>deprecation</em>: JSON Object that indicates that this object is deprecated.</li>
 		</ul>
 	</div>
 
@@ -533,8 +487,7 @@
 			{@html `<pre><code>{
   "type": <em>string</em>,
   "description": <em>string (optional)</em>,
-  "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>,
-  "deprecation": <em>JSON Object of <a href="#deprecation" class="text-ab-blue hover:text-ab-dark-blue underline">Deprecation</a> (optional)</em>
+  "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>
 }</code></pre>`}
 		</div>
 
@@ -543,7 +496,6 @@
 			<li><em>type</em>: specifies the type of this body. Acceptable values include the name of either an enum, a model, or a (<a href="/doc/types" class="text-ab-blue hover:text-ab-dark-blue underline">primitive type</a>). To specify a List, the type name can be wrapped with "[]". For example, to specify that the type is a collection of strings, use "[string]". To specify a Map, the type name can be prefixed with "map[type]". For example, to specify that the type is a Map of string to long, use "map[long]". Note that for map, the keys must be strings (per the JSON specification).</li>
 			<li><em>description</em>: optional description for what this body provides. Supports <a href="https://help.github.com/articles/github-flavored-markdown/" class="text-ab-blue hover:text-ab-dark-blue underline">GFM</a>.</li>
 			<li><em>attributes</em>: JSON array defining additional meta data about this body for use by generators. See <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a></li>
-			<li><em>deprecation</em>: JSON Object that indicates that this object is deprecated.</li>
 		</ul>
 	</div>
 
@@ -565,8 +517,7 @@
   "example": <em>string (optional)</em>,
   "minimum": <em>long (optional)</em>,
   "maximum": <em>long (optional)</em>,
-  "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>,
-  "deprecation": <em>JSON Object of <a href="#deprecation" class="text-ab-blue hover:text-ab-dark-blue underline">Deprecation</a> (optional)</em>
+  "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>
 }</code></pre>`}
 		</div>
 
@@ -582,7 +533,6 @@
 			<li><em>minimum</em>: optional - For a string, refers to the minimum length. For an array, the minimum number of elements in the array. For example, a value of 1 for an array would indicate the array must have at least 1 element.</li>
 			<li><em>maximum</em>: optional - For a string, refers to the maximum length. For an array, the maximum number of elements in the array. For example, a value of 1 for an array would indicate the array must have at most 1 element.</li>
 			<li><em>attributes</em>: JSON array defining additional meta data about this parameter for use by generators. See <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a></li>
-			<li><em>deprecation</em>: JSON Object that indicates that this object is deprecated.</li>
 		</ul>
 	</div>
 
@@ -599,8 +549,7 @@
     "type": <em>type</em>,
     "headers": <em>JSON Array of <a href="#header" class="text-ab-blue hover:text-ab-dark-blue underline">Header</a> (optional)</em>,
     "description": <em>string (optional)</em>,
-    "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>,
-    "deprecation": <em>JSON Object of <a href="#deprecation" class="text-ab-blue hover:text-ab-dark-blue underline">Deprecation</a> (optional)</em>
+    "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>
   }
 }</code></pre>`}
 		</div>
@@ -611,7 +560,6 @@
 			<li><em>type</em>: specifies the type of this response. Acceptable values include the name of either an enum, a model, or a (<a href="/doc/types" class="text-ab-blue hover:text-ab-dark-blue underline">primitive type</a>). To specify a List, the type name can be wrapped with "[]". For example, to specify that the type is a collection of strings, use "[string]". To specify a Map, the type name can be prefixed with "map[type]". For example, to specify that the type is a Map of string to long, use "map[long]". Note that for map, the keys must be strings (per the JSON specification).</li>
 			<li><em>description</em>: optional description for what this response provides. Supports <a href="https://help.github.com/articles/github-flavored-markdown/" class="text-ab-blue hover:text-ab-dark-blue underline">GFM</a>.</li>
 			<li><em>attributes</em>: JSON array defining additional meta data about this service. Attributes are used to add custom extensions to API Builder and are typically used by generators to enable advanced code generation. See <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a></li>
-			<li><em>deprecation</em>: JSON Object that indicates that this object is deprecated.</li>
 		</ul>
 
 		<p class="text-ab-dark-blue mb-2">There are a few conventions enforced:</p>
@@ -662,8 +610,7 @@
   "required": <em>boolean (optional, true by default)</em>,
   "default": <em>value (optional)</em>,
   "description": <em>string (optional)</em>,
-  "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>,
-  "deprecation": <em>JSON Object of <a href="#deprecation" class="text-ab-blue hover:text-ab-dark-blue underline">Deprecation</a> (optional)</em>
+  "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>
 }</code></pre>`}
 		</div>
 
@@ -675,7 +622,6 @@
 			<li><em>default</em>: the default value for this header. If specified, generated clients will automatically include this header in all requests. Default values must be specified as strings.</li>
 			<li><em>description</em>: optional description for what this header provides. Supports <a href="https://help.github.com/articles/github-flavored-markdown/" class="text-ab-blue hover:text-ab-dark-blue underline">GFM</a>.</li>
 			<li><em>attributes</em>: JSON array defining additional meta data about this header for use by generators. See <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a></li>
-			<li><em>deprecation</em>: JSON Object that indicates that this object is deprecated.</li>
 		</ul>
 	</div>
 
@@ -729,8 +675,7 @@
 		<div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto mb-4">
 			{@html `<pre><code>"annotations": {
   "personal_data": {
-    "description": "Identifies a field that contains Personal Data, as defined by GDPR.",
-    "deprecation": <em>JSON Object of <a href="#deprecation" class="text-ab-blue hover:text-ab-dark-blue underline">Deprecation</a> (optional)</em>
+    "description": "Identifies a field that contains Personal Data, as defined by GDPR."
   }
 }</code></pre>`}
 		</div>
@@ -739,82 +684,7 @@
 		<ul class="list-disc pl-6 text-ab-dark-blue mb-4 space-y-2">
 			<li><em>name</em>: the name of the annotation.</li>
 			<li><em>description</em>: optional, but recommended to explain how you intend the tag to clarify the usage of a field, possibly including links to additional documentation.</li>
-			<li><em>deprecation</em>: JSON Object that indicates that this object is deprecated.</li>
 		</ul>
-	</div>
-
-	<!-- Deprecation -->
-	<div class="card mb-6" id="deprecation">
-		<h3 class="text-lg font-semibold text-ab-blue mb-3">Deprecation declaration</h3>
-		<p class="text-ab-dark-blue mb-4">
-			A deprecation is represented as a JSON object of the form:
-		</p>
-
-		<div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto mb-4">
-			{@html `<pre><code>{
-  "description": <em>string (optional)</em>
-}</code></pre>`}
-		</div>
-
-		<p class="text-ab-dark-blue mb-2">where:</p>
-		<ul class="list-disc pl-6 text-ab-dark-blue mb-4 space-y-2">
-			<li><em>description</em>: optional, but recommended to contain notes for what the user is supposed to do now that this property is deprecated. Supports <a href="https://help.github.com/articles/github-flavored-markdown/" class="text-ab-blue hover:text-ab-dark-blue underline">GFM</a>.</li>
-		</ul>
-	</div>
-
-	<!-- Templates -->
-	<div class="card mb-6" id="templates">
-		<h3 class="text-lg font-semibold text-ab-blue mb-3">Templates declaration</h3>
-		<p class="text-ab-dark-blue mb-4">
-			Templates are an experimental feature to create reusable definitions of
-			the various features in API Builder. See <a href="/doc/templates" class="text-ab-blue hover:text-ab-dark-blue underline">Templates</a>
-			for more information.
-		</p>
-
-		<div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto mb-4">
-			{@html `<pre><code>"templates": {
-  "models": <em>JSON Object of <a href="#model" class="text-ab-blue hover:text-ab-dark-blue underline">Model</a> (optional)</em>,
-  "resources": <em>JSON Object of <a href="#resource" class="text-ab-blue hover:text-ab-dark-blue underline">Resource</a> (optional)</em>
-}</code></pre>`}
-		</div>
-
-		<p class="text-ab-dark-blue mb-2">where:</p>
-		<ul class="list-disc pl-6 text-ab-dark-blue mb-4 space-y-2">
-			<li><em>models</em>: JSON object defining templates for models in this API. The key of each object is the model template name. See <a href="#model" class="text-ab-blue hover:text-ab-dark-blue underline">Model</a></li>
-			<li><em>resources</em>: JSON object defining templates for resources in this API. The key of each object is the name of a template resource type.</li>
-		</ul>
-	</div>
-
-	<!-- Template Declaration -->
-	<div class="card mb-6" id="template_declaration">
-		<h3 class="text-lg font-semibold text-ab-blue mb-3">Template declaration</h3>
-		<p class="text-ab-dark-blue mb-4">
-			A template declaration is represented as a JSON object in the following form:
-		</p>
-
-		<div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto mb-4">
-			{@html `<pre><code>{
-  "name": <em>string</em>,
-  "cast": <em>JSON Object of strings (optional)</em>
-}</code></pre>`}
-		</div>
-
-		<p class="text-ab-dark-blue mb-2">where:</p>
-		<ul class="list-disc pl-6 text-ab-dark-blue mb-4 space-y-2">
-			<li><em>name</em>: the name of the template.</li>
-			<li><em>cast</em>: a JSON object used to map types in the template to concrete types to use for this resource.</li>
-		</ul>
-
-		<p class="text-ab-dark-blue mb-2">Example template declaration:</p>
-		<div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto mb-4">
-			{@html `<pre><code>"templates": [ {
-  "name": "currency_setting",
-  "cast": {
-    "currency_setting":  "organization_currency_setting",
-    "currency_setting_form":  "organization_currency_setting_form"
-  }
-} ]</code></pre>`}
-		</div>
 	</div>
 
 	<!-- CTA -->

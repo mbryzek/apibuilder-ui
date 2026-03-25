@@ -1,7 +1,7 @@
 import type { Service, Import } from '$generated/com-bryzek-apibuilder-spec';
 
 const PRIMITIVES = new Set([
-	'boolean', 'date-iso8601', 'date-time-iso8601', 'decimal', 'double',
+	'boolean', 'bytes', 'date-iso8601', 'date-time-iso8601', 'decimal', 'double',
 	'integer', 'long', 'object', 'json', 'string', 'unit', 'uuid',
 ]);
 

@@ -14,6 +14,34 @@
 	<div class="space-y-6">
 
 		<div class="card mb-6 border-l-4 border-ab-blue">
+			<h3 class="text-lg font-semibold text-ab-dark-blue mb-3">Mar 24, 2026</h3>
+			<ul class="list-disc list-inside space-y-2 text-ab-dark-blue">
+				<li>
+					<strong class="text-ab-blue">New Primitive Type: bytes</strong> — Added <code class="bg-gray-100 px-1.5 py-0.5 rounded text-sm">bytes</code> as a
+					primitive type for representing binary data. In JSON, values are encoded as base64 strings.
+					Maps to <code class="bg-gray-100 px-1.5 py-0.5 rounded text-sm">Array[Byte]</code> in Scala and
+					<code class="bg-gray-100 px-1.5 py-0.5 rounded text-sm">bytea</code> in PostgreSQL.
+					Not allowed in URL path parameters.
+				</li>
+				<li>
+					<strong class="text-ab-blue">Discriminator Required</strong> — The <code class="bg-gray-100 px-1.5 py-0.5 rounded text-sm">discriminator</code> field
+					on union types is now required.
+				</li>
+				<li>
+					<strong class="text-ab-blue">Removed apidoc</strong> — The <code class="bg-gray-100 px-1.5 py-0.5 rounded text-sm">apidoc</code> top-level
+					node has been removed from the specification.
+				</li>
+				<li>
+					<strong class="text-ab-blue">Removed deprecation</strong> — The <code class="bg-gray-100 px-1.5 py-0.5 rounded text-sm">deprecation</code> field
+					has been removed from all declarations.
+				</li>
+				<li>
+					<strong class="text-ab-blue">Removed templates</strong> — Template support has been removed from the specification.
+				</li>
+			</ul>
+		</div>
+
+		<div class="card mb-6">
 			<h3 class="text-lg font-semibold text-ab-dark-blue mb-3">Mar 1, 2026</h3>
 			<ul class="list-disc list-inside space-y-2 text-ab-dark-blue">
 				<li>
@@ -83,7 +111,7 @@
 				<div>
 					<h4 class="font-semibold text-ab-dark-blue mb-2">Nov 14, 2022</h4>
 					<ul class="list-disc list-inside space-y-2 text-ab-dark-blue">
-						<li>Introduce support for <a href="/doc/apiJson#templates" class="text-ab-blue hover:text-ab-dark-blue">templates</a> which allow sharing specification across models and resources.</li>
+						<li>Introduce support for templates which allow sharing specification across models and resources. (Templates were later removed in March 2026.)</li>
 					</ul>
 				</div>
 			</div>
