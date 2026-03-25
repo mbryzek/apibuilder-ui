@@ -38,7 +38,6 @@ export enum ParameterLocation {
 export interface Annotation {
   name: string;
   description?: string;
-  deprecation?: Deprecation;
 }
 
 export interface Application {
@@ -53,13 +52,11 @@ export interface Attribute {
   name: string;
   value: any;
   description?: string;
-  deprecation?: Deprecation;
 }
 
 export interface Body {
   type: string;
   description?: string;
-  deprecation?: Deprecation;
   attributes: Attribute[];
 }
 
@@ -72,18 +69,10 @@ export interface Contact {
   email?: string;
 }
 
-/**
- * Indicates that this particular element is considered deprecated in the API. See the description for details
- */
-export interface Deprecation {
-  description?: string;
-}
-
 export interface Enum {
   name: string;
   plural: string;
   description?: string;
-  deprecation?: Deprecation;
   values: EnumValue[];
   attributes: Attribute[];
 }
@@ -91,7 +80,6 @@ export interface Enum {
 export interface EnumValue {
   name: string;
   description?: string;
-  deprecation?: Deprecation;
   attributes: Attribute[];
   /** The actual string representation of this value. If not specified, defaults to 'name' */
   value?: string;
@@ -101,7 +89,6 @@ export interface Field {
   name: string;
   type: string;
   description?: string;
-  deprecation?: Deprecation;
   default?: string;
   required: boolean;
   minimum?: number;
@@ -156,7 +143,6 @@ export interface Interface {
   name: string;
   plural: string;
   description?: string;
-  deprecation?: Deprecation;
   fields: Field[];
   attributes: Attribute[];
 }
@@ -173,7 +159,6 @@ export interface Model {
   name: string;
   plural: string;
   description?: string;
-  deprecation?: Deprecation;
   fields: Field[];
   attributes: Attribute[];
   interfaces?: string[];
@@ -184,7 +169,6 @@ export interface Operation {
   /** The full path to this operation, relative to the service's base url. */
   path: string;
   description?: string;
-  deprecation?: Deprecation;
   body?: Body;
   parameters: Parameter[];
   responses: Response[];
@@ -201,7 +185,6 @@ export interface Parameter {
   type: string;
   location: ParameterLocation;
   description?: string;
-  deprecation?: Deprecation;
   required: boolean;
   default?: string;
   minimum?: number;
@@ -217,7 +200,6 @@ export interface Resource {
   /** The path to this specific resource. This was added in 2016 to help us differentiate between the resource path and the operation path which can be helpful when, for example, generating method names for operations. This field is optional as some of our input formats (e.g. swagger) do not explicitly differentiate resoure paths. */
   path?: string;
   description?: string;
-  deprecation?: Deprecation;
   operations: Operation[];
   attributes: Attribute[];
 }
@@ -257,7 +239,6 @@ export interface Union {
   /** Type discriminator. Serialization of these union types will always contain a field named with the value of the discriminator that will contain the name of the type. API Builder will verify that none of the types in the union type itself contain a field with the same name as the discriminator */
   discriminator: string;
   description?: string;
-  deprecation?: Deprecation;
   /** The names of the types that make up this union type */
   types: UnionType[];
   attributes: Attribute[];
@@ -271,7 +252,6 @@ export interface UnionType {
   /** The name of a type (a primitive, model name, or enum name) that makes up this union type */
   type: string;
   description?: string;
-  deprecation?: Deprecation;
   attributes: Attribute[];
   /** If true, indicates that this type should be used as the default when deserializing union types. This field is only used by union types that require a discriminator and sets the default value for that discriminator during deserialization. */
   default?: boolean;

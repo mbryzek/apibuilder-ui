@@ -130,10 +130,6 @@ export interface MembershipRequestForm {
   role: MembershipRole;
 }
 
-export interface MoveForm {
-  org_key: string;
-}
-
 export interface Organization {
   id: string;
   key: string;
@@ -276,13 +272,6 @@ export interface UpdateApplicationByAppKeyOptions {
 export interface DeleteApplicationByAppKeyOptions {
   orgKey: string;
   appKey: string;
-  headers?: Record<string, string>;
-}
-
-export interface CreateApplicationMoveByAppKeyOptions {
-  orgKey: string;
-  appKey: string;
-  body: MoveForm;
   headers?: Record<string, string>;
 }
 
@@ -640,35 +629,6 @@ export class ApiClient {
 
     if (response.status === 401) {
       throw new UnauthorizedErrorsResponse(response);
-    }
-
-    throw new ApiException(response, `Request failed with status ${response.status}`);
-
-  }
-
-  async createApplicationMoveByAppKey(params: CreateApplicationMoveByAppKeyOptions): Promise<Application> {
-    const url = `${this.baseUrl}/apibuilder/${params.orgKey}/applications/${params.appKey}/move`;
-
-      const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
-      body: JSON.stringify(params.body),
-    });
-
-    if (response.status === 200) {
-      const data = await response.json();
-      return data;
-    }
-
-    if (response.status === 401) {
-      throw new UnauthorizedErrorsResponse(response);
-    }
-
-    if (response.status === 422) {
-      throw new ValidationErrorsResponse(response);
     }
 
     throw new ApiException(response, `Request failed with status ${response.status}`);
