@@ -20,7 +20,6 @@
 		{ href: '/doc/history', label: 'History' },
 		{ href: '/doc/interfaces', label: 'Interfaces' },
 		{ href: '/doc/attributes', label: 'Attributes' },
-		{ href: '/doc/templates', label: 'Templates' },
 		{ href: '/doc/playRoutesFile', label: 'Play Routes File' },
 		{ href: '/doc/playUnionTypes', label: 'Play Union Types' },
 		{ href: '/doc/releaseNotes', label: 'Release Notes' },
