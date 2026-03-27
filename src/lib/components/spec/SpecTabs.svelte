@@ -27,7 +27,6 @@
 		{ id: 'enums', label: 'Enums', count: service.enums.length },
 		{ id: 'unions', label: 'Unions', count: service.unions.length },
 		{ id: 'interfaces', label: 'Interfaces', count: service.interfaces?.length ?? 0 },
-		{ id: 'headers', label: 'Headers', count: service.headers.length },
 		{ id: 'imports', label: 'Imports', count: service.imports.length },
 		{ id: 'annotations', label: 'Annotations', count: service.annotations?.length ?? 0 },
 	].filter((t) => t.count > 0));
@@ -141,33 +140,6 @@
 		<UnionList unions={filteredUnions} {service} exampleBaseUrl={exampleBaseUrl ?? ''} />
 	{:else if currentTab === 'interfaces'}
 		<InterfaceList interfaces={filteredInterfaces} {service} />
-	{:else if currentTab === 'headers'}
-		{#if service.headers.length > 0}
-			<div class="border border-gray-200 rounded-lg overflow-hidden">
-				<div class="overflow-x-auto">
-					<table class="w-full text-sm text-left">
-						<thead>
-							<tr class="bg-ab-light-gray border-b border-gray-200">
-								<th class="pl-4 py-3 pr-6 font-semibold text-ab-gray">Name</th>
-								<th class="py-3 pr-6 font-semibold text-ab-gray">Type</th>
-								<th class="py-3 pr-6 font-semibold text-ab-gray">Required</th>
-								<th class="py-3 pr-4 font-semibold text-ab-gray">Description</th>
-							</tr>
-						</thead>
-						<tbody>
-							{#each service.headers as header}
-								<tr class="border-b border-gray-100 last:border-b-0">
-									<td class="pl-4 py-2.5 pr-6 font-mono text-sm">{header.name}</td>
-									<td class="py-2.5 pr-6 font-mono text-sm">{header.type}</td>
-									<td class="py-2.5 pr-6">{header.required ? 'yes' : 'no'}</td>
-									<td class="py-2.5 pr-4 text-ab-dark-gray">{header.description ?? ''}</td>
-								</tr>
-							{/each}
-						</tbody>
-					</table>
-				</div>
-			</div>
-		{/if}
 	{:else if currentTab === 'imports'}
 		{#if service.imports.length > 0}
 			<div class="space-y-4">

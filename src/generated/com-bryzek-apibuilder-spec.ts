@@ -111,15 +111,6 @@ export interface Field {
   annotations?: string[];
 }
 
-export interface Header {
-  name: string;
-  type: string;
-  description?: string;
-  required: boolean;
-  default?: string;
-  attributes: Attribute[];
-}
-
 /**
  * An import is used to declare a dependency on another application. This allows you to reference the models and or enums from that application in your own app.
  */
@@ -225,7 +216,6 @@ export interface Resource {
 export interface Response {
   code: any;
   type: string;
-  headers?: Header[];
   description?: string;
   attributes?: Attribute[];
 }
@@ -240,7 +230,6 @@ export interface Service {
   base_url?: string;
   description?: string;
   info: Info;
-  headers: Header[];
   imports: Import[];
   enums: Enum[];
   interfaces?: Interface[];
