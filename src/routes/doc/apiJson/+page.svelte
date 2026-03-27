@@ -63,7 +63,6 @@
 				</h3>
 				<ul class="space-y-0.5 ml-6">
 					<li><a href="#import" class="text-ab-blue hover:text-ab-dark-blue underline">Import</a></li>
-					<li><a href="#header" class="text-ab-blue hover:text-ab-dark-blue underline">Header</a></li>
 					<li><a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a></li>
 					<li><a href="#annotation" class="text-ab-blue hover:text-ab-dark-blue underline">Annotation</a></li>
 				</ul>
@@ -94,7 +93,6 @@
   "base_url": <em>string (optional)</em>,
   "description": <em>string (optional)</em>,
   "imports": <em>JSON Array of <a href="#import" class="text-ab-blue hover:text-ab-dark-blue underline">Import</a> (optional)</em>,
-  "headers": <em>JSON Array of <a href="#header" class="text-ab-blue hover:text-ab-dark-blue underline">Header</a> (optional)</em>,
   "enums": <em>JSON Object of <a href="#enum" class="text-ab-blue hover:text-ab-dark-blue underline">Enum</a> (optional)</em>,
   "interfaces": <em>JSON Object of <a href="#interface" class="text-ab-blue hover:text-ab-dark-blue underline">Interface</a> (optional)</em>,
   "models": <em>JSON Object of <a href="#model" class="text-ab-blue hover:text-ab-dark-blue underline">Model</a> (optional)</em>,
@@ -113,7 +111,6 @@
 			<li id="base_url"><em>baseUrl</em>: the base URL where this service is hosted. Must start with http.</li>
 			<li id="description"><em>description</em>: optional description for what this service provides. Supports <a href="https://help.github.com/articles/github-flavored-markdown/" class="text-ab-blue hover:text-ab-dark-blue underline">GFM</a>.</li>
 			<li><em>imports</em>: JSON array defining any other services whose schema definitions we would like to import into our service. See <a href="#import" class="text-ab-blue hover:text-ab-dark-blue underline">Import</a></li>
-			<li><em>headers</em>: JSON array defining any HTTP Headers that the service understands or expects. See <a href="#header" class="text-ab-blue hover:text-ab-dark-blue underline">Header</a></li>
 			<li><em>enums</em>: JSON object defining all of the enums in this API. The key of each object is the enum name. See <a href="#enum" class="text-ab-blue hover:text-ab-dark-blue underline">Enum</a></li>
 			<li><em>models</em>: JSON object defining all of the models in this API. The key of each object is the model name. See <a href="#model" class="text-ab-blue hover:text-ab-dark-blue underline">Model</a></li>
 			<li><em>resources</em>: JSON object defining all of the resources in this API. The key of each object is the name of a type that this resource represents. The type must be the name of a model or an enum. See <a href="#resource" class="text-ab-blue hover:text-ab-dark-blue underline">Resource</a></li>
@@ -547,7 +544,6 @@
 			{@html `<pre><code>{
   "http_status_code": {
     "type": <em>type</em>,
-    "headers": <em>JSON Array of <a href="#header" class="text-ab-blue hover:text-ab-dark-blue underline">Header</a> (optional)</em>,
     "description": <em>string (optional)</em>,
     "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>
   }
@@ -593,35 +589,6 @@
 		<p class="text-ab-dark-blue mb-2">where:</p>
 		<ul class="list-disc pl-6 text-ab-dark-blue mb-4 space-y-2">
 			<li><em>uri</em>: The complete URI to the service specification that we are importing. Within API Builder, you can find the URL to the service specification by clicking on the "service.json" link for a service. Example: <a href="https://app.apibuilder.io/apicollective/apibuilder-api/0.16.53/service.json" class="text-ab-blue hover:text-ab-dark-blue underline">https://app.apibuilder.io/apicollective/apibuilder-api/0.16.53/service.json</a>.</li>
-		</ul>
-	</div>
-
-	<!-- Header -->
-	<div class="card mb-6" id="header">
-		<h3 class="text-lg font-semibold text-ab-blue mb-3">Header declaration</h3>
-		<p class="text-ab-dark-blue mb-4">
-			A header is represented as a JSON object of the form:
-		</p>
-
-		<div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto mb-4">
-			{@html `<pre><code>{
-  "name": <em>string</em>,
-  "type": <em>string</em>,
-  "required": <em>boolean (optional, true by default)</em>,
-  "default": <em>value (optional)</em>,
-  "description": <em>string (optional)</em>,
-  "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>
-}</code></pre>`}
-		</div>
-
-		<p class="text-ab-dark-blue mb-2">where:</p>
-		<ul class="list-disc pl-6 text-ab-dark-blue mb-4 space-y-2">
-			<li><em>name</em>: the name of the header.</li>
-			<li><em>type</em>: the type of this header. Acceptable values are either the name of an enum or string. To specify a collection (meaning multiple values for this header can be provided), the type name can be wrapped with "[]". For example, to specify that the type is a collection of strings, use "[string]".</li>
-			<li><em>required</em>: boolean: true|false. By default, all headers are considered required. To make a parameter optional, set "required" to false.</li>
-			<li><em>default</em>: the default value for this header. If specified, generated clients will automatically include this header in all requests. Default values must be specified as strings.</li>
-			<li><em>description</em>: optional description for what this header provides. Supports <a href="https://help.github.com/articles/github-flavored-markdown/" class="text-ab-blue hover:text-ab-dark-blue underline">GFM</a>.</li>
-			<li><em>attributes</em>: JSON array defining additional meta data about this header for use by generators. See <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a></li>
 		</ul>
 	</div>
 
