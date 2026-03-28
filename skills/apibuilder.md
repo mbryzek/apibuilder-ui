@@ -17,7 +17,7 @@ Activate when:
 
 ## Prerequisites
 
-1. The `api` CLI must be available at `~/code/devops/bin/api`
+1. The `api` CLI must be on your `$PATH`. Install from https://github.com/apicollective/apibuilder-cli or your project's devops tooling.
 2. Config exists at `~/.apibuilder/config` with a valid token
 3. If no config exists, run `api init` to create an anonymous org and token
 
@@ -158,9 +158,10 @@ If tests fail, fix your implementation and re-run. The spec is the source of tru
 
 | Generator | Key | Output |
 |-----------|-----|--------|
-| Play 2.9 / Scala 3 Client | `play_2_9_scala_3_client` | Type-safe HTTP client with models and JSON serialization |
+| Play 2.9 / Scala 3 Client | `bryzek_play_client` | Type-safe HTTP client with models and JSON serialization |
+| Play 2.9 / Scala 3 Model | `bryzek_play_model` | Standalone models with JSON serialization |
 | Play 2.9 / Scala 3 Controller | `bryzek_play_controller` | Abstract controller traits — implement each method |
-| Play 2.9 / Scala 3 Mock Client | `scala_mock` | Mock client sharing real client interface |
+| Play 2.9 / Scala 3 Mock Client | `bryzek_play_mock_client` | Mock client sharing real client interface |
 | Play 2.9 / Scala 3 Routes | `bryzek_play_routes` | Play routes file |
 | TypeScript Declarations | `ts_declarations` | TypeScript type definitions |
 | TypeScript SDK | `ts_sdk` | Full TypeScript client |

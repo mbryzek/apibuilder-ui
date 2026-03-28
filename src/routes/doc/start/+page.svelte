@@ -147,7 +147,7 @@ tsc --noEmit   # TypeScript</code></pre>
 
 	<!-- CTA -->
 	<div class="mt-12 mb-8 text-center">
-		<p class="text-ab-dark-blue mb-4">Need an API token for programmatic access?</p>
-		<a href="/doc/apiTokens" class="btn-primary inline-block">API Tokens</a>
+		<p class="text-ab-dark-blue mb-4">Explore the full API specification format.</p>
+		<a href="/doc/apiJson" class="btn-primary inline-block">api.json Reference</a>
 	</div>
 </div>
