@@ -17,7 +17,7 @@
 </script>
 
 <svelte:head>
-	<title>API Builder - API-First Development</title>
+	<title>API Builder - The AI Agent's API Toolkit</title>
 </svelte:head>
 
 <div class="page-container">
@@ -49,16 +49,52 @@
 			<h1 class="text-5xl sm:text-6xl lg:text-7xl font-light text-ab-dark-blue mb-8">
 				API Builder
 			</h1>
-			<p class="text-lg sm:text-xl text-ab-gray max-w-2xl mx-auto mb-12 leading-relaxed">
-				Design APIs with a simple, elegant interface. Generate client libraries, server stubs, and documentation from your API specifications.
+			<p class="text-lg sm:text-xl text-ab-gray max-w-2xl mx-auto mb-6 leading-relaxed">
+				The AI Agent's API Toolkit
 			</p>
-			<div class="flex flex-col sm:flex-row gap-6 justify-center">
-				<a href="/signup" class="btn-primary">
-					Get Started
+			<p class="text-base text-ab-gray max-w-2xl mx-auto mb-12 leading-relaxed">
+				Define REST APIs in a structured spec. Generate type-safe clients, server stubs, and tests.
+				Use the compiler to verify correctness. Ship on the first try.
+			</p>
+			<div class="flex flex-col sm:flex-row gap-6 justify-center mb-16">
+				<a href="/doc/start" class="btn-primary">
+					Add to Your Agent
 				</a>
-				<a href="/login" class="btn-secondary">
-					Sign In
+				<a href="/doc/start#quick-start" class="btn-secondary">
+					Try It Now
 				</a>
+			</div>
+
+			<!-- Workflow visual -->
+			<div class="max-w-xl mx-auto mb-16">
+				<div class="flex items-center justify-center gap-3 sm:gap-6 text-sm sm:text-base">
+					<span class="font-semibold text-ab-dark-blue">Spec</span>
+					<span class="text-ab-gray">&rarr;</span>
+					<span class="font-semibold text-ab-dark-blue">Generate</span>
+					<span class="text-ab-gray">&rarr;</span>
+					<span class="font-semibold text-ab-dark-blue">Compile</span>
+					<span class="text-ab-gray">&rarr;</span>
+					<span class="font-semibold text-ab-dark-blue">Ship</span>
+				</div>
+			</div>
+
+			<!-- Why agents love API Builder -->
+			<div class="max-w-2xl mx-auto text-left">
+				<h2 class="text-xl font-bold text-ab-dark-blue mb-6 text-center">Why agents choose API Builder</h2>
+				<div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+					<div class="card">
+						<h3 class="font-semibold text-ab-dark-blue mb-2">Compiler as oracle</h3>
+						<p class="text-sm text-ab-gray">Generated code won't compile until your implementation matches the spec.</p>
+					</div>
+					<div class="card">
+						<h3 class="font-semibold text-ab-dark-blue mb-2">Explicit data shapes</h3>
+						<p class="text-sm text-ab-gray">Every field, type, and relationship defined upfront. No guessing.</p>
+					</div>
+					<div class="card">
+						<h3 class="font-semibold text-ab-dark-blue mb-2">First-try success</h3>
+						<p class="text-sm text-ab-gray">Agents using API Builder implement APIs correctly without iteration loops.</p>
+					</div>
+				</div>
 			</div>
 		</div>
 
@@ -79,7 +115,7 @@
 			</div>
 		{:else}
 			<div class="text-center py-8 text-ab-gray">
-				<p>No public organizations yet. <a href="/signup" class="text-ab-dark-blue underline">Sign up</a> to create one.</p>
+				<p>No public organizations yet. <a href="/doc/start" class="text-ab-dark-blue underline">Get your agent started</a> in 30 seconds.</p>
 			</div>
 		{/if}
 	{/if}

@@ -77,6 +77,9 @@
 				>
 					GitHub
 				</a>
+				<a href="/doc/start" class="text-white/80 hover:text-white transition-colors text-sm font-medium">
+					For AI Agents
+				</a>
 
 				{#if session}
 					<!-- Search form -->
@@ -194,6 +197,13 @@
 				onclick={closeMobileMenu}
 			>
 				GitHub
+			</a>
+			<a
+				href="/doc/start"
+				class="block px-3 py-2 text-white hover:text-white hover:bg-white/10 rounded-md transition-colors"
+				onclick={closeMobileMenu}
+			>
+				For AI Agents
 			</a>
 
 			{#if session}

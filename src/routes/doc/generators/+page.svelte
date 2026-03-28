@@ -6,25 +6,35 @@
 	<h1 class="text-2xl font-bold text-ab-dark-blue mb-4">Code Generators</h1>
 
 	<p class="text-ab-dark-blue mb-4 text-lg leading-relaxed">
-		API Builder generates high-quality client libraries and server stubs from your API specification.
-		The generated code is designed to be indistinguishable from hand-written code — minimal dependencies,
-		single-file output, and readable enough to review like any other PR.
+		Every generator produces a single, self-contained file your agent can drop into the project.
+		No dependency resolution. No configuration. Just working code that the compiler can verify
+		against your implementation.
 	</p>
+
+	<div class="card mb-8">
+		<h2 class="text-lg font-semibold text-ab-dark-blue mb-3">Best for AI Agents</h2>
+		<p class="text-ab-dark-blue mb-3 text-sm">
+			These generators produce the strongest compiler verification — the agent implements against
+			generated interfaces and the compiler catches any mismatch:
+		</p>
+		<ul class="space-y-2 text-ab-dark-blue ml-2 text-sm">
+			<li><strong>Scala Play Client + Controller + Mock</strong> — Full type-safe client, abstract controller traits, and mock clients for testing</li>
+			<li><strong>TypeScript Declarations + SDK</strong> — Type definitions and full client with compile-time checking</li>
+			<li><strong>Elm v2</strong> — Fully typed models and operations for Elm frontends</li>
+		</ul>
+	</div>
 
 	<div class="card mb-8">
 		<h2 class="text-lg font-semibold text-ab-dark-blue mb-3">Design Principles</h2>
 		<ul class="space-y-3 text-ab-dark-blue ml-2">
 			<li>
-				<strong>Minimal dependencies</strong> — Client libraries use native framework dependencies where possible.
-				When not, we use the most standard options available.
+				<strong>Single file</strong> — One fully contained, fully functional file per generator. Drop it in and go.
 			</li>
 			<li>
-				<strong>Readable output</strong> — Every generator starts as a hand-written client that we then automate.
-				The goal is generated code you'd be proud to commit.
+				<strong>Minimal dependencies</strong> — Uses native framework dependencies. No extra libraries to manage.
 			</li>
 			<li>
-				<strong>Single file</strong> — Download one fully contained, fully functional file.
-				Drop it into your project or package it as a library.
+				<strong>Readable output</strong> — Generated code you'd be proud to commit. Indistinguishable from hand-written.
 			</li>
 		</ul>
 	</div>
