@@ -6,20 +6,36 @@
 	<h1 class="text-2xl font-bold text-ab-dark-blue mb-4">API Builder</h1>
 
 	<p class="text-ab-dark-blue mb-8 text-lg leading-relaxed">
-		Define your REST API in a simple JSON format, and API Builder generates production-quality
-		client libraries, server stubs, and documentation — so your team ships faster.
+		Give your AI agent a structured, type-safe way to build REST APIs. Define the spec,
+		generate the code, let the compiler verify correctness.
 	</p>
 
-	<!-- Intuitive API Design -->
+	<!-- Step 1: Install -->
 	<div class="mb-10">
 		<h2 class="text-lg font-bold text-ab-blue mb-4 flex items-center gap-2">
 			<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-ab-blue text-white text-xs">1</span>
-			Intuitive API Design
+			Install
 		</h2>
 		<div class="card">
 			<p class="text-ab-dark-blue mb-3">
-				Describe your service in <a href="/doc/apiJson" class="text-ab-blue hover:text-ab-dark-blue underline">api.json</a> —
-				a clean JSON format that guides you toward well-structured REST APIs through convention over configuration.
+				One command. Zero accounts. Instant access.
+			</p>
+			<pre class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto"><code>api init</code></pre>
+		</div>
+	</div>
+
+	<!-- Step 2: Define -->
+	<div class="mb-10">
+		<h2 class="text-lg font-bold text-ab-blue mb-4 flex items-center gap-2">
+			<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-ab-blue text-white text-xs">2</span>
+			Define
+		</h2>
+		<div class="card">
+			<p class="text-ab-dark-blue mb-3">
+				Write your API in <a href="/doc/apiJson" class="text-ab-blue hover:text-ab-dark-blue underline">api.json</a> —
+				a flat JSON format with no <code class="text-sm bg-gray-100 px-1.5 py-0.5 rounded">$ref</code>,
+				no <code class="text-sm bg-gray-100 px-1.5 py-0.5 rounded">oneOf</code>,
+				no indentation ambiguity. Every field, type, and relationship is explicit.
 			</p>
 			<p class="text-ab-dark-blue text-sm">
 				See the <a href="https://app.apibuilder.io/apicollective/apibuilder-api/latest" class="text-ab-blue hover:text-ab-dark-blue underline">API Builder API spec</a> for a real-world example.
@@ -27,60 +43,41 @@
 		</div>
 	</div>
 
-	<!-- Generated Client Libraries -->
-	<div class="mb-10">
-		<h2 class="text-lg font-bold text-ab-blue mb-4 flex items-center gap-2">
-			<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-ab-blue text-white text-xs">2</span>
-			Generated Client Libraries
-		</h2>
-		<div class="card">
-			<p class="text-ab-dark-blue mb-4">
-				Download native client libraries with minimal dependencies. Each is a single, readable file
-				that drops straight into your project.
-			</p>
-
-			<p class="font-semibold text-ab-dark-blue mb-2 text-sm">Ruby</p>
-			<pre class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm mb-4 overflow-x-auto"><code>client = MyService::Client.new("http://localhost:8000")
-
-organizations = client.organizations.get(:limit => 10, :offset => 0)
-organizations.each do |org|
-  puts "Org %s is named %s" % [org.id, org.name]
-end
-
-neworg = client.organizations.post(:name => "My org")
-puts "Created new org named %s" % neworg.name</code></pre>
-
-			<p class="font-semibold text-ab-dark-blue mb-2 text-sm">Scala</p>
-			<pre class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto"><code>{@html `val client = new io.apibuilder.api.v0.Client("http://localhost:8000")
-
-val organizations = client.organizations.get(limit = 10, offset = 0)
-organizations.foreach { org =>
-  println(s"Org \${org.name} is named \${org.id}")
-}
-
-val neworg = client.organizations.post(name = "My org")
-println(s"Created new org named \${neworg.name}")`}</code></pre>
-		</div>
-	</div>
-
-	<!-- Explore -->
+	<!-- Step 3: Generate -->
 	<div class="mb-10">
 		<h2 class="text-lg font-bold text-ab-blue mb-4 flex items-center gap-2">
 			<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-ab-blue text-white text-xs">3</span>
-			Explore More
+			Generate
 		</h2>
 		<div class="card">
-			<ul class="space-y-2 text-ab-dark-blue">
-				<li><a href="/doc/generators" class="text-ab-blue hover:text-ab-dark-blue underline">Code generators</a> — Scala, Java, TypeScript, Go, Ruby, and more</li>
-				<li><a href="/doc/why" class="text-ab-blue hover:text-ab-dark-blue underline">Why API Builder?</a> — What makes it different</li>
-				<li><a href="/doc/examples" class="text-ab-blue hover:text-ab-dark-blue underline">Examples</a> — Real-world API specifications</li>
-			</ul>
+			<p class="text-ab-dark-blue mb-3">
+				Produce type-safe clients, server stubs, test mocks, and database schemas. Each generator
+				outputs a single, self-contained file — drop it into the project and go.
+			</p>
+			<pre class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto"><code>api</code></pre>
+			<p class="text-ab-dark-blue text-sm mt-3">
+				See <a href="/doc/generators" class="text-ab-blue hover:text-ab-dark-blue underline">all generators</a> — Scala, TypeScript, Java, Go, Elm, and more.
+			</p>
+		</div>
+	</div>
+
+	<!-- Step 4: Verify -->
+	<div class="mb-10">
+		<h2 class="text-lg font-bold text-ab-blue mb-4 flex items-center gap-2">
+			<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-ab-blue text-white text-xs">4</span>
+			Verify
+		</h2>
+		<div class="card">
+			<p class="text-ab-dark-blue">
+				Compile. If it builds, it's correct. The generated interfaces enforce the spec — your
+				implementation either matches or the compiler tells you exactly what's wrong.
+			</p>
 		</div>
 	</div>
 
 	<!-- CTA -->
 	<div class="mt-12 mb-8 text-center">
-		<p class="text-ab-dark-blue mb-4">Ready to define your first API?</p>
-		<a href="/doc/start" class="btn-primary inline-block">Get Started</a>
+		<p class="text-ab-dark-blue mb-4">Get your agent started in 30 seconds.</p>
+		<a href="/doc/start" class="btn-primary inline-block">Getting Started</a>
 	</div>
 </div>

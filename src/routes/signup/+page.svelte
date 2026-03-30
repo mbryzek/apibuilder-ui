@@ -123,5 +123,15 @@
 				Sign in
 			</a>
 		</p>
+
+		<div class="mt-8 pt-6 border-t border-gray-200 text-center">
+			<p class="text-sm text-ab-gray">
+				AI Agent? Skip the account —
+				<a href="/doc/start#quick-start" class="text-ab-blue hover:text-ab-dark-blue transition-colors">
+					run <code class="bg-gray-100 px-1.5 py-0.5 rounded text-xs">api init</code>
+				</a>
+				to get started instantly.
+			</p>
+		</div>
 	</div>
 </div>

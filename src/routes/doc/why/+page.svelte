@@ -3,120 +3,106 @@
 </svelte:head>
 
 <div>
-	<h1 class="text-2xl font-bold text-ab-dark-blue mb-4">Why Choose API Builder?</h1>
+	<h1 class="text-2xl font-bold text-ab-dark-blue mb-4">Why API Builder?</h1>
 
 	<p class="text-ab-dark-blue mb-8 text-lg leading-relaxed">
-		Teams choose API Builder because their developers stop writing client SDKs — and their APIs get better.
-		Whether it's your only API tool or a complement to your existing stack, API Builder earns its place
-		through generated code quality, comprehensive validation, and a workflow that gets out of your way.
+		AI agents using API Builder implement APIs correctly on the first try. The spec defines the contract,
+		code generation produces trusted interfaces, and the compiler verifies everything matches.
 	</p>
 
-	<!-- Quality -->
+	<!-- Compiler-Verified Correctness -->
 	<div class="mb-10">
 		<h2 class="text-lg font-bold text-ab-blue mb-4 flex items-center gap-2">
-			<span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-ab-blue text-white text-sm">✦</span>
-			Quality
+			<span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-ab-blue text-white text-sm">&#10022;</span>
+			Compiler-Verified Correctness
 		</h2>
 		<ul class="space-y-5 text-ab-dark-blue ml-10">
 			<li>
-				<span class="font-semibold">High quality generated clients</span> —
-				Teams that adopt API Builder stop writing client SDKs entirely. The generated clients
-				are high enough quality that developers actually prefer them — freeing up time for product work.
+				<span class="font-semibold">Generated code is trusted</span> —
+				The agent doesn't write SDK code. It uses generated clients and server stubs. The generated
+				code is high enough quality that teams stop writing client SDKs entirely.
 			</li>
-
 			<li>
-				<span class="font-semibold">Comprehensive validation</span> —
-				Every upload runs extensive checks to ensure internal consistency — all types, names, and
-				references are validated. This catches problems at definition time, before they reach
-				generated code.
+				<span class="font-semibold">The compiler becomes the test oracle</span> —
+				If your implementation compiles against the generated interfaces, it matches the spec.
+				Compiler errors tell the agent exactly what's wrong — missing methods, wrong types,
+				incorrect signatures.
 			</li>
-
 			<li>
-				<span class="font-semibold">Testability of clients</span> —
-				Generated mock clients share the same interface definition, so teams can rely on mocks
-				for automated tests and override only what's needed for each scenario.
+				<span class="font-semibold">Mock clients for testing</span> —
+				Generated mock clients share the same interface definition. Agents write meaningful tests
+				without external dependencies and override only what's needed for each scenario.
 			</li>
 		</ul>
 	</div>
 
-	<!-- Flexibility -->
+	<!-- Explicit Data Shapes -->
 	<div class="mb-10">
 		<h2 class="text-lg font-bold text-ab-blue mb-4 flex items-center gap-2">
-			<span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-ab-blue text-white text-sm">⚡</span>
-			Flexibility
+			<span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-ab-blue text-white text-sm">&#9889;</span>
+			Explicit Data Shapes
 		</h2>
 		<ul class="space-y-5 text-ab-dark-blue ml-10">
 			<li>
-				<span class="font-semibold">Resource centric</span> —
-				Define resources first, then expose operations on them. This aligns with modern resource-oriented
-				tooling like GraphQL, where high quality metadata on available resources is essential.
+				<span class="font-semibold">Every field and type defined upfront</span> —
+				Every resource, field, type, and relationship is declared in the spec. No guessing,
+				no runtime discovery, no implicit conventions.
 			</li>
-
+			<li>
+				<span class="font-semibold">Spec as design input</span> —
+				Agents use the explicit data shapes to plan UX, database schemas, and data flows.
+				The spec becomes input to both API implementation and frontend design.
+			</li>
 			<li>
 				<span class="font-semibold">First class union types</span> —
-				Union types — a type constrained to one of a known set — are first class in API Builder.
-				Create new types instead of continually adding optional fields to existing ones.
-			</li>
-
-			<li>
-				<span class="font-semibold">Multiple input formats</span> —
-				Author specs in api.json. Adding new input formats is straightforward.
-			</li>
-
-			<li>
-				<span class="font-semibold">Easy to add code generators</span> —
-				Generators are REST services that accept a service description and return a string.
-				Teams write their own — even small, disposable ones — to solve problems in an automated fashion.
+				A type constrained to one of a known set. Agents know every valid state a value can
+				be in — no open-ended polymorphism to handle.
 			</li>
 		</ul>
 	</div>
 
-	<!-- Workflow -->
+	<!-- Zero-Friction Workflow -->
 	<div class="mb-10">
 		<h2 class="text-lg font-bold text-ab-blue mb-4 flex items-center gap-2">
-			<span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-ab-blue text-white text-sm">⚙</span>
-			Workflow
+			<span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-ab-blue text-white text-sm">&#9881;</span>
+			Zero-Friction Workflow
 		</h2>
 		<ul class="space-y-5 text-ab-dark-blue ml-10">
 			<li>
-				<span class="font-semibold">Integrated tooling</span> —
-				The entire <a href="https://app.apibuilder.io" class="text-ab-blue hover:text-ab-dark-blue underline">hosted platform</a> runs
-				on the API Builder API, so it's simple to automate workflows. Teams write linters that enforce naming
-				standards as part of CI. The <a href="https://github.com/apicollective/apibuilder-cli" class="text-ab-blue hover:text-ab-dark-blue underline">CLI</a> is
-				complete enough that many teams skip the UI entirely.
+				<span class="font-semibold">Instant setup</span> —
+				<code class="text-sm bg-gray-100 px-1.5 py-0.5 rounded">api init</code> creates
+				an anonymous org and token. No signup, no email, no OAuth.
 			</li>
-
 			<li>
-				<span class="font-semibold">Discovery</span> —
-				Free hosting at <a href="https://app.apibuilder.io" class="text-ab-blue hover:text-ab-dark-blue underline">app.apibuilder.io</a> for
-				both private and public projects makes service discovery easy across your organization.
+				<span class="font-semibold">CLI-native</span> —
+				Everything is a CLI command agents can script:
+				<code class="text-sm bg-gray-100 px-1.5 py-0.5 rounded">api validate</code>,
+				<code class="text-sm bg-gray-100 px-1.5 py-0.5 rounded">api</code> (upload + generate).
 			</li>
-
 			<li>
-				<span class="font-semibold">Versioning</span> —
-				Every change to every API is recorded with a list of safe and potentially breaking changes.
-				Teams use these for release notes — for example, the <a href="/apicollective/apibuilder-api" class="text-ab-blue hover:text-ab-dark-blue underline">API Builder API's own history</a>.
+				<span class="font-semibold">Versioning built in</span> —
+				Every change to every API is recorded with safe and potentially breaking changes listed.
 			</li>
 		</ul>
 	</div>
 
-	<!-- Simplicity -->
+	<!-- Simple, Parseable Format -->
 	<div class="mb-10">
 		<h2 class="text-lg font-bold text-ab-blue mb-4 flex items-center gap-2">
-			<span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-ab-blue text-white text-sm">◈</span>
-			Simplicity
+			<span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-ab-blue text-white text-sm">&#9670;</span>
+			Simple, Parseable Format
 		</h2>
 		<ul class="space-y-5 text-ab-dark-blue ml-10">
 			<li>
-				<span class="font-semibold">Simple input format</span> —
-				The default <em>api.json</em> format is JSON that's approachable by a novice. No <em>$ref</em>,
-				no <em>oneOf</em> — just look at an existing example and modify it for your application.
+				<span class="font-semibold">Flat JSON, no ambiguity</span> —
+				The <a href="/doc/apiJson" class="text-ab-blue hover:text-ab-dark-blue underline">api.json</a> format
+				is JSON — no YAML indentation issues, no <code class="text-sm bg-gray-100 px-1.5 py-0.5 rounded">$ref</code> to resolve,
+				no inheritance to trace.
 			</li>
-
 			<li>
-				<span class="font-semibold">Clean service specification</span> —
-				API Builder separates input format from service description. Regardless of how you author your spec,
-				the output is a fully expanded, complete service description — easy to parse and use directly.
+				<span class="font-semibold">Fully expanded output</span> —
+				The service specification is fully expanded and complete. An agent can read it and
+				understand the entire API surface in one pass — no external references to follow.
 			</li>
 		</ul>
 	</div>
