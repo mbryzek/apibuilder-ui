@@ -1,0 +1,44 @@
+# API Builder
+
+> Give your AI agent a structured, type-safe way to build REST APIs. Define the spec, generate the code, let the compiler verify correctness.
+
+API Builder is an API-first development platform. You define your API in a simple JSON specification (api.json), then generate type-safe clients, server stubs, mock clients, and database schemas across multiple languages. The compiler verifies your implementation matches the spec.
+
+## Core Workflow
+
+1. Install: `api init`
+2. Define: Write your API in api.json format
+3. Generate: Run `api` to produce code
+4. Verify: Compile — if it builds, it matches the spec
+
+## Documentation
+
+- [Full Documentation (Markdown)](https://www.apibuilder.org/doc.md): Complete API Builder documentation in a single markdown file
+- [Getting Started](https://www.apibuilder.org/doc/start): Quick start guide
+- [api.json Format](https://www.apibuilder.org/doc/apiJson): Complete specification reference
+- [Types](https://www.apibuilder.org/doc/types): Primitive type system
+- [Code Generators](https://www.apibuilder.org/doc/generators): Available generators (TypeScript, Scala, Elm, PostgreSQL)
+- [Interfaces](https://www.apibuilder.org/doc/interfaces): Shared fields across models
+- [Play Union Types](https://www.apibuilder.org/doc/playUnionTypes): Union type serialization
+- [Play Routes File](https://www.apibuilder.org/doc/playRoutesFile): Play Framework routes generation
+- [API Tokens](https://www.apibuilder.org/doc/apiTokens): Authentication for the REST API
+- [Attributes](https://www.apibuilder.org/doc/attributes): Customize code generation behavior
+- [Examples](https://www.apibuilder.org/doc/examples): Real-world API specifications
+- [Why API Builder?](https://www.apibuilder.org/doc/why): Design philosophy and benefits
+- [History](https://www.apibuilder.org/doc/history): Origin story and requirements
+
+## AI Agent Skill
+
+- [API Builder Skill](https://github.com/mbryzek/apibuilder-ui/blob/main/skills/apibuilder.md): Full workflow skill for AI agents
+
+## API
+
+- [API Builder API](https://app.apibuilder.io/apicollective/apibuilder-api/latest): REST API documentation
+- [API Builder Spec](https://app.apibuilder.io/apicollective/apibuilder-spec/latest): The specification format itself
+- [API Builder Generator](https://app.apibuilder.io/apicollective/apibuilder-generator/latest): Code generation service API
+
+## Source
+
+- [API Builder (backend)](https://github.com/apicollective/apibuilder): Core platform
+- [API Builder UI](https://github.com/mbryzek/apibuilder-ui): Web interface (SvelteKit)
+- [API Builder Examples](https://github.com/apicollective/apibuilder-examples): Generated code examples

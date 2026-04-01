@@ -1,3 +1,6 @@
 # allow crawling everything by default
 User-agent: *
 Disallow:
+
+# LLM documentation
+Llms-Txt: /llms.txt
