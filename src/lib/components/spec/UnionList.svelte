@@ -12,7 +12,7 @@
 	let { unions, service, exampleBaseUrl }: Props = $props();
 
 	function hasAnyDetails(union: Union): boolean {
-		return union.types.some((t) => t.description || t.default);
+		return union.types.some((t) => t.description || t.default || (t.aliases && t.aliases.length > 0));
 	}
 </script>
 
@@ -55,7 +55,12 @@
 								{#each union.types as unionType}
 									<tr class="border-b border-gray-100 last:border-b-0">
 										<td class="py-2.5 pr-6 font-mono text-sm align-top">
-											<TypeLink typeStr={unionType.type} {service} />
+											{#if unionType.literal}
+												<span class="text-green-700">"{unionType.literal}"</span>
+												<span class="text-xs text-ab-gray ml-1 font-sans">literal</span>
+											{:else}
+												<TypeLink typeStr={unionType.type} {service} />
+											{/if}
 											{#if unionType.discriminator_value}
 												<span class="text-ab-gray text-xs ml-1">({unionType.discriminator_value})</span>
 											{/if}
@@ -64,6 +69,12 @@
 											<td class="py-2.5 text-ab-dark-gray align-top">
 												{#if unionType.default}
 													<span class="text-xs text-ab-gray">default</span>
+													{#if unionType.description || (unionType.aliases && unionType.aliases.length > 0)}
+														<span class="mx-0.5"></span>
+													{/if}
+												{/if}
+												{#if unionType.aliases && unionType.aliases.length > 0}
+													<span class="text-xs text-ab-gray">aliases: {unionType.aliases.join(', ')}</span>
 													{#if unionType.description}
 														<span class="mx-0.5"></span>
 													{/if}
