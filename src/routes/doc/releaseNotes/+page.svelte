@@ -14,6 +14,34 @@
 	<div class="space-y-6">
 
 		<div class="card mb-6 border-l-4 border-ab-blue">
+			<h3 class="text-lg font-semibold text-ab-dark-blue mb-3">Apr 1, 2026</h3>
+			<ul class="list-disc list-inside space-y-2 text-ab-dark-blue">
+				<li>
+					<strong class="text-ab-blue">Primitive Types in Unions</strong> — Union types can now include
+					string-serializable primitive types (<code class="bg-gray-100 px-1.5 py-0.5 rounded text-sm">string</code>,
+					<code class="bg-gray-100 px-1.5 py-0.5 rounded text-sm">uuid</code>,
+					<code class="bg-gray-100 px-1.5 py-0.5 rounded text-sm">date-iso8601</code>,
+					<code class="bg-gray-100 px-1.5 py-0.5 rounded text-sm">date-time-iso8601</code>) alongside enums.
+					These string-serializable unions can be used in path and query parameters.
+					Generates sealed traits with wrapper case classes in Scala, string unions in TypeScript,
+					and custom types in Elm.
+				</li>
+				<li>
+					<strong class="text-ab-blue">Literal Union Members</strong> — Union types now support a
+					<code class="bg-gray-100 px-1.5 py-0.5 rounded text-sm">literal</code> field for fixed string values.
+					For example, <code class="bg-gray-100 px-1.5 py-0.5 rounded text-sm">{`{ "literal": "latest" }`}</code>
+					generates a case object in Scala. Combine with primitive types for patterns like
+					<code class="bg-gray-100 px-1.5 py-0.5 rounded text-sm">"latest" | date-time-iso8601</code>.
+				</li>
+				<li>
+					<strong class="text-ab-blue">Union Type Aliases</strong> — Union type members now support an optional
+					<code class="bg-gray-100 px-1.5 py-0.5 rounded text-sm">aliases</code> field — an array of additional
+					string values that should be accepted when parsing. Useful for case-insensitive matching.
+				</li>
+			</ul>
+		</div>
+
+		<div class="card mb-6 border-l-4 border-ab-blue">
 			<h3 class="text-lg font-semibold text-ab-dark-blue mb-3">Mar 24, 2026</h3>
 			<ul class="list-disc list-inside space-y-2 text-ab-dark-blue">
 				<li>

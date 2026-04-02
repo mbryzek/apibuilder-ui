@@ -383,13 +383,15 @@
 	<div class="card mb-6" id="unionType">
 		<h3 class="text-lg font-semibold text-ab-blue mb-3">UnionType declaration</h3>
 		<p class="text-ab-dark-blue mb-4">
-			A UnionType is represented as a JSON object of the form:
+			A UnionType is represented as a JSON object of the form. Exactly one of <em>type</em> or <em>literal</em> must be specified:
 		</p>
 
 		<div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto mb-4">
 			{@html `<pre><code>{
-  "type": <em>string</em>,
+  "type": <em>string (required if no literal)</em>,
+  "literal": <em>string (required if no type)</em>,
   "description": <em>string (optional)</em>,
+  "aliases": <em>JSON Array of string (optional)</em>,
   "default": <em>boolean (optional)</em>,
   "discriminator_value": <em>string (optional)</em>,
   "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>
@@ -398,12 +400,30 @@
 
 		<p class="text-ab-dark-blue mb-2">where:</p>
 		<ul class="list-disc pl-6 text-ab-dark-blue mb-4 space-y-2">
-			<li><em>type</em>: specifies the type to include in this union type. Acceptable values include the name of either an enum, a model, or a (<a href="/doc/types" class="text-ab-blue hover:text-ab-dark-blue underline">primitive type</a>).</li>
+			<li><em>type</em>: specifies the type to include in this union type. Acceptable values include the name of either an enum, a model, or a (<a href="/doc/types" class="text-ab-blue hover:text-ab-dark-blue underline">primitive type</a>). Mutually exclusive with <em>literal</em>. When using string-serializable primitive types (<code class="bg-gray-100 px-1 rounded">string</code>, <code class="bg-gray-100 px-1 rounded">uuid</code>, <code class="bg-gray-100 px-1 rounded">date-iso8601</code>, <code class="bg-gray-100 px-1 rounded">date-time-iso8601</code>), the union becomes string-serializable and can be used in path and query parameters.</li>
+			<li><em>literal</em>: specifies a literal string value as a union member. Generates a case object in Scala and a string literal type in TypeScript. Mutually exclusive with <em>type</em>. Useful for combining fixed keywords with typed values, e.g. <code class="bg-gray-100 px-1 rounded">"latest"</code> or <code class="bg-gray-100 px-1 rounded">"default"</code>.</li>
 			<li><em>description</em>: optional description for what this type provides. Supports <a href="https://help.github.com/articles/github-flavored-markdown/" class="text-ab-blue hover:text-ab-dark-blue underline">GFM</a>.</li>
+			<li><em>aliases</em>: optional array of additional string values that should be accepted when parsing this union member. For example, a literal of <code class="bg-gray-100 px-1 rounded">"latest"</code> with aliases <code class="bg-gray-100 px-1 rounded">["LATEST"]</code> will accept both forms.</li>
 			<li><em>default</em>: If true, indicates that this type should be used as the default when deserializing union types. This field is only used by union types that require a discriminator and sets the default value for that discriminator during deserialization.</li>
 			<li><em>discriminator_value</em>: The discriminator value defines the string to use in the discriminator field to identify this type. If not specified, the discriminator value will default to the name of the type itself.</li>
 			<li><em>attributes</em>: JSON array defining additional meta data about this union type for use by generators. See <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a></li>
 		</ul>
+
+		<h4 class="text-md font-semibold text-ab-blue mb-2 mt-4">Example: Version identifier</h4>
+		<p class="text-ab-dark-blue mb-2">
+			A union that accepts the literal string <code class="bg-gray-100 px-1 rounded">"latest"</code> or an ISO date-time string:
+		</p>
+		<div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto mb-4">
+			{@html `<pre><code>"unions": {
+  "version_number": {
+    "discriminator": "value",
+    "types": [
+      { "literal": "latest", "aliases": ["LATEST"] },
+      { "type": "date-time-iso8601" }
+    ]
+  }
+}</code></pre>`}
+		</div>
 	</div>
 
 	<!-- ================================================================== -->

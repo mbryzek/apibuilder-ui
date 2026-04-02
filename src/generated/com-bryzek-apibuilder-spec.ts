@@ -254,12 +254,16 @@ export interface Union {
 }
 
 /**
- * Metadata about one of the types that is part of a union type
+ * Metadata about one of the types that is part of a union type. Exactly one of 'type' or 'literal' must be specified.
  */
 export interface UnionType {
-  /** The name of a type (a primitive, model name, or enum name) that makes up this union type */
+  /** The name of a type (a primitive, model name, or enum name) that makes up this union type. Mutually exclusive with 'literal'. */
   type: string;
+  /** A literal string value that is a valid member of this union. Generates a case object in Scala, a string literal type in TypeScript. Mutually exclusive with 'type'. */
+  literal?: string;
   description?: string;
+  /** Additional string values that should be accepted when parsing this union member. */
+  aliases?: string[];
   deprecation?: Deprecation;
   attributes: Attribute[];
   /** If true, indicates that this type should be used as the default when deserializing union types. This field is only used by union types that require a discriminator and sets the default value for that discriminator during deserialization. */
