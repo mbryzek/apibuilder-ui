@@ -1,4 +1,4 @@
-import type { Service, Import } from '$generated/com-bryzek-apibuilder-spec';
+import type { Service } from '$generated/com-bryzek-apibuilder-spec';
 
 const PRIMITIVES = new Set([
 	'boolean', 'bytes', 'date-iso8601', 'date-time-iso8601', 'decimal', 'double',
@@ -40,12 +40,12 @@ function findLocalType(name: string, service: Service): string | null {
 /**
  * Check if a type is imported from another service
  */
-function findImportedType(name: string, imports: Import[]): Import | null {
+function findImportedType(name: string, imports: Service[]): Service | null {
 	for (const imp of imports) {
-		if (imp.enums.includes(name) || imp.models.includes(name) || imp.unions.includes(name)) {
+		if (imp.enums.some((e) => e.name === name) || imp.models.some((m) => m.name === name) || imp.unions.some((u) => u.name === name)) {
 			return imp;
 		}
-		if (imp.interfaces?.includes(name)) {
+		if (imp.interfaces?.some((i) => i.name === name)) {
 			return imp;
 		}
 	}

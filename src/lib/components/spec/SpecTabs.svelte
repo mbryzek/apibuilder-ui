@@ -28,7 +28,6 @@
 		{ id: 'unions', label: 'Unions', count: service.unions.length },
 		{ id: 'interfaces', label: 'Interfaces', count: service.interfaces?.length ?? 0 },
 		{ id: 'imports', label: 'Imports', count: service.imports.length },
-		{ id: 'annotations', label: 'Annotations', count: service.annotations?.length ?? 0 },
 	].filter((t) => t.count > 0));
 
 	let activeTab = $state('');
@@ -155,49 +154,26 @@
 						<p class="text-xs text-ab-gray mt-1">Version: {imp.version}</p>
 						{#if imp.models.length > 0}
 							<p class="text-xs text-ab-gray">Models:
-								{#each imp.models as model, i}<a href="{impBase}#{model}" class="text-ab-blue hover:text-ab-dark-blue">{model}</a>{#if i < imp.models.length - 1}, {/if}{/each}
+								{#each imp.models as model, i}<a href="{impBase}#{model.name}" class="text-ab-blue hover:text-ab-dark-blue">{model.name}</a>{#if i < imp.models.length - 1}, {/if}{/each}
 							</p>
 						{/if}
 						{#if imp.enums.length > 0}
 							<p class="text-xs text-ab-gray">Enums:
-								{#each imp.enums as enumName, i}<a href="{impBase}#{enumName}" class="text-ab-blue hover:text-ab-dark-blue">{enumName}</a>{#if i < imp.enums.length - 1}, {/if}{/each}
+								{#each imp.enums as enumItem, i}<a href="{impBase}#{enumItem.name}" class="text-ab-blue hover:text-ab-dark-blue">{enumItem.name}</a>{#if i < imp.enums.length - 1}, {/if}{/each}
 							</p>
 						{/if}
 						{#if imp.unions.length > 0}
 							<p class="text-xs text-ab-gray">Unions:
-								{#each imp.unions as unionName, i}<a href="{impBase}#{unionName}" class="text-ab-blue hover:text-ab-dark-blue">{unionName}</a>{#if i < imp.unions.length - 1}, {/if}{/each}
+								{#each imp.unions as unionItem, i}<a href="{impBase}#{unionItem.name}" class="text-ab-blue hover:text-ab-dark-blue">{unionItem.name}</a>{#if i < imp.unions.length - 1}, {/if}{/each}
 							</p>
 						{/if}
 						{#if imp.interfaces && imp.interfaces.length > 0}
 							<p class="text-xs text-ab-gray">Interfaces:
-								{#each imp.interfaces as ifaceName, i}<a href="{impBase}#{ifaceName}" class="text-ab-blue hover:text-ab-dark-blue">{ifaceName}</a>{#if i < imp.interfaces.length - 1}, {/if}{/each}
+								{#each imp.interfaces as ifaceItem, i}<a href="{impBase}#{ifaceItem.name}" class="text-ab-blue hover:text-ab-dark-blue">{ifaceItem.name}</a>{#if i < imp.interfaces.length - 1}, {/if}{/each}
 							</p>
 						{/if}
 					</div>
 				{/each}
-			</div>
-		{/if}
-	{:else if currentTab === 'annotations'}
-		{#if service.annotations && service.annotations.length > 0}
-			<div class="border border-gray-200 rounded-lg overflow-hidden">
-				<div class="overflow-x-auto">
-					<table class="w-full text-sm text-left">
-						<thead>
-							<tr class="bg-ab-light-gray border-b border-gray-200">
-								<th class="pl-4 py-3 pr-6 font-semibold text-ab-gray">Name</th>
-								<th class="py-3 pr-4 font-semibold text-ab-gray">Description</th>
-							</tr>
-						</thead>
-						<tbody>
-							{#each service.annotations as annotation}
-								<tr class="border-b border-gray-100 last:border-b-0">
-									<td class="pl-4 py-2.5 pr-6 font-mono text-sm">{annotation.name}</td>
-									<td class="py-2.5 pr-4 text-ab-dark-gray">{annotation.description ?? ''}</td>
-								</tr>
-							{/each}
-						</tbody>
-					</table>
-				</div>
 			</div>
 		{/if}
 	{/if}

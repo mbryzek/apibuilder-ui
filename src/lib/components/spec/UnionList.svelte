@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Union, Service } from '$generated/com-bryzek-apibuilder-spec';
+	import type { Union, Service, Variant, VariantType, VariantLiteral } from '$generated/com-bryzek-apibuilder-spec';
 	import TypeLink from './TypeLink.svelte';
 	import ExampleJsonLinks from './ExampleJsonLinks.svelte';
 
@@ -11,8 +11,21 @@
 
 	let { unions, service, exampleBaseUrl }: Props = $props();
 
+	function isVariantLiteral(v: Variant): v is VariantLiteral {
+		return 'literal' in v;
+	}
+
+	function isVariantType(v: Variant): v is VariantType {
+		return 'type' in v;
+	}
+
 	function hasAnyDetails(union: Union): boolean {
-		return union.types.some((t) => t.description || t.default || (t.aliases && t.aliases.length > 0));
+		return union.variants.some((t) => {
+			if (t.description) return true;
+			if (isVariantType(t) && t.default) return true;
+			if (isVariantLiteral(t) && t.aliases && t.aliases.length > 0) return true;
+			return false;
+		});
 	}
 </script>
 
@@ -52,35 +65,35 @@
 								</tr>
 							</thead>
 							<tbody>
-								{#each union.types as unionType}
+								{#each union.variants as variant}
 									<tr class="border-b border-gray-100 last:border-b-0">
 										<td class="py-2.5 pr-6 font-mono text-sm align-top">
-											{#if unionType.literal}
-												<span class="text-green-700">"{unionType.literal}"</span>
+											{#if isVariantLiteral(variant)}
+												<span class="text-green-700">"{variant.literal}"</span>
 												<span class="text-xs text-ab-gray ml-1 font-sans">literal</span>
-											{:else}
-												<TypeLink typeStr={unionType.type} {service} />
-											{/if}
-											{#if unionType.discriminator_value}
-												<span class="text-ab-gray text-xs ml-1">({unionType.discriminator_value})</span>
+											{:else if isVariantType(variant)}
+												<TypeLink typeStr={variant.type} {service} />
+												{#if variant.discriminator_value}
+													<span class="text-ab-gray text-xs ml-1">({variant.discriminator_value})</span>
+												{/if}
 											{/if}
 											</td>
 										{#if showDetails}
 											<td class="py-2.5 text-ab-dark-gray align-top">
-												{#if unionType.default}
+												{#if isVariantType(variant) && variant.default}
 													<span class="text-xs text-ab-gray">default</span>
-													{#if unionType.description || (unionType.aliases && unionType.aliases.length > 0)}
+													{#if variant.description}
 														<span class="mx-0.5"></span>
 													{/if}
 												{/if}
-												{#if unionType.aliases && unionType.aliases.length > 0}
-													<span class="text-xs text-ab-gray">aliases: {unionType.aliases.join(', ')}</span>
-													{#if unionType.description}
+												{#if isVariantLiteral(variant) && variant.aliases && variant.aliases.length > 0}
+													<span class="text-xs text-ab-gray">aliases: {variant.aliases.join(', ')}</span>
+													{#if variant.description}
 														<span class="mx-0.5"></span>
 													{/if}
 												{/if}
-												{#if unionType.description}
-													{unionType.description}
+												{#if variant.description}
+													{variant.description}
 												{/if}
 											</td>
 										{/if}
