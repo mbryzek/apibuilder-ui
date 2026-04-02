@@ -25,42 +25,15 @@ export enum ParameterLocation {
   Path = 'Path',
   Query = 'Query',
   Form = 'Form',
-  Header = 'Header',
 }
 
 // ============================================================================
 // Models
 // ============================================================================
 
-/**
- * Used to indicate an API concern for a field that is specific to the field's usage but not necessarily its data type. For example, you might use annotations to mark that certain fields contain PII or PCI data and thus should not be stored once processing is complete. Annotations communicate meaning to consumers of an API and may also be used within an implementation or tooling; for example, using static analysis tools to detect logging of sensitive data.
- */
-export interface Annotation {
-  name: string;
-  description?: string;
-  deprecation?: Deprecation;
-}
-
 export interface Application {
   /** Unique key identifying this application */
   key: string;
-}
-
-/**
- * Represents an additional attribute that is attached to one of the objects in apibuilder. The main use case is to capture additional metadata that doesn't necessarily define the API but aids in code generation. Examples would be hints for certain code generators about classes to extend, interfaces to implement, annotations to add, names to assign to certain methods, etc. The specific attributes will be applicable only in the context of the specific code generators usings them.
- */
-export interface Attribute {
-  name: string;
-  value: any;
-  description?: string;
-  deprecation?: Deprecation;
-}
-
-export interface Body {
-  type: string;
-  description?: string;
-  deprecation?: Deprecation;
-  attributes: Attribute[];
 }
 
 /**
@@ -72,27 +45,18 @@ export interface Contact {
   email?: string;
 }
 
-/**
- * Indicates that this particular element is considered deprecated in the API. See the description for details
- */
-export interface Deprecation {
-  description?: string;
-}
-
 export interface Enum {
   name: string;
   plural: string;
   description?: string;
-  deprecation?: Deprecation;
   values: EnumValue[];
-  attributes: Attribute[];
+  attributes: Record<string, any>;
 }
 
 export interface EnumValue {
   name: string;
   description?: string;
-  deprecation?: Deprecation;
-  attributes: Attribute[];
+  attributes: Record<string, any>;
   /** The actual string representation of this value. If not specified, defaults to 'name' */
   value?: string;
 }
@@ -101,38 +65,12 @@ export interface Field {
   name: string;
   type: string;
   description?: string;
-  deprecation?: Deprecation;
   default?: string;
   required: boolean;
   minimum?: number;
   maximum?: number;
   example?: string;
-  attributes: Attribute[];
-  annotations?: string[];
-}
-
-/**
- * An import is used to declare a dependency on another application. This allows you to reference the models and or enums from that application in your own app.
- */
-export interface Import {
-  /** Full URI to the service.json file of the service we are importing */
-  uri: string;
-  /** the fully qualified namespace that we have imported */
-  namespace: string;
-  organization: Organization;
-  application: Application;
-  /** The version of the service that we are importing */
-  version: string;
-  /** Enums made available by this import */
-  enums: string[];
-  /** Interfaces made available by this import */
-  interfaces?: string[];
-  /** Unions made available by this import */
-  unions: string[];
-  /** Models made available by this import */
-  models: string[];
-  /** Annotations made available by this import */
-  annotations?: Annotation[];
+  attributes: Record<string, any>;
 }
 
 /**
@@ -147,9 +85,8 @@ export interface Interface {
   name: string;
   plural: string;
   description?: string;
-  deprecation?: Deprecation;
   fields: Field[];
-  attributes: Attribute[];
+  attributes: Record<string, any>;
 }
 
 /**
@@ -164,9 +101,8 @@ export interface Model {
   name: string;
   plural: string;
   description?: string;
-  deprecation?: Deprecation;
   fields: Field[];
-  attributes: Attribute[];
+  attributes: Record<string, any>;
   interfaces?: string[];
 }
 
@@ -175,11 +111,10 @@ export interface Operation {
   /** The full path to this operation, relative to the service's base url. */
   path: string;
   description?: string;
-  deprecation?: Deprecation;
-  body?: Body;
+  body?: string;
   parameters: Parameter[];
   responses: Response[];
-  attributes: Attribute[];
+  attributes: Record<string, any>;
 }
 
 export interface Organization {
@@ -192,13 +127,12 @@ export interface Parameter {
   type: string;
   location: ParameterLocation;
   description?: string;
-  deprecation?: Deprecation;
   required: boolean;
   default?: string;
   minimum?: number;
   maximum?: number;
   example?: string;
-  attributes?: Attribute[];
+  attributes: Record<string, any>;
 }
 
 export interface Resource {
@@ -208,16 +142,15 @@ export interface Resource {
   /** The path to this specific resource. This was added in 2016 to help us differentiate between the resource path and the operation path which can be helpful when, for example, generating method names for operations. This field is optional as some of our input formats (e.g. swagger) do not explicitly differentiate resoure paths. */
   path?: string;
   description?: string;
-  deprecation?: Deprecation;
   operations: Operation[];
-  attributes: Attribute[];
+  attributes: Record<string, any>;
 }
 
 export interface Response {
   code: any;
   type: string;
   description?: string;
-  attributes?: Attribute[];
+  attributes: Record<string, any>;
 }
 
 export interface Service {
@@ -230,44 +163,58 @@ export interface Service {
   base_url?: string;
   description?: string;
   info: Info;
-  imports: Import[];
+  imports: Service[];
   enums: Enum[];
   interfaces?: Interface[];
   unions: Union[];
   models: Model[];
   resources: Resource[];
-  attributes: Attribute[];
-  annotations?: Annotation[];
+  attributes: Record<string, any>;
 }
 
 export interface Union {
   name: string;
   plural: string;
-  /** Type discriminator. Serialization of these union types will always contain a field named with the value of the discriminator that will contain the name of the type. API Builder will verify that none of the types in the union type itself contain a field with the same name as the discriminator */
-  discriminator: string;
+  /** Type discriminator. When specified, serialization of these union types will always contain a field named with the value of the discriminator that will contain the name of the type. API Builder will verify that none of the types in the union type itself contain a field with the same name as the discriminator */
+  discriminator?: string;
   description?: string;
-  deprecation?: Deprecation;
-  /** The names of the types that make up this union type */
-  types: UnionType[];
-  attributes: Attribute[];
+  /** The variants that make up this union type */
+  variants: Variant[];
+  attributes: Record<string, any>;
   interfaces?: string[];
 }
 
 /**
- * Metadata about one of the types that is part of a union type. Exactly one of 'type' or 'literal' must be specified.
+ * A variant of a union that represents a literal string value.
  */
-export interface UnionType {
-  /** The name of a type (a primitive, model name, or enum name) that makes up this union type. Mutually exclusive with 'literal'. */
-  type: string;
-  /** A literal string value that is a valid member of this union. Generates a case object in Scala, a string literal type in TypeScript. Mutually exclusive with 'type'. */
-  literal?: string;
+export interface VariantLiteral {
+  /** A literal string value that is a valid member of this union. Generates a case object in Scala, a string literal type in TypeScript. */
+  literal: string;
   description?: string;
   /** Additional string values that should be accepted when parsing this union member. */
   aliases?: string[];
-  deprecation?: Deprecation;
-  attributes: Attribute[];
+  attributes: Record<string, any>;
+}
+
+/**
+ * A variant of a union that references a named type (primitive, model, or enum).
+ */
+export interface VariantType {
+  /** The name of a type (a primitive, model name, or enum name) that makes up this union type */
+  type: string;
+  description?: string;
+  attributes: Record<string, any>;
   /** If true, indicates that this type should be used as the default when deserializing union types. This field is only used by union types that require a discriminator and sets the default value for that discriminator during deserialization. */
   default?: boolean;
   /** The discriminator value defines the string to use in the discriminator field to identify this type. If not specified, the discriminator value will default to the name of the type itself. */
   discriminator_value?: string;
 }
+
+// ============================================================================
+// Union Types
+// ============================================================================
+
+/**
+ * A member of a union. Identified by the presence of the 'type' or 'literal' required field.
+ */
+export type Variant = VariantType | VariantLiteral;

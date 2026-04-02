@@ -11,11 +11,6 @@ import type { Service } from './com-bryzek-apibuilder-spec.ts';
 // Models
 // ============================================================================
 
-export interface Attribute {
-  name: string;
-  value: string;
-}
-
 export interface Error {
   /** Machine readable code for this specific error message */
   code: string;
@@ -52,8 +47,7 @@ export interface Invocation {
 
 export interface InvocationForm {
   service: Service;
-  imported_services?: Service[];
-  attributes: Attribute[];
+  attributes: Record<string, string>;
 }
 
 // ============================================================================

@@ -41,6 +41,11 @@ export enum Visibility {
 // Models
 // ============================================================================
 
+export interface AnonymousOrg {
+  organization_key: string;
+  token: string;
+}
+
 export interface Application {
   id: string;
   key: string;
@@ -128,10 +133,6 @@ export interface MembershipRequestForm {
   org_id: string;
   user_id: string;
   role: MembershipRole;
-}
-
-export interface MoveForm {
-  org_key: string;
 }
 
 export interface Organization {
@@ -237,6 +238,19 @@ export interface WatchForm {
 }
 
 // ============================================================================
+// Union Types
+// ============================================================================
+
+/**
+ * Identifies a specific version. Either the literal 'latest' for the most recent version, or an ISO date-time for a specific version.
+ */
+export type VersionIdentifier = 'latest' | string;
+
+export function parseVersionIdentifier(value: string): VersionIdentifier {
+  return value;
+}
+
+// ============================================================================
 // API Client
 // ============================================================================
 
@@ -244,6 +258,10 @@ import { VoidResponse } from './generated-error-void-response.ts';
 import { UnauthorizedErrorsResponse } from './generated-error-unauthorized-errors-response.ts';
 import { ValidationErrorsResponse } from './generated-error-validation-errors-response.ts';
 import { ApiException } from "./generated-util.ts";
+
+export interface CreateAnonymousOrgOptions {
+  headers?: Record<string, string>;
+}
 
 export interface GetApplicationsOptions {
   orgKey: string;
@@ -279,13 +297,6 @@ export interface DeleteApplicationByAppKeyOptions {
   headers?: Record<string, string>;
 }
 
-export interface CreateApplicationMoveByAppKeyOptions {
-  orgKey: string;
-  appKey: string;
-  body: MoveForm;
-  headers?: Record<string, string>;
-}
-
 export interface GetApplicationMetadataVersionsOptions {
   orgKey: string;
   appKey: string;
@@ -305,7 +316,7 @@ export interface GetChangesOptions {
 export interface GetCodeOptions {
   orgKey: string;
   appKey: string;
-  version: string;
+  version: VersionIdentifier;
   generatorKey: string;
   attributes?: string;
   headers?: Record<string, string>;
@@ -467,14 +478,14 @@ export interface GetVersionsOptions {
 export interface GetVersionByVersionOptions {
   orgKey: string;
   appKey: string;
-  version: ISODateTimeString;
+  version: VersionIdentifier;
   headers?: Record<string, string>;
 }
 
 export interface UpdateVersionByVersionOptions {
   orgKey: string;
   appKey: string;
-  version: ISODateTimeString;
+  version: VersionIdentifier;
   body: VersionForm;
   headers?: Record<string, string>;
 }
@@ -482,7 +493,7 @@ export interface UpdateVersionByVersionOptions {
 export interface DeleteVersionByVersionOptions {
   orgKey: string;
   appKey: string;
-  version: ISODateTimeString;
+  version: VersionIdentifier;
   headers?: Record<string, string>;
 }
 
@@ -509,6 +520,26 @@ export class ApiClient {
 
   constructor(baseUrl: string) {
     this.baseUrl = baseUrl;
+  }
+
+  async createAnonymousOrg(params: CreateAnonymousOrgOptions): Promise<AnonymousOrg> {
+    const url = `${this.baseUrl}/apibuilder/anonymous`;
+
+      const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(params.headers || {}),
+      },
+    });
+
+    if (response.status === 201) {
+      const data = await response.json();
+      return data;
+    }
+
+    throw new ApiException(response, `Request failed with status ${response.status}`);
+
   }
 
   async getApplications(params: GetApplicationsOptions): Promise<Application[]> {
@@ -646,35 +677,6 @@ export class ApiClient {
 
   }
 
-  async createApplicationMoveByAppKey(params: CreateApplicationMoveByAppKeyOptions): Promise<Application> {
-    const url = `${this.baseUrl}/apibuilder/${params.orgKey}/applications/${params.appKey}/move`;
-
-      const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
-      body: JSON.stringify(params.body),
-    });
-
-    if (response.status === 200) {
-      const data = await response.json();
-      return data;
-    }
-
-    if (response.status === 401) {
-      throw new UnauthorizedErrorsResponse(response);
-    }
-
-    if (response.status === 422) {
-      throw new ValidationErrorsResponse(response);
-    }
-
-    throw new ApiException(response, `Request failed with status ${response.status}`);
-
-  }
-
   async getApplicationMetadataVersions(params: GetApplicationMetadataVersionsOptions): Promise<ApplicationMetadataVersion[]> {
     const queryParts: string[] = [];
     queryParts.push(`limit=${encodeURIComponent(String(params.limit))}`);
@@ -735,7 +737,7 @@ export class ApiClient {
       queryParts.push(`attributes=${encodeURIComponent(params.attributes)}`);
     }
     const queryString = queryParts.length > 0 ? '?' + queryParts.join('&') : '';
-    const url = `${this.baseUrl}/apibuilder/${params.orgKey}/${params.appKey}/${params.version}/${params.generatorKey}${queryString}`;
+    const url = `${this.baseUrl}/apibuilder/${params.orgKey}/${params.appKey}/${String(params.version)}/${params.generatorKey}${queryString}`;
 
       const response = await fetch(url, {
       method: 'GET',

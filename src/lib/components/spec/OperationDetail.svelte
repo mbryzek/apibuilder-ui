@@ -46,11 +46,8 @@
 		<div class="mb-3">
 			<h5 class="text-xs font-semibold text-ab-gray uppercase mb-1">Body</h5>
 			<div class="text-sm font-mono">
-				<TypeLink typeStr={operation.body.type} {service} />
+				<TypeLink typeStr={operation.body} {service} />
 			</div>
-			{#if operation.body.description}
-				<p class="text-xs text-ab-dark-gray mt-0.5">{operation.body.description}</p>
-			{/if}
 		</div>
 	{/if}
 
