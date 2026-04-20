@@ -32,6 +32,7 @@ export enum RallydNotificationType {
   OrganizerGameConfirmed = 'organizer_game_confirmed',
   Marketing = 'marketing',
   SmsOptinExpired = 'sms_optin_expired',
+  ConnectionShare = 'connection_share',
 }
 
 export enum SportRatingSystem {
