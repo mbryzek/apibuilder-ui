@@ -1,0 +1,23 @@
+amends "modulepath:/api_config.pkl"
+
+org = "bryzek"
+
+blocks {
+  new TypeScript {
+    target = "./generated"
+    attributes = new Mapping {
+      ["filter"] = new Mapping {
+        ["types"] = new Listing { "user_reference"; "person" }
+        ["resources"] = new Listing { "tenant_session"; "user"; "phone" }
+      }
+    }
+    applications { "platform" }
+  }
+
+  new TypeScriptFiles { target = "./generated" }
+
+  new TypeScript {
+    target = "./generated"
+    applications { "platform-error" }
+  }
+}
