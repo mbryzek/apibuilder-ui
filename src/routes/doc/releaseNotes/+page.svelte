@@ -26,7 +26,7 @@
 			</ul>
 		</div>
 
-		<div class="card mb-6">
+		<div class="card mb-6 border-l-4 border-ab-blue">
 			<h3 class="text-lg font-semibold text-ab-dark-blue mb-3">Apr 1, 2026</h3>
 			<ul class="list-disc list-inside space-y-2 text-ab-dark-blue">
 				<li>
@@ -54,7 +54,7 @@
 			</ul>
 		</div>
 
-		<div class="card mb-6 border-l-4 border-ab-blue">
+		<div class="card mb-6">
 			<h3 class="text-lg font-semibold text-ab-dark-blue mb-3">Mar 24, 2026</h3>
 			<ul class="list-disc list-inside space-y-2 text-ab-dark-blue">
 				<li>
