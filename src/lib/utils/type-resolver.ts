@@ -2,7 +2,7 @@ import type { Service } from '$generated/com-bryzek-apibuilder-spec';
 
 const PRIMITIVES = new Set([
 	'boolean', 'bytes', 'date-iso8601', 'date-time-iso8601', 'decimal', 'double',
-	'integer', 'long', 'object', 'json', 'string', 'unit', 'uuid',
+	'integer', 'json', 'long', 'object', 'string', 'time-iso8601', 'unit', 'uuid',
 ]);
 
 export interface ResolvedType {

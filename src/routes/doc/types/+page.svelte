@@ -78,6 +78,11 @@
 				<p class="text-ab-dark-blue text-sm mb-1">Date-time in ISO 8601 format. Maps to <em>DateTime</em> / <em>Instant</em> in Scala/Java.</p>
 				<code class="text-sm text-ab-gray">"2014-04-29T11:56:52Z"</code>
 			</div>
+			<div id="time-iso8601">
+				<h3 class="font-semibold text-ab-dark-blue">time-iso8601</h3>
+				<p class="text-ab-dark-blue text-sm mb-1">Wall-clock time of day, no timezone. Maps to <em>LocalTime</em> in Scala/Java and <em>TIME</em> in PostgreSQL.</p>
+				<code class="text-sm text-ab-gray">"18:15:00"</code>
+			</div>
 		</div>
 	</div>
 

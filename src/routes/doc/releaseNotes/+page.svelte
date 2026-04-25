@@ -14,6 +14,19 @@
 	<div class="space-y-6">
 
 		<div class="card mb-6 border-l-4 border-ab-blue">
+			<h3 class="text-lg font-semibold text-ab-dark-blue mb-3">Apr 25, 2026</h3>
+			<ul class="list-disc list-inside space-y-2 text-ab-dark-blue">
+				<li>
+					<strong class="text-ab-blue">New Primitive Type: time-iso8601</strong> — Added <code class="bg-gray-100 px-1.5 py-0.5 rounded text-sm">time-iso8601</code> as a
+					primitive type for representing wall-clock time of day with no timezone. Wire format is <code class="bg-gray-100 px-1.5 py-0.5 rounded text-sm">"HH:MM:SS"</code>;
+					parsers also accept <code class="bg-gray-100 px-1.5 py-0.5 rounded text-sm">"HH"</code>, <code class="bg-gray-100 px-1.5 py-0.5 rounded text-sm">"HH:MM"</code>, and fractional seconds.
+					Maps to <code class="bg-gray-100 px-1.5 py-0.5 rounded text-sm">LocalTime</code> in Scala/Java and
+					<code class="bg-gray-100 px-1.5 py-0.5 rounded text-sm">TIME</code> in PostgreSQL.
+				</li>
+			</ul>
+		</div>
+
+		<div class="card mb-6 border-l-4 border-ab-blue">
 			<h3 class="text-lg font-semibold text-ab-dark-blue mb-3">Apr 1, 2026</h3>
 			<ul class="list-disc list-inside space-y-2 text-ab-dark-blue">
 				<li>
@@ -41,7 +54,7 @@
 			</ul>
 		</div>
 
-		<div class="card mb-6 border-l-4 border-ab-blue">
+		<div class="card mb-6">
 			<h3 class="text-lg font-semibold text-ab-dark-blue mb-3">Mar 24, 2026</h3>
 			<ul class="list-disc list-inside space-y-2 text-ab-dark-blue">
 				<li>
