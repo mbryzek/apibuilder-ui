@@ -2,15 +2,6 @@ amends "../../../devops/api/ApiConfig.pkl"
 
 org = "bryzek"
 
-local tsGen = "./generated"
-local platformFilter = new Filter {
-  types { "user_reference"; "person" }
-  resources { "tenant_session"; "user"; "phone" }
-}
-local fileFilter = new Filter { types { "file" } }
-
 applications = new Listing<AppGroup> {
-  new { names { "platform" };         generators = module.singleGenerator("typescript", tsGen); filter = platformFilter }
-  new { names { "platform-storage" }; generators = module.singleGenerator("typescript", tsGen); filter = fileFilter }
-  new { names { "platform-error" };   generators = module.singleGenerator("typescript", tsGen) }
+  new { names { "platform" }; generators = module.singleGenerator("typescript", "./generated") }
 }
