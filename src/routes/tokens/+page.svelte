@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Pagination from '$lib/components/Pagination.svelte';
-	import type { Token } from '$generated/com-bryzek-apibuilder';
+	import type { Token } from '$generated/com-bryzek-platform';
 
 	interface Props {
 		data: {

@@ -1,9 +1,9 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
-import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
+import { platformClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth, requireAuthForAction } from '$lib/server/auth';
-import type { Token, TokenForm } from '$generated/com-bryzek-apibuilder';
+import type { Token, TokenForm } from '$generated/com-bryzek-platform';
 
 export const load: PageServerLoad = async (event) => {
 	requireAuth(event);
@@ -23,7 +23,7 @@ export const actions: Actions = {
 		}
 
 		const response = await handleApiCall<Token>(
-			() => apiBuilderClient().createToken({ body, headers }),
+			() => platformClient().createToken({ body, headers }),
 		);
 
 		if ('data' in response) {
