@@ -1,16 +1,16 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
-import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
+import { platformClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth, requireAuthForAction } from '$lib/server/auth';
-import type { CleartextToken } from '$generated/com-bryzek-apibuilder';
+import type { CleartextToken } from '$generated/com-bryzek-platform';
 
 export const load: PageServerLoad = async (event) => {
 	const session = requireAuth(event);
 	const headers = getSessionHeaders(session.id);
 
 	const response = await handleApiCall<CleartextToken>(
-		() => apiBuilderClient().getTokenCleartextById(event.params.guid, { headers }),
+		() => platformClient().getTokenCleartextById(event.params.guid, { headers }),
 	);
 
 	return {
@@ -25,7 +25,7 @@ export const actions: Actions = {
 		const headers = getSessionHeaders(session.id);
 
 		const response = await handleApiCall<void>(
-			() => apiBuilderClient().deleteTokenById(params.guid, { headers }),
+			() => platformClient().deleteTokenById(params.guid, { headers }),
 		);
 
 		if ('errors' in response) {

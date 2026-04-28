@@ -4,8 +4,8 @@ org = "bryzek"
 
 local tsSrc = "./src/generated"
 local platformFilter = new Filter {
-  types { "user_reference"; "person" }
-  resources { "email_verification"; "tenant_session"; "user"; "phone" }
+  types { "user_reference"; "person"; "token"; "token_form"; "cleartext_token" }
+  resources { "email_verification"; "tenant_session"; "user"; "phone"; "token" }
 }
 local fileFilter = new Filter { types { "file" } }
 

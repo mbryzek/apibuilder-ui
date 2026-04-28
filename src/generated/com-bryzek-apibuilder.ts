@@ -8,6 +8,7 @@
 import type { ISODateTimeString } from './generated-types';
 
 import type { Service } from './com-bryzek-apibuilder-spec.ts';
+import type { CleartextToken, Token, TokenForm } from './com-bryzek-platform.ts';
 
 // ============================================================================
 // Enums
@@ -79,10 +80,6 @@ export interface Change {
   description: string;
   changed_at: ISODateTimeString;
   is_material: boolean;
-}
-
-export interface CleartextToken {
-  token: string;
 }
 
 /**
@@ -177,19 +174,6 @@ export interface SubscriptionForm {
   organization_key: string;
   user_id: string;
   publication: Publication;
-}
-
-export interface Token {
-  id: string;
-  user: User;
-  masked_token: string;
-  description?: string;
-  created_at: ISODateTimeString;
-}
-
-export interface TokenForm {
-  user_id: string;
-  description?: string;
 }
 
 export interface User {
@@ -322,6 +306,26 @@ export interface GetCodeOptions {
   headers?: Record<string, string>;
 }
 
+export interface GetTokensUsersByUserIdOptions {
+  userId: string;
+  limit: number;
+  offset: number;
+  headers?: Record<string, string>;
+}
+
+export interface CreateTokenOptions {
+  body: TokenForm;
+  headers?: Record<string, string>;
+}
+
+export interface GetTokenCleartextByIdOptions {
+  headers?: Record<string, string>;
+}
+
+export interface DeleteTokenByIdOptions {
+  headers?: Record<string, string>;
+}
+
 export interface CreateDomainOptions {
   orgKey: string;
   body: Domain;
@@ -422,26 +426,6 @@ export interface CreateSubscriptionOptions {
 }
 
 export interface DeleteSubscriptionByIdOptions {
-  headers?: Record<string, string>;
-}
-
-export interface GetTokensUsersByUserIdOptions {
-  userId: string;
-  limit: number;
-  offset: number;
-  headers?: Record<string, string>;
-}
-
-export interface CreateTokenOptions {
-  body: TokenForm;
-  headers?: Record<string, string>;
-}
-
-export interface GetTokenCleartextByIdOptions {
-  headers?: Record<string, string>;
-}
-
-export interface DeleteTokenByIdOptions {
   headers?: Record<string, string>;
 }
 
@@ -758,6 +742,114 @@ export class ApiClient {
 
     if (response.status === 422) {
       throw new ValidationErrorsResponse(response);
+    }
+
+    throw new ApiException(response, `Request failed with status ${response.status}`);
+
+  }
+
+  async getTokensUsersByUserId(params: GetTokensUsersByUserIdOptions): Promise<Token[]> {
+    const queryParts: string[] = [];
+    queryParts.push(`limit=${encodeURIComponent(String(params.limit))}`);
+    queryParts.push(`offset=${encodeURIComponent(String(params.offset))}`);
+    const queryString = queryParts.length > 0 ? '?' + queryParts.join('&') : '';
+    const url = `${this.baseUrl}/apibuilder/tokens/users/${params.userId}${queryString}`;
+
+      const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(params.headers || {}),
+      },
+    });
+
+    if (response.status === 200) {
+      const data = await response.json();
+      return data;
+    }
+
+    if (response.status === 401) {
+      throw new UnauthorizedErrorsResponse(response);
+    }
+
+    throw new ApiException(response, `Request failed with status ${response.status}`);
+
+  }
+
+  async createToken(params: CreateTokenOptions): Promise<Token> {
+    const url = `${this.baseUrl}/apibuilder/tokens`;
+
+      const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(params.headers || {}),
+      },
+      body: JSON.stringify(params.body),
+    });
+
+    if (response.status === 201) {
+      const data = await response.json();
+      return data;
+    }
+
+    if (response.status === 401) {
+      throw new UnauthorizedErrorsResponse(response);
+    }
+
+    if (response.status === 422) {
+      throw new ValidationErrorsResponse(response);
+    }
+
+    throw new ApiException(response, `Request failed with status ${response.status}`);
+
+  }
+
+  async getTokenCleartextById(id: string, options?: GetTokenCleartextByIdOptions): Promise<CleartextToken> {
+    const url = `${this.baseUrl}/apibuilder/tokens/${id}/cleartext`;
+
+      const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(options?.headers || {}),
+      },
+    });
+
+    if (response.status === 200) {
+      const data = await response.json();
+      return data;
+    }
+
+    if (response.status === 401) {
+      throw new UnauthorizedErrorsResponse(response);
+    }
+
+    if (response.status === 404) {
+      throw new VoidResponse(response);
+    }
+
+    throw new ApiException(response, `Request failed with status ${response.status}`);
+
+  }
+
+  async deleteTokenById(id: string, options?: DeleteTokenByIdOptions): Promise<void> {
+    const url = `${this.baseUrl}/apibuilder/tokens/${id}`;
+
+      const response = await fetch(url, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(options?.headers || {}),
+      },
+    });
+
+    if (response.status === 204) {
+      return;
+    }
+
+    if (response.status === 401) {
+      throw new UnauthorizedErrorsResponse(response);
     }
 
     throw new ApiException(response, `Request failed with status ${response.status}`);
@@ -1256,114 +1348,6 @@ export class ApiClient {
 
     if (response.status === 401) {
       throw new UnauthorizedErrorsResponse(response);
-    }
-
-    throw new ApiException(response, `Request failed with status ${response.status}`);
-
-  }
-
-  async getTokensUsersByUserId(params: GetTokensUsersByUserIdOptions): Promise<Token[]> {
-    const queryParts: string[] = [];
-    queryParts.push(`limit=${encodeURIComponent(String(params.limit))}`);
-    queryParts.push(`offset=${encodeURIComponent(String(params.offset))}`);
-    const queryString = queryParts.length > 0 ? '?' + queryParts.join('&') : '';
-    const url = `${this.baseUrl}/apibuilder/tokens/users/${params.userId}${queryString}`;
-
-      const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
-    });
-
-    if (response.status === 200) {
-      const data = await response.json();
-      return data;
-    }
-
-    throw new ApiException(response, `Request failed with status ${response.status}`);
-
-  }
-
-  async createToken(params: CreateTokenOptions): Promise<Token> {
-    const url = `${this.baseUrl}/apibuilder/tokens`;
-
-      const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
-      body: JSON.stringify(params.body),
-    });
-
-    if (response.status === 201) {
-      const data = await response.json();
-      return data;
-    }
-
-    if (response.status === 401) {
-      throw new UnauthorizedErrorsResponse(response);
-    }
-
-    if (response.status === 422) {
-      throw new ValidationErrorsResponse(response);
-    }
-
-    throw new ApiException(response, `Request failed with status ${response.status}`);
-
-  }
-
-  async getTokenCleartextById(id: string, options?: GetTokenCleartextByIdOptions): Promise<CleartextToken> {
-    const url = `${this.baseUrl}/apibuilder/tokens/${id}/cleartext`;
-
-      const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(options?.headers || {}),
-      },
-    });
-
-    if (response.status === 200) {
-      const data = await response.json();
-      return data;
-    }
-
-    if (response.status === 401) {
-      throw new UnauthorizedErrorsResponse(response);
-    }
-
-    if (response.status === 404) {
-      throw new VoidResponse(response);
-    }
-
-    throw new ApiException(response, `Request failed with status ${response.status}`);
-
-  }
-
-  async deleteTokenById(id: string, options?: DeleteTokenByIdOptions): Promise<void> {
-    const url = `${this.baseUrl}/apibuilder/tokens/${id}`;
-
-      const response = await fetch(url, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(options?.headers || {}),
-      },
-    });
-
-    if (response.status === 204) {
-      return;
-    }
-
-    if (response.status === 401) {
-      throw new UnauthorizedErrorsResponse(response);
-    }
-
-    if (response.status === 404) {
-      throw new VoidResponse(response);
     }
 
     throw new ApiException(response, `Request failed with status ${response.status}`);
