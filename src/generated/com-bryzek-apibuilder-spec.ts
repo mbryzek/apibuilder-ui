@@ -115,6 +115,8 @@ export interface Operation {
   parameters: Parameter[];
   responses: Response[];
   attributes: Record<string, any>;
+  /** Content-Type header for the request body. Must be overridden when body is `bytes` (no JSON for binary). */
+  content_type: string;
 }
 
 export interface Organization {
@@ -175,13 +177,20 @@ export interface Service {
 export interface Union {
   name: string;
   plural: string;
-  /** Type discriminator. When specified, serialization of these union types will always contain a field named with the value of the discriminator that will contain the name of the type. API Builder will verify that none of the types in the union type itself contain a field with the same name as the discriminator */
-  discriminator?: string;
+  /** Type discriminator. When specified, serialization of these union types will always contain a field named with the value of the discriminator that will contain the name of the type. API Builder will verify that none of the types in the union type itself contain a field with the same name as the discriminator. Set `enum` to reference an explicitly-defined enum as the discriminator type; otherwise an enum is auto-generated from the variant names. */
+  discriminator?: UnionDiscriminator;
   description?: string;
   /** The variants that make up this union type */
   variants: Variant[];
   attributes: Record<string, any>;
   interfaces?: string[];
+}
+
+export interface UnionDiscriminator {
+  /** The JSON field name used as the discriminator key */
+  name: string;
+  /** When specified, references an existing enum in this spec to use as the discriminator type instead of auto-generating one */
+  enum?: string;
 }
 
 /**
