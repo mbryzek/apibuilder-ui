@@ -63,6 +63,7 @@
 				</h3>
 				<ul class="space-y-0.5 ml-6">
 					<li><a href="#import" class="text-ab-blue hover:text-ab-dark-blue underline">Import</a></li>
+					<li><a href="#auth_scheme" class="text-ab-blue hover:text-ab-dark-blue underline">AuthScheme</a></li>
 					<li><a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a></li>
 					<li><a href="#annotation" class="text-ab-blue hover:text-ab-dark-blue underline">Annotation</a></li>
 				</ul>
@@ -98,6 +99,7 @@
   "models": <em>JSON Object of <a href="#model" class="text-ab-blue hover:text-ab-dark-blue underline">Model</a> (optional)</em>,
   "unions": <em>JSON Object of <a href="#union" class="text-ab-blue hover:text-ab-dark-blue underline">Union</a> (optional)</em>,
   "resources": <em>JSON Object of <a href="#resource" class="text-ab-blue hover:text-ab-dark-blue underline">Resource</a> (optional)</em>,
+  "auth_schemes": <em>JSON Array of <a href="#auth_scheme" class="text-ab-blue hover:text-ab-dark-blue underline">AuthScheme</a> (optional)</em>,
   "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>,
   "annotations": <em>JSON Object of <a href="#annotation" class="text-ab-blue hover:text-ab-dark-blue underline">Annotation</a> (optional)</em>
 }</code></pre>`}
@@ -114,6 +116,7 @@
 			<li><em>enums</em>: JSON object defining all of the enums in this API. The key of each object is the enum name. See <a href="#enum" class="text-ab-blue hover:text-ab-dark-blue underline">Enum</a></li>
 			<li><em>models</em>: JSON object defining all of the models in this API. The key of each object is the model name. See <a href="#model" class="text-ab-blue hover:text-ab-dark-blue underline">Model</a></li>
 			<li><em>resources</em>: JSON object defining all of the resources in this API. The key of each object is the name of a type that this resource represents. The type must be the name of a model or an enum. See <a href="#resource" class="text-ab-blue hover:text-ab-dark-blue underline">Resource</a></li>
+			<li><em>auth_schemes</em>: JSON array declaring authentication schemes that operations in this service may reference via <code>operation.auth</code>. Each scheme is identified by a <code>type</code>. See <a href="#auth_scheme" class="text-ab-blue hover:text-ab-dark-blue underline">AuthScheme</a> and the <a href="/doc/auth" class="text-ab-blue hover:text-ab-dark-blue underline">Authentication</a> guide.</li>
 			<li><em>attributes</em>: JSON array defining additional meta data about this service. Attributes are used to add custom extensions to API Builder and are typically used by generators to enable advanced code generation. See <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a></li>
 			<li><em>annotations</em>: JSON array defining annotations or tags that can be applied to fields regardless of their type. Annotations are intended to convey usage hints to consumers of the API. See <a href="#annotation" class="text-ab-blue hover:text-ab-dark-blue underline">Annotations</a></li>
 		</ul>
@@ -447,6 +450,7 @@
     "path": <em>string (optional)</em>,
     "description": <em>string (optional)</em>,
     "operations": <em>JSON Array of <a href="#operation" class="text-ab-blue hover:text-ab-dark-blue underline">Operation</a></em>,
+    "auth": <em>string (optional)</em>,
     "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>
   }
 }</code></pre>`}
@@ -458,6 +462,7 @@
 			<li><em>path</em>: optional path where this resource is located. If not provided, defaults to the plural of the typeName, with some assumptions of formatting for web (e.g. lower case, dash separated). Path parameters can be specified by prefixing a path element with ':'. For example, a path of '/:guid' would imply that all operations for this path will require a parameter named 'guid' of type 'string'</li>
 			<li><em>description</em>: optional description for what this resource provides. Supports <a href="https://help.github.com/articles/github-flavored-markdown/" class="text-ab-blue hover:text-ab-dark-blue underline">GFM</a>.</li>
 			<li><em>operations</em>: one or more operations is required. See <a href="#operation" class="text-ab-blue hover:text-ab-dark-blue underline">Operation</a>.</li>
+			<li><em>auth</em>: optional default <a href="#auth_scheme" class="text-ab-blue hover:text-ab-dark-blue underline">auth_scheme</a> <code>type</code> applied to every operation on this resource. Per-operation <code>auth</code> overrides this. API Builder materializes the inheritance into each operation before emitting the service spec. See the <a href="/doc/auth" class="text-ab-blue hover:text-ab-dark-blue underline">Authentication</a> guide.</li>
 			<li><em>attributes</em>: JSON array defining additional meta data about this resource for use by generators. See <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a></li>
 		</ul>
 	</div>
@@ -478,6 +483,7 @@
   "content_type": <em>string (optional, default "application/json")</em>,
   "parameters": <em>JSON Array of <a href="#parameter" class="text-ab-blue hover:text-ab-dark-blue underline">Parameter</a> (optional)</em>,
   "responses": <em>JSON Object of <a href="#response" class="text-ab-blue hover:text-ab-dark-blue underline">Response</a> (optional)</em>,
+  "auth": <em>string (optional)</em>,
   "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>
 }</code></pre>`}
 		</div>
@@ -491,6 +497,7 @@
 			<li><em>content_type</em>: Content-Type header for the request body. Defaults to <code>application/json</code>. Set explicitly when shipping non-JSON payloads (e.g. <code>text/csv</code>, <code>application/octet-stream</code>). When <em>body</em> is <code>bytes</code>, you must override this to a non-JSON value — the default <code>application/json</code> is rejected as a validation error.</li>
 			<li><em>parameters</em>: optional JSON Array of the parameters to this method. By default, for GET and DELETE methods, parameters are assumed to be in the path or in the query. For other methods, parameters are assumed to be in the path or form body, unless you have explicitly specified a body in which case parameters can be provided in the path or the query. See <a href="#parameter" class="text-ab-blue hover:text-ab-dark-blue underline">Parameter</a>.</li>
 			<li><em>responses</em>: optional JSON Object of HTTP Response Code to Response. If not provided, an HTTP NoContent response is assumed. Only responses for HTTP status codes that are interesting should be documented. See <a href="#response" class="text-ab-blue hover:text-ab-dark-blue underline">Response</a>.</li>
+			<li><em>auth</em>: optional <a href="#auth_scheme" class="text-ab-blue hover:text-ab-dark-blue underline">auth_scheme</a> <code>type</code> protecting this operation, or the reserved value <code>none</code> to mark it explicitly public. Overrides any resource-level default. See the <a href="/doc/auth" class="text-ab-blue hover:text-ab-dark-blue underline">Authentication</a> guide.</li>
 			<li><em>attributes</em>: JSON array defining additional meta data about this operation for use by generators. See <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a></li>
 		</ul>
 	</div>
@@ -612,6 +619,33 @@
 		<ul class="list-disc pl-6 text-ab-dark-blue mb-4 space-y-2">
 			<li><em>uri</em>: The complete URI to the service specification that we are importing. Within API Builder, you can find the URL to the service specification by clicking on the "service.json" link for a service. Example: <a href="https://app.apibuilder.io/apicollective/apibuilder-api/0.16.53/service.json" class="text-ab-blue hover:text-ab-dark-blue underline">https://app.apibuilder.io/apicollective/apibuilder-api/0.16.53/service.json</a>.</li>
 		</ul>
+	</div>
+
+	<!-- AuthScheme -->
+	<div class="card mb-6" id="auth_scheme">
+		<h3 class="text-lg font-semibold text-ab-blue mb-3">AuthScheme declaration</h3>
+		<p class="text-ab-dark-blue mb-4">
+			An auth_scheme is represented as a JSON object of the form:
+		</p>
+
+		<div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto mb-4">
+			{@html `<pre><code>{
+  "type": <em>string</em>,
+  "description": <em>string (optional)</em>,
+  "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>
+}</code></pre>`}
+		</div>
+
+		<p class="text-ab-dark-blue mb-2">where:</p>
+		<ul class="list-disc pl-6 text-ab-dark-blue mb-4 space-y-2">
+			<li><em>type</em>: unique identifier referenced by <code>operation.auth</code>. The reserved value <code>none</code> cannot be used as an auth_scheme type; it is the explicit-public marker on operations.</li>
+			<li><em>description</em>: optional human-readable description of the scheme.</li>
+			<li><em>attributes</em>: JSON array of generator-specific metadata. See <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a>.</li>
+		</ul>
+
+		<p class="text-ab-dark-blue mb-2">
+			See the <a href="/doc/auth" class="text-ab-blue hover:text-ab-dark-blue underline">Authentication</a> guide for the full workflow.
+		</p>
 	</div>
 
 	<!-- Attribute -->
