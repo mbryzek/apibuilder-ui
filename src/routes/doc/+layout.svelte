@@ -19,6 +19,7 @@
 		{ href: '/doc/apiTokens', label: 'API Tokens' },
 		{ href: '/doc/history', label: 'History' },
 		{ href: '/doc/interfaces', label: 'Interfaces' },
+		{ href: '/doc/auth', label: 'Authentication' },
 		{ href: '/doc/attributes', label: 'Attributes' },
 		{ href: '/doc/playRoutesFile', label: 'Play Routes File' },
 		{ href: '/doc/playUnionTypes', label: 'Play Union Types' },

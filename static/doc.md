@@ -205,6 +205,7 @@ A schema is represented in JSON as a JSON object of type [api json](https://app.
   "models": "JSON Object of Model (optional)",
   "unions": "JSON Object of Union (optional)",
   "resources": "JSON Object of Resource (optional)",
+  "auth_schemes": "JSON Array of AuthScheme (optional)",
   "attributes": "JSON Array of Attribute (optional)",
   "annotations": "JSON Object of Annotation (optional)"
 }
@@ -221,6 +222,7 @@ Where:
 - **enums**: JSON object defining all of the enums in this API. The key of each object is the enum name. See [Enum](#enum-declaration).
 - **models**: JSON object defining all of the models in this API. The key of each object is the model name. See [Model](#model-declaration).
 - **resources**: JSON object defining all of the resources in this API. The key of each object is the name of a type that this resource represents. The type must be the name of a model or an enum. See [Resource](#resource-declaration).
+- **auth_schemes**: JSON array declaring the named authentication schemes that operations in this service may reference via `operation.auth`. Code generators map scheme names to runtime helpers and reject any `auth` value that does not appear in this list (other than the reserved value `none`). See [Authentication](/doc/auth).
 - **attributes**: JSON array defining additional meta data about this service. Attributes are used to add custom extensions to API Builder and are typically used by generators to enable advanced code generation. See [Attribute](#attribute-declaration).
 - **annotations**: JSON array defining annotations or tags that can be applied to fields regardless of their type. Annotations are intended to convey usage hints to consumers of the API. See [Annotation](#annotation-declaration).
 
@@ -411,6 +413,22 @@ More information about interfaces can be found in the [Interfaces](#interfaces) 
 - **discriminator_value**: The discriminator value defines the string to use in the discriminator field to identify this type. If not specified, the discriminator value will default to the name of the type itself.
 - **attributes**: JSON array defining additional meta data about this union type for use by generators. See [Attribute](#attribute-declaration).
 
+### AuthScheme Declaration
+
+```json
+{
+  "name": "string",
+  "description": "string (optional)",
+  "attributes": "JSON Array of Attribute (optional)"
+}
+```
+
+- **name**: unique identifier referenced by `operation.auth`. The reserved value `none` cannot be used as a scheme name; it is the explicit-public marker on operations.
+- **description**: optional human-readable description of the scheme.
+- **attributes**: JSON array of generator-specific metadata. See [Attribute](#attribute-declaration).
+
+See [Authentication](/doc/auth) for the full workflow.
+
 ### Resource Declaration
 
 ```json
@@ -419,6 +437,7 @@ More information about interfaces can be found in the [Interfaces](#interfaces) 
     "path": "string (optional)",
     "description": "string (optional)",
     "operations": "JSON Array of Operation",
+    "auth": "string (optional)",
     "attributes": "JSON Array of Attribute (optional)"
   }
 }
@@ -428,6 +447,7 @@ More information about interfaces can be found in the [Interfaces](#interfaces) 
 - **path**: optional path where this resource is located. If not provided, defaults to the plural of the typeName, with some assumptions of formatting for web (e.g. lower case, dash separated). Path parameters can be specified by prefixing a path element with `:`. For example, a path of `/:guid` would imply that all operations for this path will require a parameter named 'guid' of type 'string'.
 - **description**: optional description for what this resource provides. Supports [GFM](https://help.github.com/articles/github-flavored-markdown/).
 - **operations**: one or more operations is required. See [Operation](#operation-declaration).
+- **auth**: optional default auth scheme name applied to every operation on this resource. Per-operation `auth` overrides this. API Builder materializes the inheritance into each operation before emitting the service spec. See [Authentication](/doc/auth).
 - **attributes**: JSON array defining additional meta data about this resource for use by generators. See [Attribute](#attribute-declaration).
 
 ### Operation Declaration
@@ -440,6 +460,7 @@ More information about interfaces can be found in the [Interfaces](#interfaces) 
   "body": "JSON Object of Body (optional)",
   "parameters": "JSON Array of Parameter (optional)",
   "responses": "JSON Object of Response (optional)",
+  "auth": "string (optional)",
   "attributes": "JSON Array of Attribute (optional)"
 }
 ```
@@ -450,6 +471,7 @@ More information about interfaces can be found in the [Interfaces](#interfaces) 
 - **body**: optional specification for the type of the body of this request. For all operations that support bodies (e.g. POST, PUT, PATCH), allows you to specify the type of the body. See [Body](#body-declaration).
 - **parameters**: optional JSON Array of the parameters to this method. By default, for GET and DELETE methods, parameters are assumed to be in the path or in the query. For other methods, parameters are assumed to be in the path or form body, unless you have explicitly specified a body in which case parameters can be provided in the path or the query. See [Parameter](#parameter-declaration).
 - **responses**: optional JSON Object of HTTP Response Code to Response. If not provided, an HTTP NoContent response is assumed. Only responses for HTTP status codes that are interesting should be documented. See [Response](#response-declaration).
+- **auth**: optional auth scheme name protecting this operation, or the reserved value `none` to mark it explicitly public. Overrides any resource-level default. The scheme name must appear in the service-level `auth_schemes` list. See [Authentication](/doc/auth).
 - **attributes**: JSON array defining additional meta data about this operation for use by generators. See [Attribute](#attribute-declaration).
 
 ### Body Declaration
