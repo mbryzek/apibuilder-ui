@@ -7,7 +7,7 @@
 
 	<p class="text-ab-dark-blue mb-8 text-lg leading-relaxed">
 		Declare authentication as a first-class part of your service spec. Each operation
-		identifies the auth scheme it requires by name, and code generators turn that into the
+		identifies the auth scheme it requires by type, and code generators turn that into the
 		matching runtime check — no JSON attributes, no string parsing, no per-controller glue.
 	</p>
 
@@ -19,21 +19,21 @@
 		</h2>
 		<p class="text-ab-dark-blue mb-3">
 			Add an <strong>auth_schemes</strong> array at the top level of your api.json. Each entry
-			names a scheme that operations can reference. Code generators look up the name and emit
-			the corresponding runtime helper.
+			declares a scheme <code>type</code> that operations can reference. Code generators look
+			up the type and emit the corresponding runtime helper.
 		</p>
 		<pre class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm mb-4 overflow-x-auto"><code>{@html `"auth_schemes": [
   {
-    "name": "hackathon_admin",
+    "type": "hackathon_admin",
     "description": "Tenant admin for the hackathon tenant"
   },
   {
-    "name": "session",
+    "type": "session",
     "description": "Any logged-in user session"
   }
 ]`}</code></pre>
 		<p class="text-ab-dark-blue text-sm">
-			The reserved value <code>none</code> cannot be used as a scheme name &mdash; it is the
+			The reserved value <code>none</code> cannot be used as a scheme type &mdash; it is the
 			explicit-public marker on operations.
 		</p>
 	</div>
@@ -45,7 +45,7 @@
 			Reference a Scheme on an Operation
 		</h2>
 		<p class="text-ab-dark-blue mb-3">
-			Set <strong>auth</strong> on the operation to one of the declared scheme names. Code
+			Set <strong>auth</strong> on the operation to one of the declared scheme types. Code
 			generators emit the matching runtime check; the service method receives the authenticated
 			caller as its first argument.
 		</p>
@@ -102,7 +102,7 @@
 		</h2>
 		<p class="text-ab-dark-blue mb-3">
 			The Play controller generator wraps each protected operation in the runtime helper that
-			matches the scheme name and passes the authenticated principal to your service method:
+			matches the scheme type and passes the authenticated principal to your service method:
 		</p>
 		<pre class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto"><code>{@html `def getEvents(): Action[AnyContent] = Action.async { request =>
   withHackathonAdmin(request) { auth =>
@@ -110,8 +110,8 @@
   }
 }`}</code></pre>
 		<p class="text-ab-dark-blue text-sm mt-3">
-			Each generator decides how scheme names map to runtime helpers. If your generator does
-			not recognize a scheme name, codegen fails &mdash; an unrecognized scheme is never silently
+			Each generator decides how scheme types map to runtime helpers. If your generator does
+			not recognize a scheme type, codegen fails &mdash; an unrecognized scheme is never silently
 			dropped to public.
 		</p>
 	</div>
@@ -124,7 +124,7 @@
 		</h2>
 		<ul class="space-y-2 text-ab-dark-blue ml-2">
 			<li><strong>Declare before reference</strong> &mdash; every <code>operation.auth</code> value (other than <code>none</code>) must appear in <code>service.auth_schemes</code>. Generators reject unknown references.</li>
-			<li><strong>Reserved value</strong> &mdash; <code>none</code> cannot name a scheme; it is the per-operation public marker.</li>
+			<li><strong>Reserved value</strong> &mdash; <code>none</code> cannot be used as an auth_scheme type; it is the per-operation public marker.</li>
 			<li><strong>Inheritance is materialized</strong> &mdash; resource-level defaults are flattened into each operation before the spec is emitted, so generators only ever read <code>operation.auth</code>.</li>
 			<li><strong>Absent today, required tomorrow</strong> &mdash; an operation with no <code>auth</code> field is currently treated as public. A future revision will require the field; declare schemes now to be ready.</li>
 		</ul>

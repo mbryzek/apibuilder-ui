@@ -222,7 +222,7 @@ Where:
 - **enums**: JSON object defining all of the enums in this API. The key of each object is the enum name. See [Enum](#enum-declaration).
 - **models**: JSON object defining all of the models in this API. The key of each object is the model name. See [Model](#model-declaration).
 - **resources**: JSON object defining all of the resources in this API. The key of each object is the name of a type that this resource represents. The type must be the name of a model or an enum. See [Resource](#resource-declaration).
-- **auth_schemes**: JSON array declaring the named authentication schemes that operations in this service may reference via `operation.auth`. Code generators map scheme names to runtime helpers and reject any `auth` value that does not appear in this list (other than the reserved value `none`). See [Authentication](/doc/auth).
+- **auth_schemes**: JSON array declaring the authentication schemes that operations in this service may reference via `operation.auth`. Each scheme is identified by a `type`. Code generators map scheme types to runtime helpers and reject any `auth` value that does not appear in this list (other than the reserved value `none`). See [Authentication](/doc/auth).
 - **attributes**: JSON array defining additional meta data about this service. Attributes are used to add custom extensions to API Builder and are typically used by generators to enable advanced code generation. See [Attribute](#attribute-declaration).
 - **annotations**: JSON array defining annotations or tags that can be applied to fields regardless of their type. Annotations are intended to convey usage hints to consumers of the API. See [Annotation](#annotation-declaration).
 
@@ -417,13 +417,13 @@ More information about interfaces can be found in the [Interfaces](#interfaces) 
 
 ```json
 {
-  "name": "string",
+  "type": "string",
   "description": "string (optional)",
   "attributes": "JSON Array of Attribute (optional)"
 }
 ```
 
-- **name**: unique identifier referenced by `operation.auth`. The reserved value `none` cannot be used as a scheme name; it is the explicit-public marker on operations.
+- **type**: unique identifier referenced by `operation.auth`. The reserved value `none` cannot be used as an auth_scheme type; it is the explicit-public marker on operations.
 - **description**: optional human-readable description of the scheme.
 - **attributes**: JSON array of generator-specific metadata. See [Attribute](#attribute-declaration).
 
@@ -471,7 +471,7 @@ See [Authentication](/doc/auth) for the full workflow.
 - **body**: optional specification for the type of the body of this request. For all operations that support bodies (e.g. POST, PUT, PATCH), allows you to specify the type of the body. See [Body](#body-declaration).
 - **parameters**: optional JSON Array of the parameters to this method. By default, for GET and DELETE methods, parameters are assumed to be in the path or in the query. For other methods, parameters are assumed to be in the path or form body, unless you have explicitly specified a body in which case parameters can be provided in the path or the query. See [Parameter](#parameter-declaration).
 - **responses**: optional JSON Object of HTTP Response Code to Response. If not provided, an HTTP NoContent response is assumed. Only responses for HTTP status codes that are interesting should be documented. See [Response](#response-declaration).
-- **auth**: optional auth scheme name protecting this operation, or the reserved value `none` to mark it explicitly public. Overrides any resource-level default. The scheme name must appear in the service-level `auth_schemes` list. See [Authentication](/doc/auth).
+- **auth**: optional auth_scheme `type` protecting this operation, or the reserved value `none` to mark it explicitly public. Overrides any resource-level default. The type must appear in the service-level `auth_schemes` list. See [Authentication](/doc/auth).
 - **attributes**: JSON array defining additional meta data about this operation for use by generators. See [Attribute](#attribute-declaration).
 
 ### Body Declaration
