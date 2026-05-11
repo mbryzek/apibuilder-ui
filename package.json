@@ -33,7 +33,7 @@
 		"@tailwindcss/postcss": "^4.2.1",
 		"autoprefixer": "^10.4.27",
 		"marked": "^17.0.3",
-		"postcss": "^8.5.6",
+		"postcss": "^8.5.14",
 		"tailwindcss": "^4.2.1"
 	}
 }
