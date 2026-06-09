@@ -11,6 +11,14 @@ import type { Service } from './com-bryzek-apibuilder-spec.ts';
 // Models
 // ============================================================================
 
+/**
+ * A reference to an application in the API Builder catalog
+ */
+export interface ApplicationRef {
+  organization_key: string;
+  application_key: string;
+}
+
 export interface Error {
   /** Machine readable code for this specific error message */
   code: string;
@@ -50,6 +58,14 @@ export interface InvocationForm {
   attributes: Record<string, string>;
 }
 
+/**
+ * Form for invoking a multi-spec code generator
+ */
+export interface MultiSpecInvocationForm {
+  /** The applications whose specs will be fetched and passed to the generator */
+  applications: ApplicationRef[];
+}
+
 // ============================================================================
 // API Client
 // ============================================================================
@@ -72,6 +88,12 @@ export interface GetGeneratorByKeyOptions {
 export interface CreateGeneratorInvocationByKeyOptions {
   key: string;
   body: InvocationForm;
+  headers?: Record<string, string>;
+}
+
+export interface CreateGeneratorMultiSpecInvocationsByKeyOptions {
+  key: string;
+  body: MultiSpecInvocationForm;
   headers?: Record<string, string>;
 }
 
@@ -159,6 +181,35 @@ export class ApiClient {
     }
 
     if (response.status === 409) {
+      throw new ErrorsResponse(response);
+    }
+
+    throw new ApiException(response, `Request failed with status ${response.status}`);
+
+  }
+
+  async createGeneratorMultiSpecInvocationsByKey(params: CreateGeneratorMultiSpecInvocationsByKeyOptions): Promise<Invocation> {
+    const url = `${this.baseUrl}/apibuilder/generators/${params.key}/multi-spec-invocations`;
+
+      const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(params.headers || {}),
+      },
+      body: JSON.stringify(params.body),
+    });
+
+    if (response.status === 200) {
+      const data = await response.json();
+      return data;
+    }
+
+    if (response.status === 404) {
+      throw new VoidResponse(response);
+    }
+
+    if (response.status === 422) {
       throw new ErrorsResponse(response);
     }
 

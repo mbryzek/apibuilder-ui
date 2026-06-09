@@ -154,6 +154,23 @@ export interface LoginPhoneVerifyForm {
   code: string;
 }
 
+/**
+ * A minted one-time login token. token is carried in the redirect URL to the destination host and exchanged there. No cookie is set by the minting host.
+ */
+export interface LoginToken {
+  token: string;
+  expires_at: ISODateTimeString;
+}
+
+/**
+ * Mint a one-time login token by verifying a tenant user's credentials. redirect_url's host is validated server-side against a known-hosts allowlist (else 422) so the token is only ever bounced to a trusted host; it is NOT persisted.
+ */
+export interface LoginTokenForm {
+  email: string;
+  password: string;
+  redirect_url: string;
+}
+
 export interface MobilePhoneForm {
   number: string;
   optin_to_sms?: boolean;
@@ -391,7 +408,7 @@ export function isSmsOptinRequestResultRateLimited(obj: SmsOptinRequestResult): 
 // ============================================================================
 
 import { VoidResponse } from './generated-error-void-response.ts';
-import { UnauthorizedErrorsResponse } from './generated-error-unauthorized-errors-response.ts';
+import { UnauthorizedErrorResponse } from './generated-error-unauthorized-error-response.ts';
 import { ValidationErrorsResponse } from './generated-error-validation-errors-response.ts';
 import { ApiException } from "./generated-util.ts";
 
@@ -416,6 +433,12 @@ export interface CreateTenantSessionLoginsOptions {
 export interface CreateTenantSessionSignupsOptions {
   tenantId: string;
   body: SignupForm;
+  headers?: Record<string, string>;
+}
+
+export interface CreateTenantSessionLoginAndTokensOptions {
+  tenantId: string;
+  body: LoginTokenForm;
   headers?: Record<string, string>;
 }
 
@@ -507,6 +530,20 @@ export interface UpdateUserPrimaryByIdOptions {
   headers?: Record<string, string>;
 }
 
+export interface UpdateActiveUserByIdOptions {
+  headers?: Record<string, string>;
+}
+
+export interface UpdateInactiveUserByIdOptions {
+  headers?: Record<string, string>;
+}
+
+export interface UpdateUserRoleByIdAndRoleOptions {
+  id: string;
+  role: UserRole;
+  headers?: Record<string, string>;
+}
+
 export interface UpdateUserPasswordByIdOptions {
   id: string;
   body: UserPasswordForm;
@@ -568,7 +605,7 @@ export class ApiClient {
     }
 
     if (response.status === 401) {
-      throw new UnauthorizedErrorsResponse(response);
+      throw new UnauthorizedErrorResponse(response);
     }
 
     if (response.status === 404) {
@@ -600,7 +637,7 @@ export class ApiClient {
     }
 
     if (response.status === 401) {
-      throw new UnauthorizedErrorsResponse(response);
+      throw new UnauthorizedErrorResponse(response);
     }
 
     if (response.status === 404) {
@@ -638,6 +675,31 @@ export class ApiClient {
 
   async createTenantSessionSignups(params: CreateTenantSessionSignupsOptions): Promise<SessionState> {
     const url = `${this.baseUrl}/tenant/${params.tenantId}/session/signups`;
+
+      const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(params.headers || {}),
+      },
+      body: JSON.stringify(params.body),
+    });
+
+    if (response.status === 201) {
+      const data = await response.json();
+      return data;
+    }
+
+    if (response.status === 422) {
+      throw new ValidationErrorsResponse(response);
+    }
+
+    throw new ApiException(response, `Request failed with status ${response.status}`);
+
+  }
+
+  async createTenantSessionLoginAndTokens(params: CreateTenantSessionLoginAndTokensOptions): Promise<LoginToken> {
+    const url = `${this.baseUrl}/tenant/${params.tenantId}/session/login/tokens`;
 
       const response = await fetch(url, {
       method: 'POST',
@@ -775,7 +837,7 @@ export class ApiClient {
     }
 
     if (response.status === 401) {
-      throw new UnauthorizedErrorsResponse(response);
+      throw new UnauthorizedErrorResponse(response);
     }
 
     throw new ApiException(response, `Request failed with status ${response.status}`);
@@ -803,7 +865,7 @@ export class ApiClient {
     }
 
     if (response.status === 401) {
-      throw new UnauthorizedErrorsResponse(response);
+      throw new UnauthorizedErrorResponse(response);
     }
 
     throw new ApiException(response, `Request failed with status ${response.status}`);
@@ -828,7 +890,7 @@ export class ApiClient {
     }
 
     if (response.status === 401) {
-      throw new UnauthorizedErrorsResponse(response);
+      throw new UnauthorizedErrorResponse(response);
     }
 
     if (response.status === 422) {
@@ -856,7 +918,7 @@ export class ApiClient {
     }
 
     if (response.status === 401) {
-      throw new UnauthorizedErrorsResponse(response);
+      throw new UnauthorizedErrorResponse(response);
     }
 
     if (response.status === 404) {
@@ -883,7 +945,7 @@ export class ApiClient {
     }
 
     if (response.status === 401) {
-      throw new UnauthorizedErrorsResponse(response);
+      throw new UnauthorizedErrorResponse(response);
     }
 
     if (response.status === 404) {
@@ -933,7 +995,7 @@ export class ApiClient {
     }
 
     if (response.status === 401) {
-      throw new UnauthorizedErrorsResponse(response);
+      throw new UnauthorizedErrorResponse(response);
     }
 
     if (response.status === 422) {
@@ -961,7 +1023,7 @@ export class ApiClient {
     }
 
     if (response.status === 401) {
-      throw new UnauthorizedErrorsResponse(response);
+      throw new UnauthorizedErrorResponse(response);
     }
 
     if (response.status === 404) {
@@ -990,7 +1052,7 @@ export class ApiClient {
     }
 
     if (response.status === 401) {
-      throw new UnauthorizedErrorsResponse(response);
+      throw new UnauthorizedErrorResponse(response);
     }
 
     if (response.status === 422) {
@@ -1019,7 +1081,7 @@ export class ApiClient {
     }
 
     if (response.status === 401) {
-      throw new UnauthorizedErrorsResponse(response);
+      throw new UnauthorizedErrorResponse(response);
     }
 
     if (response.status === 404) {
@@ -1052,7 +1114,7 @@ export class ApiClient {
     }
 
     if (response.status === 401) {
-      throw new UnauthorizedErrorsResponse(response);
+      throw new UnauthorizedErrorResponse(response);
     }
 
     if (response.status === 404) {
@@ -1085,7 +1147,103 @@ export class ApiClient {
     }
 
     if (response.status === 401) {
-      throw new UnauthorizedErrorsResponse(response);
+      throw new UnauthorizedErrorResponse(response);
+    }
+
+    if (response.status === 404) {
+      throw new VoidResponse(response);
+    }
+
+    if (response.status === 422) {
+      throw new ValidationErrorsResponse(response);
+    }
+
+    throw new ApiException(response, `Request failed with status ${response.status}`);
+
+  }
+
+  async updateActiveUserById(id: string, options?: UpdateActiveUserByIdOptions): Promise<User> {
+    const url = `${this.baseUrl}/users/${id}/active`;
+
+      const response = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(options?.headers || {}),
+      },
+    });
+
+    if (response.status === 200) {
+      const data = await response.json();
+      return data;
+    }
+
+    if (response.status === 401) {
+      throw new UnauthorizedErrorResponse(response);
+    }
+
+    if (response.status === 404) {
+      throw new VoidResponse(response);
+    }
+
+    if (response.status === 422) {
+      throw new ValidationErrorsResponse(response);
+    }
+
+    throw new ApiException(response, `Request failed with status ${response.status}`);
+
+  }
+
+  async updateInactiveUserById(id: string, options?: UpdateInactiveUserByIdOptions): Promise<User> {
+    const url = `${this.baseUrl}/users/${id}/inactive`;
+
+      const response = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(options?.headers || {}),
+      },
+    });
+
+    if (response.status === 200) {
+      const data = await response.json();
+      return data;
+    }
+
+    if (response.status === 401) {
+      throw new UnauthorizedErrorResponse(response);
+    }
+
+    if (response.status === 404) {
+      throw new VoidResponse(response);
+    }
+
+    if (response.status === 422) {
+      throw new ValidationErrorsResponse(response);
+    }
+
+    throw new ApiException(response, `Request failed with status ${response.status}`);
+
+  }
+
+  async updateUserRoleByIdAndRole(params: UpdateUserRoleByIdAndRoleOptions): Promise<User> {
+    const url = `${this.baseUrl}/users/${params.id}/role/${String(params.role)}`;
+
+      const response = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(params.headers || {}),
+      },
+    });
+
+    if (response.status === 200) {
+      const data = await response.json();
+      return data;
+    }
+
+    if (response.status === 401) {
+      throw new UnauthorizedErrorResponse(response);
     }
 
     if (response.status === 404) {
@@ -1117,7 +1275,7 @@ export class ApiClient {
     }
 
     if (response.status === 401) {
-      throw new UnauthorizedErrorsResponse(response);
+      throw new UnauthorizedErrorResponse(response);
     }
 
     if (response.status === 404) {
@@ -1168,7 +1326,7 @@ export class ApiClient {
     }
 
     if (response.status === 401) {
-      throw new UnauthorizedErrorsResponse(response);
+      throw new UnauthorizedErrorResponse(response);
     }
 
     if (response.status === 404) {

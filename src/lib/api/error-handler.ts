@@ -4,7 +4,7 @@
  */
 
 import { ValidationErrorsResponse } from "$generated/generated-error-validation-errors-response";
-import { UnauthorizedErrorsResponse } from "$generated/generated-error-unauthorized-errors-response";
+import { UnauthorizedErrorResponse } from "$generated/generated-error-unauthorized-error-response";
 import { VoidResponse } from "$generated/generated-error-void-response";
 import { ApiException } from "$generated/generated-util";
 import type { ValidationError } from "$generated/com-bryzek-platform-error";
@@ -96,18 +96,14 @@ export async function handleApiCall<T>(
 			};
 		}
 
-		if (error instanceof UnauthorizedErrorsResponse) {
+		if (error instanceof UnauthorizedErrorResponse) {
 			if (options?.onUnauthorized) {
 				options.onUnauthorized();
 			}
-			const unauthorizedErrors = await error.unauthorizedErrors();
-			const errors = unauthorizedErrors
-				.map((e) => e.message)
-				.filter(Boolean)
-				.map((message) => ({ message }));
+			const unauthorizedError = await error.unauthorizedError();
 			return {
 				status: error.response.status,
-				errors: errors.length > 0 ? errors : [{ message: "Unauthorized" }],
+				errors: [{ message: unauthorizedError.message }],
 			};
 		}
 
