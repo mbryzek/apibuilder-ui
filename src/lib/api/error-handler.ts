@@ -103,7 +103,7 @@ export async function handleApiCall<T>(
 			const unauthorizedError = await error.unauthorizedError();
 			return {
 				status: error.response.status,
-				errors: [{ message: unauthorizedError.message }],
+				errors: [{ message: unauthorizedError.message || "Unauthorized" }],
 			};
 		}
 
