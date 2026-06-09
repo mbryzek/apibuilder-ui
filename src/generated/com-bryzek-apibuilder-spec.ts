@@ -37,6 +37,16 @@ export interface Application {
 }
 
 /**
+ * Declares a named authentication scheme that operations can reference. Code generators map scheme types to runtime helpers (e.g. `hackathon_admin` -> `withHackathonAdmin`). Schemes are interpreted by generators; this spec only declares their existence.
+ */
+export interface AuthScheme {
+  /** Unique identifier referenced by `operation.auth`. The reserved value `none` cannot be used as an auth_scheme type; it is the explicit-public marker on operations. */
+  type: string;
+  description?: string;
+  attributes: Record<string, any>;
+}
+
+/**
  * Describes the primary contact for this service
  */
 export interface Contact {
@@ -87,6 +97,7 @@ export interface Interface {
   description?: string;
   fields: Field[];
   attributes: Record<string, any>;
+  type_parameters?: string[];
 }
 
 /**
@@ -117,6 +128,8 @@ export interface Operation {
   attributes: Record<string, any>;
   /** Content-Type header for the request body. Must be overridden when body is `bytes` (no JSON for binary). */
   content_type: string;
+  /** The auth_scheme.type protecting this operation, or the reserved value `none` to mark it explicitly public. apibuilder resolves the effective auth at parse time (operation overrides resource overrides service-level default) and materializes it into this per-operation field before emitting the service spec, so generators MUST read this value directly and MUST NOT re-derive inheritance. If absent, the operation is treated as public; a future revision will require this field to be present. */
+  auth?: string;
 }
 
 export interface Organization {
@@ -172,6 +185,8 @@ export interface Service {
   models: Model[];
   resources: Resource[];
   attributes: Record<string, any>;
+  /** Authentication schemes declared by this service. Code generators validate that every `operation.auth` value references a scheme listed here (the reserved value `none` is always permitted). */
+  auth_schemes: AuthScheme[];
 }
 
 export interface Union {

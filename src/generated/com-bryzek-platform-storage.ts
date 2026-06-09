@@ -19,6 +19,8 @@ export enum FileType {
   Md = 'md',
   Txt = 'txt',
   Html = 'html',
+  Xlsx = 'xlsx',
+  Xls = 'xls',
 }
 
 // ============================================================================
@@ -27,6 +29,8 @@ export enum FileType {
 
 export interface File {
   id: string;
+  /** URL-safe filename derived from what the uploader supplied. Suitable for display. */
+  name: string;
   type: FileType;
   url: string;
 }
