@@ -16,12 +16,25 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 	};
 };
 
+/**
+ * Validate that a redirect path is same-origin (must start with '/' but not '//')
+ * to prevent open-redirect attacks.
+ */
+function safeRedirectPath(path: string | null | undefined): string {
+	if (!path || !path.startsWith('/') || path.startsWith('//')) {
+		return '/';
+	}
+	return path;
+}
+
 export const actions: Actions = {
 	default: async ({ request, cookies, url }) => {
 		const formData = await request.formData();
 		const email = formData.get('email') as string;
 		const password = formData.get('password') as string;
-		const redirectTo = (formData.get('redirectTo') as string) || url.searchParams.get('redirect') || '/';
+		const redirectTo = safeRedirectPath(
+			(formData.get('redirectTo') as string) || url.searchParams.get('redirect')
+		);
 
 		if (!email || !password) {
 			return fail(400, { errors: [{ message: 'Email and password are required' }] });
