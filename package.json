@@ -25,6 +25,7 @@
 		"@sveltejs/adapter-auto": "^7.0.0",
 		"@sveltejs/kit": "^2.60.1",
 		"@sveltejs/vite-plugin-svelte": "^7.1.2",
+		"@tailwindcss/vite": "^4.3.1",
 		"@types/node": "^25.5.0",
 		"@typescript-eslint/eslint-plugin": "^8.60.1",
 		"@typescript-eslint/parser": "^8.60.1",
@@ -40,7 +41,6 @@
 	"dependencies": {
 		"@sveltejs/adapter-cloudflare": "^7.2.8",
 		"@tailwindcss/forms": "^0.5.11",
-		"@tailwindcss/postcss": "^4.2.1",
 		"autoprefixer": "^10.4.27",
 		"marked": "^17.0.3",
 		"postcss": "^8.5.14",
