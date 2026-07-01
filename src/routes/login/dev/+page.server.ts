@@ -1,8 +1,8 @@
 import type { PageServerLoad } from './$types';
-import { redirect } from '@sveltejs/kit';
 import { clients, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { SESSION_COOKIE, config } from '$lib/config';
+import { redirectWithFlash } from '$lib/server/flash';
 import type { TenantSession } from '$generated/com-bryzek-platform';
 
 export const load: PageServerLoad = async ({ cookies }) => {
@@ -19,8 +19,8 @@ export const load: PageServerLoad = async ({ cookies }) => {
 			sameSite: 'lax',
 			maxAge: 60 * 60 * 24 * 365,
 		});
-		throw redirect(303, '/?flash=' + encodeURIComponent('Logged in as dev') + '&flash_type=success');
+		redirectWithFlash('/', 'Logged in as dev');
 	}
 
-	throw redirect(303, '/login?flash=' + encodeURIComponent('Developer login not enabled') + '&flash_type=error');
+	redirectWithFlash('/login', 'Developer login not enabled', 'error');
 };

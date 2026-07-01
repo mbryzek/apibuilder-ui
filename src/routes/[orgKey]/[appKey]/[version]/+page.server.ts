@@ -3,6 +3,7 @@ import { redirect, fail } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuthForAction, requireMemberForAction } from '$lib/server/auth';
+import { redirectWithFlash } from '$lib/server/flash';
 import type { Watch } from '$generated/com-bryzek-apibuilder';
 
 export const load: PageServerLoad = async () => {
@@ -59,7 +60,7 @@ export const actions: Actions = {
 		);
 
 		if ('data' in response) {
-			throw redirect(303, `/${params.orgKey}/${params.appKey}/latest?flash=${encodeURIComponent('Version deleted')}&flash_type=success`);
+			redirectWithFlash(`/${params.orgKey}/${params.appKey}/latest`, 'Version deleted');
 		}
 
 		return fail(400, { errors: 'errors' in response ? response.errors : [{ message: 'Failed to delete version' }] });

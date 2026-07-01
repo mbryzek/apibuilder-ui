@@ -3,6 +3,7 @@ import { redirect, fail } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth } from '$lib/server/auth';
+import { redirectWithFlash } from '$lib/server/flash';
 import type { User, UserForm } from '$generated/com-bryzek-apibuilder';
 
 export const load: PageServerLoad = async (event) => {
@@ -41,7 +42,7 @@ export const actions: Actions = {
 		);
 
 		if ('data' in response) {
-			throw redirect(303, '/account/profile?flash=' + encodeURIComponent('Profile updated successfully') + '&flash_type=success');
+			redirectWithFlash('/account/profile', 'Profile updated successfully');
 		}
 
 		if ('errors' in response) {

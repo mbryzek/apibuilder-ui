@@ -3,6 +3,7 @@ import { redirect, fail } from '@sveltejs/kit';
 import { clients, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { SESSION_COOKIE, config } from '$lib/config';
+import { redirectWithFlash } from '$lib/server/flash';
 import { isTenantSession, type SessionState } from '$generated/com-bryzek-platform';
 
 export const load: PageServerLoad = async ({ locals }) => {
@@ -46,9 +47,9 @@ export const actions: Actions = {
 				sameSite: 'lax',
 				maxAge: 60 * 60 * 24 * 365,
 			});
-			throw redirect(303, '/org/create?flash=' + encodeURIComponent('Welcome to API Builder! Create your first organization to get started.') + '&flash_type=success');
+			redirectWithFlash('/org/create', 'Welcome to API Builder! Create your first organization to get started.');
 		}
 
-		throw redirect(303, '/login?flash=' + encodeURIComponent('Account created! Please sign in.') + '&flash_type=success');
+		redirectWithFlash('/login', 'Account created! Please sign in.');
 	},
 };

@@ -1,8 +1,9 @@
 import type { PageServerLoad, Actions } from './$types';
-import { redirect, fail } from '@sveltejs/kit';
+import { fail } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth, requireAdminForAction } from '$lib/server/auth';
+import { redirectWithFlash } from '$lib/server/flash';
 import type { Organization, OrganizationForm } from '$generated/com-bryzek-apibuilder';
 import type { Visibility } from '$generated/com-bryzek-apibuilder';
 
@@ -36,7 +37,7 @@ export const actions: Actions = {
 
 		if ('data' in response) {
 			const newKey = response.data.key;
-			throw redirect(303, `/${newKey}/details?flash=${encodeURIComponent('Organization updated')}&flash_type=success`);
+			redirectWithFlash(`/${newKey}/details`, 'Organization updated');
 		}
 
 		if ('errors' in response) {
@@ -56,7 +57,7 @@ export const actions: Actions = {
 		);
 
 		if ('data' in response) {
-			throw redirect(303, `/?flash=${encodeURIComponent('Organization deleted')}&flash_type=success`);
+			redirectWithFlash('/', 'Organization deleted');
 		}
 
 		if ('errors' in response) {

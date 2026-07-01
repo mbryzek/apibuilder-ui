@@ -1,7 +1,7 @@
 import type { PageServerLoad } from './$types';
-import { redirect } from '@sveltejs/kit';
 import { platformClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
+import { redirectWithFlash } from '$lib/server/flash';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const headers = locals.session ? getSessionHeaders(locals.session.id) : {};
@@ -11,12 +11,12 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	);
 
 	if ('data' in response) {
-		throw redirect(303, '/?flash=' + encodeURIComponent('Email verified') + '&flash_type=success');
+		redirectWithFlash('/', 'Email verified');
 	}
 
 	const errorMessage = 'errors' in response
 		? response.errors.map((e) => e.message).join(', ')
 		: 'Unable to verify email';
 
-	throw redirect(303, '/?flash=' + encodeURIComponent(errorMessage) + '&flash_type=error');
+	redirectWithFlash('/', errorMessage, 'error');
 };

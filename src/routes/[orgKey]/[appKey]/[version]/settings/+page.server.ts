@@ -1,8 +1,9 @@
 import type { PageServerLoad, Actions } from './$types';
-import { redirect, fail } from '@sveltejs/kit';
+import { fail } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth, requireAdminForAction } from '$lib/server/auth';
+import { redirectWithFlash } from '$lib/server/flash';
 import type { Application, Visibility } from '$generated/com-bryzek-apibuilder';
 
 export const load: PageServerLoad = async (event) => {
@@ -35,7 +36,7 @@ export const actions: Actions = {
 		);
 
 		if ('data' in response) {
-			throw redirect(303, `/${params.orgKey}/${response.data.key}/${params.version}/settings?flash=${encodeURIComponent('Visibility updated')}&flash_type=success`);
+			redirectWithFlash(`/${params.orgKey}/${response.data.key}/${params.version}/settings`, 'Visibility updated');
 		}
 
 		return fail(Math.max(response.status, 400), { errors: 'errors' in response ? response.errors : [{ message: 'Failed to update' }] });
@@ -51,7 +52,7 @@ export const actions: Actions = {
 		);
 
 		if ('data' in response) {
-			throw redirect(303, `/${params.orgKey}?flash=${encodeURIComponent('Application deleted')}&flash_type=success`);
+			redirectWithFlash(`/${params.orgKey}`, 'Application deleted');
 		}
 
 		return fail(Math.max(response.status, 400), { errors: 'errors' in response ? response.errors : [{ message: 'Failed to delete' }] });
