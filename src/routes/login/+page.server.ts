@@ -3,6 +3,7 @@ import { redirect, fail } from '@sveltejs/kit';
 import { clients, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { SESSION_COOKIE, config } from '$lib/config';
+import { redirectWithFlash } from '$lib/server/flash';
 import { isTenantSession, type SessionState } from '$generated/com-bryzek-platform';
 
 export const load: PageServerLoad = async ({ locals, url }) => {
@@ -53,7 +54,7 @@ export const actions: Actions = {
 				sameSite: 'lax',
 				maxAge: 60 * 60 * 24 * 365,
 			});
-			throw redirect(303, redirectTo + '?flash=' + encodeURIComponent('Welcome back!') + '&flash_type=success');
+			redirectWithFlash(redirectTo, 'Welcome back!');
 		}
 
 		if ('errors' in response) {

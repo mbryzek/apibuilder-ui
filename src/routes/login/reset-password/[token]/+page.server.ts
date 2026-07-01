@@ -1,8 +1,9 @@
 import type { PageServerLoad, Actions } from './$types';
-import { redirect, fail } from '@sveltejs/kit';
+import { fail } from '@sveltejs/kit';
 import { platformClient } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { SESSION_COOKIE, config } from '$lib/config';
+import { redirectWithFlash } from '$lib/server/flash';
 import { isTenantSession, type SessionState } from '$generated/com-bryzek-platform';
 
 export const load: PageServerLoad = async ({ params }) => {
@@ -38,7 +39,7 @@ export const actions: Actions = {
 				sameSite: 'lax',
 				maxAge: 60 * 60 * 24 * 365,
 			});
-			throw redirect(303, '/?flash=' + encodeURIComponent('Password reset successfully!') + '&flash_type=success');
+			redirectWithFlash('/', 'Password reset successfully!');
 		}
 
 		if ('errors' in response) {

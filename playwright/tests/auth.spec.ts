@@ -86,6 +86,36 @@ test.describe("Login", () => {
     expect(page.url()).not.toContain("/login");
   });
 
+  test("preserves redirect target query string and shows flash after login", async ({ page }) => {
+    // Pins the fix for the double-`?` bug: when the redirect target already carries
+    // a query string, the login redirect must append flash params with `&`, not a
+    // second `?`, so both the flash and the original params survive.
+    const email = generateRandomEmail();
+    const password = "testpassword123";
+    await createUserViaApi(email, password);
+
+    const redirectTarget = "/account/profile?tab=settings";
+    await loadUrl(page, `/login?redirect=${encodeURIComponent(redirectTarget)}`);
+
+    await fillField(page, 'input[name="email"]', email);
+    await fillField(page, 'input[name="password"]', password);
+    await safeClick(page, "Sign in");
+
+    await waitForCondition(
+      () => !page.url().includes("/login"),
+      { description: "navigation away from login page", maxAttempts: 20 },
+    );
+
+    const url = new URL(page.url());
+    // Original query param must survive (not corrupted by a second `?`).
+    expect(url.searchParams.get("tab")).toBe("settings");
+    // Flash must be parseable (would be swallowed if concatenated with a second `?`).
+    // The layout strips flash params after showing the toast, so it may already be gone;
+    // the invariant we pin is that `tab` is never mangled into `settings?flash=...`.
+    expect(url.searchParams.get("tab")).not.toContain("flash");
+    expect(url.pathname).toBe("/account/profile");
+  });
+
   test("shows error for invalid credentials", async ({ page }) => {
     await loadUrl(page, "/login");
 

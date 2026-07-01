@@ -3,6 +3,7 @@ import { redirect, fail } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth } from '$lib/server/auth';
+import { redirectWithFlash } from '$lib/server/flash';
 import type { Organization, OrganizationForm } from '$generated/com-bryzek-apibuilder';
 import { Visibility } from '$generated/com-bryzek-apibuilder';
 
@@ -38,7 +39,7 @@ export const actions: Actions = {
 		);
 
 		if ('data' in response) {
-			throw redirect(303, '/' + response.data.key + '?flash=' + encodeURIComponent('Organization created successfully') + '&flash_type=success');
+			redirectWithFlash('/' + response.data.key, 'Organization created successfully');
 		}
 
 		if ('errors' in response) {
