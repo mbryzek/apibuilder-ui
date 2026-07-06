@@ -154,23 +154,6 @@ export interface LoginPhoneVerifyForm {
   code: string;
 }
 
-/**
- * A minted one-time login token. token is carried in the redirect URL to the destination host and exchanged there. No cookie is set by the minting host.
- */
-export interface LoginToken {
-  token: string;
-  expires_at: ISODateTimeString;
-}
-
-/**
- * Mint a one-time login token by verifying a tenant user's credentials. redirect_url's host is validated server-side against a known-hosts allowlist (else 422) so the token is only ever bounced to a trusted host; it is NOT persisted.
- */
-export interface LoginTokenForm {
-  email: string;
-  password: string;
-  redirect_url: string;
-}
-
 export interface MobilePhoneForm {
   number: string;
   optin_to_sms?: boolean;
@@ -292,6 +275,7 @@ export interface TenantSession {
   session: SessionReference;
   user: User;
   tenant: TenantSummary;
+  impersonated_by?: UserReference;
 }
 
 export interface TenantSummary {
@@ -433,12 +417,6 @@ export interface CreateTenantSessionLoginsOptions {
 export interface CreateTenantSessionSignupsOptions {
   tenantId: string;
   body: SignupForm;
-  headers?: Record<string, string>;
-}
-
-export interface CreateTenantSessionLoginAndTokensOptions {
-  tenantId: string;
-  body: LoginTokenForm;
   headers?: Record<string, string>;
 }
 
@@ -675,31 +653,6 @@ export class ApiClient {
 
   async createTenantSessionSignups(params: CreateTenantSessionSignupsOptions): Promise<SessionState> {
     const url = `${this.baseUrl}/tenant/${params.tenantId}/session/signups`;
-
-      const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
-      body: JSON.stringify(params.body),
-    });
-
-    if (response.status === 201) {
-      const data = await response.json();
-      return data;
-    }
-
-    if (response.status === 422) {
-      throw new ValidationErrorsResponse(response);
-    }
-
-    throw new ApiException(response, `Request failed with status ${response.status}`);
-
-  }
-
-  async createTenantSessionLoginAndTokens(params: CreateTenantSessionLoginAndTokensOptions): Promise<LoginToken> {
-    const url = `${this.baseUrl}/tenant/${params.tenantId}/session/login/tokens`;
 
       const response = await fetch(url, {
       method: 'POST',

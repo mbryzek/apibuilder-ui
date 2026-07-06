@@ -111,6 +111,16 @@ export interface Item {
   application_key: string;
 }
 
+/**
+ * A spec import that is declared but never referenced, and can be removed from the spec.
+ */
+export interface LinterUnusedImport {
+  /** Namespace of the unreferenced import. */
+  namespace: string;
+  /** Application key of the unreferenced import. */
+  application: string;
+}
+
 export interface Membership {
   id: string;
   user: User;
