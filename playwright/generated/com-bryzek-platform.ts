@@ -32,6 +32,7 @@ export enum RallydNotificationType {
   OrganizerGameConfirmed = 'organizer_game_confirmed',
   Marketing = 'marketing',
   SmsOptinExpired = 'sms_optin_expired',
+  ConnectionShare = 'connection_share',
 }
 
 export enum SportRatingSystem {
@@ -227,7 +228,7 @@ export interface SessionReference {
 
 export interface SignupForm {
   user: UserForm;
-  password: string;
+  password?: string;
   /** Notification types to opt into during registration */
   opt_ins?: RallydNotificationType[];
 }
@@ -263,6 +264,7 @@ export interface TenantSession {
   session: SessionReference;
   user: User;
   tenant: TenantSummary;
+  impersonated_by?: UserReference;
 }
 
 export interface TenantSummary {
@@ -452,6 +454,20 @@ export interface UpdateUserSecondaryByIdOptions {
 export interface UpdateUserPrimaryByIdOptions {
   id: string;
   body: UserPrimaryForm;
+  headers?: Record<string, string>;
+}
+
+export interface UpdateActiveUserByIdOptions {
+  headers?: Record<string, string>;
+}
+
+export interface UpdateInactiveUserByIdOptions {
+  headers?: Record<string, string>;
+}
+
+export interface UpdateUserRoleByIdAndRoleOptions {
+  id: string;
+  role: UserRole;
   headers?: Record<string, string>;
 }
 
@@ -890,6 +906,102 @@ export class ApiClient {
         ...(params.headers || {}),
       },
       body: JSON.stringify(params.body),
+    });
+
+    if (response.status === 200) {
+      const data = await response.json();
+      return data;
+    }
+
+    if (response.status === 401) {
+      throw new UnauthorizedErrorResponse(response);
+    }
+
+    if (response.status === 404) {
+      throw new VoidResponse(response);
+    }
+
+    if (response.status === 422) {
+      throw new ValidationErrorsResponse(response);
+    }
+
+    throw new ApiException(response, `Request failed with status ${response.status}`);
+
+  }
+
+  async updateActiveUserById(id: string, options?: UpdateActiveUserByIdOptions): Promise<User> {
+    const url = `${this.baseUrl}/users/${id}/active`;
+
+      const response = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(options?.headers || {}),
+      },
+    });
+
+    if (response.status === 200) {
+      const data = await response.json();
+      return data;
+    }
+
+    if (response.status === 401) {
+      throw new UnauthorizedErrorResponse(response);
+    }
+
+    if (response.status === 404) {
+      throw new VoidResponse(response);
+    }
+
+    if (response.status === 422) {
+      throw new ValidationErrorsResponse(response);
+    }
+
+    throw new ApiException(response, `Request failed with status ${response.status}`);
+
+  }
+
+  async updateInactiveUserById(id: string, options?: UpdateInactiveUserByIdOptions): Promise<User> {
+    const url = `${this.baseUrl}/users/${id}/inactive`;
+
+      const response = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(options?.headers || {}),
+      },
+    });
+
+    if (response.status === 200) {
+      const data = await response.json();
+      return data;
+    }
+
+    if (response.status === 401) {
+      throw new UnauthorizedErrorResponse(response);
+    }
+
+    if (response.status === 404) {
+      throw new VoidResponse(response);
+    }
+
+    if (response.status === 422) {
+      throw new ValidationErrorsResponse(response);
+    }
+
+    throw new ApiException(response, `Request failed with status ${response.status}`);
+
+  }
+
+  async updateUserRoleByIdAndRole(params: UpdateUserRoleByIdAndRoleOptions): Promise<User> {
+    const url = `${this.baseUrl}/users/${params.id}/role/${String(params.role)}`;
+
+      const response = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(params.headers || {}),
+      },
     });
 
     if (response.status === 200) {

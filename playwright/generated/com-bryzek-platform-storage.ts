@@ -18,6 +18,20 @@ export enum FileType {
   Zip = 'zip',
   Md = 'md',
   Txt = 'txt',
+  Html = 'html',
+  Xlsx = 'xlsx',
+  Xls = 'xls',
+  Bmp = 'bmp',
+  Webp = 'webp',
+  Heic = 'heic',
+  Tiff = 'tiff',
+  Mp4 = 'mp4',
+  Mov = 'mov',
+  Mp3 = 'mp3',
+  M4a = 'm4a',
+  Amr = 'amr',
+  Ogg = 'ogg',
+  Vcf = 'vcf',
 }
 
 // ============================================================================
@@ -26,6 +40,8 @@ export enum FileType {
 
 export interface File {
   id: string;
+  /** URL-safe filename derived from what the uploader supplied. Suitable for display. */
+  name: string;
   type: FileType;
   url: string;
 }
