@@ -6,41 +6,41 @@ import type { Membership } from '$generated/com-bryzek-apibuilder';
 import { MembershipRole } from '$generated/com-bryzek-apibuilder';
 
 export function requireAuth(event: RequestEvent): NonNullable<App.Locals['session']> {
-	const { locals, url } = event;
-	if (!locals.session) {
-		const redirectTo = url.pathname + url.search;
-		throw redirect(303, '/login?redirect=' + encodeURIComponent(redirectTo));
-	}
-	return locals.session;
+  const { locals, url } = event;
+  if (!locals.session) {
+    const redirectTo = url.pathname + url.search;
+    throw redirect(303, '/login?redirect=' + encodeURIComponent(redirectTo));
+  }
+  return locals.session;
 }
 
 export function requireAuthForAction(locals: App.Locals): NonNullable<App.Locals['session']> {
-	if (!locals.session) {
-		throw redirect(302, '/login');
-	}
-	return locals.session;
+  if (!locals.session) {
+    throw redirect(302, '/login');
+  }
+  return locals.session;
 }
 
 export async function requireMemberForAction(locals: App.Locals, orgKey: string): Promise<NonNullable<App.Locals['session']>> {
-	const session = requireAuthForAction(locals);
-	const headers = getSessionHeaders(session.id);
-	const response = await handleApiCall<Membership[]>(
-		() => apiBuilderClient().getMemberships({ orgKey, userId: session.user.id, limit: 25, offset: 0, headers }),
-	);
-	if (!('data' in response) || response.data.length === 0) {
-		throw error(403, 'Forbidden');
-	}
-	return session;
+  const session = requireAuthForAction(locals);
+  const headers = getSessionHeaders(session.id);
+  const response = await handleApiCall<Membership[]>(() =>
+    apiBuilderClient().getMemberships({ orgKey, userId: session.user.id, limit: 25, offset: 0, headers })
+  );
+  if (!('data' in response) || response.data.length === 0) {
+    throw error(403, 'Forbidden');
+  }
+  return session;
 }
 
 export async function requireAdminForAction(locals: App.Locals, orgKey: string): Promise<NonNullable<App.Locals['session']>> {
-	const session = requireAuthForAction(locals);
-	const headers = getSessionHeaders(session.id);
-	const response = await handleApiCall<Membership[]>(
-		() => apiBuilderClient().getMemberships({ orgKey, userId: session.user.id, role: MembershipRole.Admin, limit: 25, offset: 0, headers }),
-	);
-	if (!('data' in response) || response.data.length === 0) {
-		throw error(403, 'Forbidden');
-	}
-	return session;
+  const session = requireAuthForAction(locals);
+  const headers = getSessionHeaders(session.id);
+  const response = await handleApiCall<Membership[]>(() =>
+    apiBuilderClient().getMemberships({ orgKey, userId: session.user.id, role: MembershipRole.Admin, limit: 25, offset: 0, headers })
+  );
+  if (!('data' in response) || response.data.length === 0) {
+    throw error(403, 'Forbidden');
+  }
+  return session;
 }

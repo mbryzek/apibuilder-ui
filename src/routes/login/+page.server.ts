@@ -7,14 +7,14 @@ import { redirectWithFlash } from '$lib/server/flash';
 import { isTenantSession, type SessionState } from '$generated/com-bryzek-platform';
 
 export const load: PageServerLoad = async ({ locals, url }) => {
-	if (locals.session) {
-		throw redirect(303, '/');
-	}
-	return {
-		githubClientId: config.githubClientId,
-		appBaseUrl: config.appBaseUrl,
-		redirectTo: url.searchParams.get('redirect') || '/',
-	};
+  if (locals.session) {
+    throw redirect(303, '/');
+  }
+  return {
+    githubClientId: config.githubClientId,
+    appBaseUrl: config.appBaseUrl,
+    redirectTo: url.searchParams.get('redirect') || '/'
+  };
 };
 
 /**
@@ -22,45 +22,43 @@ export const load: PageServerLoad = async ({ locals, url }) => {
  * to prevent open-redirect attacks.
  */
 function safeRedirectPath(path: string | null | undefined): string {
-	if (!path || !path.startsWith('/') || path.startsWith('//')) {
-		return '/';
-	}
-	return path;
+  if (!path || !path.startsWith('/') || path.startsWith('//')) {
+    return '/';
+  }
+  return path;
 }
 
 export const actions: Actions = {
-	default: async ({ request, cookies, url }) => {
-		const formData = await request.formData();
-		const email = formData.get('email') as string;
-		const password = formData.get('password') as string;
-		const redirectTo = safeRedirectPath(
-			(formData.get('redirectTo') as string) || url.searchParams.get('redirect')
-		);
+  default: async ({ request, cookies, url }) => {
+    const formData = await request.formData();
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+    const redirectTo = safeRedirectPath((formData.get('redirectTo') as string) || url.searchParams.get('redirect'));
 
-		if (!email || !password) {
-			return fail(400, { errors: [{ message: 'Email and password are required' }] });
-		}
+    if (!email || !password) {
+      return fail(400, { errors: [{ message: 'Email and password are required' }] });
+    }
 
-		const client = clients();
-		const response = await handleApiCall<SessionState>(
-			() => client.platform.createTenantSessionLogins({ tenantId: config.tenantId, body: { email, password }, headers: getSessionHeaders() }),
-		);
+    const client = clients();
+    const response = await handleApiCall<SessionState>(() =>
+      client.platform.createTenantSessionLogins({ tenantId: config.tenantId, body: { email, password }, headers: getSessionHeaders() })
+    );
 
-		if ('data' in response && response.data && isTenantSession(response.data)) {
-			cookies.set(SESSION_COOKIE, response.data.session.id, {
-				path: '/',
-				httpOnly: true,
-				secure: config.isProduction,
-				sameSite: 'lax',
-				maxAge: 60 * 60 * 24 * 365,
-			});
-			redirectWithFlash(redirectTo, 'Welcome back!');
-		}
+    if ('data' in response && response.data && isTenantSession(response.data)) {
+      cookies.set(SESSION_COOKIE, response.data.session.id, {
+        path: '/',
+        httpOnly: true,
+        secure: config.isProduction,
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 365
+      });
+      redirectWithFlash(redirectTo, 'Welcome back!');
+    }
 
-		if ('errors' in response) {
-			return fail(400, { errors: response.errors });
-		}
+    if ('errors' in response) {
+      return fail(400, { errors: response.errors });
+    }
 
-		return fail(500, { errors: [{ message: 'An unexpected error occurred' }] });
-	},
+    return fail(500, { errors: [{ message: 'An unexpected error occurred' }] });
+  }
 };

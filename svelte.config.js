@@ -8,13 +8,13 @@ const config = {
     adapter: adapter({
       routes: {
         include: ['/*'],
-        exclude: ['<all>'],
-      },
+        exclude: ['<all>']
+      }
     }),
     alias: {
-      $generated: 'src/generated',
-    },
-  },
+      $generated: 'src/generated'
+    }
+  }
 };
 
 export default config;

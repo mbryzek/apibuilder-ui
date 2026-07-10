@@ -3,46 +3,46 @@
  * Direct access to generated API clients
  */
 
-import { ApiClient as ApiBuilderClient } from "$generated/com-bryzek-apibuilder";
-import { ApiClient as GeneratorClient } from "$generated/com-bryzek-apibuilder-generator";
-import { ApiClient as PlatformClient } from "$generated/com-bryzek-platform";
-import { config } from "$lib/config";
+import { ApiClient as ApiBuilderClient } from '$generated/com-bryzek-apibuilder';
+import { ApiClient as GeneratorClient } from '$generated/com-bryzek-apibuilder-generator';
+import { ApiClient as PlatformClient } from '$generated/com-bryzek-platform';
+import { config } from '$lib/config';
 
 export { ApiBuilderClient, GeneratorClient, PlatformClient };
 
 export function clients() {
-	return {
-		apibuilder: apiBuilderClient(),
-		platform: platformClient(),
-	};
+  return {
+    apibuilder: apiBuilderClient(),
+    platform: platformClient()
+  };
 }
 
 export function apiBuilderClient(): ApiBuilderClient {
-	return new ApiBuilderClient(config.apiBaseUrl);
+  return new ApiBuilderClient(config.apiBaseUrl);
 }
 
 export function generatorClient(): GeneratorClient {
-	return new GeneratorClient(config.apiBaseUrl);
+  return new GeneratorClient(config.apiBaseUrl);
 }
 
 export function platformClient(): PlatformClient {
-	return new PlatformClient(config.apiBaseUrl);
+  return new PlatformClient(config.apiBaseUrl);
 }
 
 function getRateLimitBypassHeaders(): Record<string, string> {
-	if (!config.isProduction) {
-		return { "X-Bypass-Rate-Limit": "true" };
-	}
-	return {};
+  if (!config.isProduction) {
+    return { 'X-Bypass-Rate-Limit': 'true' };
+  }
+  return {};
 }
 
 export function getSessionHeaders(sessionId?: string): Record<string, string> {
-	const baseHeaders = getRateLimitBypassHeaders();
-	if (!sessionId) {
-		return baseHeaders;
-	}
-	return {
-		...baseHeaders,
-		session_id: sessionId,
-	};
+  const baseHeaders = getRateLimitBypassHeaders();
+  if (!sessionId) {
+    return baseHeaders;
+  }
+  return {
+    ...baseHeaders,
+    session_id: sessionId
+  };
 }

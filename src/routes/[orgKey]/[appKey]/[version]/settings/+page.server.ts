@@ -7,54 +7,54 @@ import { redirectWithFlash } from '$lib/server/flash';
 import type { Application, Visibility } from '$generated/com-bryzek-apibuilder';
 
 export const load: PageServerLoad = async (event) => {
-	requireAuth(event);
-	return {};
+  requireAuth(event);
+  return {};
 };
 
 export const actions: Actions = {
-	updateVisibility: async ({ request, params, locals }) => {
-		const session = await requireAdminForAction(locals, params.orgKey);
-		const headers = getSessionHeaders(session.id);
-		const formData = await request.formData();
-		const client = apiBuilderClient();
+  updateVisibility: async ({ request, params, locals }) => {
+    const session = await requireAdminForAction(locals, params.orgKey);
+    const headers = getSessionHeaders(session.id);
+    const formData = await request.formData();
+    const client = apiBuilderClient();
 
-		const visibility = formData.get('visibility') as string;
-		if (!visibility) {
-			return fail(400, { errors: [{ message: 'Visibility is required' }] });
-		}
+    const visibility = formData.get('visibility') as string;
+    if (!visibility) {
+      return fail(400, { errors: [{ message: 'Visibility is required' }] });
+    }
 
-		const response = await handleApiCall<Application>(
-			() => client.updateApplicationByAppKey({
-				orgKey: params.orgKey,
-				appKey: params.appKey,
-				body: {
-					name: formData.get('name') as string,
-					visibility: visibility as Visibility,
-				},
-				headers,
-			}),
-		);
+    const response = await handleApiCall<Application>(() =>
+      client.updateApplicationByAppKey({
+        orgKey: params.orgKey,
+        appKey: params.appKey,
+        body: {
+          name: formData.get('name') as string,
+          visibility: visibility as Visibility
+        },
+        headers
+      })
+    );
 
-		if ('data' in response) {
-			redirectWithFlash(`/${params.orgKey}/${response.data.key}/${params.version}/settings`, 'Visibility updated');
-		}
+    if ('data' in response) {
+      redirectWithFlash(`/${params.orgKey}/${response.data.key}/${params.version}/settings`, 'Visibility updated');
+    }
 
-		return fail(Math.max(response.status, 400), { errors: 'errors' in response ? response.errors : [{ message: 'Failed to update' }] });
-	},
+    return fail(Math.max(response.status, 400), { errors: 'errors' in response ? response.errors : [{ message: 'Failed to update' }] });
+  },
 
-	deleteApp: async ({ params, locals }) => {
-		const session = await requireAdminForAction(locals, params.orgKey);
-		const headers = getSessionHeaders(session.id);
-		const client = apiBuilderClient();
+  deleteApp: async ({ params, locals }) => {
+    const session = await requireAdminForAction(locals, params.orgKey);
+    const headers = getSessionHeaders(session.id);
+    const client = apiBuilderClient();
 
-		const response = await handleApiCall<void>(
-			() => client.deleteApplicationByAppKey({ orgKey: params.orgKey, appKey: params.appKey, headers }),
-		);
+    const response = await handleApiCall<void>(() =>
+      client.deleteApplicationByAppKey({ orgKey: params.orgKey, appKey: params.appKey, headers })
+    );
 
-		if ('data' in response) {
-			redirectWithFlash(`/${params.orgKey}`, 'Application deleted');
-		}
+    if ('data' in response) {
+      redirectWithFlash(`/${params.orgKey}`, 'Application deleted');
+    }
 
-		return fail(Math.max(response.status, 400), { errors: 'errors' in response ? response.errors : [{ message: 'Failed to delete' }] });
-	},
+    return fail(Math.max(response.status, 400), { errors: 'errors' in response ? response.errors : [{ message: 'Failed to delete' }] });
+  }
 };

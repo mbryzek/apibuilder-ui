@@ -7,19 +7,19 @@ import type { Token } from '$generated/com-bryzek-platform';
 const LIMIT = 25;
 
 export const load: PageServerLoad = async (event) => {
-	const session = requireAuth(event);
-	const headers = getSessionHeaders(session.id);
-	const offset = Number(event.url.searchParams.get('offset') || '0');
+  const session = requireAuth(event);
+  const headers = getSessionHeaders(session.id);
+  const offset = Number(event.url.searchParams.get('offset') || '0');
 
-	const response = await handleApiCall<Token[]>(
-		() => platformClient().getTokensUsersByUserId({ userId: session.user.id, limit: LIMIT, offset, headers }),
-	);
+  const response = await handleApiCall<Token[]>(() =>
+    platformClient().getTokensUsersByUserId({ userId: session.user.id, limit: LIMIT, offset, headers })
+  );
 
-	const tokens = 'data' in response ? response.data : [];
+  const tokens = 'data' in response ? response.data : [];
 
-	return {
-		tokens,
-		offset,
-		hasMore: tokens.length >= LIMIT,
-	};
+  return {
+    tokens,
+    offset,
+    hasMore: tokens.length >= LIMIT
+  };
 };

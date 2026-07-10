@@ -5,18 +5,24 @@ import { handleApiCall } from '$lib/api/error-handler';
 import type { Code } from '$generated/com-bryzek-apibuilder';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
-	const headers = locals.session ? getSessionHeaders(locals.session.id) : {};
+  const headers = locals.session ? getSessionHeaders(locals.session.id) : {};
 
-	const codeResponse = await handleApiCall<Code>(
-		() => apiBuilderClient().getCode({ orgKey: params.orgKey, appKey: params.appKey, version: params.version, generatorKey: params.generatorKey, headers }),
-	);
+  const codeResponse = await handleApiCall<Code>(() =>
+    apiBuilderClient().getCode({
+      orgKey: params.orgKey,
+      appKey: params.appKey,
+      version: params.version,
+      generatorKey: params.generatorKey,
+      headers
+    })
+  );
 
-	if (!('data' in codeResponse)) {
-		throw error(404, 'Generated code not found');
-	}
+  if (!('data' in codeResponse)) {
+    throw error(404, 'Generated code not found');
+  }
 
-	return {
-		code: codeResponse.data,
-		generatorKey: params.generatorKey,
-	};
+  return {
+    code: codeResponse.data,
+    generatorKey: params.generatorKey
+  };
 };

@@ -6,25 +6,23 @@ import type { Item } from '$generated/com-bryzek-apibuilder';
 const LIMIT = 25;
 
 export const load: PageServerLoad = async ({ url, locals }) => {
-	const headers = locals.session ? getSessionHeaders(locals.session.id) : {};
-	const q = url.searchParams.get('q') || '';
-	const offset = Number(url.searchParams.get('offset') || '0');
+  const headers = locals.session ? getSessionHeaders(locals.session.id) : {};
+  const q = url.searchParams.get('q') || '';
+  const offset = Number(url.searchParams.get('offset') || '0');
 
-	let items: Item[] = [];
-	let hasMore = false;
+  let items: Item[] = [];
+  let hasMore = false;
 
-	if (q) {
-		const response = await handleApiCall<Item[]>(
-			() => apiBuilderClient().getItems({ q, limit: LIMIT, offset, headers }),
-		);
-		items = 'data' in response ? response.data : [];
-		hasMore = items.length >= LIMIT;
-	}
+  if (q) {
+    const response = await handleApiCall<Item[]>(() => apiBuilderClient().getItems({ q, limit: LIMIT, offset, headers }));
+    items = 'data' in response ? response.data : [];
+    hasMore = items.length >= LIMIT;
+  }
 
-	return {
-		items,
-		q,
-		offset,
-		hasMore,
-	};
+  return {
+    items,
+    q,
+    offset,
+    hasMore
+  };
 };

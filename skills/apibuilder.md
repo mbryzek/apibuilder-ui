@@ -10,6 +10,7 @@ You are an AI agent building REST APIs. API Builder is your toolkit for defining
 ## When to Use This Skill
 
 Activate when:
+
 - Building a new REST API from requirements
 - Adding endpoints to an existing API
 - Generating client libraries, server stubs, or test mocks
@@ -116,6 +117,7 @@ api
 This auto-detects operations: uploads specs if they exist locally, then generates code. The tool reads `.api/config` for generator mappings.
 
 For specific apps only:
+
 ```bash
 api --app my-service
 ```
@@ -156,29 +158,29 @@ If tests fail, fix your implementation and re-run. The spec is the source of tru
 
 ### Recommended for AI Agents (strongest compiler verification)
 
-| Generator | Key | Output |
-|-----------|-----|--------|
-| Play 2.9 / Scala 3 Client | `bryzek_play_client` | Type-safe HTTP client with models and JSON serialization |
-| Play 2.9 / Scala 3 Model | `bryzek_play_model` | Standalone models with JSON serialization |
-| Play 2.9 / Scala 3 Controller | `bryzek_play_controller` | Abstract controller traits — implement each method |
-| Play 2.9 / Scala 3 Mock Client | `bryzek_play_mock_client` | Mock client sharing real client interface |
-| Play 2.9 / Scala 3 Routes | `bryzek_play_routes` | Play routes file |
-| TypeScript Declarations | `ts_declarations` | TypeScript type definitions |
-| TypeScript SDK | `ts_sdk` | Full TypeScript client |
+| Generator                      | Key                       | Output                                                   |
+| ------------------------------ | ------------------------- | -------------------------------------------------------- |
+| Play 2.9 / Scala 3 Client      | `bryzek_play_client`      | Type-safe HTTP client with models and JSON serialization |
+| Play 2.9 / Scala 3 Model       | `bryzek_play_model`       | Standalone models with JSON serialization                |
+| Play 2.9 / Scala 3 Controller  | `bryzek_play_controller`  | Abstract controller traits — implement each method       |
+| Play 2.9 / Scala 3 Mock Client | `bryzek_play_mock_client` | Mock client sharing real client interface                |
+| Play 2.9 / Scala 3 Routes      | `bryzek_play_routes`      | Play routes file                                         |
+| TypeScript Declarations        | `ts_declarations`         | TypeScript type definitions                              |
+| TypeScript SDK                 | `ts_sdk`                  | Full TypeScript client                                   |
 
 ### Additional Generators
 
-| Generator | Key |
-|-----------|-----|
-| Http4s 0.23 Client | `http4s_0_23` |
-| Scala Models | `scala_models` |
-| Anorm Parsers | `anorm_2_9_scala_3_parsers` |
-| Go Client | `go_1_5_client` |
+| Generator             | Key                            |
+| --------------------- | ------------------------------ |
+| Http4s 0.23 Client    | `http4s_0_23`                  |
+| Scala Models          | `scala_models`                 |
+| Anorm Parsers         | `anorm_2_9_scala_3_parsers`    |
+| Go Client             | `go_1_5_client`                |
 | Java Spring WebClient | `java_spring_webclient_client` |
-| Elm v2 | `elm_v2` |
-| PostgreSQL DDL | `psql_ddl` |
-| OpenAPI 3 | `openapi_3` |
-| JSON Schema | `json_schema` |
+| Elm v2                | `elm_v2`                       |
+| PostgreSQL DDL        | `psql_ddl`                     |
+| OpenAPI 3             | `openapi_3`                    |
+| JSON Schema           | `json_schema`                  |
 
 ## .api/config Format
 
@@ -198,6 +200,7 @@ my-org:
 ## Using Spec Data for UX Planning
 
 The spec explicitly defines every data shape. Use it as input for UX planning:
+
 - Read `models` to understand what data exists and its types
 - Read `resources` and `operations` to understand available actions
 - Read `enums` to understand constrained value sets
@@ -207,8 +210,8 @@ This makes the spec the single source of truth for both API implementation AND f
 
 ## Common Errors
 
-| Error | Cause | Fix |
-|-------|-------|-----|
-| `Resource type[X] not found` | Resource name doesn't match a local model/enum | Ensure the resource key matches a defined model |
-| `Unrecognized element[type]` | Extra `"type"` field in resource definition | Remove the `"type"` field from resources |
-| Type mismatch on compile | Implementation doesn't match generated interface | Read the compiler error — it tells you the expected type |
+| Error                        | Cause                                            | Fix                                                      |
+| ---------------------------- | ------------------------------------------------ | -------------------------------------------------------- |
+| `Resource type[X] not found` | Resource name doesn't match a local model/enum   | Ensure the resource key matches a defined model          |
+| `Unrecognized element[type]` | Extra `"type"` field in resource definition      | Remove the `"type"` field from resources                 |
+| Type mismatch on compile     | Implementation doesn't match generated interface | Read the compiler error — it tells you the expected type |

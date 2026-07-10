@@ -17,7 +17,7 @@ export default defineConfig({
 
   timeout: 60000,
   expect: {
-    timeout: 30000,
+    timeout: 30000
   },
 
   fullyParallel: true,
@@ -31,7 +31,7 @@ export default defineConfig({
   reporter: [
     ['list'],
     ['html', { outputFolder: `${TEST_RUN_DIR}/html-report` }],
-    ['json', { outputFile: `${TEST_RUN_DIR}/test-results.json` }],
+    ['json', { outputFile: `${TEST_RUN_DIR}/test-results.json` }]
   ],
 
   use: {
@@ -45,7 +45,7 @@ export default defineConfig({
 
     navigationTimeout: 60000,
 
-    actionTimeout: 30000,
+    actionTimeout: 30000
   },
 
   projects: [
@@ -55,9 +55,9 @@ export default defineConfig({
         ...devices['Desktop Chrome'],
         viewport: { width: 1920, height: 1080 },
         launchOptions: {
-          slowMo: HEADLESS ? 0 : 50,
-        },
-      },
-    },
-  ],
+          slowMo: HEADLESS ? 0 : 50
+        }
+      }
+    }
+  ]
 });

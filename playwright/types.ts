@@ -2,7 +2,7 @@
  * TypeScript Type Definitions for API Builder UI Tests
  */
 
-import type { BrowserContext, Page } from "@playwright/test";
+import type { BrowserContext, Page } from '@playwright/test';
 
 /**
  * Browser configuration options

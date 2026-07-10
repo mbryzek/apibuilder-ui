@@ -26,9 +26,7 @@ export const config: TestConfig = {
 
   SCREENSHOTS: {
     enabled: process.env['SCREENSHOTS'] === 'true',
-    path: process.env['TEST_RUN_DIR']
-      ? `${process.env['TEST_RUN_DIR']}/screenshots`
-      : '/tmp/playwright-apibuilder-screenshots',
+    path: process.env['TEST_RUN_DIR'] ? `${process.env['TEST_RUN_DIR']}/screenshots` : '/tmp/playwright-apibuilder-screenshots',
     fullPage: true
   }
 };
