@@ -7,62 +7,62 @@ import { redirectWithFlash } from '$lib/server/flash';
 import type { Watch } from '$generated/com-bryzek-apibuilder';
 
 export const load: PageServerLoad = async () => {
-	// Data already loaded by layout
-	return {};
+  // Data already loaded by layout
+  return {};
 };
 
 export const actions: Actions = {
-	watch: async ({ params, locals }) => {
-		const session = requireAuthForAction(locals);
-		const headers = getSessionHeaders(session.id);
-		const client = apiBuilderClient();
+  watch: async ({ params, locals }) => {
+    const session = requireAuthForAction(locals);
+    const headers = getSessionHeaders(session.id);
+    const client = apiBuilderClient();
 
-		const response = await handleApiCall<Watch>(
-			() => client.createWatch({
-				body: {
-					user_id: session.user.id,
-					organization_key: params.orgKey,
-					application_key: params.appKey,
-				},
-				headers,
-			}),
-		);
+    const response = await handleApiCall<Watch>(() =>
+      client.createWatch({
+        body: {
+          user_id: session.user.id,
+          organization_key: params.orgKey,
+          application_key: params.appKey
+        },
+        headers
+      })
+    );
 
-		if ('data' in response) {
-			throw redirect(303, `/${params.orgKey}/${params.appKey}/${params.version}`);
-		}
+    if ('data' in response) {
+      throw redirect(303, `/${params.orgKey}/${params.appKey}/${params.version}`);
+    }
 
-		return fail(400, { errors: 'errors' in response ? response.errors : [{ message: 'Failed to watch' }] });
-	},
+    return fail(400, { errors: 'errors' in response ? response.errors : [{ message: 'Failed to watch' }] });
+  },
 
-	unwatch: async ({ params, locals, request }) => {
-		const session = requireAuthForAction(locals);
-		const headers = getSessionHeaders(session.id);
-		const client = apiBuilderClient();
+  unwatch: async ({ params, locals, request }) => {
+    const session = requireAuthForAction(locals);
+    const headers = getSessionHeaders(session.id);
+    const client = apiBuilderClient();
 
-		const formData = await request.formData();
-		const watchGuid = formData.get('watch_guid') as string;
+    const formData = await request.formData();
+    const watchGuid = formData.get('watch_guid') as string;
 
-		if (watchGuid) {
-			await handleApiCall<void>(() => client.deleteWatchById(watchGuid, { headers }));
-		}
+    if (watchGuid) {
+      await handleApiCall<void>(() => client.deleteWatchById(watchGuid, { headers }));
+    }
 
-		throw redirect(303, `/${params.orgKey}/${params.appKey}/${params.version}`);
-	},
+    throw redirect(303, `/${params.orgKey}/${params.appKey}/${params.version}`);
+  },
 
-	deleteVersion: async ({ params, locals }) => {
-		const session = await requireMemberForAction(locals, params.orgKey);
-		const headers = getSessionHeaders(session.id);
-		const client = apiBuilderClient();
+  deleteVersion: async ({ params, locals }) => {
+    const session = await requireMemberForAction(locals, params.orgKey);
+    const headers = getSessionHeaders(session.id);
+    const client = apiBuilderClient();
 
-		const response = await handleApiCall<void>(
-			() => client.deleteVersionByVersion({ orgKey: params.orgKey, appKey: params.appKey, version: params.version, headers }),
-		);
+    const response = await handleApiCall<void>(() =>
+      client.deleteVersionByVersion({ orgKey: params.orgKey, appKey: params.appKey, version: params.version, headers })
+    );
 
-		if ('data' in response) {
-			redirectWithFlash(`/${params.orgKey}/${params.appKey}/latest`, 'Version deleted');
-		}
+    if ('data' in response) {
+      redirectWithFlash(`/${params.orgKey}/${params.appKey}/latest`, 'Version deleted');
+    }
 
-		return fail(400, { errors: 'errors' in response ? response.errors : [{ message: 'Failed to delete version' }] });
-	},
+    return fail(400, { errors: 'errors' in response ? response.errors : [{ message: 'Failed to delete version' }] });
+  }
 };

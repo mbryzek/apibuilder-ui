@@ -3,7 +3,7 @@
  * Runs once before all tests to verify dependencies
  */
 
-import { config } from "./config";
+import { config } from './config';
 
 interface ServerCheck {
   name: string;
@@ -18,7 +18,7 @@ async function checkServer(check: ServerCheck): Promise<boolean> {
 
     const response = await fetch(check.url, {
       signal: controller.signal,
-      method: "GET",
+      method: 'GET'
     });
 
     clearTimeout(timeoutId);
@@ -32,8 +32,8 @@ async function checkServer(check: ServerCheck): Promise<boolean> {
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
 
-    console.error("");
-    if (errorMessage.includes("ECONNREFUSED")) {
+    console.error('');
+    if (errorMessage.includes('ECONNREFUSED')) {
       console.error(`  ${check.name} connection refused: ${check.url}`);
       console.error(`   ${check.description}`);
     } else {
@@ -46,37 +46,35 @@ async function checkServer(check: ServerCheck): Promise<boolean> {
 }
 
 export default async function globalSetup() {
-  if (process.env['SKIP_DEPENDENCY_CHECK'] === "true") {
-    console.log(
-      "\n  Skipping server dependency check (SKIP_DEPENDENCY_CHECK=true)\n",
-    );
+  if (process.env['SKIP_DEPENDENCY_CHECK'] === 'true') {
+    console.log('\n  Skipping server dependency check (SKIP_DEPENDENCY_CHECK=true)\n');
     return;
   }
 
   const servers: ServerCheck[] = [
     {
-      name: "Frontend",
+      name: 'Frontend',
       url: config.FRONTEND_BASE_URL,
-      description: "Start frontend with: npm run dev",
+      description: 'Start frontend with: npm run dev'
     },
     {
-      name: "Platform API",
+      name: 'Platform API',
       url: `${config.API_BASE_URL}/_internal_/healthcheck`,
-      description: "Start platform with: cd ~/code/platform; ./run.sh; sbt 'project api; run'",
-    },
+      description: "Start platform with: cd ~/code/platform; ./run.sh; sbt 'project api; run'"
+    }
   ];
 
   const results = await Promise.all(
     servers.map(async (server) => ({
       server,
-      isRunning: await checkServer(server),
-    })),
+      isRunning: await checkServer(server)
+    }))
   );
 
   const failedServers = results.filter((r) => !r.isRunning);
 
   if (failedServers.length > 0) {
-    console.error("\nThe following servers are not running:\n");
+    console.error('\nThe following servers are not running:\n');
 
     failedServers.forEach(({ server }) => {
       console.error(`  ${server.name}: ${server.url}`);

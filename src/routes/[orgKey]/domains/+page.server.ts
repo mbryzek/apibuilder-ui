@@ -6,54 +6,50 @@ import { requireAuth, requireAdminForAction } from '$lib/server/auth';
 import type { Domain } from '$generated/com-bryzek-apibuilder';
 
 export const load: PageServerLoad = async (event) => {
-	requireAuth(event);
-	return {};
+  requireAuth(event);
+  return {};
 };
 
 export const actions: Actions = {
-	addDomain: async ({ request, params, locals }) => {
-		const session = await requireAdminForAction(locals, params.orgKey);
-		const headers = getSessionHeaders(session.id);
-		const formData = await request.formData();
-		const name = (formData.get('name') as string)?.trim();
+  addDomain: async ({ request, params, locals }) => {
+    const session = await requireAdminForAction(locals, params.orgKey);
+    const headers = getSessionHeaders(session.id);
+    const formData = await request.formData();
+    const name = (formData.get('name') as string)?.trim();
 
-		if (!name) {
-			return fail(400, { errors: [{ message: 'Domain name is required' }] });
-		}
+    if (!name) {
+      return fail(400, { errors: [{ message: 'Domain name is required' }] });
+    }
 
-		const response = await handleApiCall<Domain>(
-			() => apiBuilderClient().createDomain({ orgKey: params.orgKey, body: { name }, headers }),
-		);
+    const response = await handleApiCall<Domain>(() => apiBuilderClient().createDomain({ orgKey: params.orgKey, body: { name }, headers }));
 
-		if ('data' in response) {
-			return { success: true };
-		}
+    if ('data' in response) {
+      return { success: true };
+    }
 
-		if ('errors' in response) {
-			return fail(400, { errors: response.errors });
-		}
+    if ('errors' in response) {
+      return fail(400, { errors: response.errors });
+    }
 
-		return fail(500, { errors: [{ message: 'An unexpected error occurred' }] });
-	},
+    return fail(500, { errors: [{ message: 'An unexpected error occurred' }] });
+  },
 
-	removeDomain: async ({ request, params, locals }) => {
-		const session = await requireAdminForAction(locals, params.orgKey);
-		const headers = getSessionHeaders(session.id);
-		const formData = await request.formData();
-		const name = formData.get('name');
+  removeDomain: async ({ request, params, locals }) => {
+    const session = await requireAdminForAction(locals, params.orgKey);
+    const headers = getSessionHeaders(session.id);
+    const formData = await request.formData();
+    const name = formData.get('name');
 
-		if (!name || typeof name !== 'string') {
-			return fail(400, { errors: [{ message: 'Invalid request' }] });
-		}
+    if (!name || typeof name !== 'string') {
+      return fail(400, { errors: [{ message: 'Invalid request' }] });
+    }
 
-		const response = await handleApiCall<void>(
-			() => apiBuilderClient().deleteDomainByName({ orgKey: params.orgKey, name, headers }),
-		);
+    const response = await handleApiCall<void>(() => apiBuilderClient().deleteDomainByName({ orgKey: params.orgKey, name, headers }));
 
-		if ('errors' in response) {
-			return fail(400, { errors: response.errors });
-		}
+    if ('errors' in response) {
+      return fail(400, { errors: response.errors });
+    }
 
-		return { success: true };
-	},
+    return { success: true };
+  }
 };

@@ -17,21 +17,16 @@ export type FlashType = 'success' | 'error' | 'info';
  * only to parse/rebuild the query string; it is never emitted.
  */
 export function buildFlashUrl(path: string, message: string, type: FlashType = 'success'): string {
-	const url = new URL(path, 'http://localhost');
-	url.searchParams.set('flash', message);
-	url.searchParams.set('flash_type', type);
-	return url.pathname + url.search;
+  const url = new URL(path, 'http://localhost');
+  url.searchParams.set('flash', message);
+  url.searchParams.set('flash_type', type);
+  return url.pathname + url.search;
 }
 
 /**
  * Throw a SvelteKit redirect (303 by default) to `path` with a flash message attached.
  * Never returns.
  */
-export function redirectWithFlash(
-	path: string,
-	message: string,
-	type: FlashType = 'success',
-	status: 302 | 303 = 303,
-): never {
-	throw redirect(status, buildFlashUrl(path, message, type));
+export function redirectWithFlash(path: string, message: string, type: FlashType = 'success', status: 302 | 303 = 303): never {
+  throw redirect(status, buildFlashUrl(path, message, type));
 }

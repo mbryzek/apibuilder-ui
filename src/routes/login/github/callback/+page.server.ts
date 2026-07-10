@@ -8,40 +8,36 @@ import { env } from '$env/dynamic/private';
 import type { Authentication } from '$generated/com-bryzek-apibuilder';
 
 export const load: PageServerLoad = async ({ url, cookies }) => {
-	const code = url.searchParams.get('code');
+  const code = url.searchParams.get('code');
 
-	if (!code) {
-		redirectWithFlash('/login', 'GitHub authentication failed: no code provided', 'error');
-	}
+  if (!code) {
+    redirectWithFlash('/login', 'GitHub authentication failed: no code provided', 'error');
+  }
 
-	const githubClientSecret = env['GITHUB_CLIENT_SECRET'] || '';
+  const githubClientSecret = env['GITHUB_CLIENT_SECRET'] || '';
 
-	let accessToken: string;
-	try {
-		accessToken = await exchangeGithubCode(code, githubClientSecret);
-	} catch (err) {
-		const msg = err instanceof Error ? err.message : 'Failed to exchange GitHub code';
-		redirectWithFlash('/login', msg, 'error');
-	}
+  let accessToken: string;
+  try {
+    accessToken = await exchangeGithubCode(code, githubClientSecret);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Failed to exchange GitHub code';
+    redirectWithFlash('/login', msg, 'error');
+  }
 
-	const response = await handleApiCall<Authentication>(
-		() => apiBuilderClient().createGithubAuthForm({ body: { token: accessToken } }),
-	);
+  const response = await handleApiCall<Authentication>(() => apiBuilderClient().createGithubAuthForm({ body: { token: accessToken } }));
 
-	if ('data' in response && response.data) {
-		cookies.set(SESSION_COOKIE, response.data.session.id, {
-			path: '/',
-			httpOnly: true,
-			secure: config.isProduction,
-			sameSite: 'lax',
-			maxAge: 60 * 60 * 24 * 365,
-		});
-		redirectWithFlash('/', 'Welcome!');
-	}
+  if ('data' in response && response.data) {
+    cookies.set(SESSION_COOKIE, response.data.session.id, {
+      path: '/',
+      httpOnly: true,
+      secure: config.isProduction,
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 365
+    });
+    redirectWithFlash('/', 'Welcome!');
+  }
 
-	const errorMsg = 'errors' in response && response.errors.length > 0
-		? response.errors[0]!.message
-		: 'GitHub authentication failed';
+  const errorMsg = 'errors' in response && response.errors.length > 0 ? response.errors[0]!.message : 'GitHub authentication failed';
 
-	redirectWithFlash('/login', errorMsg, 'error');
+  redirectWithFlash('/login', errorMsg, 'error');
 };

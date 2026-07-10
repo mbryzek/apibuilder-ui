@@ -644,33 +644,33 @@ Every generator produces a single, self-contained file your agent can drop into 
 
 #### TypeScript
 
-| Generator | Key | Description |
-|-----------|-----|-------------|
+| Generator  | Key          | Description                                                        |
+| ---------- | ------------ | ------------------------------------------------------------------ |
 | TypeScript | `typescript` | Full client SDK with type definitions, API client, and error types |
 
 #### Scala (Play Framework)
 
-| Generator | Key | Description |
-|-----------|-----|-------------|
-| Play Model | `bryzek_play_model` | Case classes, enums, and JSON serialization |
-| Play Client | `bryzek_play_client` | Type-safe HTTP client with models |
-| Play Controller | `bryzek_play_controller` | Abstract controller traits for server implementation |
-| Play Routes | `bryzek_play_routes` | Play routes file entries for each operation |
-| Play Mock Model | `bryzek_play_mock_model` | Factory methods for generating test data |
-| Play Mock Client | `bryzek_play_mock_client` | Mock client for testing without HTTP |
+| Generator        | Key                       | Description                                          |
+| ---------------- | ------------------------- | ---------------------------------------------------- |
+| Play Model       | `bryzek_play_model`       | Case classes, enums, and JSON serialization          |
+| Play Client      | `bryzek_play_client`      | Type-safe HTTP client with models                    |
+| Play Controller  | `bryzek_play_controller`  | Abstract controller traits for server implementation |
+| Play Routes      | `bryzek_play_routes`      | Play routes file entries for each operation          |
+| Play Mock Model  | `bryzek_play_mock_model`  | Factory methods for generating test data             |
+| Play Mock Client | `bryzek_play_mock_client` | Mock client for testing without HTTP                 |
 
 #### Elm
 
-| Generator | Key | Description |
-|-----------|-----|-------------|
-| Elm | `elm_v2` | Fully typed models, decoders, encoders, and HTTP operations |
+| Generator | Key      | Description                                                 |
+| --------- | -------- | ----------------------------------------------------------- |
+| Elm       | `elm_v2` | Fully typed models, decoders, encoders, and HTTP operations |
 
 #### PostgreSQL
 
-| Generator | Key | Description |
-|-----------|-----|-------------|
+| Generator | Key          | Description                                                  |
+| --------- | ------------ | ------------------------------------------------------------ |
 | Scala DAO | `psql_scala` | Scala DAO classes with type-safe queries and CRUD operations |
-| DDL | `psql_ddl` | PostgreSQL table definitions, indexes, and constraints |
+| DDL       | `psql_ddl`   | PostgreSQL table definitions, indexes, and constraints       |
 
 ### Using Generators in .api/config
 
@@ -846,11 +846,13 @@ Generated clients include a `Bindables` object with implicits to automatically b
 Enums are first-class objects in routes. When a path or parameter includes an enumeration, Play automatically validates the value and returns an error page listing valid types if the value is invalid. To enable this:
 
 1. Import play keys:
+
    ```scala
    import play.PlayImport.PlayKeys._
    ```
 
 2. Enable plugin:
+
    ```scala
    enablePlugins(PlayScala)
    ```
@@ -939,20 +941,24 @@ The fastest way to learn API Builder is by studying real specifications. These s
 ### API Builder Services
 
 **apibuilder-api** — The core API that powers app.apibuilder.io — organizations, applications, versions, and code generation.
+
 - [Documentation](https://app.apibuilder.io/apicollective/apibuilder-api/latest)
 - [Source (api.json)](https://github.com/apicollective/apibuilder/blob/main/spec/apibuilder-api.json)
 
 **apibuilder-spec** — The specification format itself — defines the structure of api.json files.
+
 - [Documentation](https://app.apibuilder.io/apicollective/apibuilder-spec/latest)
 - [Source (api.json)](https://github.com/apicollective/apibuilder/blob/main/spec/apibuilder-spec.json)
 
 **apibuilder-generator** — The code generation service — accepts a service description, returns generated code.
+
 - [Documentation](https://app.apibuilder.io/apicollective/apibuilder-generator/latest)
 - [Source (api.json)](https://github.com/apicollective/apibuilder/blob/main/spec/apibuilder-generator.json)
 
 ### Generated Code Examples
 
 Working examples showing generated output across multiple languages and frameworks:
+
 - [apibuilder-examples on GitHub](https://github.com/apicollective/apibuilder-examples) — GraphQL, TypeScript, Scala, and more
 
 ---

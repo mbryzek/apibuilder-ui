@@ -5,61 +5,64 @@ import { SESSION_COOKIE, config } from '$lib/config';
 import type { TenantSession } from '$generated/com-bryzek-platform';
 
 export const handle: Handle = async ({ event, resolve }) => {
-	const sessionId = event.cookies.get(SESSION_COOKIE) || undefined;
+  const sessionId = event.cookies.get(SESSION_COOKIE) || undefined;
 
-	if (sessionId) {
-		const client = clients();
-		let sessionInvalid = false;
-		const response = await handleApiCall<TenantSession>(
-			() => client.platform.getTenantSession(config.tenantId, { headers: getSessionHeaders(sessionId) }),
-			{
-				onUnauthorized: () => {
-					event.cookies.delete(SESSION_COOKIE, { path: '/' });
-					event.locals.session = undefined;
-					sessionInvalid = true;
-				},
-			},
-		);
+  if (sessionId) {
+    const client = clients();
+    let sessionInvalid = false;
+    const response = await handleApiCall<TenantSession>(
+      () => client.platform.getTenantSession(config.tenantId, { headers: getSessionHeaders(sessionId) }),
+      {
+        onUnauthorized: () => {
+          event.cookies.delete(SESSION_COOKIE, { path: '/' });
+          event.locals.session = undefined;
+          sessionInvalid = true;
+        }
+      }
+    );
 
-		if (sessionInvalid) {
-			const redirectTo = event.url.pathname + event.url.search;
-			throw redirect(303, '/login?redirect=' + encodeURIComponent(redirectTo));
-		}
+    if (sessionInvalid) {
+      const redirectTo = event.url.pathname + event.url.search;
+      throw redirect(303, '/login?redirect=' + encodeURIComponent(redirectTo));
+    }
 
-		if ('data' in response && response.data) {
-			event.locals.session = {
-				id: sessionId,
-				user: response.data.user,
-			};
-		} else {
-			event.locals.session = undefined;
-		}
-	} else {
-		event.locals.session = undefined;
-	}
+    if ('data' in response && response.data) {
+      event.locals.session = {
+        id: sessionId,
+        user: response.data.user
+      };
+    } else {
+      event.locals.session = undefined;
+    }
+  } else {
+    event.locals.session = undefined;
+  }
 
-	const res = await resolve(event);
+  const res = await resolve(event);
 
-	res.headers.set('X-Frame-Options', 'DENY');
-	res.headers.set('X-Content-Type-Options', 'nosniff');
-	res.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-	res.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  res.headers.set('X-Frame-Options', 'DENY');
+  res.headers.set('X-Content-Type-Options', 'nosniff');
+  res.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
 
-	if (config.isProduction) {
-		res.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
-	}
+  if (config.isProduction) {
+    res.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+  }
 
-	res.headers.set('Content-Security-Policy', [
-		"default-src 'self'",
-		"script-src 'self' 'unsafe-inline'",
-		"style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-		"font-src 'self' https://fonts.gstatic.com",
-		"img-src 'self' data: https:",
-		"connect-src 'self' " + config.apiBaseUrl,
-		"frame-ancestors 'none'",
-		"base-uri 'self'",
-		"form-action 'self'",
-	].join('; '));
+  res.headers.set(
+    'Content-Security-Policy',
+    [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline'",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "font-src 'self' https://fonts.gstatic.com",
+      "img-src 'self' data: https:",
+      "connect-src 'self' " + config.apiBaseUrl,
+      "frame-ancestors 'none'",
+      "base-uri 'self'",
+      "form-action 'self'"
+    ].join('; ')
+  );
 
-	return res;
+  return res;
 };

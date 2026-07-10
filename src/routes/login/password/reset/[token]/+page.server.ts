@@ -2,5 +2,5 @@ import type { PageServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
 
 export const load: PageServerLoad = async ({ params }) => {
-	throw redirect(301, `/login/reset-password/${params.token}`);
+  throw redirect(301, `/login/reset-password/${params.token}`);
 };

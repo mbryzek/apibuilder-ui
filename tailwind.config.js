@@ -11,13 +11,13 @@ export default {
         'ab-light-gray': '#f7fafc',
         'ab-dark-gray': '#444444',
         'ab-error-red': '#e53e3e',
-        'ab-success-green': '#38a169',
+        'ab-success-green': '#38a169'
       },
       fontFamily: {
         sans: ['Poppins', 'system-ui', '-apple-system', 'sans-serif'],
-        mono: ['JetBrains Mono', 'Menlo', 'monospace'],
-      },
-    },
+        mono: ['JetBrains Mono', 'Menlo', 'monospace']
+      }
+    }
   },
-  plugins: [require('@tailwindcss/forms')],
+  plugins: [require('@tailwindcss/forms')]
 };
