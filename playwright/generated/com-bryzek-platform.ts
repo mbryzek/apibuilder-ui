@@ -128,6 +128,12 @@ export interface LoginForm {
   password: string;
 }
 
+export interface LoginLinkRequestForm {
+  email: string;
+  /** Relative path on the tenant frontend to land on after the token exchange; validated server-side (relative-only). */
+  return_url?: string;
+}
+
 /**
  * Form to request a phone login code via SMS
  */
@@ -401,6 +407,12 @@ export interface CreateTenantSessionPasswordAndResetsOptions {
   headers?: Record<string, string>;
 }
 
+export interface CreateTenantSessionLoginAndLinkAndRequestsOptions {
+  tenantId: string;
+  body: LoginLinkRequestForm;
+  headers?: Record<string, string>;
+}
+
 export interface CreateTenantSessionLoginAndPhoneAndRequestsOptions {
   tenantId: string;
   body: LoginPhoneRequestForm;
@@ -629,6 +641,30 @@ export class ApiClient {
 
   async createTenantSessionPasswordAndResets(params: CreateTenantSessionPasswordAndResetsOptions): Promise<void> {
     const url = `${this.baseUrl}/tenant/${params.tenantId}/session/password/resets`;
+
+      const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(params.headers || {}),
+      },
+      body: JSON.stringify(params.body),
+    });
+
+    if (response.status === 204) {
+      return;
+    }
+
+    if (response.status === 422) {
+      throw new ValidationErrorsResponse(response);
+    }
+
+    throw new ApiException(response, `Request failed with status ${response.status}`);
+
+  }
+
+  async createTenantSessionLoginAndLinkAndRequests(params: CreateTenantSessionLoginAndLinkAndRequestsOptions): Promise<void> {
+    const url = `${this.baseUrl}/tenant/${params.tenantId}/session/login/link/requests`;
 
       const response = await fetch(url, {
       method: 'POST',
