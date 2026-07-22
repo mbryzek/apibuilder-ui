@@ -9,12 +9,18 @@ export const GET: RequestHandler = async ({ params, locals, url }) => {
 
   const optionalFields = url.searchParams.get('optional_fields') === 'true';
 
-  const queryParts: string[] = [];
+  // Encode each path segment: org/app/version/typeName come from the request URL and
+  // can contain characters (e.g. '.' in a version, or a namespaced type name) that must
+  // not be interpolated raw into the upstream URL.
+  const path = [params.orgKey, params.appKey, params.version, 'example', params.typeName]
+    .map((segment) => encodeURIComponent(segment))
+    .join('/');
+  const query = new URLSearchParams();
   if (optionalFields) {
-    queryParts.push('optional_fields=true');
+    query.set('optional_fields', 'true');
   }
-  const queryString = queryParts.length > 0 ? '?' + queryParts.join('&') : '';
-  const fetchUrl = `${config.apiBaseUrl}/apibuilder/${params.orgKey}/${params.appKey}/${params.version}/example/${params.typeName}${queryString}`;
+  const queryString = query.toString();
+  const fetchUrl = `${config.apiBaseUrl}/apibuilder/${path}${queryString ? `?${queryString}` : ''}`;
 
   const response = await fetch(fetchUrl, {
     method: 'GET',
@@ -28,7 +34,7 @@ export const GET: RequestHandler = async ({ params, locals, url }) => {
     throw error(404, 'Example not found');
   }
 
-  const data = await response.json();
+  const data: unknown = await response.json();
 
   return new Response(JSON.stringify(data, null, 2), {
     headers: {
