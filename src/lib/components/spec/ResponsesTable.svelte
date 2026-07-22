@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Response, Service } from '$generated/com-bryzek-apibuilder-spec';
   import TypeLink from './TypeLink.svelte';
+  import { getStatusCode, getStatusColorClass } from './responseCode';
 
   interface Props {
     responses: Response[];
@@ -8,24 +9,6 @@
   }
 
   let { responses, service }: Props = $props();
-
-  function getStatusCode(response: Response): string {
-    if (response.code.integer) {
-      return String(response.code.integer.value);
-    }
-    if (response.code.response_code_option) {
-      return response.code.response_code_option.value;
-    }
-    return '???';
-  }
-
-  function getStatusColorClass(code: string): string {
-    if (code.startsWith('2')) return 'bg-green-100 text-green-800';
-    if (code.startsWith('3')) return 'bg-blue-100 text-blue-800';
-    if (code.startsWith('4')) return 'bg-yellow-100 text-yellow-800';
-    if (code.startsWith('5')) return 'bg-red-100 text-red-800';
-    return 'bg-gray-100 text-gray-800';
-  }
 </script>
 
 {#if responses.length > 0}
