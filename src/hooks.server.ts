@@ -2,6 +2,7 @@ import { type Handle } from '@sveltejs/kit';
 import { clients, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { SESSION_COOKIE, config } from '$lib/config';
+import { clearSessionCookie } from '$lib/server/session';
 import type { TenantSession } from '$generated/com-bryzek-platform';
 
 export const handle: Handle = async ({ event, resolve }) => {
@@ -18,7 +19,7 @@ export const handle: Handle = async ({ event, resolve }) => {
           // routes (e.g. /doc/*, home, /generators) just because they carry an expired
           // cookie. Protected routes enforce auth in their own load via requireAuth(),
           // which produces the correct /login?redirect=<path> only when actually needed.
-          event.cookies.delete(SESSION_COOKIE, { path: '/' });
+          clearSessionCookie(event.cookies);
           event.locals.session = undefined;
         }
       }
