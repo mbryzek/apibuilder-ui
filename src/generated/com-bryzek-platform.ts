@@ -41,6 +41,11 @@ export enum SportRatingSystem {
   TennisNtrp = 'tennis_ntrp',
 }
 
+export enum Subproject {
+  Platform = 'platform',
+  Playbook = 'playbook',
+}
+
 export enum TimeZone {
   AmericaNewYork = 'america_new_york',
   AmericaChicago = 'america_chicago',
@@ -132,6 +137,14 @@ export interface Email {
 
 export interface EmailVerification {
 
+}
+
+/**
+ * A feature enabled for the current session (already role-filtered). Returned on tenant_session.
+ */
+export interface EnabledFeature {
+  subproject: Subproject;
+  feature: string;
 }
 
 export interface LoginForm {
@@ -282,6 +295,8 @@ export interface TenantSession {
   user: User;
   tenant: TenantSummary;
   impersonated_by?: UserReference;
+  /** User-features enabled for this tenant AND this session user's role. Clients match subproject+feature against their generated feature enum (e.g. clubaid_feature). System features are never included. */
+  enabled_features: EnabledFeature[];
 }
 
 export interface TenantSummary {
