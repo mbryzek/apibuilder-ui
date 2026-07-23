@@ -162,7 +162,7 @@ export interface Resource {
 }
 
 export interface Response {
-  code: any;
+  code: number;
   type: string;
   description?: string;
   attributes: Record<string, any>;

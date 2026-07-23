@@ -2,27 +2,9 @@ import type { Response } from '$generated/com-bryzek-apibuilder-spec';
 
 /**
  * Formats an apibuilder response code for display.
- *
- * The backend serializes `code` as a bare JSON value — a number (e.g. `200`) for
- * status codes, or the string `"default"` — not as a wrapped `response_code` union.
- * We still accept the wrapped `{ integer: { value } }` / `{ response_code_option: { value } }`
- * form for forward compatibility. Falls back to `'???'` for anything unrecognized.
  */
 export function getStatusCode(response: Response): string {
-  const code = response.code;
-  if (typeof code === 'number') {
-    return String(code);
-  }
-  if (typeof code === 'string') {
-    return code;
-  }
-  if (code?.integer) {
-    return String(code.integer.value);
-  }
-  if (code?.response_code_option) {
-    return code.response_code_option.value;
-  }
-  return '???';
+  return String(response.code);
 }
 
 export function getStatusColorClass(code: string): string {
