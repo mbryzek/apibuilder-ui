@@ -12,7 +12,6 @@
       isAdmin: boolean;
       version: { version: string };
       service: Service;
-      versions: { version: string }[];
       isWatching: boolean;
       watchGuid?: string;
       session?: { id: string; user: { id: string; person: { email?: { address: string } } } };

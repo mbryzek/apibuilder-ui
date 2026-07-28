@@ -65,11 +65,6 @@ export interface ApplicationMetadataVersion {
   version?: ISODateTimeString;
 }
 
-export interface Authentication {
-  user: User;
-  session: Session;
-}
-
 export interface Change {
   id: string;
   organization: Organization;
@@ -97,10 +92,6 @@ export interface CodeFile {
 
 export interface Domain {
   name: string;
-}
-
-export interface GithubAuthForm {
-  token: string;
 }
 
 export interface Item {
@@ -247,8 +238,8 @@ export function parseVersionIdentifier(value: string): VersionIdentifier {
 // API Client
 // ============================================================================
 
-import { VoidResponse } from './generated-error-void-response.ts';
 import { UnauthorizedErrorResponse } from './generated-error-unauthorized-error-response.ts';
+import { VoidResponse } from './generated-error-void-response.ts';
 import { ValidationErrorsResponse } from './generated-error-validation-errors-response.ts';
 import { ApiException } from "./generated-util.ts";
 
@@ -290,14 +281,6 @@ export interface DeleteApplicationByAppKeyOptions {
   headers?: Record<string, string>;
 }
 
-export interface GetApplicationMetadataVersionsOptions {
-  orgKey: string;
-  appKey: string;
-  limit: number;
-  offset: number;
-  headers?: Record<string, string>;
-}
-
 export interface GetChangesOptions {
   limit: number;
   offset: number;
@@ -324,11 +307,6 @@ export interface CreateDomainOptions {
 export interface DeleteDomainByNameOptions {
   orgKey: string;
   name: string;
-  headers?: Record<string, string>;
-}
-
-export interface CreateGithubAuthFormOptions {
-  body: GithubAuthForm;
   headers?: Record<string, string>;
 }
 
@@ -541,6 +519,10 @@ export class ApiClient {
       return data;
     }
 
+    if (response.status === 401) {
+      throw new UnauthorizedErrorResponse(response);
+    }
+
     throw new ApiException(response, `Request failed with status ${response.status}`);
 
   }
@@ -559,6 +541,10 @@ export class ApiClient {
     if (response.status === 200) {
       const data = await response.json();
       return data;
+    }
+
+    if (response.status === 401) {
+      throw new UnauthorizedErrorResponse(response);
     }
 
     if (response.status === 404) {
@@ -646,28 +632,8 @@ export class ApiClient {
       throw new UnauthorizedErrorResponse(response);
     }
 
-    throw new ApiException(response, `Request failed with status ${response.status}`);
-
-  }
-
-  async getApplicationMetadataVersions(params: GetApplicationMetadataVersionsOptions): Promise<ApplicationMetadataVersion[]> {
-    const queryParts: string[] = [];
-    queryParts.push(`limit=${encodeURIComponent(String(params.limit))}`);
-    queryParts.push(`offset=${encodeURIComponent(String(params.offset))}`);
-    const queryString = queryParts.length > 0 ? '?' + queryParts.join('&') : '';
-    const url = `${this.baseUrl}/apibuilder/${params.orgKey}/metadata/${params.appKey}/versions${queryString}`;
-
-      const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
-    });
-
-    if (response.status === 200) {
-      const data = await response.json();
-      return data;
+    if (response.status === 404) {
+      throw new VoidResponse(response);
     }
 
     throw new ApiException(response, `Request failed with status ${response.status}`);
@@ -700,6 +666,10 @@ export class ApiClient {
       return data;
     }
 
+    if (response.status === 401) {
+      throw new UnauthorizedErrorResponse(response);
+    }
+
     throw new ApiException(response, `Request failed with status ${response.status}`);
 
   }
@@ -723,6 +693,10 @@ export class ApiClient {
     if (response.status === 200) {
       const data = await response.json();
       return data;
+    }
+
+    if (response.status === 401) {
+      throw new UnauthorizedErrorResponse(response);
     }
 
     if (response.status === 404) {
@@ -785,29 +759,8 @@ export class ApiClient {
       throw new UnauthorizedErrorResponse(response);
     }
 
-    throw new ApiException(response, `Request failed with status ${response.status}`);
-
-  }
-
-  async createGithubAuthForm(params: CreateGithubAuthFormOptions): Promise<Authentication> {
-    const url = `${this.baseUrl}/apibuilder/users/authenticate/github`;
-
-      const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
-      body: JSON.stringify(params.body),
-    });
-
-    if (response.status === 200) {
-      const data = await response.json();
-      return data;
-    }
-
-    if (response.status === 422) {
-      throw new ValidationErrorsResponse(response);
+    if (response.status === 404) {
+      throw new VoidResponse(response);
     }
 
     throw new ApiException(response, `Request failed with status ${response.status}`);
@@ -838,6 +791,10 @@ export class ApiClient {
     if (response.status === 200) {
       const data = await response.json();
       return data;
+    }
+
+    if (response.status === 401) {
+      throw new UnauthorizedErrorResponse(response);
     }
 
     throw new ApiException(response, `Request failed with status ${response.status}`);
@@ -873,6 +830,10 @@ export class ApiClient {
       return data;
     }
 
+    if (response.status === 401) {
+      throw new UnauthorizedErrorResponse(response);
+    }
+
     throw new ApiException(response, `Request failed with status ${response.status}`);
 
   }
@@ -894,6 +855,10 @@ export class ApiClient {
 
     if (response.status === 401) {
       throw new UnauthorizedErrorResponse(response);
+    }
+
+    if (response.status === 404) {
+      throw new VoidResponse(response);
     }
 
     throw new ApiException(response, `Request failed with status ${response.status}`);
@@ -924,6 +889,10 @@ export class ApiClient {
     if (response.status === 200) {
       const data = await response.json();
       return data;
+    }
+
+    if (response.status === 401) {
+      throw new UnauthorizedErrorResponse(response);
     }
 
     throw new ApiException(response, `Request failed with status ${response.status}`);
@@ -1041,6 +1010,10 @@ export class ApiClient {
       return data;
     }
 
+    if (response.status === 401) {
+      throw new UnauthorizedErrorResponse(response);
+    }
+
     throw new ApiException(response, `Request failed with status ${response.status}`);
 
   }
@@ -1059,6 +1032,10 @@ export class ApiClient {
     if (response.status === 200) {
       const data = await response.json();
       return data;
+    }
+
+    if (response.status === 401) {
+      throw new UnauthorizedErrorResponse(response);
     }
 
     if (response.status === 404) {
@@ -1146,6 +1123,10 @@ export class ApiClient {
       throw new UnauthorizedErrorResponse(response);
     }
 
+    if (response.status === 404) {
+      throw new VoidResponse(response);
+    }
+
     throw new ApiException(response, `Request failed with status ${response.status}`);
 
   }
@@ -1177,6 +1158,10 @@ export class ApiClient {
     if (response.status === 200) {
       const data = await response.json();
       return data;
+    }
+
+    if (response.status === 401) {
+      throw new UnauthorizedErrorResponse(response);
     }
 
     throw new ApiException(response, `Request failed with status ${response.status}`);
@@ -1229,6 +1214,10 @@ export class ApiClient {
 
     if (response.status === 401) {
       throw new UnauthorizedErrorResponse(response);
+    }
+
+    if (response.status === 404) {
+      throw new VoidResponse(response);
     }
 
     throw new ApiException(response, `Request failed with status ${response.status}`);
@@ -1372,6 +1361,10 @@ export class ApiClient {
       return data;
     }
 
+    if (response.status === 401) {
+      throw new UnauthorizedErrorResponse(response);
+    }
+
     throw new ApiException(response, `Request failed with status ${response.status}`);
 
   }
@@ -1390,6 +1383,10 @@ export class ApiClient {
     if (response.status === 200) {
       const data = await response.json();
       return data;
+    }
+
+    if (response.status === 401) {
+      throw new UnauthorizedErrorResponse(response);
     }
 
     if (response.status === 404) {
@@ -1448,6 +1445,10 @@ export class ApiClient {
       throw new UnauthorizedErrorResponse(response);
     }
 
+    if (response.status === 404) {
+      throw new VoidResponse(response);
+    }
+
     throw new ApiException(response, `Request failed with status ${response.status}`);
 
   }
@@ -1479,6 +1480,10 @@ export class ApiClient {
     if (response.status === 200) {
       const data = await response.json();
       return data;
+    }
+
+    if (response.status === 401) {
+      throw new UnauthorizedErrorResponse(response);
     }
 
     throw new ApiException(response, `Request failed with status ${response.status}`);
@@ -1531,6 +1536,10 @@ export class ApiClient {
 
     if (response.status === 401) {
       throw new UnauthorizedErrorResponse(response);
+    }
+
+    if (response.status === 404) {
+      throw new VoidResponse(response);
     }
 
     throw new ApiException(response, `Request failed with status ${response.status}`);
