@@ -238,8 +238,8 @@ export function parseVersionIdentifier(value: string): VersionIdentifier {
 // API Client
 // ============================================================================
 
-import { VoidResponse } from './generated-error-void-response.ts';
 import { UnauthorizedErrorResponse } from './generated-error-unauthorized-error-response.ts';
+import { VoidResponse } from './generated-error-void-response.ts';
 import { ValidationErrorsResponse } from './generated-error-validation-errors-response.ts';
 import { ApiException } from "./generated-util.ts";
 
@@ -519,6 +519,10 @@ export class ApiClient {
       return data;
     }
 
+    if (response.status === 401) {
+      throw new UnauthorizedErrorResponse(response);
+    }
+
     throw new ApiException(response, `Request failed with status ${response.status}`);
 
   }
@@ -537,6 +541,10 @@ export class ApiClient {
     if (response.status === 200) {
       const data = await response.json();
       return data;
+    }
+
+    if (response.status === 401) {
+      throw new UnauthorizedErrorResponse(response);
     }
 
     if (response.status === 404) {
@@ -624,6 +632,10 @@ export class ApiClient {
       throw new UnauthorizedErrorResponse(response);
     }
 
+    if (response.status === 404) {
+      throw new VoidResponse(response);
+    }
+
     throw new ApiException(response, `Request failed with status ${response.status}`);
 
   }
@@ -654,6 +666,10 @@ export class ApiClient {
       return data;
     }
 
+    if (response.status === 401) {
+      throw new UnauthorizedErrorResponse(response);
+    }
+
     throw new ApiException(response, `Request failed with status ${response.status}`);
 
   }
@@ -677,6 +693,10 @@ export class ApiClient {
     if (response.status === 200) {
       const data = await response.json();
       return data;
+    }
+
+    if (response.status === 401) {
+      throw new UnauthorizedErrorResponse(response);
     }
 
     if (response.status === 404) {
@@ -739,6 +759,10 @@ export class ApiClient {
       throw new UnauthorizedErrorResponse(response);
     }
 
+    if (response.status === 404) {
+      throw new VoidResponse(response);
+    }
+
     throw new ApiException(response, `Request failed with status ${response.status}`);
 
   }
@@ -767,6 +791,10 @@ export class ApiClient {
     if (response.status === 200) {
       const data = await response.json();
       return data;
+    }
+
+    if (response.status === 401) {
+      throw new UnauthorizedErrorResponse(response);
     }
 
     throw new ApiException(response, `Request failed with status ${response.status}`);
@@ -802,6 +830,10 @@ export class ApiClient {
       return data;
     }
 
+    if (response.status === 401) {
+      throw new UnauthorizedErrorResponse(response);
+    }
+
     throw new ApiException(response, `Request failed with status ${response.status}`);
 
   }
@@ -823,6 +855,10 @@ export class ApiClient {
 
     if (response.status === 401) {
       throw new UnauthorizedErrorResponse(response);
+    }
+
+    if (response.status === 404) {
+      throw new VoidResponse(response);
     }
 
     throw new ApiException(response, `Request failed with status ${response.status}`);
@@ -853,6 +889,10 @@ export class ApiClient {
     if (response.status === 200) {
       const data = await response.json();
       return data;
+    }
+
+    if (response.status === 401) {
+      throw new UnauthorizedErrorResponse(response);
     }
 
     throw new ApiException(response, `Request failed with status ${response.status}`);
@@ -970,6 +1010,10 @@ export class ApiClient {
       return data;
     }
 
+    if (response.status === 401) {
+      throw new UnauthorizedErrorResponse(response);
+    }
+
     throw new ApiException(response, `Request failed with status ${response.status}`);
 
   }
@@ -988,6 +1032,10 @@ export class ApiClient {
     if (response.status === 200) {
       const data = await response.json();
       return data;
+    }
+
+    if (response.status === 401) {
+      throw new UnauthorizedErrorResponse(response);
     }
 
     if (response.status === 404) {
@@ -1075,6 +1123,10 @@ export class ApiClient {
       throw new UnauthorizedErrorResponse(response);
     }
 
+    if (response.status === 404) {
+      throw new VoidResponse(response);
+    }
+
     throw new ApiException(response, `Request failed with status ${response.status}`);
 
   }
@@ -1106,6 +1158,10 @@ export class ApiClient {
     if (response.status === 200) {
       const data = await response.json();
       return data;
+    }
+
+    if (response.status === 401) {
+      throw new UnauthorizedErrorResponse(response);
     }
 
     throw new ApiException(response, `Request failed with status ${response.status}`);
@@ -1158,6 +1214,10 @@ export class ApiClient {
 
     if (response.status === 401) {
       throw new UnauthorizedErrorResponse(response);
+    }
+
+    if (response.status === 404) {
+      throw new VoidResponse(response);
     }
 
     throw new ApiException(response, `Request failed with status ${response.status}`);
@@ -1301,6 +1361,10 @@ export class ApiClient {
       return data;
     }
 
+    if (response.status === 401) {
+      throw new UnauthorizedErrorResponse(response);
+    }
+
     throw new ApiException(response, `Request failed with status ${response.status}`);
 
   }
@@ -1319,6 +1383,10 @@ export class ApiClient {
     if (response.status === 200) {
       const data = await response.json();
       return data;
+    }
+
+    if (response.status === 401) {
+      throw new UnauthorizedErrorResponse(response);
     }
 
     if (response.status === 404) {
@@ -1377,8 +1445,8 @@ export class ApiClient {
       throw new UnauthorizedErrorResponse(response);
     }
 
-    if (response.status === 422) {
-      throw new ValidationErrorsResponse(response);
+    if (response.status === 404) {
+      throw new VoidResponse(response);
     }
 
     throw new ApiException(response, `Request failed with status ${response.status}`);
@@ -1412,6 +1480,10 @@ export class ApiClient {
     if (response.status === 200) {
       const data = await response.json();
       return data;
+    }
+
+    if (response.status === 401) {
+      throw new UnauthorizedErrorResponse(response);
     }
 
     throw new ApiException(response, `Request failed with status ${response.status}`);
@@ -1464,6 +1536,10 @@ export class ApiClient {
 
     if (response.status === 401) {
       throw new UnauthorizedErrorResponse(response);
+    }
+
+    if (response.status === 404) {
+      throw new VoidResponse(response);
     }
 
     throw new ApiException(response, `Request failed with status ${response.status}`);
