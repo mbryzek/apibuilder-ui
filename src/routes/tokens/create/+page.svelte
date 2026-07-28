@@ -19,12 +19,12 @@
     <a href="/tokens" class="text-ab-blue hover:text-ab-dark-blue text-sm">&larr; Back to Tokens</a>
   </div>
 
-  <h1 class="text-2xl font-bold text-ab-dark-blue mb-6">Create API Token</h1>
+  <h1 class="text-ab-dark-blue mb-6 text-2xl font-bold">Create API Token</h1>
 
   {#if formResult?.errors}
-    <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+    <div class="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
       {#each formResult.errors as err}
-        <p class="text-red-800 text-sm">{err.message}</p>
+        <p class="text-sm text-red-800">{err.message}</p>
       {/each}
     </div>
   {/if}
@@ -41,7 +41,7 @@
       }}
     >
       <div class="mb-4">
-        <label for="description" class="block text-sm font-semibold text-ab-dark-blue mb-1">Description</label>
+        <label for="description" class="text-ab-dark-blue mb-1 block text-sm font-semibold">Description</label>
         <input
           type="text"
           id="description"
@@ -49,7 +49,7 @@
           placeholder="Optional description for this token"
           class="input-field w-full"
         />
-        <p class="text-sm text-ab-gray mt-1">A description to help you remember what this token is used for.</p>
+        <p class="text-ab-gray mt-1 text-sm">A description to help you remember what this token is used for.</p>
       </div>
       <button type="submit" class="btn-primary" disabled={isSubmitting}>
         {isSubmitting ? 'Creating...' : 'Create Token'}

@@ -28,12 +28,12 @@
 </svelte:head>
 
 <div class="max-w-2xl">
-  <h1 class="text-2xl font-bold text-ab-dark-blue mb-6">Upload API Specification</h1>
+  <h1 class="text-ab-dark-blue mb-6 text-2xl font-bold">Upload API Specification</h1>
 
   {#if form?.errors}
-    <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+    <div class="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
       {#each form.errors as error}
-        <p class="text-red-700 text-sm">{error.message}</p>
+        <p class="text-sm text-red-700">{error.message}</p>
       {/each}
     </div>
   {/if}
@@ -51,7 +51,7 @@
     class="space-y-5"
   >
     <div>
-      <label for="file" class="block text-sm font-medium text-gray-700 mb-1">API Specification File</label>
+      <label for="file" class="mb-1 block text-sm font-medium text-gray-700">API Specification File</label>
       <div class="relative">
         <input
           type="file"
@@ -59,7 +59,7 @@
           name="file"
           accept=".json"
           required
-          class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-ab-blue file:text-white hover:file:bg-ab-light-blue file:cursor-pointer"
+          class="file:bg-ab-blue hover:file:bg-ab-light-blue block w-full text-sm text-gray-500 file:mr-4 file:cursor-pointer file:rounded-lg file:border-0 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white"
           onchange={(e) => {
             const input = e.currentTarget as HTMLInputElement;
             fileName = input.files?.[0]?.name ?? '';
@@ -67,12 +67,12 @@
         />
       </div>
       {#if fileName}
-        <p class="text-sm text-ab-gray mt-1">Selected: {fileName}</p>
+        <p class="text-ab-gray mt-1 text-sm">Selected: {fileName}</p>
       {/if}
     </div>
 
     <div>
-      <label for="spec_type" class="block text-sm font-medium text-gray-700 mb-1">Format</label>
+      <label for="spec_type" class="mb-1 block text-sm font-medium text-gray-700">Format</label>
       <select id="spec_type" name="spec_type" class="input-field w-full" value={form?.specType ?? ''}>
         {#each Object.values(OriginalType) as t}
           <option value={t}>{t}</option>
@@ -81,7 +81,7 @@
     </div>
 
     <div>
-      <label for="app_key" class="block text-sm font-medium text-gray-700 mb-1">
+      <label for="app_key" class="mb-1 block text-sm font-medium text-gray-700">
         Application Key
         <span class="text-ab-gray font-normal">(optional — derived from spec name if omitted)</span>
       </label>
@@ -89,7 +89,7 @@
     </div>
 
     <div>
-      <label for="visibility" class="block text-sm font-medium text-gray-700 mb-1">Visibility</label>
+      <label for="visibility" class="mb-1 block text-sm font-medium text-gray-700">Visibility</label>
       <select id="visibility" name="visibility" class="input-field w-full" value={form?.visibility ?? 'organization'}>
         {#each Object.values(Visibility) as v}
           <option value={v}>{v}</option>

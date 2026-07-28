@@ -32,15 +32,15 @@
 </script>
 
 {#if showPagination}
-  <nav class="flex justify-between items-center mt-6" aria-label="Pagination">
+  <nav class="mt-6 flex items-center justify-between" aria-label="Pagination">
     {#if showPrevious}
-      <a href={previousUrl} class="text-ab-blue hover:text-ab-dark-blue font-medium text-sm transition-colors"> &larr; Previous </a>
+      <a href={previousUrl} class="text-ab-blue hover:text-ab-dark-blue text-sm font-medium transition-colors"> &larr; Previous </a>
     {:else}
       <span></span>
     {/if}
 
     {#if showNext}
-      <a href={nextUrl} class="text-ab-blue hover:text-ab-dark-blue font-medium text-sm transition-colors"> Next &rarr; </a>
+      <a href={nextUrl} class="text-ab-blue hover:text-ab-dark-blue text-sm font-medium transition-colors"> Next &rarr; </a>
     {:else}
       <span></span>
     {/if}

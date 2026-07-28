@@ -34,20 +34,20 @@
 
 <div class="flex gap-10">
   <AppSidebar {orgKey} {appKey} version={version.version} appName={service.name} isMember={data.isMember} isAdmin={data.isAdmin} />
-  <div class="flex-1 min-w-0">
+  <div class="min-w-0 flex-1">
     {#if service.description}
       <p class="text-ab-gray mb-4">{service.description}</p>
     {/if}
 
     <!-- Info bar -->
     {#if service.base_url || service.info.contact || service.info.license}
-      <div class="bg-ab-light-gray rounded-lg p-4 mb-6 text-sm space-y-1">
+      <div class="bg-ab-light-gray mb-6 space-y-1 rounded-lg p-4 text-sm">
         {#if service.base_url}
-          <p><span class="font-medium text-ab-dark-gray">Base URL:</span> <code class="text-ab-blue">{service.base_url}</code></p>
+          <p><span class="text-ab-dark-gray font-medium">Base URL:</span> <code class="text-ab-blue">{service.base_url}</code></p>
         {/if}
         {#if service.info.contact}
           <p>
-            <span class="font-medium text-ab-dark-gray">Contact:</span>
+            <span class="text-ab-dark-gray font-medium">Contact:</span>
             {#if service.info.contact.name}{service.info.contact.name}{/if}
             {#if service.info.contact.email}
               <a href="mailto:{service.info.contact.email}" class="text-ab-blue hover:text-ab-dark-blue">{service.info.contact.email}</a>
@@ -61,7 +61,7 @@
         {/if}
         {#if service.info.license}
           <p>
-            <span class="font-medium text-ab-dark-gray">License:</span>
+            <span class="text-ab-dark-gray font-medium">License:</span>
             {#if service.info.license.url}
               <a href={service.info.license.url} class="text-ab-blue hover:text-ab-dark-blue" target="_blank" rel="noopener"
                 >{service.info.license.name}</a

@@ -23,22 +23,22 @@
 </svelte:head>
 
 <div>
-  <h1 class="text-2xl font-bold text-ab-dark-blue mb-6">Join {org.name}</h1>
+  <h1 class="text-ab-dark-blue mb-6 text-2xl font-bold">Join {org.name}</h1>
 
   {#if formResult?.errors}
-    <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+    <div class="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
       {#each formResult.errors as err}
-        <p class="text-red-800 text-sm">{err.message}</p>
+        <p class="text-sm text-red-800">{err.message}</p>
       {/each}
     </div>
   {/if}
 
   {#if data.isMember}
-    <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+    <div class="rounded-lg border border-green-200 bg-green-50 p-4">
       <p class="text-green-800">You are already a member of this organization.</p>
     </div>
   {:else if data.hasPendingRequest || formResult?.success}
-    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+    <div class="rounded-lg border border-blue-200 bg-blue-50 p-4">
       <p class="text-blue-800">Your membership request is pending review by an admin.</p>
     </div>
   {:else}

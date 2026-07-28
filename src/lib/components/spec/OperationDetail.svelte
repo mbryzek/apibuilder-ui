@@ -30,24 +30,24 @@
   }
 </script>
 
-<div class="border-l-4 {getBorderClass(operation.method)} pl-4 py-3">
-  <div class="flex flex-wrap items-center gap-2 mb-2">
+<div class="border-l-4 {getBorderClass(operation.method)} py-3 pl-4">
+  <div class="mb-2 flex flex-wrap items-center gap-2">
     <span
-      class="inline-block px-2 py-0.5 rounded text-xs font-mono font-bold {methodColors[operation.method] ?? 'bg-gray-100 text-gray-800'}"
+      class="inline-block rounded px-2 py-0.5 font-mono text-xs font-bold {methodColors[operation.method] ?? 'bg-gray-100 text-gray-800'}"
     >
       {operation.method}
     </span>
-    <code class="text-sm font-mono text-ab-dark-blue">{operation.path}</code>
+    <code class="text-ab-dark-blue font-mono text-sm">{operation.path}</code>
   </div>
 
   {#if operation.description}
-    <p class="text-sm text-ab-dark-gray mb-3">{operation.description}</p>
+    <p class="text-ab-dark-gray mb-3 text-sm">{operation.description}</p>
   {/if}
 
   {#if operation.body}
     <div class="mb-3">
-      <h5 class="text-xs font-semibold text-ab-gray uppercase mb-1">Body</h5>
-      <div class="text-sm font-mono">
+      <h5 class="text-ab-gray mb-1 text-xs font-semibold uppercase">Body</h5>
+      <div class="font-mono text-sm">
         <TypeLink typeStr={operation.body} {service} />
       </div>
     </div>
@@ -55,14 +55,14 @@
 
   {#if operation.parameters.length > 0}
     <div class="mb-3">
-      <h5 class="text-xs font-semibold text-ab-gray uppercase mb-1">Parameters</h5>
+      <h5 class="text-ab-gray mb-1 text-xs font-semibold uppercase">Parameters</h5>
       <ParametersTable parameters={operation.parameters} {service} />
     </div>
   {/if}
 
   {#if operation.responses.length > 0}
     <div>
-      <h5 class="text-xs font-semibold text-ab-gray uppercase mb-1">Responses</h5>
+      <h5 class="text-ab-gray mb-1 text-xs font-semibold uppercase">Responses</h5>
       <ResponsesTable responses={operation.responses} {service} />
     </div>
   {/if}

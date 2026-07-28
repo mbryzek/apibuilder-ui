@@ -23,12 +23,12 @@
 </svelte:head>
 
 <div>
-  <h1 class="text-2xl font-bold text-ab-dark-blue mb-6">Membership Requests</h1>
+  <h1 class="text-ab-dark-blue mb-6 text-2xl font-bold">Membership Requests</h1>
 
   {#if formResult?.errors}
-    <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+    <div class="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
       {#each formResult.errors as err}
-        <p class="text-red-800 text-sm">{err.message}</p>
+        <p class="text-sm text-red-800">{err.message}</p>
       {/each}
     </div>
   {/if}
@@ -38,11 +38,11 @@
   {:else}
     <div class="space-y-4">
       {#each requests as req (req.id)}
-        <div class="card flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div class="card flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <div class="font-medium text-ab-dark-blue">{req.user.nickname}</div>
-            <div class="text-sm text-ab-gray">{req.user.email}</div>
-            <div class="text-sm text-ab-gray">Requested role: <span class="font-medium">{req.role}</span></div>
+            <div class="text-ab-dark-blue font-medium">{req.user.nickname}</div>
+            <div class="text-ab-gray text-sm">{req.user.email}</div>
+            <div class="text-ab-gray text-sm">Requested role: <span class="font-medium">{req.role}</span></div>
           </div>
           <div class="flex gap-2">
             <form
@@ -57,7 +57,7 @@
               }}
             >
               <input type="hidden" name="guid" value={req.id} />
-              <button type="submit" class="btn-primary text-sm px-4 py-2" disabled={isSubmitting}>Accept</button>
+              <button type="submit" class="btn-primary px-4 py-2 text-sm" disabled={isSubmitting}>Accept</button>
             </form>
             <form
               method="POST"
@@ -71,7 +71,7 @@
               }}
             >
               <input type="hidden" name="guid" value={req.id} />
-              <button type="submit" class="btn-secondary text-sm px-4 py-2" disabled={isSubmitting}>Decline</button>
+              <button type="submit" class="btn-secondary px-4 py-2 text-sm" disabled={isSubmitting}>Decline</button>
             </form>
           </div>
         </div>

@@ -36,21 +36,21 @@
 </script>
 
 {#if form?.errors}
-  <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+  <div class="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
     {#each form.errors as error}
-      <p class="text-red-700 text-sm">{error.message}</p>
+      <p class="text-sm text-red-700">{error.message}</p>
     {/each}
   </div>
 {/if}
 
 <!-- Toolbar: version + search on left, watch + upload on right -->
-<div class="flex flex-wrap items-center gap-3 mb-6">
+<div class="mb-6 flex flex-wrap items-center gap-3">
   <!-- Version selector -->
   <div class="flex items-center gap-2 text-sm">
     <label for="version-select" class="text-ab-gray font-medium">Version:</label>
     <select
       id="version-select"
-      class="input-field text-sm py-1"
+      class="input-field py-1 text-sm"
       value={version.version}
       onchange={(e) => {
         const target = e.currentTarget as HTMLSelectElement;
@@ -66,7 +66,7 @@
   <!-- Search -->
   <div class="relative">
     <svg
-      class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ab-gray pointer-events-none"
+      class="text-ab-gray pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
       aria-hidden="true"
       fill="none"
       stroke="currentColor"
@@ -79,7 +79,7 @@
       aria-label="Filter types by name"
       placeholder="Filter types by name..."
       bind:value={searchQuery}
-      class="w-56 sm:w-64 input-field pl-9 pr-3 py-1.5 border rounded-lg text-sm"
+      class="input-field w-56 rounded-lg border py-1.5 pr-3 pl-9 text-sm sm:w-64"
     />
   </div>
 
@@ -99,7 +99,7 @@
           class="p-1.5 transition-colors {data.isWatching ? 'text-ab-blue' : 'text-ab-gray hover:text-ab-blue'}"
         >
           {#if data.isWatching}
-            <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -108,7 +108,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
             </svg>
           {:else}
-            <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -122,14 +122,14 @@
     {#if data.isMember}
       <a
         href="/{orgKey}/upload"
-        class="px-3.5 py-1.5 text-sm font-medium rounded-md border border-ab-blue text-ab-blue hover:bg-ab-blue hover:text-white transition-colors"
+        class="border-ab-blue text-ab-blue hover:bg-ab-blue rounded-md border px-3.5 py-1.5 text-sm font-medium transition-colors hover:text-white"
       >
         + Upload
       </a>
       {#if !showDeleteConfirm}
         <button
           type="button"
-          class="px-3.5 py-1.5 text-sm font-medium rounded-md border border-red-300 text-red-600 hover:bg-red-600 hover:text-white transition-colors"
+          class="rounded-md border border-red-300 px-3.5 py-1.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-600 hover:text-white"
           onclick={() => (showDeleteConfirm = true)}
         >
           Delete Version
@@ -140,8 +140,8 @@
 </div>
 
 {#if showDeleteConfirm}
-  <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-    <p class="text-sm text-red-700 font-medium mb-3">
+  <div class="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
+    <p class="mb-3 text-sm font-medium text-red-700">
       Are you sure you want to delete version <strong>{version.version}</strong>? This action cannot be undone.
     </p>
     <div class="flex gap-3">

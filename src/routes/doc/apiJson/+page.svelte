@@ -3,7 +3,7 @@
 </svelte:head>
 
 <div>
-  <h1 class="text-2xl font-bold text-ab-dark-blue mb-4">api.json format</h1>
+  <h1 class="text-ab-dark-blue mb-4 text-2xl font-bold">api.json format</h1>
 
   <p class="text-ab-dark-blue mb-4 text-lg leading-relaxed">
     Define your complete API in a single JSON file. The api.json format is API Builder's native specification — simple enough for a novice,
@@ -12,14 +12,14 @@
 
   <!-- Section Navigation -->
   <div class="card mb-8">
-    <h2 class="text-lg font-semibold text-ab-dark-blue mb-3">Quick Reference</h2>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+    <h2 class="text-ab-dark-blue mb-3 text-lg font-semibold">Quick Reference</h2>
+    <div class="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2 lg:grid-cols-4">
       <div>
-        <h3 class="font-semibold text-ab-blue mb-1 flex items-center gap-1">
-          <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-ab-blue text-white text-xs font-bold">&#9670;</span>
+        <h3 class="text-ab-blue mb-1 flex items-center gap-1 font-semibold">
+          <span class="bg-ab-blue inline-flex h-5 w-5 items-center justify-center rounded-full text-xs font-bold text-white">&#9670;</span>
           Core Structure
         </h3>
-        <ul class="space-y-0.5 ml-6">
+        <ul class="ml-6 space-y-0.5">
           <li><a href="#name" class="text-ab-blue hover:text-ab-dark-blue underline">name</a></li>
           <li><a href="#info" class="text-ab-blue hover:text-ab-dark-blue underline">info</a></li>
           <li><a href="#contact" class="text-ab-blue hover:text-ab-dark-blue underline">contact</a></li>
@@ -30,11 +30,11 @@
         </ul>
       </div>
       <div>
-        <h3 class="font-semibold text-ab-blue mb-1 flex items-center gap-1">
-          <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-ab-blue text-white text-xs font-bold">T</span>
+        <h3 class="text-ab-blue mb-1 flex items-center gap-1 font-semibold">
+          <span class="bg-ab-blue inline-flex h-5 w-5 items-center justify-center rounded-full text-xs font-bold text-white">T</span>
           Types
         </h3>
-        <ul class="space-y-0.5 ml-6">
+        <ul class="ml-6 space-y-0.5">
           <li><a href="#enum" class="text-ab-blue hover:text-ab-dark-blue underline">Enum</a></li>
           <li><a href="#enumValue" class="text-ab-blue hover:text-ab-dark-blue underline">EnumValue</a></li>
           <li><a href="#model" class="text-ab-blue hover:text-ab-dark-blue underline">Model</a></li>
@@ -45,11 +45,11 @@
         </ul>
       </div>
       <div>
-        <h3 class="font-semibold text-ab-blue mb-1 flex items-center gap-1">
-          <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-ab-blue text-white text-xs font-bold">&#9889;</span>
+        <h3 class="text-ab-blue mb-1 flex items-center gap-1 font-semibold">
+          <span class="bg-ab-blue inline-flex h-5 w-5 items-center justify-center rounded-full text-xs font-bold text-white">&#9889;</span>
           API
         </h3>
-        <ul class="space-y-0.5 ml-6">
+        <ul class="ml-6 space-y-0.5">
           <li><a href="#resource" class="text-ab-blue hover:text-ab-dark-blue underline">Resource</a></li>
           <li><a href="#operation" class="text-ab-blue hover:text-ab-dark-blue underline">Operation</a></li>
           <li><a href="#body" class="text-ab-blue hover:text-ab-dark-blue underline">Body</a></li>
@@ -58,11 +58,11 @@
         </ul>
       </div>
       <div>
-        <h3 class="font-semibold text-ab-blue mb-1 flex items-center gap-1">
-          <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-ab-blue text-white text-xs font-bold">&#9881;</span>
+        <h3 class="text-ab-blue mb-1 flex items-center gap-1 font-semibold">
+          <span class="bg-ab-blue inline-flex h-5 w-5 items-center justify-center rounded-full text-xs font-bold text-white">&#9881;</span>
           Metadata
         </h3>
-        <ul class="space-y-0.5 ml-6">
+        <ul class="ml-6 space-y-0.5">
           <li><a href="#import" class="text-ab-blue hover:text-ab-dark-blue underline">Import</a></li>
           <li><a href="#auth_scheme" class="text-ab-blue hover:text-ab-dark-blue underline">AuthScheme</a></li>
           <li><a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a></li>
@@ -75,13 +75,13 @@
   <!-- ================================================================== -->
   <!-- CORE STRUCTURE -->
   <!-- ================================================================== -->
-  <h2 class="text-xl font-bold text-ab-dark-blue mb-6 mt-12 flex items-center gap-2">
-    <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-ab-blue text-white text-xs font-bold">&#9670;</span>
+  <h2 class="text-ab-dark-blue mt-12 mb-6 flex items-center gap-2 text-xl font-bold">
+    <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-white">&#9670;</span>
     Core Structure
   </h2>
 
   <div class="card mb-6" id="name">
-    <h3 class="text-lg font-semibold text-ab-blue mb-3">Top-level Schema</h3>
+    <h3 class="text-ab-blue mb-3 text-lg font-semibold">Top-level Schema</h3>
 
     <p class="text-ab-dark-blue mb-4">
       A schema is represented in JSON as a JSON object of type <a
@@ -90,7 +90,7 @@
       >:
     </p>
 
-    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto mb-4">
+    <div class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
       {@html `<pre><code>{
   "name": <em>string</em>,
   "info": <em>JSON Object of <a href="#info" class="text-ab-blue hover:text-ab-dark-blue underline">Info</a> (optional)</em>,
@@ -110,7 +110,7 @@
     </div>
 
     <p class="text-ab-dark-blue mb-2">where:</p>
-    <ul class="list-disc pl-6 text-ab-dark-blue mb-4 space-y-2">
+    <ul class="text-ab-dark-blue mb-4 list-disc space-y-2 pl-6">
       <li>
         <em>name</em>: the human readable name of this service. Used for display, and as the basis for generating a unique key for URL.
       </li>
@@ -168,10 +168,10 @@
 
   <!-- Info -->
   <div class="card mb-6" id="info">
-    <h3 class="text-lg font-semibold text-ab-blue mb-3">Info declaration</h3>
+    <h3 class="text-ab-blue mb-3 text-lg font-semibold">Info declaration</h3>
     <p class="text-ab-dark-blue mb-4">The info node is represented as a JSON object of the form:</p>
 
-    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto mb-4">
+    <div class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
       {@html `<pre><code>{
   "contact": <em>JSON Object of <a href="#contact" class="text-ab-blue hover:text-ab-dark-blue underline">Contact</a> (optional)</em>,
   "license": <em>JSON Object of <a href="#license" class="text-ab-blue hover:text-ab-dark-blue underline">License</a> (optional)</em>
@@ -179,7 +179,7 @@
     </div>
 
     <p class="text-ab-dark-blue mb-2">where:</p>
-    <ul class="list-disc pl-6 text-ab-dark-blue mb-4 space-y-2">
+    <ul class="text-ab-dark-blue mb-4 list-disc space-y-2 pl-6">
       <li>
         <em>contact</em>: specifies contact information for this service. See
         <a href="#contact" class="text-ab-blue hover:text-ab-dark-blue underline">Contact</a>
@@ -193,10 +193,10 @@
 
   <!-- Contact -->
   <div class="card mb-6" id="contact">
-    <h3 class="text-lg font-semibold text-ab-blue mb-3">Contact declaration</h3>
+    <h3 class="text-ab-blue mb-3 text-lg font-semibold">Contact declaration</h3>
     <p class="text-ab-dark-blue mb-4">The contact node is represented as a JSON object of the form:</p>
 
-    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto mb-4">
+    <div class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
       {@html `<pre><code>{
   "name": <em>string (optional)</em>,
   "url": <em>string (optional)</em>,
@@ -205,7 +205,7 @@
     </div>
 
     <p class="text-ab-dark-blue mb-2">where:</p>
-    <ul class="list-disc pl-6 text-ab-dark-blue mb-4 space-y-2">
+    <ul class="text-ab-dark-blue mb-4 list-disc space-y-2 pl-6">
       <li><em>name</em>: Identifying name of the contact person/organization</li>
       <li><em>url</em>: URL pointing to the contact information</li>
       <li><em>email</em>: Email address of the contact person/organization</li>
@@ -214,10 +214,10 @@
 
   <!-- License -->
   <div class="card mb-6" id="license">
-    <h3 class="text-lg font-semibold text-ab-blue mb-3">License declaration</h3>
+    <h3 class="text-ab-blue mb-3 text-lg font-semibold">License declaration</h3>
     <p class="text-ab-dark-blue mb-4">The license node is represented as a JSON object of the form:</p>
 
-    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto mb-4">
+    <div class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
       {@html `<pre><code>{
   "name": <em>string</em>,
   "url": <em>string (optional)</em>
@@ -225,7 +225,7 @@
     </div>
 
     <p class="text-ab-dark-blue mb-2">where:</p>
-    <ul class="list-disc pl-6 text-ab-dark-blue mb-4 space-y-2">
+    <ul class="text-ab-dark-blue mb-4 list-disc space-y-2 pl-6">
       <li><em>name</em>: Name of the license - e.g. MIT</li>
       <li><em>url</em>: URL of the license itself</li>
     </ul>
@@ -234,17 +234,17 @@
   <!-- ================================================================== -->
   <!-- TYPES -->
   <!-- ================================================================== -->
-  <h2 class="text-xl font-bold text-ab-dark-blue mb-6 mt-12 flex items-center gap-2">
-    <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-ab-blue text-white text-xs font-bold">T</span>
+  <h2 class="text-ab-dark-blue mt-12 mb-6 flex items-center gap-2 text-xl font-bold">
+    <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-white">T</span>
     Types
   </h2>
 
   <!-- Enum -->
   <div class="card mb-6" id="enum">
-    <h3 class="text-lg font-semibold text-ab-blue mb-3">Enum declaration</h3>
+    <h3 class="text-ab-blue mb-3 text-lg font-semibold">Enum declaration</h3>
     <p class="text-ab-dark-blue mb-4">An enum is represented as a JSON object of the form:</p>
 
-    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto mb-4">
+    <div class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
       {@html `<pre><code>{
   "name": {
     "plural": <em>string (optional)</em>,
@@ -256,7 +256,7 @@
     </div>
 
     <p class="text-ab-dark-blue mb-2">where:</p>
-    <ul class="list-disc pl-6 text-ab-dark-blue mb-4 space-y-2">
+    <ul class="text-ab-dark-blue mb-4 list-disc space-y-2 pl-6">
       <li>
         <em>name</em>: the name of the enum. Names must be alphanumeric and must start with a letter. Valid characters are a-z, A-Z, 0-9 and
         _ characters. The name must be unique in the set of names assigned to enums, interfaces, models, or unions types.
@@ -280,10 +280,10 @@
 
   <!-- EnumValue -->
   <div class="card mb-6" id="enumValue">
-    <h3 class="text-lg font-semibold text-ab-blue mb-3">EnumValue declaration</h3>
+    <h3 class="text-ab-blue mb-3 text-lg font-semibold">EnumValue declaration</h3>
     <p class="text-ab-dark-blue mb-4">An EnumValue is represented as a JSON object of the form:</p>
 
-    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto mb-4">
+    <div class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
       {@html `<pre><code>{
   "name": <em>string</em>,
   "value": <em>string (optional)</em>,
@@ -293,7 +293,7 @@
     </div>
 
     <p class="text-ab-dark-blue mb-2">where:</p>
-    <ul class="list-disc pl-6 text-ab-dark-blue mb-4 space-y-2">
+    <ul class="text-ab-dark-blue mb-4 list-disc space-y-2 pl-6">
       <li><em>name</em>: the name of the value. Names must start with a letter.</li>
       <li><em>value</em>: the actual string representation of this value when serializing. If not specified, defaults to 'name'.</li>
       <li>
@@ -309,10 +309,10 @@
 
   <!-- Model -->
   <div class="card mb-6" id="model">
-    <h3 class="text-lg font-semibold text-ab-blue mb-3">Model declaration</h3>
+    <h3 class="text-ab-blue mb-3 text-lg font-semibold">Model declaration</h3>
     <p class="text-ab-dark-blue mb-4">A model is represented as a JSON object of the form:</p>
 
-    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto mb-4">
+    <div class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
       {@html `<pre><code>{
   "name": {
     "description": <em>string (optional)</em>,
@@ -325,7 +325,7 @@
     </div>
 
     <p class="text-ab-dark-blue mb-2">where:</p>
-    <ul class="list-disc pl-6 text-ab-dark-blue mb-4 space-y-2">
+    <ul class="text-ab-dark-blue mb-4 list-disc space-y-2 pl-6">
       <li>
         <em>name</em>: specifies the name of the model. Names must be alphanumeric and start with a letter. Valid characters are a-z, A-Z,
         0-9 and _ characters. The name must be unique in the set of names assigned to enums, interfaces, models, or unions types.
@@ -352,10 +352,10 @@
 
   <!-- Field -->
   <div class="card mb-6" id="field">
-    <h3 class="text-lg font-semibold text-ab-blue mb-3">Field declaration</h3>
+    <h3 class="text-ab-blue mb-3 text-lg font-semibold">Field declaration</h3>
     <p class="text-ab-dark-blue mb-4">A field is represented as a JSON object of the form:</p>
 
-    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto mb-4">
+    <div class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
       {@html `<pre><code>{
   "name": <em>string</em>,
   "type": <em>string</em>,
@@ -371,7 +371,7 @@
     </div>
 
     <p class="text-ab-dark-blue mb-2">where:</p>
-    <ul class="list-disc pl-6 text-ab-dark-blue mb-4 space-y-2">
+    <ul class="text-ab-dark-blue mb-4 list-disc space-y-2 pl-6">
       <li>
         <em>name</em>: specifies the name of the field. Names must be alphanumeric and start with a letter. Valid characters are a-z, A-Z,
         0-9 and _ characters.
@@ -414,16 +414,16 @@
     <p class="text-ab-dark-blue mb-4">
       When a field is marked as required, it must be present in any form of a model for that form to be valid. In a client-server scenario,
       this means that any defaults that are present in the model must be applied by the client. If you want a default to be applied by the
-      receiver, you should mark the field as <code class="bg-gray-100 px-1 rounded">"required": false</code>.
+      receiver, you should mark the field as <code class="rounded bg-gray-100 px-1">"required": false</code>.
     </p>
   </div>
 
   <!-- Interface -->
   <div class="card mb-6" id="interface">
-    <h3 class="text-lg font-semibold text-ab-blue mb-3">Interface declaration</h3>
+    <h3 class="text-ab-blue mb-3 text-lg font-semibold">Interface declaration</h3>
     <p class="text-ab-dark-blue mb-4">An interface is represented as a JSON object of the form:</p>
 
-    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto mb-4">
+    <div class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
       {@html `<pre><code>{
   "name": {
     "description": <em>string (optional)</em>,
@@ -435,7 +435,7 @@
     </div>
 
     <p class="text-ab-dark-blue mb-2">where:</p>
-    <ul class="list-disc pl-6 text-ab-dark-blue mb-4 space-y-2">
+    <ul class="text-ab-dark-blue mb-4 list-disc space-y-2 pl-6">
       <li>
         <em>name</em>: specifies the name of the interface. Names must be alphanumeric and start with a letter. Valid characters are a-z,
         A-Z, 0-9 and _ characters. The name must be unique in the set of names assigned to enums, interfaces, or models. Note you may define
@@ -466,10 +466,10 @@
 
   <!-- Union -->
   <div class="card mb-6" id="union">
-    <h3 class="text-lg font-semibold text-ab-blue mb-3">Union declaration</h3>
+    <h3 class="text-ab-blue mb-3 text-lg font-semibold">Union declaration</h3>
     <p class="text-ab-dark-blue mb-4">A union is represented as a JSON object of the form:</p>
 
-    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto mb-4">
+    <div class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
       {@html `<pre><code>{
   "name": {
     "plural": <em>string (optional)</em>,
@@ -484,7 +484,7 @@
     </div>
 
     <p class="text-ab-dark-blue mb-2">where:</p>
-    <ul class="list-disc pl-6 text-ab-dark-blue mb-4 space-y-2">
+    <ul class="text-ab-dark-blue mb-4 list-disc space-y-2 pl-6">
       <li>
         <em>name</em>: specifies the name of the union. Names must be alphanumeric and start with a letter. Valid characters are a-z, A-Z,
         0-9 and _ characters. The name must be unique in the set of names assigned to enums, unions, or models. Note you may define an
@@ -524,12 +524,12 @@
 
   <!-- UnionType -->
   <div class="card mb-6" id="unionType">
-    <h3 class="text-lg font-semibold text-ab-blue mb-3">UnionType declaration</h3>
+    <h3 class="text-ab-blue mb-3 text-lg font-semibold">UnionType declaration</h3>
     <p class="text-ab-dark-blue mb-4">
       A UnionType is represented as a JSON object of the form. Exactly one of <em>type</em> or <em>literal</em> must be specified:
     </p>
 
-    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto mb-4">
+    <div class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
       {@html `<pre><code>{
   "type": <em>string (required if no literal)</em>,
   "literal": <em>string (required if no type)</em>,
@@ -542,20 +542,20 @@
     </div>
 
     <p class="text-ab-dark-blue mb-2">where:</p>
-    <ul class="list-disc pl-6 text-ab-dark-blue mb-4 space-y-2">
+    <ul class="text-ab-dark-blue mb-4 list-disc space-y-2 pl-6">
       <li>
         <em>type</em>: specifies the type to include in this union type. Acceptable values include the name of either an enum, a model, or a
         (<a href="/doc/types" class="text-ab-blue hover:text-ab-dark-blue underline">primitive type</a>). Mutually exclusive with
-        <em>literal</em>. When using string-serializable primitive types (<code class="bg-gray-100 px-1 rounded">string</code>,
-        <code class="bg-gray-100 px-1 rounded">uuid</code>, <code class="bg-gray-100 px-1 rounded">date-iso8601</code>,
-        <code class="bg-gray-100 px-1 rounded">date-time-iso8601</code>), the union becomes string-serializable and can be used in path and
+        <em>literal</em>. When using string-serializable primitive types (<code class="rounded bg-gray-100 px-1">string</code>,
+        <code class="rounded bg-gray-100 px-1">uuid</code>, <code class="rounded bg-gray-100 px-1">date-iso8601</code>,
+        <code class="rounded bg-gray-100 px-1">date-time-iso8601</code>), the union becomes string-serializable and can be used in path and
         query parameters.
       </li>
       <li>
         <em>literal</em>: specifies a literal string value as a union member. Generates a case object in Scala and a string literal type in
         TypeScript. Mutually exclusive with <em>type</em>. Useful for combining fixed keywords with typed values, e.g.
-        <code class="bg-gray-100 px-1 rounded">"latest"</code>
-        or <code class="bg-gray-100 px-1 rounded">"default"</code>.
+        <code class="rounded bg-gray-100 px-1">"latest"</code>
+        or <code class="rounded bg-gray-100 px-1">"default"</code>.
       </li>
       <li>
         <em>description</em>: optional description for what this type provides. Supports
@@ -563,8 +563,8 @@
       </li>
       <li>
         <em>aliases</em>: optional array of additional string values that should be accepted when parsing this union member. For example, a
-        literal of <code class="bg-gray-100 px-1 rounded">"latest"</code> with aliases
-        <code class="bg-gray-100 px-1 rounded">["LATEST"]</code> will accept both forms.
+        literal of <code class="rounded bg-gray-100 px-1">"latest"</code> with aliases
+        <code class="rounded bg-gray-100 px-1">["LATEST"]</code> will accept both forms.
       </li>
       <li>
         <em>default</em>: If true, indicates that this type should be used as the default when deserializing union types. This field is only
@@ -580,11 +580,11 @@
       </li>
     </ul>
 
-    <h4 class="text-md font-semibold text-ab-blue mb-2 mt-4">Example: Version identifier</h4>
+    <h4 class="text-md text-ab-blue mt-4 mb-2 font-semibold">Example: Version identifier</h4>
     <p class="text-ab-dark-blue mb-2">
-      A union that accepts the literal string <code class="bg-gray-100 px-1 rounded">"latest"</code> or an ISO date-time string:
+      A union that accepts the literal string <code class="rounded bg-gray-100 px-1">"latest"</code> or an ISO date-time string:
     </p>
-    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto mb-4">
+    <div class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
       {@html `<pre><code>"unions": {
   "version_number": {
     "discriminator": "value",
@@ -600,17 +600,17 @@
   <!-- ================================================================== -->
   <!-- API -->
   <!-- ================================================================== -->
-  <h2 class="text-xl font-bold text-ab-dark-blue mb-6 mt-12 flex items-center gap-2">
-    <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-ab-blue text-white text-xs font-bold">&#9889;</span>
+  <h2 class="text-ab-dark-blue mt-12 mb-6 flex items-center gap-2 text-xl font-bold">
+    <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-white">&#9889;</span>
     API
   </h2>
 
   <!-- Resource -->
   <div class="card mb-6" id="resource">
-    <h3 class="text-lg font-semibold text-ab-blue mb-3">Resource declaration</h3>
+    <h3 class="text-ab-blue mb-3 text-lg font-semibold">Resource declaration</h3>
     <p class="text-ab-dark-blue mb-4">A resource is represented as a JSON object of the form:</p>
 
-    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto mb-4">
+    <div class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
       {@html `<pre><code>{
   "typeName": {
     "path": <em>string (optional)</em>,
@@ -623,7 +623,7 @@
     </div>
 
     <p class="text-ab-dark-blue mb-2">where:</p>
-    <ul class="list-disc pl-6 text-ab-dark-blue mb-4 space-y-2">
+    <ul class="text-ab-dark-blue mb-4 list-disc space-y-2 pl-6">
       <li><em>typeName</em>: the name of the model or enum that this resource represents</li>
       <li>
         <em>path</em>: optional path where this resource is located. If not provided, defaults to the plural of the typeName, with some
@@ -655,10 +655,10 @@
 
   <!-- Operation -->
   <div class="card mb-6" id="operation">
-    <h3 class="text-lg font-semibold text-ab-blue mb-3">Operation declaration</h3>
+    <h3 class="text-ab-blue mb-3 text-lg font-semibold">Operation declaration</h3>
     <p class="text-ab-dark-blue mb-4">An operation is represented as a JSON object of the form:</p>
 
-    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto mb-4">
+    <div class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
       {@html `<pre><code>{
   "method": <em>string</em>,
   "path": <em>string (optional)</em>,
@@ -673,7 +673,7 @@
     </div>
 
     <p class="text-ab-dark-blue mb-2">where:</p>
-    <ul class="list-disc pl-6 text-ab-dark-blue mb-4 space-y-2">
+    <ul class="text-ab-dark-blue mb-4 list-disc space-y-2 pl-6">
       <li><em>method</em>: the HTTP method for this operation</li>
       <li>
         <em>path</em>: optional path for this particular operation. If not provided, defaults to no additional path. Path parameters can be
@@ -722,10 +722,10 @@
 
   <!-- Body -->
   <div class="card mb-6" id="body">
-    <h3 class="text-lg font-semibold text-ab-blue mb-3">Body declaration</h3>
+    <h3 class="text-ab-blue mb-3 text-lg font-semibold">Body declaration</h3>
     <p class="text-ab-dark-blue mb-4">A body is represented as a JSON object of the form:</p>
 
-    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto mb-4">
+    <div class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
       {@html `<pre><code>{
   "type": <em>string</em>,
   "description": <em>string (optional)</em>,
@@ -734,7 +734,7 @@
     </div>
 
     <p class="text-ab-dark-blue mb-2">where:</p>
-    <ul class="list-disc pl-6 text-ab-dark-blue mb-4 space-y-2">
+    <ul class="text-ab-dark-blue mb-4 list-disc space-y-2 pl-6">
       <li>
         <em>type</em>: specifies the type of this body. Acceptable values include the name of either an enum, a model, or a (<a
           href="/doc/types"
@@ -759,10 +759,10 @@
 
   <!-- Parameter -->
   <div class="card mb-6" id="parameter">
-    <h3 class="text-lg font-semibold text-ab-blue mb-3">Parameter declaration</h3>
+    <h3 class="text-ab-blue mb-3 text-lg font-semibold">Parameter declaration</h3>
     <p class="text-ab-dark-blue mb-4">A parameter is represented as a JSON object of the form:</p>
 
-    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto mb-4">
+    <div class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
       {@html `<pre><code>{
   "name": <em>string</em>,
   "type": <em>string</em>,
@@ -778,7 +778,7 @@
     </div>
 
     <p class="text-ab-dark-blue mb-2">where:</p>
-    <ul class="list-disc pl-6 text-ab-dark-blue mb-4 space-y-2">
+    <ul class="text-ab-dark-blue mb-4 list-disc space-y-2 pl-6">
       <li>
         <em>name</em>: the name of the parameter. Names must be alphanumeric and must start with a letter. Valid characters are a-z, A-Z,
         0-9 and _ characters.
@@ -825,10 +825,10 @@
 
   <!-- Response -->
   <div class="card mb-6" id="response">
-    <h3 class="text-lg font-semibold text-ab-blue mb-3">Response declaration</h3>
+    <h3 class="text-ab-blue mb-3 text-lg font-semibold">Response declaration</h3>
     <p class="text-ab-dark-blue mb-4">A response is represented as a JSON object of the form:</p>
 
-    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto mb-4">
+    <div class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
       {@html `<pre><code>{
   "http_status_code": {
     "type": <em>type</em>,
@@ -839,7 +839,7 @@
     </div>
 
     <p class="text-ab-dark-blue mb-2">where:</p>
-    <ul class="list-disc pl-6 text-ab-dark-blue mb-4 space-y-2">
+    <ul class="text-ab-dark-blue mb-4 list-disc space-y-2 pl-6">
       <li>
         <em>http_status_code</em>: A valid HTTP status code for this response (e.g. 200). Only status codes that have interesting return
         types should be documented. You can also specify an HTTP status code of 'default' to map to all other non documented types. This is
@@ -865,7 +865,7 @@
     </ul>
 
     <p class="text-ab-dark-blue mb-2">There are a few conventions enforced:</p>
-    <ul class="list-disc pl-6 text-ab-dark-blue mb-4 space-y-2">
+    <ul class="text-ab-dark-blue mb-4 list-disc space-y-2 pl-6">
       <li>
         HTTP Response codes of 5xx cannot be explicitly specified and are handled automatically to ensure consistent behavior in generated
         client libraries.
@@ -877,24 +877,24 @@
   <!-- ================================================================== -->
   <!-- METADATA -->
   <!-- ================================================================== -->
-  <h2 class="text-xl font-bold text-ab-dark-blue mb-6 mt-12 flex items-center gap-2">
-    <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-ab-blue text-white text-xs font-bold">&#9881;</span>
+  <h2 class="text-ab-dark-blue mt-12 mb-6 flex items-center gap-2 text-xl font-bold">
+    <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-white">&#9881;</span>
     Metadata
   </h2>
 
   <!-- Import -->
   <div class="card mb-6" id="import">
-    <h3 class="text-lg font-semibold text-ab-blue mb-3">Import declaration</h3>
+    <h3 class="text-ab-blue mb-3 text-lg font-semibold">Import declaration</h3>
     <p class="text-ab-dark-blue mb-4">An import is represented as a JSON object of the form:</p>
 
-    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto mb-4">
+    <div class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
       {@html `<pre><code>{
   "uri": <em>string</em>
 }</code></pre>`}
     </div>
 
     <p class="text-ab-dark-blue mb-2">where:</p>
-    <ul class="list-disc pl-6 text-ab-dark-blue mb-4 space-y-2">
+    <ul class="text-ab-dark-blue mb-4 list-disc space-y-2 pl-6">
       <li>
         <em>uri</em>: The complete URI to the service specification that we are importing. Within API Builder, you can find the URL to the
         service specification by clicking on the "service.json" link for a service. Example:
@@ -909,10 +909,10 @@
 
   <!-- AuthScheme -->
   <div class="card mb-6" id="auth_scheme">
-    <h3 class="text-lg font-semibold text-ab-blue mb-3">AuthScheme declaration</h3>
+    <h3 class="text-ab-blue mb-3 text-lg font-semibold">AuthScheme declaration</h3>
     <p class="text-ab-dark-blue mb-4">An auth_scheme is represented as a JSON object of the form:</p>
 
-    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto mb-4">
+    <div class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
       {@html `<pre><code>{
   "type": <em>string</em>,
   "description": <em>string (optional)</em>,
@@ -921,7 +921,7 @@
     </div>
 
     <p class="text-ab-dark-blue mb-2">where:</p>
-    <ul class="list-disc pl-6 text-ab-dark-blue mb-4 space-y-2">
+    <ul class="text-ab-dark-blue mb-4 list-disc space-y-2 pl-6">
       <li>
         <em>type</em>: unique identifier referenced by <code>operation.auth</code>. The reserved value <code>none</code> cannot be used as an
         auth_scheme type; it is the explicit-public marker on operations.
@@ -940,10 +940,10 @@
 
   <!-- Attribute -->
   <div class="card mb-6" id="attribute">
-    <h3 class="text-lg font-semibold text-ab-blue mb-3">Attribute declaration</h3>
+    <h3 class="text-ab-blue mb-3 text-lg font-semibold">Attribute declaration</h3>
     <p class="text-ab-dark-blue mb-4">An attribute is represented as a JSON object in the following form:</p>
 
-    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto mb-4">
+    <div class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
       {@html `<pre><code>{
   "name": <em>string</em>,
   "value": <em>JSON Object</em>
@@ -951,13 +951,13 @@
     </div>
 
     <p class="text-ab-dark-blue mb-2">where:</p>
-    <ul class="list-disc pl-6 text-ab-dark-blue mb-4 space-y-2">
+    <ul class="text-ab-dark-blue mb-4 list-disc space-y-2 pl-6">
       <li><em>name</em>: the name and identifier of the attribute.</li>
       <li><em>value</em>: a JSON object that is usually utilized by a downstream Generator.</li>
     </ul>
 
     <p class="text-ab-dark-blue mb-2">Example attribute:</p>
-    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto mb-4">
+    <div class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
       {@html `<pre><code>{
   "name": "my_regex_validation",
   "value": {
@@ -969,12 +969,12 @@
 
   <!-- Annotation -->
   <div class="card mb-6" id="annotation">
-    <h3 class="text-lg font-semibold text-ab-blue mb-3">Annotation declaration</h3>
+    <h3 class="text-ab-blue mb-3 text-lg font-semibold">Annotation declaration</h3>
     <p class="text-ab-dark-blue mb-4">
       An annotation is just a short key that can be used to tag any field in any model of this API. The intent is to convey additional
       information about how a field might be used that isn't apparent in either the field's type or API semantics. For example, if you
       wanted to clearly identify fields of an API that may contain private customer data, you would create a <em>privacy</em>
-      annotation and add <code class="bg-gray-100 px-1 rounded">"annotations": ["privacy"]</code> to all such fields.
+      annotation and add <code class="rounded bg-gray-100 px-1">"annotations": ["privacy"]</code> to all such fields.
     </p>
     <p class="text-ab-dark-blue mb-4">
       Generated code may preserve annotations either in the type system, documentation or via metaprogramming facilities depending on
@@ -982,7 +982,7 @@
       declaration.
     </p>
 
-    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto mb-4">
+    <div class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
       {@html `<pre><code>"annotations": {
   "personal_data": {
     "description": "Identifies a field that contains Personal Data, as defined by GDPR."
@@ -991,7 +991,7 @@
     </div>
 
     <p class="text-ab-dark-blue mb-2">where:</p>
-    <ul class="list-disc pl-6 text-ab-dark-blue mb-4 space-y-2">
+    <ul class="text-ab-dark-blue mb-4 list-disc space-y-2 pl-6">
       <li><em>name</em>: the name of the annotation.</li>
       <li>
         <em>description</em>: optional, but recommended to explain how you intend the tag to clarify the usage of a field, possibly

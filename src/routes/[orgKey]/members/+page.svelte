@@ -27,26 +27,26 @@
 </svelte:head>
 
 <div>
-  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
-    <h1 class="text-2xl font-bold text-ab-dark-blue">Members</h1>
+  <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+    <h1 class="text-ab-dark-blue text-2xl font-bold">Members</h1>
     {#if data.isAdmin && data.pendingRequestsCount > 0}
-      <a href="/{org.key}/membership-requests" class="btn-secondary mt-3 sm:mt-0 inline-block text-center">
+      <a href="/{org.key}/membership-requests" class="btn-secondary mt-3 inline-block text-center sm:mt-0">
         Pending Requests ({data.pendingRequestsCount})
       </a>
     {/if}
   </div>
 
   {#if formResult?.errors}
-    <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+    <div class="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
       {#each formResult.errors as err}
-        <p class="text-red-800 text-sm">{err.message}</p>
+        <p class="text-sm text-red-800">{err.message}</p>
       {/each}
     </div>
   {/if}
 
   {#if data.isAdmin}
     <div class="card mb-6">
-      <h2 class="text-lg font-semibold text-ab-dark-blue mb-3">Add Member</h2>
+      <h2 class="text-ab-dark-blue mb-3 text-lg font-semibold">Add Member</h2>
       <form
         method="POST"
         action="?/addMember"
@@ -57,16 +57,16 @@
             await update();
           };
         }}
-        class="flex flex-col sm:flex-row gap-3"
+        class="flex flex-col gap-3 sm:flex-row"
       >
         <input
           type="text"
           name="email_or_nickname"
           placeholder="Email or nickname"
           required
-          class="input-field flex-1 px-3 py-2 border rounded-lg"
+          class="input-field flex-1 rounded-lg border px-3 py-2"
         />
-        <select name="role" class="input-field px-3 py-2 border rounded-lg">
+        <select name="role" class="input-field rounded-lg border px-3 py-2">
           <option value="member">Member</option>
           <option value="admin">Admin</option>
         </select>
@@ -84,10 +84,10 @@
       <table class="w-full text-left">
         <thead>
           <tr class="border-b border-gray-200">
-            <th class="pb-3 text-sm font-semibold text-ab-gray">User</th>
-            <th class="pb-3 text-sm font-semibold text-ab-gray">Role</th>
+            <th class="text-ab-gray pb-3 text-sm font-semibold">User</th>
+            <th class="text-ab-gray pb-3 text-sm font-semibold">Role</th>
             {#if data.isAdmin}
-              <th class="pb-3 text-sm font-semibold text-ab-gray text-right">Actions</th>
+              <th class="text-ab-gray pb-3 text-right text-sm font-semibold">Actions</th>
             {/if}
           </tr>
         </thead>
@@ -95,15 +95,15 @@
           {#each memberships as membership (membership.id)}
             <tr class="border-b border-gray-100">
               <td class="py-3">
-                <div class="font-medium text-ab-dark-blue">{membership.user.nickname}</div>
-                <div class="text-sm text-ab-gray">{membership.user.email}</div>
+                <div class="text-ab-dark-blue font-medium">{membership.user.nickname}</div>
+                <div class="text-ab-gray text-sm">{membership.user.email}</div>
                 {#if membership.user.name}
-                  <div class="text-sm text-ab-gray">{membership.user.name}</div>
+                  <div class="text-ab-gray text-sm">{membership.user.name}</div>
                 {/if}
               </td>
               <td class="py-3">
                 <span
-                  class="inline-block text-xs font-medium px-2 py-0.5 rounded-full {membership.role === MembershipRole.Admin
+                  class="inline-block rounded-full px-2 py-0.5 text-xs font-medium {membership.role === MembershipRole.Admin
                     ? 'bg-purple-100 text-purple-800'
                     : 'bg-blue-100 text-blue-800'}"
                 >
@@ -112,7 +112,7 @@
               </td>
               {#if data.isAdmin}
                 <td class="py-3 text-right">
-                  <div class="flex gap-2 justify-end">
+                  <div class="flex justify-end gap-2">
                     {#if membership.role === MembershipRole.Admin}
                       <form
                         method="POST"
@@ -126,7 +126,7 @@
                         }}
                       >
                         <input type="hidden" name="user_id" value={membership.user.id} />
-                        <button type="submit" class="text-sm text-ab-blue hover:text-ab-dark-blue" disabled={isSubmitting}>
+                        <button type="submit" class="text-ab-blue hover:text-ab-dark-blue text-sm" disabled={isSubmitting}>
                           Revoke Admin
                         </button>
                       </form>
@@ -143,7 +143,7 @@
                         }}
                       >
                         <input type="hidden" name="user_id" value={membership.user.id} />
-                        <button type="submit" class="text-sm text-ab-blue hover:text-ab-dark-blue" disabled={isSubmitting}>
+                        <button type="submit" class="text-ab-blue hover:text-ab-dark-blue text-sm" disabled={isSubmitting}>
                           Make Admin
                         </button>
                       </form>
@@ -163,11 +163,11 @@
                         }}
                       >
                         <input type="hidden" name="guid" value={membership.id} />
-                        <button type="submit" class="text-sm text-red-600 hover:text-red-800 font-semibold" disabled={isSubmitting}>
+                        <button type="submit" class="text-sm font-semibold text-red-600 hover:text-red-800" disabled={isSubmitting}>
                           Confirm Remove
                         </button>
                       </form>
-                      <button type="button" class="text-sm text-ab-gray hover:text-ab-dark-blue" onclick={() => (confirmRemoveId = null)}>
+                      <button type="button" class="text-ab-gray hover:text-ab-dark-blue text-sm" onclick={() => (confirmRemoveId = null)}>
                         Cancel
                       </button>
                     {:else}

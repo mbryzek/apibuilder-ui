@@ -21,25 +21,25 @@
     <a href="/generators" class="text-ab-blue hover:text-ab-dark-blue text-sm">&larr; Back to Generators</a>
   </div>
 
-  <h1 class="text-2xl font-bold text-ab-dark-blue mb-6">{gen.name}</h1>
+  <h1 class="text-ab-dark-blue mb-6 text-2xl font-bold">{gen.name}</h1>
 
   <div class="card">
-    <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
       <div>
-        <dt class="text-sm font-semibold text-ab-gray">Key</dt>
+        <dt class="text-ab-gray text-sm font-semibold">Key</dt>
         <dd class="text-ab-dark-blue">{gen.key}</dd>
       </div>
       {#if gen.language}
         <div>
-          <dt class="text-sm font-semibold text-ab-gray">Language</dt>
+          <dt class="text-ab-gray text-sm font-semibold">Language</dt>
           <dd class="text-ab-dark-blue">{gen.language}</dd>
         </div>
       {/if}
       {#if gen.attributes && gen.attributes.length > 0}
         <div>
-          <dt class="text-sm font-semibold text-ab-gray">Attributes</dt>
+          <dt class="text-ab-gray text-sm font-semibold">Attributes</dt>
           <dd>
-            <ul class="list-disc list-inside text-ab-dark-blue">
+            <ul class="text-ab-dark-blue list-inside list-disc">
               {#each gen.attributes as attr}
                 <li>{attr}</li>
               {/each}

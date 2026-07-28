@@ -21,13 +21,13 @@
 </svelte:head>
 
 <div class="page-container">
-  <div class="max-w-lg mx-auto">
-    <h1 class="text-2xl font-bold text-ab-dark-blue mb-8">Edit Profile</h1>
+  <div class="mx-auto max-w-lg">
+    <h1 class="text-ab-dark-blue mb-8 text-2xl font-bold">Edit Profile</h1>
 
     {#if errors.length > 0}
-      <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+      <div class="mb-4 rounded-lg border border-red-200 bg-red-50 p-4">
         {#each errors as error}
-          <p class="text-red-800 text-sm">{error.message}</p>
+          <p class="text-sm text-red-800">{error.message}</p>
         {/each}
       </div>
     {/if}
@@ -44,25 +44,25 @@
     >
       <div class="space-y-4">
         <div>
-          <label for="email" class="block text-sm font-medium text-ab-dark-blue mb-1">Email</label>
-          <input type="email" id="email" name="email" required value={user.email} class="w-full input-field px-3 py-2 border rounded-lg" />
+          <label for="email" class="text-ab-dark-blue mb-1 block text-sm font-medium">Email</label>
+          <input type="email" id="email" name="email" required value={user.email} class="input-field w-full rounded-lg border px-3 py-2" />
         </div>
 
         <div>
-          <label for="nickname" class="block text-sm font-medium text-ab-dark-blue mb-1">Nickname</label>
+          <label for="nickname" class="text-ab-dark-blue mb-1 block text-sm font-medium">Nickname</label>
           <input
             type="text"
             id="nickname"
             name="nickname"
             required
             value={user.nickname}
-            class="w-full input-field px-3 py-2 border rounded-lg"
+            class="input-field w-full rounded-lg border px-3 py-2"
           />
         </div>
 
         <div>
-          <label for="name" class="block text-sm font-medium text-ab-dark-blue mb-1">Name</label>
-          <input type="text" id="name" name="name" value={user.name ?? ''} class="w-full input-field px-3 py-2 border rounded-lg" />
+          <label for="name" class="text-ab-dark-blue mb-1 block text-sm font-medium">Name</label>
+          <input type="text" id="name" name="name" value={user.name ?? ''} class="input-field w-full rounded-lg border px-3 py-2" />
         </div>
 
         <div class="flex gap-4 pt-4">

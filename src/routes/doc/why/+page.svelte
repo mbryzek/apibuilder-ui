@@ -3,7 +3,7 @@
 </svelte:head>
 
 <div>
-  <h1 class="text-2xl font-bold text-ab-dark-blue mb-4">Why API Builder?</h1>
+  <h1 class="text-ab-dark-blue mb-4 text-2xl font-bold">Why API Builder?</h1>
 
   <p class="text-ab-dark-blue mb-8 text-lg leading-relaxed">
     AI agents using API Builder implement APIs correctly on the first try. The spec defines the contract, code generation produces trusted
@@ -12,11 +12,11 @@
 
   <!-- Compiler-Verified Correctness -->
   <div class="mb-10">
-    <h2 class="text-lg font-bold text-ab-blue mb-4 flex items-center gap-2">
-      <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-ab-blue text-white text-sm">&#10022;</span>
+    <h2 class="text-ab-blue mb-4 flex items-center gap-2 text-lg font-bold">
+      <span class="bg-ab-blue inline-flex h-8 w-8 items-center justify-center rounded-full text-sm text-white">&#10022;</span>
       Compiler-Verified Correctness
     </h2>
-    <ul class="space-y-5 text-ab-dark-blue ml-10">
+    <ul class="text-ab-dark-blue ml-10 space-y-5">
       <li>
         <span class="font-semibold">Generated code is trusted</span> — The agent doesn't write SDK code. It uses generated clients and server
         stubs. The generated code is high enough quality that teams stop writing client SDKs entirely.
@@ -34,11 +34,11 @@
 
   <!-- Explicit Data Shapes -->
   <div class="mb-10">
-    <h2 class="text-lg font-bold text-ab-blue mb-4 flex items-center gap-2">
-      <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-ab-blue text-white text-sm">&#9889;</span>
+    <h2 class="text-ab-blue mb-4 flex items-center gap-2 text-lg font-bold">
+      <span class="bg-ab-blue inline-flex h-8 w-8 items-center justify-center rounded-full text-sm text-white">&#9889;</span>
       Explicit Data Shapes
     </h2>
-    <ul class="space-y-5 text-ab-dark-blue ml-10">
+    <ul class="text-ab-dark-blue ml-10 space-y-5">
       <li>
         <span class="font-semibold">Every field and type defined upfront</span> — Every resource, field, type, and relationship is declared in
         the spec. No guessing, no runtime discovery, no implicit conventions.
@@ -56,19 +56,19 @@
 
   <!-- Zero-Friction Workflow -->
   <div class="mb-10">
-    <h2 class="text-lg font-bold text-ab-blue mb-4 flex items-center gap-2">
-      <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-ab-blue text-white text-sm">&#9881;</span>
+    <h2 class="text-ab-blue mb-4 flex items-center gap-2 text-lg font-bold">
+      <span class="bg-ab-blue inline-flex h-8 w-8 items-center justify-center rounded-full text-sm text-white">&#9881;</span>
       Zero-Friction Workflow
     </h2>
-    <ul class="space-y-5 text-ab-dark-blue ml-10">
+    <ul class="text-ab-dark-blue ml-10 space-y-5">
       <li>
         <span class="font-semibold">Instant setup</span> —
-        <code class="text-sm bg-gray-100 px-1.5 py-0.5 rounded">api init</code> creates an anonymous org and token. No signup, no email, no OAuth.
+        <code class="rounded bg-gray-100 px-1.5 py-0.5 text-sm">api init</code> creates an anonymous org and token. No signup, no email, no OAuth.
       </li>
       <li>
         <span class="font-semibold">CLI-native</span> — Everything is a CLI command agents can script:
-        <code class="text-sm bg-gray-100 px-1.5 py-0.5 rounded">api validate</code>,
-        <code class="text-sm bg-gray-100 px-1.5 py-0.5 rounded">api</code> (upload + generate).
+        <code class="rounded bg-gray-100 px-1.5 py-0.5 text-sm">api validate</code>,
+        <code class="rounded bg-gray-100 px-1.5 py-0.5 text-sm">api</code> (upload + generate).
       </li>
       <li>
         <span class="font-semibold">Versioning built in</span> — Every change to every API is recorded with safe and potentially breaking changes
@@ -79,15 +79,15 @@
 
   <!-- Simple, Parseable Format -->
   <div class="mb-10">
-    <h2 class="text-lg font-bold text-ab-blue mb-4 flex items-center gap-2">
-      <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-ab-blue text-white text-sm">&#9670;</span>
+    <h2 class="text-ab-blue mb-4 flex items-center gap-2 text-lg font-bold">
+      <span class="bg-ab-blue inline-flex h-8 w-8 items-center justify-center rounded-full text-sm text-white">&#9670;</span>
       Simple, Parseable Format
     </h2>
-    <ul class="space-y-5 text-ab-dark-blue ml-10">
+    <ul class="text-ab-dark-blue ml-10 space-y-5">
       <li>
         <span class="font-semibold">Flat JSON, no ambiguity</span> — The
         <a href="/doc/apiJson" class="text-ab-blue hover:text-ab-dark-blue underline">api.json</a>
-        format is JSON — no YAML indentation issues, no <code class="text-sm bg-gray-100 px-1.5 py-0.5 rounded">$ref</code> to resolve, no inheritance
+        format is JSON — no YAML indentation issues, no <code class="rounded bg-gray-100 px-1.5 py-0.5 text-sm">$ref</code> to resolve, no inheritance
         to trace.
       </li>
       <li>

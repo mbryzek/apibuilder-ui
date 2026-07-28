@@ -19,13 +19,13 @@
 </svelte:head>
 
 <div class="page-container">
-  <div class="max-w-lg mx-auto">
-    <h1 class="text-2xl font-bold text-ab-dark-blue mb-8">Create Organization</h1>
+  <div class="mx-auto max-w-lg">
+    <h1 class="text-ab-dark-blue mb-8 text-2xl font-bold">Create Organization</h1>
 
     {#if errors.length > 0}
-      <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+      <div class="mb-4 rounded-lg border border-red-200 bg-red-50 p-4">
         {#each errors as error}
-          <p class="text-red-800 text-sm">{error.message}</p>
+          <p class="text-sm text-red-800">{error.message}</p>
         {/each}
       </div>
     {/if}
@@ -42,12 +42,12 @@
     >
       <div class="space-y-4">
         <div>
-          <label for="name" class="block text-sm font-medium text-ab-dark-blue mb-1">Name <span class="text-ab-error-red">*</span></label>
-          <input type="text" id="name" name="name" required class="w-full input-field px-3 py-2 border rounded-lg" />
+          <label for="name" class="text-ab-dark-blue mb-1 block text-sm font-medium">Name <span class="text-ab-error-red">*</span></label>
+          <input type="text" id="name" name="name" required class="input-field w-full rounded-lg border px-3 py-2" />
         </div>
 
         <div>
-          <label for="namespace" class="block text-sm font-medium text-ab-dark-blue mb-1"
+          <label for="namespace" class="text-ab-dark-blue mb-1 block text-sm font-medium"
             >Namespace <span class="text-ab-error-red">*</span></label
           >
           <input
@@ -56,25 +56,25 @@
             name="namespace"
             required
             placeholder="e.g. com.example"
-            class="w-full input-field px-3 py-2 border rounded-lg"
+            class="input-field w-full rounded-lg border px-3 py-2"
           />
         </div>
 
         <div>
-          <label for="key" class="block text-sm font-medium text-ab-dark-blue mb-1">Key</label>
+          <label for="key" class="text-ab-dark-blue mb-1 block text-sm font-medium">Key</label>
           <input
             type="text"
             id="key"
             name="key"
             placeholder="Auto-generated from name if left blank"
-            class="w-full input-field px-3 py-2 border rounded-lg"
+            class="input-field w-full rounded-lg border px-3 py-2"
           />
-          <p class="text-xs text-ab-gray mt-1">Used in URLs. Auto-generated if left blank.</p>
+          <p class="text-ab-gray mt-1 text-xs">Used in URLs. Auto-generated if left blank.</p>
         </div>
 
         <div>
-          <label for="visibility" class="block text-sm font-medium text-ab-dark-blue mb-1">Visibility</label>
-          <select id="visibility" name="visibility" class="w-full input-field px-3 py-2 border rounded-lg">
+          <label for="visibility" class="text-ab-dark-blue mb-1 block text-sm font-medium">Visibility</label>
+          <select id="visibility" name="visibility" class="input-field w-full rounded-lg border px-3 py-2">
             {#each Object.values(Visibility) as v}
               <option value={v} selected={v === Visibility.Organization}>{v}</option>
             {/each}

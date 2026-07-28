@@ -23,7 +23,7 @@
 </svelte:head>
 
 <div>
-  <h2 class="text-xl font-bold text-ab-dark-blue mb-6">History</h2>
+  <h2 class="text-ab-dark-blue mb-6 text-xl font-bold">History</h2>
 
   {#if changes.length === 0}
     <p class="text-ab-gray">No changes found for this application.</p>
@@ -32,15 +32,15 @@
       <table class="w-full text-left">
         <thead>
           <tr class="border-b border-gray-200">
-            <th class="pb-3 text-sm font-semibold text-ab-gray hidden sm:table-cell">Version</th>
-            <th class="pb-3 text-sm font-semibold text-ab-gray">Change</th>
-            <th class="pb-3 text-sm font-semibold text-ab-gray hidden lg:table-cell">Date</th>
+            <th class="text-ab-gray hidden pb-3 text-sm font-semibold sm:table-cell">Version</th>
+            <th class="text-ab-gray pb-3 text-sm font-semibold">Change</th>
+            <th class="text-ab-gray hidden pb-3 text-sm font-semibold lg:table-cell">Date</th>
           </tr>
         </thead>
         <tbody>
           {#each changes as change (change.id)}
-            <tr class="border-b border-gray-100 hover:bg-ab-light-gray/50 transition-colors">
-              <td class="py-3 pr-4 hidden sm:table-cell text-sm text-ab-dark-blue whitespace-nowrap">
+            <tr class="hover:bg-ab-light-gray/50 border-b border-gray-100 transition-colors">
+              <td class="text-ab-dark-blue hidden py-3 pr-4 text-sm whitespace-nowrap sm:table-cell">
                 <a href="/{data.orgKey}/{data.appKey}/{change.from_version}" class="text-ab-blue hover:text-ab-dark-blue">
                   {change.from_version}
                 </a>
@@ -56,7 +56,7 @@
                   <span class="text-green-700">{change.description}</span>
                 {/if}
               </td>
-              <td class="py-3 hidden lg:table-cell text-sm text-ab-gray">
+              <td class="text-ab-gray hidden py-3 text-sm lg:table-cell">
                 {new Date(change.changed_at).toLocaleDateString()}
               </td>
             </tr>

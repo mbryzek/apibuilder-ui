@@ -33,10 +33,10 @@
   <div class="space-y-6">
     {#each unions as union}
       {@const showDetails = hasAnyDetails(union)}
-      <div id={union.name} class="scroll-mt-16 border border-gray-200 rounded-lg overflow-hidden">
-        <div class="bg-ab-light-gray px-4 py-3 flex items-center justify-between gap-2">
-          <div class="flex items-center gap-2 min-w-0">
-            <h3 class="text-base font-bold text-ab-dark-blue font-mono truncate">{union.name}</h3>
+      <div id={union.name} class="scroll-mt-16 overflow-hidden rounded-lg border border-gray-200">
+        <div class="bg-ab-light-gray flex items-center justify-between gap-2 px-4 py-3">
+          <div class="flex min-w-0 items-center gap-2">
+            <h3 class="text-ab-dark-blue truncate font-mono text-base font-bold">{union.name}</h3>
           </div>
           {#if exampleBaseUrl}
             <ExampleJsonLinks baseUrl={exampleBaseUrl} typeName={union.name} />
@@ -44,50 +44,50 @@
         </div>
         <div class="px-4 py-3">
           {#if union.description}
-            <p class="text-sm text-ab-dark-gray mb-3">{union.description}</p>
+            <p class="text-ab-dark-gray mb-3 text-sm">{union.description}</p>
           {/if}
           {#if union.discriminator}
-            <p class="text-xs text-ab-gray mb-2">Discriminator: <code class="font-mono">{union.discriminator}</code></p>
+            <p class="text-ab-gray mb-2 text-xs">Discriminator: <code class="font-mono">{union.discriminator}</code></p>
           {/if}
           {#if union.interfaces && union.interfaces.length > 0}
-            <p class="text-xs text-ab-gray mb-2">
+            <p class="text-ab-gray mb-2 text-xs">
               Implements: {union.interfaces.join(', ')}
             </p>
           {/if}
           <div class="overflow-x-auto">
-            <table class="w-full text-sm text-left">
+            <table class="w-full text-left text-sm">
               <thead>
                 <tr class="border-b border-gray-200">
-                  <th class="pb-2 pr-6 font-semibold text-ab-gray">Type</th>
+                  <th class="text-ab-gray pr-6 pb-2 font-semibold">Type</th>
                   {#if showDetails}
-                    <th class="pb-2 font-semibold text-ab-gray">Description</th>
+                    <th class="text-ab-gray pb-2 font-semibold">Description</th>
                   {/if}
                 </tr>
               </thead>
               <tbody>
                 {#each union.variants as variant}
                   <tr class="border-b border-gray-100 last:border-b-0">
-                    <td class="py-2.5 pr-6 font-mono text-sm align-top">
+                    <td class="py-2.5 pr-6 align-top font-mono text-sm">
                       {#if isVariantLiteral(variant)}
                         <span class="text-green-700">"{variant.literal}"</span>
-                        <span class="text-xs text-ab-gray ml-1 font-sans">literal</span>
+                        <span class="text-ab-gray ml-1 font-sans text-xs">literal</span>
                       {:else if isVariantType(variant)}
                         <TypeLink typeStr={variant.type} {service} />
                         {#if variant.discriminator_value}
-                          <span class="text-ab-gray text-xs ml-1">({variant.discriminator_value})</span>
+                          <span class="text-ab-gray ml-1 text-xs">({variant.discriminator_value})</span>
                         {/if}
                       {/if}
                     </td>
                     {#if showDetails}
-                      <td class="py-2.5 text-ab-dark-gray align-top">
+                      <td class="text-ab-dark-gray py-2.5 align-top">
                         {#if isVariantType(variant) && variant.default}
-                          <span class="text-xs text-ab-gray">default</span>
+                          <span class="text-ab-gray text-xs">default</span>
                           {#if variant.description}
                             <span class="mx-0.5"></span>
                           {/if}
                         {/if}
                         {#if isVariantLiteral(variant) && variant.aliases && variant.aliases.length > 0}
-                          <span class="text-xs text-ab-gray">aliases: {variant.aliases.join(', ')}</span>
+                          <span class="text-ab-gray text-xs">aliases: {variant.aliases.join(', ')}</span>
                           {#if variant.description}
                             <span class="mx-0.5"></span>
                           {/if}

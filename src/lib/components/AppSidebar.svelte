@@ -49,16 +49,16 @@
 </script>
 
 <!-- Mobile nav -->
-<nav class="md:hidden mb-4" aria-label="Application navigation">
+<nav class="mb-4 md:hidden" aria-label="Application navigation">
   <button
     type="button"
-    class="flex items-center gap-2 text-sm font-medium text-ab-blue"
+    class="text-ab-blue flex items-center gap-2 text-sm font-medium"
     aria-expanded={mobileOpen}
     onclick={() => (mobileOpen = !mobileOpen)}
   >
     <svg
       aria-hidden="true"
-      class="w-4 h-4 transition-transform {mobileOpen ? 'rotate-90' : ''}"
+      class="h-4 w-4 transition-transform {mobileOpen ? 'rotate-90' : ''}"
       fill="none"
       stroke="currentColor"
       viewBox="0 0 24 24"
@@ -68,11 +68,11 @@
     Application Menu
   </button>
   {#if mobileOpen}
-    <div class="mt-2 border-l-2 border-ab-blue pl-3">
+    <div class="border-ab-blue mt-2 border-l-2 pl-3">
       <!-- App name -->
       <a
         href={versionBase}
-        class="block text-sm font-bold text-ab-dark-blue hover:text-ab-blue transition-colors mb-2"
+        class="text-ab-dark-blue hover:text-ab-blue mb-2 block text-sm font-bold transition-colors"
         onclick={() => (mobileOpen = false)}
       >
         {appName}
@@ -98,8 +98,8 @@
 
       <!-- Org links -->
       {#if orgLinks.length > 0}
-        <div class="border-t border-gray-200 mt-3 pt-3">
-          <span class="block text-xs font-medium text-ab-gray uppercase mb-1">{orgKey}</span>
+        <div class="mt-3 border-t border-gray-200 pt-3">
+          <span class="text-ab-gray mb-1 block text-xs font-medium uppercase">{orgKey}</span>
           <ul class="space-y-1">
             {#each orgLinks as link (link.href)}
               <li>
@@ -122,10 +122,10 @@
 </nav>
 
 <!-- Desktop sidebar -->
-<nav class="hidden md:block w-56 shrink-0" aria-label="Application navigation">
+<nav class="hidden w-56 shrink-0 md:block" aria-label="Application navigation">
   <div class="sticky top-4">
     <!-- App name -->
-    <a href={versionBase} class="block text-lg font-bold text-ab-dark-blue hover:text-ab-blue transition-colors truncate mb-4">
+    <a href={versionBase} class="text-ab-dark-blue hover:text-ab-blue mb-4 block truncate text-lg font-bold transition-colors">
       {appName}
     </a>
 
@@ -135,7 +135,7 @@
         <li>
           <a
             href={link.href}
-            class="block px-3 py-2 rounded-md text-sm font-medium transition-colors {isActive(link.href)
+            class="block rounded-md px-3 py-2 text-sm font-medium transition-colors {isActive(link.href)
               ? 'bg-ab-blue text-white'
               : 'text-ab-gray hover:text-ab-dark-blue hover:bg-ab-light-gray'}"
             data-sveltekit-preload-data={link.preloadOff ? 'off' : undefined}
@@ -148,16 +148,16 @@
 
     <!-- Collapsible org section -->
     {#if orgLinks.length > 0}
-      <div class="border-t border-gray-200 mt-6 pt-4">
+      <div class="mt-6 border-t border-gray-200 pt-4">
         <button
           type="button"
-          class="flex items-center gap-2 text-sm font-medium text-ab-dark-blue hover:text-ab-blue transition-colors w-full"
+          class="text-ab-dark-blue hover:text-ab-blue flex w-full items-center gap-2 text-sm font-medium transition-colors"
           aria-expanded={orgExpanded}
           onclick={() => (orgExpanded = !orgExpanded)}
         >
           <svg
             aria-hidden="true"
-            class="w-4 h-4 transition-transform {orgExpanded ? 'rotate-90' : ''}"
+            class="h-4 w-4 transition-transform {orgExpanded ? 'rotate-90' : ''}"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -172,7 +172,7 @@
               <li>
                 <a
                   href={link.href}
-                  class="block px-3 py-2 rounded-md text-sm font-medium transition-colors {isActive(link.href)
+                  class="block rounded-md px-3 py-2 text-sm font-medium transition-colors {isActive(link.href)
                     ? 'bg-ab-blue text-white'
                     : 'text-ab-gray hover:text-ab-dark-blue hover:bg-ab-light-gray'}"
                 >

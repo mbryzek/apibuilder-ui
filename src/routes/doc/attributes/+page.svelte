@@ -3,7 +3,7 @@
 </svelte:head>
 
 <div>
-  <h1 class="text-2xl font-bold text-ab-dark-blue mb-4">Attributes</h1>
+  <h1 class="text-ab-dark-blue mb-4 text-2xl font-bold">Attributes</h1>
 
   <p class="text-ab-dark-blue mb-8 text-lg leading-relaxed">
     Attributes let you customize code generation behavior per-organization or per-service. Generators declare which attributes they depend
@@ -12,12 +12,12 @@
 
   <!-- How They Work -->
   <div class="mb-10">
-    <h2 class="text-lg font-bold text-ab-blue mb-4 flex items-center gap-2">
-      <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-ab-blue text-white text-xs">⚙</span>
+    <h2 class="text-ab-blue mb-4 flex items-center gap-2 text-lg font-bold">
+      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs text-white">⚙</span>
       How Attributes Work
     </h2>
     <div class="card">
-      <ul class="space-y-4 text-ab-dark-blue">
+      <ul class="text-ab-dark-blue space-y-4">
         <li>
           <strong>Globally unique</strong> — Each attribute has a URL-friendly name and optional description.
         </li>
@@ -34,13 +34,13 @@
 
   <!-- Setting Attributes -->
   <div class="mb-10">
-    <h2 class="text-lg font-bold text-ab-blue mb-4 flex items-center gap-2">
-      <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-ab-blue text-white text-xs">✦</span>
+    <h2 class="text-ab-blue mb-4 flex items-center gap-2 text-lg font-bold">
+      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs text-white">✦</span>
       Setting Attribute Values
     </h2>
     <div class="card">
       <p class="text-ab-dark-blue mb-3">To configure attributes for your organization:</p>
-      <ol class="space-y-2 text-ab-dark-blue list-decimal list-inside">
+      <ol class="text-ab-dark-blue list-inside list-decimal space-y-2">
         <li>Navigate to your organization</li>
         <li>Click <strong>"Org Details"</strong> in the left nav</li>
         <li>Select <strong>"Org Attributes"</strong></li>

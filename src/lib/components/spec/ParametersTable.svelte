@@ -14,13 +14,13 @@
 
 {#if parameters.length > 0}
   <div class="overflow-x-auto">
-    <table class="w-full text-sm text-left">
+    <table class="w-full text-left text-sm">
       <thead>
         <tr class="border-b border-gray-200">
-          <th class="pb-2 pr-6 font-semibold text-ab-gray">Name</th>
-          <th class="pb-2 pr-6 font-semibold text-ab-gray">Type</th>
+          <th class="text-ab-gray pr-6 pb-2 font-semibold">Name</th>
+          <th class="text-ab-gray pr-6 pb-2 font-semibold">Type</th>
           {#if hasDetails}
-            <th class="pb-2 font-semibold text-ab-gray">Description</th>
+            <th class="text-ab-gray pb-2 font-semibold">Description</th>
           {/if}
         </tr>
       </thead>
@@ -30,19 +30,19 @@
             <td class="py-2.5 pr-6 align-top">
               <span class="font-mono text-sm">{param.name}</span>
               {#if param.required}
-                <span class="block text-[11px] text-ab-success-green font-medium mt-0.5">required</span>
+                <span class="text-ab-success-green mt-0.5 block text-[11px] font-medium">required</span>
               {/if}
             </td>
-            <td class="py-2.5 pr-6 font-mono text-sm whitespace-nowrap align-top">
+            <td class="py-2.5 pr-6 align-top font-mono text-sm whitespace-nowrap">
               <TypeLink typeStr={param.type} {service} />
             </td>
             {#if hasDetails}
-              <td class="py-2.5 text-ab-dark-gray align-top">
+              <td class="text-ab-dark-gray py-2.5 align-top">
                 {#if param.location}
-                  <span class="inline-block px-1.5 py-0.5 rounded bg-gray-100 text-ab-dark-gray text-xs mr-1">{param.location}</span>
+                  <span class="text-ab-dark-gray mr-1 inline-block rounded bg-gray-100 px-1.5 py-0.5 text-xs">{param.location}</span>
                 {/if}
                 {#if param.default}
-                  <span class="text-xs text-ab-gray">default: {param.default}</span>
+                  <span class="text-ab-gray text-xs">default: {param.default}</span>
                 {/if}
                 {#if param.description}
                   {#if param.location || param.default}
@@ -51,7 +51,7 @@
                   {param.description}
                 {/if}
                 {#if param.minimum !== undefined || param.maximum !== undefined}
-                  <span class="text-xs text-ab-gray ml-1">
+                  <span class="text-ab-gray ml-1 text-xs">
                     ({#if param.minimum !== undefined}min: {param.minimum}{/if}{#if param.minimum !== undefined && param.maximum !== undefined},
                     {/if}{#if param.maximum !== undefined}max: {param.maximum}{/if})
                   </span>
