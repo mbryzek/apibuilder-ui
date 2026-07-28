@@ -1262,6 +1262,10 @@ export class ApiClient {
       return data;
     }
 
+    if (response.status === 401) {
+      throw new UnauthorizedErrorResponse(response);
+    }
+
     throw new ApiException(response, `Request failed with status ${response.status}`);
 
   }
@@ -1280,6 +1284,10 @@ export class ApiClient {
     if (response.status === 200) {
       const data = await response.json();
       return data;
+    }
+
+    if (response.status === 401) {
+      throw new UnauthorizedErrorResponse(response);
     }
 
     if (response.status === 404) {

@@ -44,22 +44,22 @@
 
 {#if visible}
   <div
-    class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 max-w-md w-full mx-4 animate-slide-down"
+    class="animate-slide-down fixed top-4 left-1/2 z-50 mx-4 w-full max-w-md -translate-x-1/2 transform"
     role="status"
     aria-live={variant === 'error' ? 'assertive' : 'polite'}
     aria-atomic="true"
   >
-    <div class="border rounded-lg shadow-lg p-4 flex items-start gap-3 {variantClasses}">
+    <div class="flex items-start gap-3 rounded-lg border p-4 shadow-lg {variantClasses}">
       {#if variant === 'success'}
-        <svg class="h-5 w-5 {iconColor} flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+        <svg class="h-5 w-5 {iconColor} mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       {:else if variant === 'error'}
-        <svg class="h-5 w-5 {iconColor} flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+        <svg class="h-5 w-5 {iconColor} mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       {:else}
-        <svg class="h-5 w-5 {iconColor} flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+        <svg class="h-5 w-5 {iconColor} mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
           <path
             stroke-linecap="round"
             stroke-linejoin="round"

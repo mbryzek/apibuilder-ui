@@ -20,9 +20,9 @@
 </svelte:head>
 
 <div class="page-container">
-  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
-    <h1 class="text-2xl font-bold text-ab-dark-blue">API Tokens</h1>
-    <a href="/tokens/create" class="btn-primary mt-3 sm:mt-0 inline-block text-center"> Create Token </a>
+  <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+    <h1 class="text-ab-dark-blue text-2xl font-bold">API Tokens</h1>
+    <a href="/tokens/create" class="btn-primary mt-3 inline-block text-center sm:mt-0"> Create Token </a>
   </div>
 
   {#if tokens.length === 0}
@@ -32,14 +32,14 @@
       {#each tokens as token (token.id)}
         <a
           href="/tokens/{token.id}"
-          class="block border border-gray-200 rounded-lg p-4 hover:border-ab-blue/30 hover:bg-ab-light-gray/50 transition-colors"
+          class="hover:border-ab-blue/30 hover:bg-ab-light-gray/50 block rounded-lg border border-gray-200 p-4 transition-colors"
         >
-          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
-            <div class="font-mono text-sm text-ab-blue font-medium">{token.masked_token}</div>
-            <div class="text-xs text-ab-gray">Created {new Date(token.created_at).toLocaleDateString()}</div>
+          <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+            <div class="text-ab-blue font-mono text-sm font-medium">{token.masked_token}</div>
+            <div class="text-ab-gray text-xs">Created {new Date(token.created_at).toLocaleDateString()}</div>
           </div>
           {#if token.description}
-            <p class="text-sm text-ab-dark-gray mt-1">{token.description}</p>
+            <p class="text-ab-dark-gray mt-1 text-sm">{token.description}</p>
           {/if}
         </a>
       {/each}

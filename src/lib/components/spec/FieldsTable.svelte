@@ -19,13 +19,13 @@
 
 {#if fields.length > 0}
   <div class="overflow-x-auto">
-    <table class="w-full text-sm text-left">
+    <table class="w-full text-left text-sm">
       <thead>
         <tr class="border-b border-gray-200">
-          <th class="pb-2 pr-6 font-semibold text-ab-gray">Field</th>
-          <th class="pb-2 pr-6 font-semibold text-ab-gray">Type</th>
+          <th class="text-ab-gray pr-6 pb-2 font-semibold">Field</th>
+          <th class="text-ab-gray pr-6 pb-2 font-semibold">Type</th>
           {#if hasDetails}
-            <th class="pb-2 font-semibold text-ab-gray">Description</th>
+            <th class="text-ab-gray pb-2 font-semibold">Description</th>
           {/if}
         </tr>
       </thead>
@@ -35,22 +35,22 @@
             <td class="py-2.5 pr-6 align-top">
               <span class="font-mono text-sm">{field.name}</span>
               {#if field.required}
-                <span class="block text-[11px] text-ab-success-green font-medium mt-0.5">required</span>
+                <span class="text-ab-success-green mt-0.5 block text-[11px] font-medium">required</span>
               {/if}
             </td>
-            <td class="py-2.5 pr-6 font-mono text-sm whitespace-nowrap align-top">
+            <td class="py-2.5 pr-6 align-top font-mono text-sm whitespace-nowrap">
               <TypeLink typeStr={field.type} {service} />
             </td>
             {#if hasDetails}
-              <td class="py-2.5 text-ab-dark-gray align-top">
+              <td class="text-ab-dark-gray py-2.5 align-top">
                 {#if field.default !== undefined && field.default !== null}
-                  <span class="text-xs text-ab-gray">default: {field.default}</span>
+                  <span class="text-ab-gray text-xs">default: {field.default}</span>
                   {#if field.description || field.minimum !== undefined || field.maximum !== undefined || field.example}
                     <span class="mx-0.5"></span>
                   {/if}
                 {/if}
                 {#if field.minimum !== undefined || field.maximum !== undefined}
-                  <span class="text-xs text-ab-gray">
+                  <span class="text-ab-gray text-xs">
                     {#if field.minimum !== undefined}min: {field.minimum}{/if}{#if field.minimum !== undefined && field.maximum !== undefined},
                     {/if}{#if field.maximum !== undefined}max: {field.maximum}{/if}
                   </span>
@@ -62,7 +62,7 @@
                   {field.description}
                 {/if}
                 {#if field.example}
-                  <span class="text-xs text-ab-gray ml-1">e.g. {field.example}</span>
+                  <span class="text-ab-gray ml-1 text-xs">e.g. {field.example}</span>
                 {/if}
               </td>
             {/if}

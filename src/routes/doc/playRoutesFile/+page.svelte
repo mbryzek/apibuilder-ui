@@ -3,7 +3,7 @@
 </svelte:head>
 
 <div>
-  <h1 class="text-2xl font-bold text-ab-dark-blue mb-4">Play Routes File</h1>
+  <h1 class="text-ab-dark-blue mb-4 text-2xl font-bold">Play Routes File</h1>
 
   <p class="text-ab-dark-blue mb-4 text-lg leading-relaxed">
     Guarantee your <a href="http://playframework.com/" class="text-ab-blue hover:text-ab-dark-blue underline">Play Framework</a> service implements
@@ -11,21 +11,21 @@
   </p>
 
   <div class="card mb-6">
-    <h2 class="text-lg font-semibold text-ab-blue mb-3 flex items-center gap-2">
-      <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-ab-blue text-white text-xs font-bold">⏱</span>
+    <h2 class="text-ab-blue mb-3 flex items-center gap-2 text-lg font-semibold">
+      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-white">⏱</span>
       Bindables for Date Times
     </h2>
     <p class="text-ab-dark-blue">
-      Generated clients include a <code class="bg-gray-100 px-1 rounded">Bindables</code> object with implicits to automatically bind
-      <code class="bg-gray-100 px-1 rounded">date-iso8601</code>
+      Generated clients include a <code class="rounded bg-gray-100 px-1">Bindables</code> object with implicits to automatically bind
+      <code class="rounded bg-gray-100 px-1">date-iso8601</code>
       and
-      <code class="bg-gray-100 px-1 rounded">date-time-iso8601</code> data types in routes.
+      <code class="rounded bg-gray-100 px-1">date-time-iso8601</code> data types in routes.
     </p>
   </div>
 
   <div class="card mb-6">
-    <h2 class="text-lg font-semibold text-ab-blue mb-3 flex items-center gap-2">
-      <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-ab-blue text-white text-xs font-bold">✦</span>
+    <h2 class="text-ab-blue mb-3 flex items-center gap-2 text-lg font-semibold">
+      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-white">✦</span>
       Enums as First Class in Routes
     </h2>
 
@@ -34,28 +34,28 @@
       returns an error page listing valid types if the value is invalid. To enable this, add the appropriate imports:
     </p>
 
-    <ol class="list-decimal list-inside space-y-4 text-ab-dark-blue">
+    <ol class="text-ab-dark-blue list-inside list-decimal space-y-4">
       <li>
         <strong>Import play keys</strong> —
-        <pre class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto mt-2"><code
+        <pre class="mt-2 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm"><code
             >import play.PlayImport.PlayKeys._</code
           ></pre>
       </li>
 
       <li>
         <strong>Enable plugin</strong> —
-        <pre class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto mt-2"><code>enablePlugins(PlayScala)</code
+        <pre class="mt-2 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm"><code>enablePlugins(PlayScala)</code
           ></pre>
       </li>
 
       <li>
         <strong>Add bindables to build.sbt</strong> —
         <pre
-          class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto mt-2">{@html `<code>routesImport += "&lt;packageName&gt;.&lt;serviceName&gt;.v&lt;versionNumber&gt;.Bindables._"</code>`}</pre>
+          class="mt-2 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">{@html `<code>routesImport += "&lt;packageName&gt;.&lt;serviceName&gt;.v&lt;versionNumber&gt;.Bindables._"</code>`}</pre>
 
         <p class="mt-2">For example:</p>
         <pre
-          class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto mt-2">{@html `<code>routesImport += "io.apibuilder.api.v0.Bindables._"</code>`}</pre>
+          class="mt-2 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">{@html `<code>routesImport += "io.apibuilder.api.v0.Bindables._"</code>`}</pre>
       </li>
     </ol>
 

@@ -27,13 +27,13 @@
 </svelte:head>
 
 <div>
-  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+  <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between">
     <div>
-      <h2 class="text-xl font-bold text-ab-dark-blue">{data.generatorKey}</h2>
+      <h2 class="text-ab-dark-blue text-xl font-bold">{data.generatorKey}</h2>
     </div>
     {#if files.length > 0}
-      <div class="flex gap-2 mt-3 sm:mt-0">
-        <a href="/{orgKey}/{appKey}/{versionName}/{data.generatorKey}/download" class="btn-secondary text-sm inline-block text-center">
+      <div class="mt-3 flex gap-2 sm:mt-0">
+        <a href="/{orgKey}/{appKey}/{versionName}/{data.generatorKey}/download" class="btn-secondary inline-block text-center text-sm">
           Download Files
         </a>
       </div>
@@ -43,14 +43,14 @@
   {#if files.length === 0}
     <p class="text-ab-gray">No files generated.</p>
   {:else}
-    <div class="flex flex-col lg:flex-row gap-4">
+    <div class="flex flex-col gap-4 lg:flex-row">
       <!-- File list sidebar -->
-      <div class="lg:w-64 flex-shrink-0">
-        <h3 class="text-sm font-semibold text-ab-gray uppercase mb-2">Files ({files.length})</h3>
-        <div class="border rounded-lg overflow-hidden">
+      <div class="flex-shrink-0 lg:w-64">
+        <h3 class="text-ab-gray mb-2 text-sm font-semibold uppercase">Files ({files.length})</h3>
+        <div class="overflow-hidden rounded-lg border">
           {#each files as file, i}
             <button
-              class="w-full text-left px-3 py-2 text-sm font-mono border-b last:border-b-0 transition-colors {i === selectedFileIndex
+              class="w-full border-b px-3 py-2 text-left font-mono text-sm transition-colors last:border-b-0 {i === selectedFileIndex
                 ? 'bg-ab-blue text-white'
                 : 'hover:bg-ab-light-gray text-ab-dark-gray'}"
               onclick={() => (selectedFileIndex = i)}
@@ -62,15 +62,15 @@
       </div>
 
       <!-- Code preview -->
-      <div class="flex-1 min-w-0">
+      <div class="min-w-0 flex-1">
         {#if selectedFile}
-          <div class="flex items-center justify-between mb-2">
-            <h3 class="text-sm font-mono text-ab-dark-gray truncate">
+          <div class="mb-2 flex items-center justify-between">
+            <h3 class="text-ab-dark-gray truncate font-mono text-sm">
               {selectedFile.dir ? `${selectedFile.dir}/` : ''}{selectedFile.name}
             </h3>
           </div>
-          <div class="border rounded-lg overflow-x-auto bg-gray-50">
-            <pre class="p-4 text-sm font-mono text-ab-dark-blue whitespace-pre">{selectedFile.contents}</pre>
+          <div class="overflow-x-auto rounded-lg border bg-gray-50">
+            <pre class="text-ab-dark-blue p-4 font-mono text-sm whitespace-pre">{selectedFile.contents}</pre>
           </div>
         {/if}
       </div>

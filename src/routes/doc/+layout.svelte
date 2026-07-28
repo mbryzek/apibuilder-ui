@@ -30,23 +30,23 @@
 </script>
 
 <div class="page-container">
-  <div class="flex flex-col md:flex-row gap-10">
-    <nav class="md:w-56 shrink-0" aria-label="Documentation">
+  <div class="flex flex-col gap-10 md:flex-row">
+    <nav class="shrink-0 md:w-56" aria-label="Documentation">
       <button
-        class="md:hidden w-full text-left text-ab-blue font-semibold py-2 mb-2"
+        class="text-ab-blue mb-2 w-full py-2 text-left font-semibold md:hidden"
         onclick={() => (mobileNavOpen = !mobileNavOpen)}
         aria-expanded={mobileNavOpen}
         aria-controls="doc-nav-list"
       >
         {mobileNavOpen ? 'Hide' : 'Show'} Navigation
       </button>
-      <ul id="doc-nav-list" class="{mobileNavOpen ? 'block' : 'hidden'} md:block space-y-1">
+      <ul id="doc-nav-list" class="{mobileNavOpen ? 'block' : 'hidden'} space-y-1 md:block">
         {#each navItems as item}
           <li>
             <a
               href={item.href}
-              class="block px-3 py-2 rounded text-sm transition-colors {$page.url.pathname === item.href
-                ? 'bg-ab-blue text-white font-semibold'
+              class="block rounded px-3 py-2 text-sm transition-colors {$page.url.pathname === item.href
+                ? 'bg-ab-blue font-semibold text-white'
                 : 'text-ab-dark-blue hover:bg-ab-light-gray'}"
             >
               {item.label}
@@ -56,7 +56,7 @@
       </ul>
     </nav>
 
-    <div class="flex-1 min-w-0">
+    <div class="min-w-0 flex-1">
       {@render children()}
     </div>
   </div>

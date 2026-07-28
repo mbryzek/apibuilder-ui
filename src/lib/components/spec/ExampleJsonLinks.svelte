@@ -35,7 +35,7 @@
   }
 </script>
 
-<span class="text-xs text-ab-gray whitespace-nowrap">
+<span class="text-ab-gray text-xs whitespace-nowrap">
   Example JSON:
   <button onclick={() => copyExample(false)} class="text-ab-blue hover:text-ab-dark-blue cursor-pointer">
     {#if copiedLabel === 'minimal'}

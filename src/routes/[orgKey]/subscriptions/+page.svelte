@@ -41,13 +41,13 @@
 </svelte:head>
 
 <div>
-  <h1 class="text-2xl font-bold text-ab-dark-blue mb-2">Subscriptions</h1>
-  <p class="text-ab-gray text-sm mb-6">Manage email notifications for this organization.</p>
+  <h1 class="text-ab-dark-blue mb-2 text-2xl font-bold">Subscriptions</h1>
+  <p class="text-ab-gray mb-6 text-sm">Manage email notifications for this organization.</p>
 
   {#if formResult?.errors}
-    <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+    <div class="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
       {#each formResult.errors as err}
-        <p class="text-red-800 text-sm">{err.message}</p>
+        <p class="text-sm text-red-800">{err.message}</p>
       {/each}
     </div>
   {/if}
@@ -56,11 +56,11 @@
     {#each visiblePublications as publication (publication)}
       {@const subId = getSubscriptionId(publication)}
       {@const isSubscribed = !!subId}
-      <div class="flex items-center justify-between py-3 px-4 bg-white border border-gray-200 rounded-lg">
+      <div class="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3">
         <div>
-          <div class="font-medium text-ab-dark-blue">{publicationLabels[publication] || publication}</div>
+          <div class="text-ab-dark-blue font-medium">{publicationLabels[publication] || publication}</div>
           <span
-            class="inline-block text-xs font-medium px-2 py-0.5 rounded-full mt-1 {isSubscribed
+            class="mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-medium {isSubscribed
               ? 'bg-green-100 text-green-800'
               : 'bg-gray-100 text-gray-600'}"
           >
@@ -82,7 +82,7 @@
           {#if subId}
             <input type="hidden" name="subscription_id" value={subId} />
           {/if}
-          <button type="submit" class="{isSubscribed ? 'btn-secondary' : 'btn-primary'} text-sm px-4 py-2" disabled={isSubmitting}>
+          <button type="submit" class="{isSubscribed ? 'btn-secondary' : 'btn-primary'} px-4 py-2 text-sm" disabled={isSubmitting}>
             {isSubscribed ? 'Unsubscribe' : 'Subscribe'}
           </button>
         </form>

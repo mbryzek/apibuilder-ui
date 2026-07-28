@@ -3,7 +3,7 @@
 </svelte:head>
 
 <div>
-  <h1 class="text-2xl font-bold text-ab-dark-blue mb-4">Interfaces</h1>
+  <h1 class="text-ab-dark-blue mb-4 text-2xl font-bold">Interfaces</h1>
 
   <p class="text-ab-dark-blue mb-8 text-lg leading-relaxed">
     Interfaces let you share fields across models and union types. Define common fields once, then enforce consistency everywhere they're
@@ -12,14 +12,14 @@
 
   <!-- Define -->
   <div class="card mb-6">
-    <h2 class="text-lg font-semibold text-ab-blue mb-3 flex items-center gap-2">
-      <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-ab-blue text-white text-xs">1</span>
+    <h2 class="text-ab-blue mb-3 flex items-center gap-2 text-lg font-semibold">
+      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs text-white">1</span>
       Define an Interface
     </h2>
     <p class="text-ab-dark-blue mb-3">
       Declare shared fields in the <strong>interfaces</strong> section. Interfaces are abstract — they cannot be instantiated directly.
     </p>
-    <pre class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm mb-4 overflow-x-auto"><code
+    <pre class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm"><code
         >{@html `"interfaces": {
   "person": {
     "fields": [
@@ -30,7 +30,7 @@
 }`}</code
       ></pre>
     <p class="text-ab-dark-blue text-sm">A Scala generator produces:</p>
-    <pre class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto"><code
+    <pre class="overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm"><code
         >{@html `sealed trait Person {
   def email: Option[String]
   def name: Option[String]
@@ -40,15 +40,15 @@
 
   <!-- Extend -->
   <div class="card mb-6">
-    <h2 class="text-lg font-semibold text-ab-blue mb-3 flex items-center gap-2">
-      <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-ab-blue text-white text-xs">2</span>
+    <h2 class="text-ab-blue mb-3 flex items-center gap-2 text-lg font-semibold">
+      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs text-white">2</span>
       Extend from a Model
     </h2>
     <p class="text-ab-dark-blue mb-3">
       List interface names in a model's <strong>interfaces</strong> array. The model must include all interface fields with matching name, type,
       and required status.
     </p>
-    <pre class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm mb-4 overflow-x-auto"><code
+    <pre class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm"><code
         >{@html `"models": {
   "guest": {
     "interfaces": ["person"],
@@ -61,7 +61,7 @@
 }`}</code
       ></pre>
     <p class="text-ab-dark-blue text-sm">Generated Scala:</p>
-    <pre class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto"><code
+    <pre class="overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm"><code
         >case class Guest(
   sessionId: String,
   override val email: Option[String] = None,
@@ -72,15 +72,15 @@
 
   <!-- Union Types -->
   <div class="card mb-6">
-    <h2 class="text-lg font-semibold text-ab-blue mb-3 flex items-center gap-2">
-      <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-ab-blue text-white text-xs">3</span>
+    <h2 class="text-ab-blue mb-3 flex items-center gap-2 text-lg font-semibold">
+      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs text-white">3</span>
       Use with Union Types
     </h2>
     <p class="text-ab-dark-blue mb-3">
       Union types can also implement interfaces. When a union declares an interface, every type in the union automatically inherits it — no
       need to repeat the interface on each member.
     </p>
-    <pre class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm mb-4 overflow-x-auto"><code
+    <pre class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm"><code
         >{@html `"unions": {
   "person": {
     "discriminator": "discriminator",
@@ -99,11 +99,11 @@
 
   <!-- Key Rules -->
   <div class="card mb-6">
-    <h2 class="text-lg font-semibold text-ab-blue mb-3 flex items-center gap-2">
-      <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-ab-blue text-white text-xs">!</span>
+    <h2 class="text-ab-blue mb-3 flex items-center gap-2 text-lg font-semibold">
+      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs text-white">!</span>
       Key Rules
     </h2>
-    <ul class="space-y-2 text-ab-dark-blue ml-2">
+    <ul class="text-ab-dark-blue ml-2 space-y-2">
       <li><strong>Validation</strong> — Fields must match by name, type, and required status</li>
       <li><strong>Multiple interfaces</strong> — Models can extend zero or more interfaces</li>
       <li><strong>Union shortcut</strong> — A union and interface can share the same name if the union explicitly lists the interface</li>
@@ -112,8 +112,8 @@
 
   <!-- Resources -->
   <div class="card mb-6">
-    <h2 class="text-lg font-semibold text-ab-dark-blue mb-3">Resources</h2>
-    <ul class="space-y-2 text-ab-dark-blue ml-2">
+    <h2 class="text-ab-dark-blue mb-3 text-lg font-semibold">Resources</h2>
+    <ul class="text-ab-dark-blue ml-2 space-y-2">
       <li>
         <a
           href="https://github.com/apicollective/apibuilder/blob/main/examples/example-interface.json"

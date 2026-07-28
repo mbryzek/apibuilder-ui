@@ -39,12 +39,12 @@
     <a href="/tokens" class="text-ab-blue hover:text-ab-dark-blue text-sm">&larr; Back to Tokens</a>
   </div>
 
-  <h1 class="text-2xl font-bold text-ab-dark-blue mb-6">API Token</h1>
+  <h1 class="text-ab-dark-blue mb-6 text-2xl font-bold">API Token</h1>
 
   {#if formResult?.errors}
-    <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+    <div class="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
       {#each formResult.errors as err}
-        <p class="text-red-800 text-sm">{err.message}</p>
+        <p class="text-sm text-red-800">{err.message}</p>
       {/each}
     </div>
   {/if}
@@ -52,23 +52,23 @@
   {#if data.cleartextToken}
     <div class="card mb-6">
       <div class="mb-2">
-        <p class="text-sm font-semibold text-ab-gray mb-1">Token</p>
+        <p class="text-ab-gray mb-1 text-sm font-semibold">Token</p>
         <div class="flex items-center gap-2">
-          <code class="flex-1 bg-ab-light-gray rounded p-3 text-sm text-ab-dark-blue font-mono break-all select-all">
+          <code class="bg-ab-light-gray text-ab-dark-blue flex-1 rounded p-3 font-mono text-sm break-all select-all">
             {data.cleartextToken}
           </code>
           <button
             type="button"
-            class="shrink-0 p-2 rounded hover:bg-ab-light-gray transition-colors"
+            class="hover:bg-ab-light-gray shrink-0 rounded p-2 transition-colors"
             title="Copy to clipboard"
             onclick={handleCopy}
           >
             {#if copied}
-              <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
             {:else}
-              <svg class="w-5 h-5 text-ab-gray hover:text-ab-dark-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="text-ab-gray hover:text-ab-dark-blue h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   stroke-linecap="round"
                   stroke-linejoin="round"
@@ -79,21 +79,21 @@
             {/if}
           </button>
         </div>
-        <p class="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded p-2 mt-2">
+        <p class="mt-2 rounded border border-amber-200 bg-amber-50 p-2 text-sm text-amber-700">
           This token will only be displayed once. Copy it now and store it securely.
         </p>
       </div>
     </div>
   {:else}
     <div class="card mb-6">
-      <p class="text-sm text-ab-gray">This token has already been displayed. For security, tokens are only shown once after creation.</p>
+      <p class="text-ab-gray text-sm">This token has already been displayed. For security, tokens are only shown once after creation.</p>
     </div>
   {/if}
 
   <div>
     {#if confirmDelete}
-      <div class="bg-red-50 border border-red-200 rounded-lg p-4">
-        <p class="text-red-800 text-sm mb-3">Are you sure you want to delete this token? This cannot be undone.</p>
+      <div class="rounded-lg border border-red-200 bg-red-50 p-4">
+        <p class="mb-3 text-sm text-red-800">Are you sure you want to delete this token? This cannot be undone.</p>
         <div class="flex gap-3">
           <form
             method="POST"

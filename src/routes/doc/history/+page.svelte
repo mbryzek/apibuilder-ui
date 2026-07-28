@@ -3,7 +3,7 @@
 </svelte:head>
 
 <div>
-  <h1 class="text-2xl font-bold text-ab-dark-blue mb-4">History</h1>
+  <h1 class="text-ab-dark-blue mb-4 text-2xl font-bold">History</h1>
 
   <p class="text-ab-dark-blue mb-8 text-lg leading-relaxed">
     API Builder grew out of real problems at scale — 100+ active committers, 300+ microservices, and significant revenue running through
@@ -12,8 +12,8 @@
 
   <!-- Origin -->
   <div class="card mb-6">
-    <h2 class="text-lg font-semibold text-ab-blue mb-3 flex items-center gap-2">
-      <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-ab-blue text-white text-xs">1</span>
+    <h2 class="text-ab-blue mb-3 flex items-center gap-2 text-lg font-semibold">
+      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs text-white">1</span>
       The Problem
     </h2>
     <p class="text-ab-dark-blue mb-3">
@@ -28,8 +28,8 @@
 
   <!-- Evaluation -->
   <div class="card mb-6">
-    <h2 class="text-lg font-semibold text-ab-blue mb-3 flex items-center gap-2">
-      <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-ab-blue text-white text-xs">2</span>
+    <h2 class="text-ab-blue mb-3 flex items-center gap-2 text-lg font-semibold">
+      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs text-white">2</span>
       What We Evaluated
     </h2>
     <p class="text-ab-dark-blue mb-3">
@@ -40,11 +40,11 @@
 
   <!-- Requirements -->
   <div class="card mb-6">
-    <h2 class="text-lg font-semibold text-ab-blue mb-3 flex items-center gap-2">
-      <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-ab-blue text-white text-xs">3</span>
+    <h2 class="text-ab-blue mb-3 flex items-center gap-2 text-lg font-semibold">
+      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs text-white">3</span>
       Key Requirements
     </h2>
-    <ul class="space-y-4 text-ab-dark-blue ml-2">
+    <ul class="text-ab-dark-blue ml-2 space-y-4">
       <li>
         <strong>Clients developers love</strong> — Generated clients so good that developers stop writing their own. Zero runtime dependencies.
       </li>

@@ -20,7 +20,7 @@
 </svelte:head>
 
 <div>
-  <h1 class="text-2xl font-bold text-ab-dark-blue mb-6">History</h1>
+  <h1 class="text-ab-dark-blue mb-6 text-2xl font-bold">History</h1>
 
   {#if changes.length === 0}
     <p class="text-ab-gray">No changes found.</p>
@@ -29,21 +29,21 @@
       <table class="w-full text-left">
         <thead>
           <tr class="border-b border-gray-200">
-            <th class="pb-3 text-sm font-semibold text-ab-gray">Application</th>
-            <th class="pb-3 text-sm font-semibold text-ab-gray hidden sm:table-cell">Version</th>
-            <th class="pb-3 text-sm font-semibold text-ab-gray">Change</th>
-            <th class="pb-3 text-sm font-semibold text-ab-gray hidden lg:table-cell">Date</th>
+            <th class="text-ab-gray pb-3 text-sm font-semibold">Application</th>
+            <th class="text-ab-gray hidden pb-3 text-sm font-semibold sm:table-cell">Version</th>
+            <th class="text-ab-gray pb-3 text-sm font-semibold">Change</th>
+            <th class="text-ab-gray hidden pb-3 text-sm font-semibold lg:table-cell">Date</th>
           </tr>
         </thead>
         <tbody>
           {#each changes as change (change.id)}
-            <tr class="border-b border-gray-100 hover:bg-ab-light-gray/50 transition-colors">
+            <tr class="hover:bg-ab-light-gray/50 border-b border-gray-100 transition-colors">
               <td class="py-3">
                 <a href="/{change.organization.key}/{change.application.key}" class="text-ab-blue hover:text-ab-dark-blue font-medium">
                   {change.organization.key}/{change.application.key}
                 </a>
               </td>
-              <td class="py-3 pr-4 hidden sm:table-cell text-sm text-ab-dark-blue whitespace-nowrap">
+              <td class="text-ab-dark-blue hidden py-3 pr-4 text-sm whitespace-nowrap sm:table-cell">
                 {change.from_version} &rarr; {change.to_version}
               </td>
               <td class="py-3 text-sm">
@@ -53,7 +53,7 @@
                   <span class="text-green-700">{change.description}</span>
                 {/if}
               </td>
-              <td class="py-3 hidden lg:table-cell text-sm text-ab-gray">
+              <td class="text-ab-gray hidden py-3 text-sm lg:table-cell">
                 {new Date(change.changed_at).toLocaleDateString()}
               </td>
             </tr>

@@ -104,14 +104,14 @@
 
 <!-- Tab navigation -->
 <div class="mb-6 overflow-x-auto">
-  <div class="flex gap-2 min-w-max" role="tablist" aria-label="Spec sections">
+  <div class="flex min-w-max gap-2" role="tablist" aria-label="Spec sections">
     {#each filteredTabs as tab (tab.id)}
       <button
         role="tab"
         aria-selected={currentTab === tab.id}
-        class="px-4 py-1.5 text-sm font-medium rounded-full transition-colors whitespace-nowrap {currentTab === tab.id
+        class="rounded-full px-4 py-1.5 text-sm font-medium whitespace-nowrap transition-colors {currentTab === tab.id
           ? 'bg-ab-blue text-white'
-          : 'bg-gray-100 text-ab-gray hover:bg-gray-200 hover:text-ab-dark-gray'}"
+          : 'text-ab-gray hover:text-ab-dark-gray bg-gray-100 hover:bg-gray-200'}"
         onclick={() => (activeTab = tab.id)}
       >
         {tab.label}
@@ -138,13 +138,13 @@
       <div class="space-y-4">
         {#each service.imports as imp}
           {@const impBase = `/${imp.organization.key}/${imp.application.key}/${imp.version}`}
-          <div class="border border-gray-200 rounded-lg p-4">
+          <div class="rounded-lg border border-gray-200 p-4">
             <a href={impBase} class="text-ab-blue hover:text-ab-dark-blue font-medium">
               {imp.namespace}
             </a>
-            <p class="text-xs text-ab-gray mt-1">Version: {imp.version}</p>
+            <p class="text-ab-gray mt-1 text-xs">Version: {imp.version}</p>
             {#if imp.models.length > 0}
-              <p class="text-xs text-ab-gray">
+              <p class="text-ab-gray text-xs">
                 Models:
                 {#each imp.models as model, i}<a href="{impBase}#{model.name}" class="text-ab-blue hover:text-ab-dark-blue">{model.name}</a
                   >{#if i < imp.models.length - 1},
@@ -152,7 +152,7 @@
               </p>
             {/if}
             {#if imp.enums.length > 0}
-              <p class="text-xs text-ab-gray">
+              <p class="text-ab-gray text-xs">
                 Enums:
                 {#each imp.enums as enumItem, i}<a href="{impBase}#{enumItem.name}" class="text-ab-blue hover:text-ab-dark-blue"
                     >{enumItem.name}</a
@@ -161,7 +161,7 @@
               </p>
             {/if}
             {#if imp.unions.length > 0}
-              <p class="text-xs text-ab-gray">
+              <p class="text-ab-gray text-xs">
                 Unions:
                 {#each imp.unions as unionItem, i}<a href="{impBase}#{unionItem.name}" class="text-ab-blue hover:text-ab-dark-blue"
                     >{unionItem.name}</a
@@ -170,7 +170,7 @@
               </p>
             {/if}
             {#if imp.interfaces && imp.interfaces.length > 0}
-              <p class="text-xs text-ab-gray">
+              <p class="text-ab-gray text-xs">
                 Interfaces:
                 {#each imp.interfaces as ifaceItem, i}<a href="{impBase}#{ifaceItem.name}" class="text-ab-blue hover:text-ab-dark-blue"
                     >{ifaceItem.name}</a

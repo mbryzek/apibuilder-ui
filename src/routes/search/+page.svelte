@@ -52,7 +52,7 @@
 </svelte:head>
 
 <div class="page-container">
-  <h1 class="text-2xl font-bold text-ab-dark-blue mb-6">Search</h1>
+  <h1 class="text-ab-dark-blue mb-6 text-2xl font-bold">Search</h1>
 
   <form onsubmit={handleSubmit} class="mb-6">
     <div class="flex gap-3">
@@ -72,7 +72,7 @@
               {item.label}
             </a>
             {#if item.description}
-              <p class="text-sm text-ab-gray mt-1">{item.description}</p>
+              <p class="text-ab-gray mt-1 text-sm">{item.description}</p>
             {/if}
           </div>
         {/each}

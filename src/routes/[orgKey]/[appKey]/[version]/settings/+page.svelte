@@ -28,19 +28,19 @@
 </svelte:head>
 
 <div class="max-w-2xl space-y-8">
-  <h2 class="text-xl font-bold text-ab-dark-blue">Application Settings</h2>
+  <h2 class="text-ab-dark-blue text-xl font-bold">Application Settings</h2>
 
   {#if form?.errors}
-    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+    <div class="rounded-lg border border-red-200 bg-red-50 p-4">
       {#each form.errors as error}
-        <p class="text-red-700 text-sm">{error.message}</p>
+        <p class="text-sm text-red-700">{error.message}</p>
       {/each}
     </div>
   {/if}
 
   <!-- Visibility -->
   <div class="card">
-    <h3 class="text-lg font-semibold text-ab-dark-blue mb-4">Visibility</h3>
+    <h3 class="text-ab-dark-blue mb-4 text-lg font-semibold">Visibility</h3>
     <form method="POST" action="?/updateVisibility" use:enhance class="space-y-4">
       <input type="hidden" name="name" value={service.name} />
       <div>
@@ -56,13 +56,13 @@
 
   <!-- Delete -->
   <div class="card border border-red-200">
-    <h3 class="text-lg font-semibold text-red-700 mb-4">Danger Zone</h3>
+    <h3 class="mb-4 text-lg font-semibold text-red-700">Danger Zone</h3>
 
     {#if !showDeleteConfirm}
-      <p class="text-sm text-ab-gray mb-4">Permanently delete this application and all its versions. This cannot be undone.</p>
+      <p class="text-ab-gray mb-4 text-sm">Permanently delete this application and all its versions. This cannot be undone.</p>
       <button class="btn-danger" onclick={() => (showDeleteConfirm = true)}> Delete Application </button>
     {:else}
-      <p class="text-sm text-red-700 font-medium mb-4">
+      <p class="mb-4 text-sm font-medium text-red-700">
         Are you sure you want to delete <strong>{service.name}</strong>? This action cannot be undone.
       </p>
       <div class="flex gap-3">

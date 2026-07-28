@@ -30,7 +30,7 @@
 
 <div class="page-container">
   <div class="mb-6">
-    <h1 class="text-2xl font-bold text-ab-dark-blue">Generators</h1>
+    <h1 class="text-ab-dark-blue text-2xl font-bold">Generators</h1>
   </div>
 
   <div class="mb-4">
@@ -38,7 +38,7 @@
       type="text"
       placeholder="Filter generators..."
       bind:value={searchQuery}
-      class="w-full sm:w-80 input-field px-3 py-2 border rounded-lg text-sm"
+      class="input-field w-full rounded-lg border px-3 py-2 text-sm sm:w-80"
     />
   </div>
 
@@ -49,21 +49,21 @@
       <table class="w-full text-left">
         <thead>
           <tr class="border-b border-gray-200">
-            <th class="pb-3 text-sm font-semibold text-ab-gray">Key</th>
-            <th class="pb-3 text-sm font-semibold text-ab-gray hidden sm:table-cell">Name</th>
-            <th class="pb-3 text-sm font-semibold text-ab-gray hidden md:table-cell">Language</th>
+            <th class="text-ab-gray pb-3 text-sm font-semibold">Key</th>
+            <th class="text-ab-gray hidden pb-3 text-sm font-semibold sm:table-cell">Name</th>
+            <th class="text-ab-gray hidden pb-3 text-sm font-semibold md:table-cell">Language</th>
           </tr>
         </thead>
         <tbody>
           {#each filtered as gen (gen.key)}
-            <tr class="border-b border-gray-100 hover:bg-ab-light-gray/50 transition-colors">
+            <tr class="hover:bg-ab-light-gray/50 border-b border-gray-100 transition-colors">
               <td class="py-3">
                 <a href="/generators/{gen.key}" class="text-ab-blue hover:text-ab-dark-blue font-medium">
                   {gen.key}
                 </a>
               </td>
-              <td class="py-3 hidden sm:table-cell text-ab-dark-blue">{gen.name}</td>
-              <td class="py-3 hidden md:table-cell text-ab-gray">{gen.language ?? '-'}</td>
+              <td class="text-ab-dark-blue hidden py-3 sm:table-cell">{gen.name}</td>
+              <td class="text-ab-gray hidden py-3 md:table-cell">{gen.language ?? '-'}</td>
             </tr>
           {/each}
         </tbody>

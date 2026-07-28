@@ -3,7 +3,7 @@
 </svelte:head>
 
 <div>
-  <h1 class="text-2xl font-bold text-ab-dark-blue mb-4">Authentication</h1>
+  <h1 class="text-ab-dark-blue mb-4 text-2xl font-bold">Authentication</h1>
 
   <p class="text-ab-dark-blue mb-8 text-lg leading-relaxed">
     Declare authentication as a first-class part of your service spec. Each operation identifies the auth scheme it requires by type, and
@@ -12,15 +12,15 @@
 
   <!-- Declare schemes -->
   <div class="card mb-6">
-    <h2 class="text-lg font-semibold text-ab-blue mb-3 flex items-center gap-2">
-      <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-ab-blue text-white text-xs">1</span>
+    <h2 class="text-ab-blue mb-3 flex items-center gap-2 text-lg font-semibold">
+      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs text-white">1</span>
       Declare Auth Schemes on the Service
     </h2>
     <p class="text-ab-dark-blue mb-3">
       Add an <strong>auth_schemes</strong> array at the top level of your api.json. Each entry declares a scheme <code>type</code> that operations
       can reference. Code generators look up the type and emit the corresponding runtime helper.
     </p>
-    <pre class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm mb-4 overflow-x-auto"><code
+    <pre class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm"><code
         >{@html `"auth_schemes": [
   {
     "type": "hackathon_admin",
@@ -39,15 +39,15 @@
 
   <!-- Reference on operation -->
   <div class="card mb-6">
-    <h2 class="text-lg font-semibold text-ab-blue mb-3 flex items-center gap-2">
-      <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-ab-blue text-white text-xs">2</span>
+    <h2 class="text-ab-blue mb-3 flex items-center gap-2 text-lg font-semibold">
+      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs text-white">2</span>
       Reference a Scheme on an Operation
     </h2>
     <p class="text-ab-dark-blue mb-3">
       Set <strong>auth</strong> on the operation to one of the declared scheme types. Code generators emit the matching runtime check; the service
       method receives the authenticated caller as its first argument.
     </p>
-    <pre class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto"><code
+    <pre class="overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm"><code
         >{@html `"resources": {
   "event": {
     "operations": [
@@ -64,8 +64,8 @@
 
   <!-- Resource-level default -->
   <div class="card mb-6">
-    <h2 class="text-lg font-semibold text-ab-blue mb-3 flex items-center gap-2">
-      <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-ab-blue text-white text-xs">3</span>
+    <h2 class="text-ab-blue mb-3 flex items-center gap-2 text-lg font-semibold">
+      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs text-white">3</span>
       Resource-Level Defaults &amp; Per-Operation Overrides
     </h2>
     <p class="text-ab-dark-blue mb-3">
@@ -73,7 +73,7 @@
       the inheritance for you &mdash; the emitted service spec carries the effective scheme on each operation directly. Generators never need
       to walk back to the resource to find the auth value.
     </p>
-    <pre class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm mb-4 overflow-x-auto"><code
+    <pre class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm"><code
         >{@html `"resources": {
   "event": {
     "auth": "hackathon_admin",
@@ -97,22 +97,22 @@
 
   <!-- Generator output -->
   <div class="card mb-6">
-    <h2 class="text-lg font-semibold text-ab-blue mb-3 flex items-center gap-2">
-      <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-ab-blue text-white text-xs">4</span>
+    <h2 class="text-ab-blue mb-3 flex items-center gap-2 text-lg font-semibold">
+      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs text-white">4</span>
       What Generators Produce
     </h2>
     <p class="text-ab-dark-blue mb-3">
       The Play controller generator wraps each protected operation in the runtime helper that matches the scheme type and passes the
       authenticated principal to your service method:
     </p>
-    <pre class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm overflow-x-auto"><code
+    <pre class="overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm"><code
         >{@html `def getEvents(): Action[AnyContent] = Action.async { request =>
   withHackathonAdmin(request) { auth =>
     service.getEvents(auth).map(toGetEventsResult)
   }
 }`}</code
       ></pre>
-    <p class="text-ab-dark-blue text-sm mt-3">
+    <p class="text-ab-dark-blue mt-3 text-sm">
       Each generator decides how scheme types map to runtime helpers. If your generator does not recognize a scheme type, codegen fails
       &mdash; an unrecognized scheme is never silently dropped to public.
     </p>
@@ -120,11 +120,11 @@
 
   <!-- Key Rules -->
   <div class="card mb-6">
-    <h2 class="text-lg font-semibold text-ab-blue mb-3 flex items-center gap-2">
-      <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-ab-blue text-white text-xs">!</span>
+    <h2 class="text-ab-blue mb-3 flex items-center gap-2 text-lg font-semibold">
+      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs text-white">!</span>
       Key Rules
     </h2>
-    <ul class="space-y-2 text-ab-dark-blue ml-2">
+    <ul class="text-ab-dark-blue ml-2 space-y-2">
       <li>
         <strong>Declare before reference</strong> &mdash; every <code>operation.auth</code> value (other than <code>none</code>) must appear
         in <code>service.auth_schemes</code>. Generators reject unknown references.
@@ -145,8 +145,8 @@
 
   <!-- Resources -->
   <div class="card mb-6">
-    <h2 class="text-lg font-semibold text-ab-dark-blue mb-3">Resources</h2>
-    <ul class="space-y-2 text-ab-dark-blue ml-2">
+    <h2 class="text-ab-dark-blue mb-3 text-lg font-semibold">Resources</h2>
+    <ul class="text-ab-dark-blue ml-2 space-y-2">
       <li>
         <a href="/doc/apiJson" class="text-ab-blue hover:text-ab-dark-blue underline">api.json specification</a>
         &mdash; Full format reference
