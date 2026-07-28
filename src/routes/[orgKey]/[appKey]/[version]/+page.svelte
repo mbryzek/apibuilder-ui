@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { goto } from '$app/navigation';
   import { enhance } from '$app/forms';
   import { page } from '$app/stores';
   import type { Service } from '$generated/com-bryzek-apibuilder-spec';
@@ -9,7 +8,6 @@
     data: {
       service: Service;
       version: { version: string };
-      versions: { version: string }[];
       isMember: boolean;
       isWatching: boolean;
       watchGuid?: string;
@@ -24,7 +22,6 @@
 
   const service = $derived(data.service);
   const version = $derived(data.version);
-  const versions = $derived(data.versions);
   const orgKey = $derived($page.params.orgKey);
   const appKey = $derived($page.params.appKey);
   const versionBase = $derived(`/${orgKey}/${appKey}/${version.version}`);
@@ -43,26 +40,8 @@
   </div>
 {/if}
 
-<!-- Toolbar: version + search on left, watch + upload on right -->
+<!-- Toolbar: search on left, watch + upload on right -->
 <div class="mb-6 flex flex-wrap items-center gap-3">
-  <!-- Version selector -->
-  <div class="flex items-center gap-2 text-sm">
-    <label for="version-select" class="text-ab-gray font-medium">Version:</label>
-    <select
-      id="version-select"
-      class="input-field py-1 text-sm"
-      value={version.version}
-      onchange={(e) => {
-        const target = e.currentTarget as HTMLSelectElement;
-        goto(`/${orgKey}/${appKey}/${target.value}`);
-      }}
-    >
-      {#each versions as v}
-        <option value={v.version}>{v.version}</option>
-      {/each}
-    </select>
-  </div>
-
   <!-- Search -->
   <div class="relative">
     <svg

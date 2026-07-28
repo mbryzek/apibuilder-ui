@@ -12,8 +12,6 @@ export const load: PageServerLoad = async ({ locals, url }) => {
     throw redirect(303, '/');
   }
   return {
-    githubClientId: config.githubClientId,
-    appBaseUrl: config.appBaseUrl,
     redirectTo: url.searchParams.get('redirect') || '/'
   };
 };

@@ -11,10 +11,7 @@ export const load: PageServerLoad = async ({ locals }) => {
   if (locals.session) {
     throw redirect(303, '/');
   }
-  return {
-    githubClientId: config.githubClientId,
-    appBaseUrl: config.appBaseUrl
-  };
+  return {};
 };
 
 export const actions: Actions = {
