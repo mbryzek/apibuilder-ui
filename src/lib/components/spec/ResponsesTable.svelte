@@ -1,7 +1,6 @@
 <script lang="ts">
   import type { Response, Service } from '$generated/com-bryzek-apibuilder-spec';
   import TypeLink from './TypeLink.svelte';
-  import { getStatusCode, getStatusColorClass } from './responseCode';
 
   interface Props {
     responses: Response[];
@@ -9,6 +8,16 @@
   }
 
   let { responses, service }: Props = $props();
+
+  // `Response.code` is an integer in the apibuilder spec, so the status class is a plain
+  // range check on the number the API sends.
+  function statusColorClass(code: number): string {
+    if (code < 200) return 'bg-gray-100 text-gray-800';
+    if (code < 300) return 'bg-green-100 text-green-800';
+    if (code < 400) return 'bg-blue-100 text-blue-800';
+    if (code < 500) return 'bg-yellow-100 text-yellow-800';
+    return 'bg-red-100 text-red-800';
+  }
 </script>
 
 {#if responses.length > 0}
@@ -23,10 +32,10 @@
       </thead>
       <tbody>
         {#each responses as resp}
-          {@const code = getStatusCode(resp)}
           <tr class="border-b border-gray-100">
             <td class="py-2 pr-4">
-              <span class="inline-block rounded px-2 py-0.5 font-mono text-xs font-semibold {getStatusColorClass(code)}">{code}</span>
+              <span class="inline-block rounded px-2 py-0.5 font-mono text-xs font-semibold {statusColorClass(resp.code)}">{resp.code}</span
+              >
             </td>
             <td class="py-2 pr-4 font-mono text-sm">
               <TypeLink typeStr={resp.type} {service} />
