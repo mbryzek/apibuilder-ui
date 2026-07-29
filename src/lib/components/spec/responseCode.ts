@@ -2,9 +2,35 @@ import type { Response } from '$generated/com-bryzek-apibuilder-spec';
 
 /**
  * Formats an apibuilder response code for display.
+ *
+ * The apibuilder backend serializes `code` as the wrapped `response_code` union — either
+ * `{ integer: { value } }` for an HTTP status code (e.g. 200, 409) or
+ * `{ response_code_option: { value } }` for the string `"default"`. We also accept the
+ * bare number / string form for forward compatibility (the generated type currently
+ * declares `code: number`, which does not match the live wrapped serialization). Falls
+ * back to `'???'` for anything unrecognized rather than rendering `[object Object]`.
  */
 export function getStatusCode(response: Response): string {
-  return String(response.code);
+  const code: unknown = response.code;
+  if (typeof code === 'number') {
+    return String(code);
+  }
+  if (typeof code === 'string') {
+    return code;
+  }
+  if (code && typeof code === 'object') {
+    const wrapped = code as {
+      integer?: { value?: unknown };
+      response_code_option?: { value?: unknown };
+    };
+    if (wrapped.integer && wrapped.integer.value != null) {
+      return String(wrapped.integer.value);
+    }
+    if (wrapped.response_code_option && wrapped.response_code_option.value != null) {
+      return String(wrapped.response_code_option.value);
+    }
+  }
+  return '???';
 }
 
 export function getStatusColorClass(code: string): string {
