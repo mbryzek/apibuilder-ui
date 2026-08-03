@@ -17,13 +17,8 @@ import type { Service } from './com-bryzek-apibuilder-spec.ts';
 export interface ApplicationRef {
   organization_key: string;
   application_key: string;
-}
-
-export interface Error {
-  /** Machine readable code for this specific error message */
-  code: string;
-  /** Description of the error */
-  message: string;
+  /** Local api_json spec payload for this application. When present, the server validates it hermetically against the other payloads in the form (imports resolve payload-first, registry fallback) and generates from it instead of fetching the latest published version. Nothing is persisted. */
+  original?: any;
 }
 
 /**
@@ -64,13 +59,15 @@ export interface InvocationForm {
 export interface MultiSpecInvocationForm {
   /** The applications whose specs will be fetched and passed to the generator */
   applications: ApplicationRef[];
+  /** Payload-only applications that participate in hermetic import resolution but are not passed to the generator. */
+  context?: ApplicationRef[];
 }
 
 // ============================================================================
 // API Client
 // ============================================================================
 
-import { ErrorsResponse } from './generated-error-errors-response.ts';
+import { ValidationErrorsResponse } from './generated-error-validation-errors-response.ts';
 import { VoidResponse } from './generated-error-void-response.ts';
 import { ApiException } from "./generated-util.ts";
 
@@ -128,7 +125,7 @@ export class ApiClient {
     }
 
     if (response.status === 409) {
-      throw new ErrorsResponse(response);
+      throw new ValidationErrorsResponse(response);
     }
 
     throw new ApiException(response, `Request failed with status ${response.status}`);
@@ -181,7 +178,7 @@ export class ApiClient {
     }
 
     if (response.status === 409) {
-      throw new ErrorsResponse(response);
+      throw new ValidationErrorsResponse(response);
     }
 
     throw new ApiException(response, `Request failed with status ${response.status}`);
@@ -210,7 +207,7 @@ export class ApiClient {
     }
 
     if (response.status === 422) {
-      throw new ErrorsResponse(response);
+      throw new ValidationErrorsResponse(response);
     }
 
     throw new ApiException(response, `Request failed with status ${response.status}`);
