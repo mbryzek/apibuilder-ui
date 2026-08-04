@@ -110,9 +110,13 @@ export async function handleApiCall<T>(apiCall: () => Promise<T>, options?: ApiC
           data: undefined as T
         };
       }
+      // The message must follow the status. Hardcoding 'Not found' made every void-returning
+      // endpoint report 401, 403, 409, 410, and 500 as a missing resource — and callers surface
+      // this string verbatim (e.g. email-verifications/[token] flashes it), so an expired token
+      // and a platform outage read identically to the user.
       return {
         status,
-        errors: [{ message: 'Not found' }]
+        errors: [{ message: status === 404 ? 'Not found' : `Request failed with status ${status}` }]
       };
     }
 
