@@ -5,7 +5,7 @@ import { handleApiCall } from '$lib/api/error-handler';
 import type { Code } from '$generated/com-bryzek-apibuilder';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
-  const headers = locals.session ? getSessionHeaders(locals.session.id) : {};
+  const headers = getSessionHeaders(locals.session?.id);
 
   const codeResponse = await handleApiCall<Code>(() =>
     apiBuilderClient().getCode({

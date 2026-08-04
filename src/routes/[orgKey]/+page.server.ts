@@ -2,16 +2,15 @@ import type { PageServerLoad } from './$types';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import type { Application, MembershipRequest } from '$generated/com-bryzek-apibuilder';
-
-const LIMIT = 25;
+import { PAGE_LIMIT, parseOffset } from '$lib/pagination';
 
 export const load: PageServerLoad = async ({ params, parent, locals, url }) => {
   const { isAdmin } = await parent();
-  const headers = locals.session ? getSessionHeaders(locals.session.id) : {};
-  const offset = Number(url.searchParams.get('offset') || '0');
+  const headers = getSessionHeaders(locals.session?.id);
+  const offset = parseOffset(url);
 
   const appsResponse = await handleApiCall<Application[]>(() =>
-    apiBuilderClient().getApplications({ orgKey: params.orgKey, hasVersion: true, limit: LIMIT, offset, headers })
+    apiBuilderClient().getApplications({ orgKey: params.orgKey, hasVersion: true, limit: PAGE_LIMIT, offset, headers })
   );
 
   const applications = 'data' in appsResponse ? appsResponse.data : [];
@@ -29,7 +28,8 @@ export const load: PageServerLoad = async ({ params, parent, locals, url }) => {
   return {
     applications,
     offset,
-    hasMore: applications.length >= LIMIT,
+    limit: PAGE_LIMIT,
+    hasMore: applications.length >= PAGE_LIMIT,
     hasPendingRequests
   };
 };

@@ -2,19 +2,18 @@ import type { PageServerLoad } from './$types';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import type { Change } from '$generated/com-bryzek-apibuilder';
-
-const LIMIT = 25;
+import { PAGE_LIMIT, parseOffset } from '$lib/pagination';
 
 export const load: PageServerLoad = async ({ url, locals, parent, params }) => {
   const { version } = await parent();
-  const headers = locals.session ? getSessionHeaders(locals.session.id) : {};
-  const offset = Number(url.searchParams.get('offset') || '0');
+  const headers = getSessionHeaders(locals.session?.id);
+  const offset = parseOffset(url);
   const orgKey = params.orgKey;
   const appKey = params.appKey;
   const client = apiBuilderClient();
 
   const response = await handleApiCall<Change[]>(() =>
-    client.getChanges({ orgKey, applicationKey: appKey, limit: LIMIT, offset, headers })
+    client.getChanges({ orgKey, applicationKey: appKey, limit: PAGE_LIMIT, offset, headers })
   );
 
   const changes = 'data' in response ? response.data : [];
@@ -22,7 +21,8 @@ export const load: PageServerLoad = async ({ url, locals, parent, params }) => {
   return {
     changes,
     offset,
-    hasMore: changes.length >= LIMIT,
+    limit: PAGE_LIMIT,
+    hasMore: changes.length >= PAGE_LIMIT,
     orgKey,
     appKey,
     versionName: version.version

@@ -3,16 +3,15 @@ import { platformClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { requireAuth } from '$lib/server/auth';
 import type { Token } from '$generated/com-bryzek-platform';
-
-const LIMIT = 25;
+import { PAGE_LIMIT, parseOffset } from '$lib/pagination';
 
 export const load: PageServerLoad = async (event) => {
   const session = requireAuth(event);
   const headers = getSessionHeaders(session.id);
-  const offset = Number(event.url.searchParams.get('offset') || '0');
+  const offset = parseOffset(event.url);
 
   const response = await handleApiCall<Token[]>(() =>
-    platformClient().getTokensUsersByUserId({ userId: session.user.id, limit: LIMIT, offset, headers })
+    platformClient().getTokensUsersByUserId({ userId: session.user.id, limit: PAGE_LIMIT, offset, headers })
   );
 
   const tokens = 'data' in response ? response.data : [];
@@ -20,6 +19,7 @@ export const load: PageServerLoad = async (event) => {
   return {
     tokens,
     offset,
-    hasMore: tokens.length >= LIMIT
+    limit: PAGE_LIMIT,
+    hasMore: tokens.length >= PAGE_LIMIT
   };
 };

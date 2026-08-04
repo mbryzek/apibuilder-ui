@@ -6,7 +6,7 @@ import type { Organization, Membership } from '$generated/com-bryzek-apibuilder'
 import { MembershipRole } from '$generated/com-bryzek-apibuilder';
 
 export const load: LayoutServerLoad = async ({ params, locals }) => {
-  const headers = locals.session ? getSessionHeaders(locals.session.id) : {};
+  const headers = getSessionHeaders(locals.session?.id);
 
   const orgResponse = await handleApiCall<Organization>(() => apiBuilderClient().getOrganizationByKey(params.orgKey, { headers }));
 

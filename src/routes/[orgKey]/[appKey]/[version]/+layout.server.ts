@@ -5,7 +5,7 @@ import { handleApiCall } from '$lib/api/error-handler';
 import type { Version, Watch } from '$generated/com-bryzek-apibuilder';
 
 export const load: LayoutServerLoad = async ({ params, locals }) => {
-  const headers = locals.session ? getSessionHeaders(locals.session.id) : {};
+  const headers = getSessionHeaders(locals.session?.id);
   const client = apiBuilderClient();
 
   const versionResponse = await handleApiCall<Version>(() =>
