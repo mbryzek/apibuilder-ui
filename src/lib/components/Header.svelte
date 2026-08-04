@@ -5,7 +5,7 @@
    */
 
   interface Props {
-    session?: { id: string; user: { id: string; person: { email?: { address: string } } } } | undefined;
+    session?: { user: { id: string; person: { email?: { address: string } } } } | undefined;
   }
 
   let { session }: Props = $props();
