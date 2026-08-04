@@ -6,11 +6,12 @@ compatibility_flags = ["nodejs_compat"]
 # Pages configuration
 pages_build_output_dir = ".svelte-kit/cloudflare"
 
-# Environment variables for production deployment
-# Sensitive values should be set via:
+# NOTE: do NOT put VITE_* here. `src/lib/config.ts` reads them via `import.meta.env`, which Vite
+# substitutes at BUILD time, and devops/bin/release-sveltekit builds locally before running
+# `wrangler pages deploy`. Pages `[vars]` are a RUNTIME binding, so they never reach the bundle —
+# a VITE_* value set here is inert and silently disagrees with the one that actually ships.
+# The production values come from `.env.production`; change them there.
+#
+# Genuine runtime secrets (Pages Functions) go through:
 #   wrangler pages secret put VARIABLE_NAME
-# Or in Cloudflare Dashboard under Pages → Settings → Environment Variables
-[vars]
-VITE_API_BASE_URL = "https://api.apibuilder.io"
-VITE_APP_BASE_URL = "https://www.apibuilder.org"
-VITE_ENVIRONMENT = "production"
+# or Cloudflare Dashboard → Pages → Settings → Environment Variables.
