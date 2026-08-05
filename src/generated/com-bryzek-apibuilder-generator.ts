@@ -133,7 +133,7 @@ export class ApiClient {
   }
 
   async getGeneratorByKey(key: string, options?: GetGeneratorByKeyOptions): Promise<Generator> {
-    const url = `${this.baseUrl}/apibuilder/generators/${key}`;
+    const url = `${this.baseUrl}/apibuilder/generators/${encodeURIComponent(key)}`;
 
       const response = await fetch(url, {
       method: 'GET',
@@ -157,7 +157,7 @@ export class ApiClient {
   }
 
   async createGeneratorInvocationByKey(params: CreateGeneratorInvocationByKeyOptions): Promise<Invocation> {
-    const url = `${this.baseUrl}/apibuilder/generators/${params.key}/invocation`;
+    const url = `${this.baseUrl}/apibuilder/generators/${encodeURIComponent(params.key)}/invocation`;
 
       const response = await fetch(url, {
       method: 'POST',
@@ -186,7 +186,7 @@ export class ApiClient {
   }
 
   async createGeneratorMultiSpecInvocationsByKey(params: CreateGeneratorMultiSpecInvocationsByKeyOptions): Promise<Invocation> {
-    const url = `${this.baseUrl}/apibuilder/generators/${params.key}/multi-spec-invocations`;
+    const url = `${this.baseUrl}/apibuilder/generators/${encodeURIComponent(params.key)}/multi-spec-invocations`;
 
       const response = await fetch(url, {
       method: 'POST',
