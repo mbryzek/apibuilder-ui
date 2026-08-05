@@ -16,7 +16,7 @@
 
 {#if enums.length > 0}
   <div class="space-y-6">
-    {#each enums as enumDef}
+    {#each enums as enumDef (enumDef.name)}
       <div id={enumDef.name} class="scroll-mt-16 overflow-hidden rounded-lg border border-gray-200">
         <div class="bg-ab-light-gray flex items-center justify-between gap-2 px-4 py-3">
           <div class="flex min-w-0 items-center gap-2">
@@ -41,7 +41,7 @@
                 </tr>
               </thead>
               <tbody>
-                {#each enumDef.values as value}
+                {#each enumDef.values as value (value.name)}
                   <tr class="border-b border-gray-100 last:border-b-0">
                     <td class="py-2.5 pr-6 align-top font-mono text-sm">
                       {value.name}

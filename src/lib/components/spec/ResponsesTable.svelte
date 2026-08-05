@@ -31,7 +31,7 @@
         </tr>
       </thead>
       <tbody>
-        {#each responses as resp}
+        {#each responses as resp (resp.code)}
           <tr class="border-b border-gray-100">
             <td class="py-2 pr-4">
               <span class="inline-block rounded px-2 py-0.5 font-mono text-xs font-semibold {statusColorClass(resp.code)}">{resp.code}</span

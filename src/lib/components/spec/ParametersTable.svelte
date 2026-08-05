@@ -22,7 +22,7 @@
         </tr>
       </thead>
       <tbody>
-        {#each parameters as param}
+        {#each parameters as param (param.name)}
           <tr class="border-b border-gray-100 last:border-b-0">
             <td class="py-2.5 pr-6 align-top">
               <span class="font-mono text-sm">{param.name}</span>

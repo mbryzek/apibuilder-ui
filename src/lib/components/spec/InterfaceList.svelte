@@ -12,7 +12,7 @@
 
 {#if interfaces.length > 0}
   <div class="space-y-6">
-    {#each interfaces as iface}
+    {#each interfaces as iface (iface.name)}
       <div id={iface.name} class="scroll-mt-16 overflow-hidden rounded-lg border border-gray-200">
         <div class="bg-ab-light-gray flex items-center gap-2 px-4 py-3">
           <h3 class="text-ab-dark-blue truncate font-mono text-base font-bold">{iface.name}</h3>
