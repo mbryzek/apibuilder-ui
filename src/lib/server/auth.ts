@@ -6,9 +6,26 @@ import { throwIfUnavailable } from '$lib/api/load-error';
 import type { Membership } from '$generated/com-bryzek-apibuilder';
 import { MembershipRole } from '$generated/com-bryzek-apibuilder';
 
+const UNAVAILABLE = 'We could not reach the server. Please try again in a moment.';
+
+/**
+ * Stop before sending someone to sign in when we never learned whether they already are.
+ *
+ * `locals.session` is absent both for a genuinely anonymous request and for one whose session
+ * lookup never got an answer (see `hooks.server.ts`). Telling the second case to sign in is a
+ * lie that costs the user whatever they had typed, and signing in again fails too, because the
+ * platform that could not answer is the same one that would have to authenticate them.
+ */
+function assertSessionKnown(locals: App.Locals): void {
+  if (locals.sessionUnavailable) {
+    throw error(503, UNAVAILABLE);
+  }
+}
+
 export function requireAuth(event: RequestEvent): NonNullable<App.Locals['session']> {
   const { locals, url } = event;
   if (!locals.session) {
+    assertSessionKnown(locals);
     const redirectTo = url.pathname + url.search;
     throw redirect(303, '/login?redirect=' + encodeURIComponent(redirectTo));
   }
@@ -17,6 +34,7 @@ export function requireAuth(event: RequestEvent): NonNullable<App.Locals['sessio
 
 export function requireAuthForAction(locals: App.Locals): NonNullable<App.Locals['session']> {
   if (!locals.session) {
+    assertSessionKnown(locals);
     throw redirect(302, '/login');
   }
   return locals.session;
