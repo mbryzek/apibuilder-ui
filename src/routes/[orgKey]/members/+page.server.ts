@@ -5,6 +5,7 @@ import { handleApiCall, type ApiResponse } from '$lib/api/error-handler';
 import { dataOr, loadErrorFrom } from '$lib/api/load-error';
 import { requireAuth, requireAdminForAction } from '$lib/server/auth';
 import { PAGE_FETCH_LIMIT, PAGE_LIMIT, parseOffset, toPage } from '$lib/pagination';
+import { findScopedById, outOfScope } from '$lib/server/scoped-id';
 import type { Membership, User, MembershipRequest, Organization } from '$generated/com-bryzek-apibuilder';
 import { MembershipRole } from '$generated/com-bryzek-apibuilder';
 
@@ -106,8 +107,7 @@ export const actions: Actions = {
   },
 
   removeMember: async ({ request, locals, params }) => {
-    await requireAdminForAction(locals, params.orgKey);
-    const session = locals.session!;
+    const session = await requireAdminForAction(locals, params.orgKey);
     const headers = getSessionHeaders(session.id);
     const formData = await request.formData();
     const guid = formData.get('guid');
@@ -116,7 +116,17 @@ export const actions: Actions = {
       return fail(400, { errors: [{ message: 'Invalid request' }] });
     }
 
-    const response = await handleApiCall<void>(() => apiBuilderClient().deleteMembershipById(guid, { headers }));
+    // Resolve the membership within the org that was just authorized, and delete the id that
+    // came back — the same discipline `revokeAdmin` below already used. See
+    // `$lib/server/scoped-id`.
+    const membership = await findScopedById<Membership>(guid, (limit, offset) =>
+      handleApiCall<Membership[]>(() => apiBuilderClient().getMemberships({ orgKey: params.orgKey, limit, offset, headers }))
+    );
+    if (!membership) {
+      return outOfScope();
+    }
+
+    const response = await handleApiCall<void>(() => apiBuilderClient().deleteMembershipById(membership.id, { headers }));
 
     if ('errors' in response) {
       return fail(400, { errors: response.errors });
