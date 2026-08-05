@@ -74,6 +74,7 @@ import { ApiException } from "./generated-util.ts";
 export interface GetGeneratorsOptions {
   limit: number;
   offset: number;
+  q?: string;
   key?: string;
   headers?: Record<string, string>;
 }
@@ -103,6 +104,9 @@ export class ApiClient {
 
   async getGenerators(params: GetGeneratorsOptions): Promise<Generator[]> {
     const queryParts: string[] = [];
+    if (params.q !== undefined && params.q !== null) {
+      queryParts.push(`q=${encodeURIComponent(params.q)}`);
+    }
     if (params.key !== undefined && params.key !== null) {
       queryParts.push(`key=${encodeURIComponent(params.key)}`);
     }

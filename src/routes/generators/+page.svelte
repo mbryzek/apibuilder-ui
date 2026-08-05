@@ -1,12 +1,16 @@
 <script lang="ts">
+  import { onDestroy } from 'svelte';
+  import { goto } from '$app/navigation';
   import LoadErrorBanner from '$lib/components/LoadErrorBanner.svelte';
   import Pagination from '$lib/components/Pagination.svelte';
+  import { listUrl } from '$lib/pagination';
   import type { LoadError } from '$lib/api/load-error';
   import type { Generator } from '$generated/com-bryzek-apibuilder-generator';
 
   interface Props {
     data: {
       generators: Generator[];
+      q: string;
       offset: number;
       limit: number;
       hasMore: boolean;
@@ -16,16 +20,26 @@
 
   let { data }: Props = $props();
 
-  let searchQuery = $state('');
+  // Carries the filter, drops the offset — so Previous/Next page through the matches, and typing
+  // a narrower filter restarts at page one instead of landing past the end of the smaller set.
+  const paginationBaseUrl = $derived(listUrl('/generators', { q: data.q }));
 
-  const filtered = $derived(
-    searchQuery
-      ? data.generators.filter((gen) => {
-          const q = searchQuery.toLowerCase();
-          return gen.key.toLowerCase().includes(q) || gen.name.toLowerCase().includes(q) || (gen.language ?? '').toLowerCase().includes(q);
-        })
-      : data.generators
-  );
+  let debounceTimer: ReturnType<typeof setTimeout> | undefined;
+
+  function filter(query: string) {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      goto(listUrl('/generators', { q: query }), { keepFocus: true });
+    }, 250);
+  }
+
+  function handleInput(event: Event) {
+    filter((event.target as HTMLInputElement).value);
+  }
+
+  onDestroy(() => {
+    clearTimeout(debounceTimer);
+  });
 </script>
 
 <svelte:head>
@@ -40,8 +54,10 @@
   <div class="mb-4">
     <input
       type="text"
+      name="q"
+      value={data.q}
+      oninput={handleInput}
       placeholder="Filter generators..."
-      bind:value={searchQuery}
       class="input-field w-full rounded-lg border px-3 py-2 text-sm sm:w-80"
     />
   </div>
@@ -50,7 +66,7 @@
     <LoadErrorBanner error={data.loadError} />
   {/if}
 
-  {#if filtered.length > 0}
+  {#if data.generators.length > 0}
     <div class="overflow-x-auto">
       <table class="w-full text-left">
         <thead>
@@ -61,7 +77,7 @@
           </tr>
         </thead>
         <tbody>
-          {#each filtered as gen (gen.key)}
+          {#each data.generators as gen (gen.key)}
             <tr class="hover:bg-ab-light-gray/50 border-b border-gray-100 transition-colors">
               <td class="py-3">
                 <a href="/generators/{gen.key}" class="text-ab-blue hover:text-ab-dark-blue font-medium">
@@ -76,12 +92,11 @@
       </table>
     </div>
   {:else if !data.loadError}
-    <p class="text-ab-gray">{searchQuery ? 'No generators match your filter.' : 'No generators found.'}</p>
+    <p class="text-ab-gray">{data.q ? `No generators match "${data.q}".` : 'No generators found.'}</p>
   {/if}
 
-  <!-- Outside the list guard on purpose: an empty page still needs its Previous link. Still
-       suppressed while a client-side filter is active, since the filter only sees this page. -->
-  {#if !searchQuery}
-    <Pagination offset={data.offset} limit={data.limit} hasMore={data.hasMore} baseUrl="/generators" />
-  {/if}
+  <!-- Outside the list guard on purpose: an empty page still needs its Previous link. No longer
+       suppressed while a filter is active — the API applies the filter, so the pages these links
+       point at are pages of the matches. -->
+  <Pagination offset={data.offset} limit={data.limit} hasMore={data.hasMore} baseUrl={paginationBaseUrl} />
 </div>
