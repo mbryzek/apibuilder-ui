@@ -4,6 +4,7 @@
   import AppSidebar from '$lib/components/AppSidebar.svelte';
   import type { Organization } from '$generated/com-bryzek-apibuilder';
   import type { Service } from '$generated/com-bryzek-apibuilder-spec';
+  import type { LoadError } from '$lib/api/load-error';
 
   interface Props {
     data: {
@@ -14,6 +15,7 @@
       service: Service;
       isWatching: boolean;
       watchGuid?: string;
+      watchLoadError: LoadError | null;
       session?: { id: string; user: { id: string; person: { email?: { address: string } } } };
     };
     children: Snippet;

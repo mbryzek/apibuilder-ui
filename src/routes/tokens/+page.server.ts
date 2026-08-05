@@ -1,6 +1,7 @@
 import type { PageServerLoad } from './$types';
 import { platformClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
+import { dataOr, loadErrorFrom } from '$lib/api/load-error';
 import { requireAuth } from '$lib/server/auth';
 import type { Token } from '$generated/com-bryzek-platform';
 import { PAGE_LIMIT, parseOffset } from '$lib/pagination';
@@ -14,12 +15,13 @@ export const load: PageServerLoad = async (event) => {
     platformClient().getTokensUsersByUserId({ userId: session.user.id, limit: PAGE_LIMIT, offset, headers })
   );
 
-  const tokens = 'data' in response ? response.data : [];
+  const tokens = dataOr(response, []);
 
   return {
     tokens,
     offset,
     limit: PAGE_LIMIT,
-    hasMore: tokens.length >= PAGE_LIMIT
+    hasMore: tokens.length >= PAGE_LIMIT,
+    loadError: loadErrorFrom(response)
   };
 };

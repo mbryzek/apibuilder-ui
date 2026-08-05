@@ -2,6 +2,7 @@ import { redirect, error } from '@sveltejs/kit';
 import type { RequestEvent } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
+import { throwIfUnavailable } from '$lib/api/load-error';
 import type { Membership } from '$generated/com-bryzek-apibuilder';
 import { MembershipRole } from '$generated/com-bryzek-apibuilder';
 
@@ -27,6 +28,9 @@ export async function requireMemberForAction(locals: App.Locals, orgKey: string)
   const response = await handleApiCall<Membership[]>(() =>
     apiBuilderClient().getMemberships({ orgKey, userId: session.user.id, limit: 25, offset: 0, headers })
   );
+  // An unanswered membership lookup is not a denial: reporting "Forbidden" for an
+  // outage tells a member their access was revoked.
+  throwIfUnavailable(response);
   if (!('data' in response) || response.data.length === 0) {
     throw error(403, 'Forbidden');
   }
@@ -39,6 +43,7 @@ export async function requireAdminForAction(locals: App.Locals, orgKey: string):
   const response = await handleApiCall<Membership[]>(() =>
     apiBuilderClient().getMemberships({ orgKey, userId: session.user.id, role: MembershipRole.Admin, limit: 25, offset: 0, headers })
   );
+  throwIfUnavailable(response);
   if (!('data' in response) || response.data.length === 0) {
     throw error(403, 'Forbidden');
   }

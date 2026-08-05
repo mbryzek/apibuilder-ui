@@ -1,5 +1,7 @@
 <script lang="ts">
+  import LoadErrorBanner from '$lib/components/LoadErrorBanner.svelte';
   import Pagination from '$lib/components/Pagination.svelte';
+  import type { LoadError } from '$lib/api/load-error';
   import type { Token } from '$generated/com-bryzek-platform';
 
   interface Props {
@@ -8,6 +10,7 @@
       offset: number;
       limit: number;
       hasMore: boolean;
+      loadError: LoadError | null;
     };
   }
 
@@ -26,9 +29,11 @@
     <a href="/tokens/create" class="btn-primary mt-3 inline-block text-center sm:mt-0"> Create Token </a>
   </div>
 
-  {#if tokens.length === 0}
-    <p class="text-ab-gray">No API tokens found.</p>
-  {:else}
+  {#if data.loadError}
+    <LoadErrorBanner error={data.loadError} />
+  {/if}
+
+  {#if tokens.length > 0}
     <div class="space-y-3">
       {#each tokens as token (token.id)}
         <a
@@ -47,5 +52,7 @@
     </div>
 
     <Pagination offset={data.offset} limit={data.limit} hasMore={data.hasMore} baseUrl="/tokens" />
+  {:else if !data.loadError}
+    <p class="text-ab-gray">No API tokens found.</p>
   {/if}
 </div>

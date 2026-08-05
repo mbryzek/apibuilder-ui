@@ -2,6 +2,7 @@ import type { PageServerLoad, Actions } from './$types';
 import { fail } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
+import { dataOr, loadErrorFrom } from '$lib/api/load-error';
 import { requireAuth, requireAuthForAction } from '$lib/server/auth';
 import type { Subscription } from '$generated/com-bryzek-apibuilder';
 import { Publication } from '$generated/com-bryzek-apibuilder';
@@ -15,7 +16,8 @@ export const load: PageServerLoad = async (event) => {
   );
 
   return {
-    subscriptions: 'data' in response ? response.data : []
+    subscriptions: dataOr(response, []),
+    loadError: loadErrorFrom(response)
   };
 };
 

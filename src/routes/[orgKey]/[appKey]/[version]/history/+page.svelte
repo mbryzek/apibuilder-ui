@@ -1,5 +1,7 @@
 <script lang="ts">
+  import LoadErrorBanner from '$lib/components/LoadErrorBanner.svelte';
   import Pagination from '$lib/components/Pagination.svelte';
+  import type { LoadError } from '$lib/api/load-error';
   import type { Change } from '$generated/com-bryzek-apibuilder';
 
   interface Props {
@@ -11,6 +13,7 @@
       orgKey: string;
       appKey: string;
       versionName: string;
+      loadError: LoadError | null;
     };
   }
 
@@ -26,9 +29,11 @@
 <div>
   <h2 class="text-ab-dark-blue mb-6 text-xl font-bold">History</h2>
 
-  {#if changes.length === 0}
-    <p class="text-ab-gray">No changes found for this application.</p>
-  {:else}
+  {#if data.loadError}
+    <LoadErrorBanner error={data.loadError} />
+  {/if}
+
+  {#if changes.length > 0}
     <div class="overflow-x-auto">
       <table class="w-full text-left">
         <thead>
@@ -72,5 +77,7 @@
       hasMore={data.hasMore}
       baseUrl="/{data.orgKey}/{data.appKey}/{data.versionName}/history"
     />
+  {:else if !data.loadError}
+    <p class="text-ab-gray">No changes found for this application.</p>
   {/if}
 </div>

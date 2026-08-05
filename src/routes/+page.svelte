@@ -1,4 +1,6 @@
 <script lang="ts">
+  import LoadErrorBanner from '$lib/components/LoadErrorBanner.svelte';
+  import type { LoadError } from '$lib/api/load-error';
   import type { Organization } from '$generated/com-bryzek-apibuilder';
 
   interface Props {
@@ -6,6 +8,7 @@
       session?: { id: string; user: { id: string; person: { email?: { address: string } } } };
       publicOrgs?: Organization[];
       myOrgs: Organization[];
+      loadError: LoadError | null;
     };
   }
 
@@ -21,31 +24,37 @@
 </svelte:head>
 
 <div class="page-container">
-  {#if session && myOrgs.length > 1}
-    <!-- Multiple orgs — let user pick -->
-    <div class="mb-12">
-      <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <h1 class="text-ab-dark-blue text-2xl font-bold">My Organizations</h1>
-        <a href="/org/create" class="btn-primary mt-4 inline-block text-center sm:mt-0"> Create Organization </a>
-      </div>
+  {#if session}
+    {#if data.loadError}
+      <LoadErrorBanner error={data.loadError} />
+    {/if}
 
-      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {#each myOrgs as org (org.key)}
-          <a href="/{org.key}" class="card transition-shadow hover:shadow-[0_0_17px_-4px_rgba(0,0,0,0.2)]">
-            <h3 class="text-ab-dark-blue font-semibold">{org.name}</h3>
-            <p class="text-ab-gray mt-1 text-sm">{org.namespace}</p>
-            <span
-              class="mt-2 inline-block rounded-full px-2 py-0.5 text-xs font-medium {org.visibility === 'public'
-                ? 'bg-green-100 text-green-800'
-                : 'bg-gray-100 text-gray-600'}"
-            >
-              {org.visibility}
-            </span>
-          </a>
-        {/each}
+    {#if myOrgs.length > 1}
+      <!-- Multiple orgs — let user pick -->
+      <div class="mb-12">
+        <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <h1 class="text-ab-dark-blue text-2xl font-bold">My Organizations</h1>
+          <a href="/org/create" class="btn-primary mt-4 inline-block text-center sm:mt-0"> Create Organization </a>
+        </div>
+
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {#each myOrgs as org (org.key)}
+            <a href="/{org.key}" class="card transition-shadow hover:shadow-[0_0_17px_-4px_rgba(0,0,0,0.2)]">
+              <h3 class="text-ab-dark-blue font-semibold">{org.name}</h3>
+              <p class="text-ab-gray mt-1 text-sm">{org.namespace}</p>
+              <span
+                class="mt-2 inline-block rounded-full px-2 py-0.5 text-xs font-medium {org.visibility === 'public'
+                  ? 'bg-green-100 text-green-800'
+                  : 'bg-gray-100 text-gray-600'}"
+              >
+                {org.visibility}
+              </span>
+            </a>
+          {/each}
+        </div>
       </div>
-    </div>
-  {:else if !session}
+    {/if}
+  {:else}
     <!-- Hero for logged out users -->
     <div class="py-20 text-center sm:py-32">
       <h1 class="text-ab-dark-blue mb-8 text-5xl font-light sm:text-6xl lg:text-7xl">API Builder</h1>
@@ -92,7 +101,9 @@
       </div>
     </div>
 
-    {#if publicOrgs.length > 0}
+    {#if data.loadError}
+      <LoadErrorBanner error={data.loadError} />
+    {:else if publicOrgs.length > 0}
       <div>
         <h2 class="text-ab-dark-blue mb-6 text-xl font-bold">Public Organizations</h2>
         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">

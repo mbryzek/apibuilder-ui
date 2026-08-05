@@ -2,6 +2,7 @@ import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
 import { platformClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
+import { dataOr, loadErrorFrom } from '$lib/api/load-error';
 import { requireAuth, requireAuthForAction } from '$lib/server/auth';
 import type { CleartextToken } from '$generated/com-bryzek-platform';
 
@@ -13,7 +14,11 @@ export const load: PageServerLoad = async (event) => {
 
   return {
     tokenGuid: event.params.guid,
-    cleartextToken: 'data' in response ? response.data.token : null
+    cleartextToken: dataOr<CleartextToken | null>(response, null)?.token ?? null,
+    // A 404 is the normal "already displayed" state — the cleartext is deliberately
+    // unavailable after the first view. Every other failure is a failure, and saying
+    // "already displayed" for it hides a token the user just created.
+    loadError: response.status === 404 ? null : loadErrorFrom(response)
   };
 };
 

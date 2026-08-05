@@ -1,6 +1,7 @@
 import type { PageServerLoad } from './$types';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
+import { dataOr, loadErrorFrom } from '$lib/api/load-error';
 import type { Change } from '$generated/com-bryzek-apibuilder';
 import { PAGE_LIMIT, parseOffset } from '$lib/pagination';
 
@@ -16,7 +17,7 @@ export const load: PageServerLoad = async ({ url, locals, parent, params }) => {
     client.getChanges({ orgKey, applicationKey: appKey, limit: PAGE_LIMIT, offset, headers })
   );
 
-  const changes = 'data' in response ? response.data : [];
+  const changes = dataOr(response, []);
 
   return {
     changes,
@@ -25,6 +26,7 @@ export const load: PageServerLoad = async ({ url, locals, parent, params }) => {
     hasMore: changes.length >= PAGE_LIMIT,
     orgKey,
     appKey,
-    versionName: version.version
+    versionName: version.version,
+    loadError: loadErrorFrom(response)
   };
 };

@@ -1,11 +1,14 @@
 <script lang="ts">
   import { enhance } from '$app/forms';
+  import LoadErrorBanner from '$lib/components/LoadErrorBanner.svelte';
   import type { ApiErrorItem } from '$lib/api/error-handler';
+  import type { LoadError } from '$lib/api/load-error';
 
   interface Props {
     data: {
       tokenGuid: string;
       cleartextToken: string | null;
+      loadError: LoadError | null;
     };
     form: { errors?: ApiErrorItem[] } | null;
   }
@@ -49,7 +52,9 @@
     </div>
   {/if}
 
-  {#if data.cleartextToken}
+  {#if data.loadError}
+    <LoadErrorBanner error={data.loadError} />
+  {:else if data.cleartextToken}
     <div class="card mb-6">
       <div class="mb-2">
         <p class="text-ab-gray mb-1 text-sm font-semibold">Token</p>

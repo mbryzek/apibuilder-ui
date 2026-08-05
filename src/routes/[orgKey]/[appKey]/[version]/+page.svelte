@@ -2,6 +2,7 @@
   import { enhance } from '$app/forms';
   import { page } from '$app/stores';
   import type { Service } from '$generated/com-bryzek-apibuilder-spec';
+  import type { LoadError } from '$lib/api/load-error';
   import SpecTabs from '$lib/components/spec/SpecTabs.svelte';
 
   interface Props {
@@ -11,6 +12,7 @@
       isMember: boolean;
       isWatching: boolean;
       watchGuid?: string;
+      watchLoadError: LoadError | null;
       session?: { id: string; user: { id: string; person: { email?: { address: string } } } };
     };
     form: {
@@ -74,8 +76,15 @@
         {/if}
         <button
           type="submit"
-          title={data.isWatching ? 'Unwatch this application' : 'Watch this application'}
-          class="p-1.5 transition-colors {data.isWatching ? 'text-ab-blue' : 'text-ab-gray hover:text-ab-blue'}"
+          disabled={!!data.watchLoadError}
+          title={data.watchLoadError
+            ? `Watch status unavailable: ${data.watchLoadError.message}`
+            : data.isWatching
+              ? 'Unwatch this application'
+              : 'Watch this application'}
+          class="p-1.5 transition-colors disabled:cursor-not-allowed disabled:opacity-50 {data.isWatching
+            ? 'text-ab-blue'
+            : 'text-ab-gray hover:text-ab-blue'}"
         >
           {#if data.isWatching}
             <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">

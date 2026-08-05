@@ -1,6 +1,7 @@
 import type { PageServerLoad } from './$types';
 import { generatorClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
+import { dataOr, loadErrorFrom } from '$lib/api/load-error';
 import type { Generator } from '$generated/com-bryzek-apibuilder-generator';
 import { PAGE_LIMIT, parseOffset } from '$lib/pagination';
 
@@ -10,12 +11,13 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 
   const response = await handleApiCall<Generator[]>(() => generatorClient().getGenerators({ limit: PAGE_LIMIT, offset, headers }));
 
-  const generators = 'data' in response ? response.data : [];
+  const generators = dataOr(response, []);
 
   return {
     generators,
     offset,
     limit: PAGE_LIMIT,
-    hasMore: generators.length >= PAGE_LIMIT
+    hasMore: generators.length >= PAGE_LIMIT,
+    loadError: loadErrorFrom(response)
   };
 };
