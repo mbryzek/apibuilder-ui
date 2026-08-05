@@ -504,7 +504,7 @@ export class ApiClient {
     queryParts.push(`limit=${encodeURIComponent(String(params.limit))}`);
     queryParts.push(`offset=${encodeURIComponent(String(params.offset))}`);
     const queryString = queryParts.length > 0 ? '?' + queryParts.join('&') : '';
-    const url = `${this.baseUrl}/apibuilder/${params.orgKey}/applications${queryString}`;
+    const url = `${this.baseUrl}/apibuilder/${encodeURIComponent(params.orgKey)}/applications${queryString}`;
 
       const response = await fetch(url, {
       method: 'GET',
@@ -528,7 +528,7 @@ export class ApiClient {
   }
 
   async getApplicationByAppKey(params: GetApplicationByAppKeyOptions): Promise<Application> {
-    const url = `${this.baseUrl}/apibuilder/${params.orgKey}/applications/${params.appKey}`;
+    const url = `${this.baseUrl}/apibuilder/${encodeURIComponent(params.orgKey)}/applications/${encodeURIComponent(params.appKey)}`;
 
       const response = await fetch(url, {
       method: 'GET',
@@ -556,7 +556,7 @@ export class ApiClient {
   }
 
   async createApplication(params: CreateApplicationOptions): Promise<Application> {
-    const url = `${this.baseUrl}/apibuilder/${params.orgKey}/applications`;
+    const url = `${this.baseUrl}/apibuilder/${encodeURIComponent(params.orgKey)}/applications`;
 
       const response = await fetch(url, {
       method: 'POST',
@@ -585,7 +585,7 @@ export class ApiClient {
   }
 
   async updateApplicationByAppKey(params: UpdateApplicationByAppKeyOptions): Promise<Application> {
-    const url = `${this.baseUrl}/apibuilder/${params.orgKey}/applications/${params.appKey}`;
+    const url = `${this.baseUrl}/apibuilder/${encodeURIComponent(params.orgKey)}/applications/${encodeURIComponent(params.appKey)}`;
 
       const response = await fetch(url, {
       method: 'PUT',
@@ -614,7 +614,7 @@ export class ApiClient {
   }
 
   async deleteApplicationByAppKey(params: DeleteApplicationByAppKeyOptions): Promise<void> {
-    const url = `${this.baseUrl}/apibuilder/${params.orgKey}/applications/${params.appKey}`;
+    const url = `${this.baseUrl}/apibuilder/${encodeURIComponent(params.orgKey)}/applications/${encodeURIComponent(params.appKey)}`;
 
       const response = await fetch(url, {
       method: 'DELETE',
@@ -680,7 +680,7 @@ export class ApiClient {
       queryParts.push(`attributes=${encodeURIComponent(params.attributes)}`);
     }
     const queryString = queryParts.length > 0 ? '?' + queryParts.join('&') : '';
-    const url = `${this.baseUrl}/apibuilder/${params.orgKey}/${params.appKey}/${String(params.version)}/${params.generatorKey}${queryString}`;
+    const url = `${this.baseUrl}/apibuilder/${encodeURIComponent(params.orgKey)}/${encodeURIComponent(params.appKey)}/${encodeURIComponent(String(params.version))}/${encodeURIComponent(params.generatorKey)}${queryString}`;
 
       const response = await fetch(url, {
       method: 'GET',
@@ -712,7 +712,7 @@ export class ApiClient {
   }
 
   async createDomain(params: CreateDomainOptions): Promise<Domain> {
-    const url = `${this.baseUrl}/apibuilder/domains/${params.orgKey}`;
+    const url = `${this.baseUrl}/apibuilder/domains/${encodeURIComponent(params.orgKey)}`;
 
       const response = await fetch(url, {
       method: 'POST',
@@ -741,7 +741,7 @@ export class ApiClient {
   }
 
   async deleteDomainByName(params: DeleteDomainByNameOptions): Promise<void> {
-    const url = `${this.baseUrl}/apibuilder/domains/${params.orgKey}/${params.name}`;
+    const url = `${this.baseUrl}/apibuilder/domains/${encodeURIComponent(params.orgKey)}/${encodeURIComponent(params.name)}`;
 
       const response = await fetch(url, {
       method: 'DELETE',
@@ -839,7 +839,7 @@ export class ApiClient {
   }
 
   async deleteMembershipById(id: string, options?: DeleteMembershipByIdOptions): Promise<void> {
-    const url = `${this.baseUrl}/apibuilder/memberships/${id}`;
+    const url = `${this.baseUrl}/apibuilder/memberships/${encodeURIComponent(id)}`;
 
       const response = await fetch(url, {
       method: 'DELETE',
@@ -929,7 +929,7 @@ export class ApiClient {
   }
 
   async createMembershipRequestAcceptById(id: string, options?: CreateMembershipRequestAcceptByIdOptions): Promise<Membership> {
-    const url = `${this.baseUrl}/apibuilder/membership/requests/${id}/accept`;
+    const url = `${this.baseUrl}/apibuilder/membership/requests/${encodeURIComponent(id)}/accept`;
 
       const response = await fetch(url, {
       method: 'POST',
@@ -961,7 +961,7 @@ export class ApiClient {
   }
 
   async createMembershipRequestDeclineById(id: string, options?: CreateMembershipRequestDeclineByIdOptions): Promise<void> {
-    const url = `${this.baseUrl}/apibuilder/membership/requests/${id}/decline`;
+    const url = `${this.baseUrl}/apibuilder/membership/requests/${encodeURIComponent(id)}/decline`;
 
       const response = await fetch(url, {
       method: 'POST',
@@ -1019,7 +1019,7 @@ export class ApiClient {
   }
 
   async getOrganizationByKey(key: string, options?: GetOrganizationByKeyOptions): Promise<Organization> {
-    const url = `${this.baseUrl}/apibuilder/organizations/${key}`;
+    const url = `${this.baseUrl}/apibuilder/organizations/${encodeURIComponent(key)}`;
 
       const response = await fetch(url, {
       method: 'GET',
@@ -1076,7 +1076,7 @@ export class ApiClient {
   }
 
   async updateOrganizationByKey(params: UpdateOrganizationByKeyOptions): Promise<Organization> {
-    const url = `${this.baseUrl}/apibuilder/organizations/${params.key}`;
+    const url = `${this.baseUrl}/apibuilder/organizations/${encodeURIComponent(params.key)}`;
 
       const response = await fetch(url, {
       method: 'PUT',
@@ -1105,7 +1105,7 @@ export class ApiClient {
   }
 
   async deleteOrganizationByKey(key: string, options?: DeleteOrganizationByKeyOptions): Promise<void> {
-    const url = `${this.baseUrl}/apibuilder/organizations/${key}`;
+    const url = `${this.baseUrl}/apibuilder/organizations/${encodeURIComponent(key)}`;
 
       const response = await fetch(url, {
       method: 'DELETE',
@@ -1198,7 +1198,7 @@ export class ApiClient {
   }
 
   async deleteSubscriptionById(id: string, options?: DeleteSubscriptionByIdOptions): Promise<void> {
-    const url = `${this.baseUrl}/apibuilder/subscriptions/${id}`;
+    const url = `${this.baseUrl}/apibuilder/subscriptions/${encodeURIComponent(id)}`;
 
       const response = await fetch(url, {
       method: 'DELETE',
@@ -1260,7 +1260,7 @@ export class ApiClient {
   }
 
   async getUserById(id: string, options?: GetUserByIdOptions): Promise<User> {
-    const url = `${this.baseUrl}/apibuilder/users/${id}`;
+    const url = `${this.baseUrl}/apibuilder/users/${encodeURIComponent(id)}`;
 
       const response = await fetch(url, {
       method: 'GET',
@@ -1288,7 +1288,7 @@ export class ApiClient {
   }
 
   async updateUserById(params: UpdateUserByIdOptions): Promise<User> {
-    const url = `${this.baseUrl}/apibuilder/users/${params.id}`;
+    const url = `${this.baseUrl}/apibuilder/users/${encodeURIComponent(params.id)}`;
 
       const response = await fetch(url, {
       method: 'PUT',
@@ -1346,7 +1346,7 @@ export class ApiClient {
     queryParts.push(`limit=${encodeURIComponent(String(params.limit))}`);
     queryParts.push(`offset=${encodeURIComponent(String(params.offset))}`);
     const queryString = queryParts.length > 0 ? '?' + queryParts.join('&') : '';
-    const url = `${this.baseUrl}/apibuilder/${params.orgKey}/${params.appKey}${queryString}`;
+    const url = `${this.baseUrl}/apibuilder/${encodeURIComponent(params.orgKey)}/${encodeURIComponent(params.appKey)}${queryString}`;
 
       const response = await fetch(url, {
       method: 'GET',
@@ -1370,7 +1370,7 @@ export class ApiClient {
   }
 
   async getVersionByVersion(params: GetVersionByVersionOptions): Promise<Version> {
-    const url = `${this.baseUrl}/apibuilder/${params.orgKey}/${params.appKey}/${String(params.version)}`;
+    const url = `${this.baseUrl}/apibuilder/${encodeURIComponent(params.orgKey)}/${encodeURIComponent(params.appKey)}/${encodeURIComponent(String(params.version))}`;
 
       const response = await fetch(url, {
       method: 'GET',
@@ -1398,7 +1398,7 @@ export class ApiClient {
   }
 
   async updateVersionByVersion(params: UpdateVersionByVersionOptions): Promise<Version> {
-    const url = `${this.baseUrl}/apibuilder/${params.orgKey}/${params.appKey}/${String(params.version)}`;
+    const url = `${this.baseUrl}/apibuilder/${encodeURIComponent(params.orgKey)}/${encodeURIComponent(params.appKey)}/${encodeURIComponent(String(params.version))}`;
 
       const response = await fetch(url, {
       method: 'PUT',
@@ -1427,7 +1427,7 @@ export class ApiClient {
   }
 
   async deleteVersionByVersion(params: DeleteVersionByVersionOptions): Promise<void> {
-    const url = `${this.baseUrl}/apibuilder/${params.orgKey}/${params.appKey}/${String(params.version)}`;
+    const url = `${this.baseUrl}/apibuilder/${encodeURIComponent(params.orgKey)}/${encodeURIComponent(params.appKey)}/${encodeURIComponent(String(params.version))}`;
 
       const response = await fetch(url, {
       method: 'DELETE',
@@ -1520,7 +1520,7 @@ export class ApiClient {
   }
 
   async deleteWatchById(id: string, options?: DeleteWatchByIdOptions): Promise<void> {
-    const url = `${this.baseUrl}/apibuilder/watches/${id}`;
+    const url = `${this.baseUrl}/apibuilder/watches/${encodeURIComponent(id)}`;
 
       const response = await fetch(url, {
       method: 'DELETE',
