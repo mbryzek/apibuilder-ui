@@ -9,7 +9,8 @@ import type { Cookies } from '@sveltejs/kit';
  * `/login/dev` was gated behind `config.isProduction` — and neither had a test that ran. The e2e
  * suite that would have covered them needs a live platform API, so it only runs on a developer
  * machine (see README). These assert the same invariants against the real route modules with the
- * API client mocked, so they run in CI on every PR.
+ * API client mocked, so `npm run test:unit` / `npm run check` catches a regression without a
+ * server.
  *
  * The API client is the only thing stubbed: the real `handleApiCall`, the real `getSessionHeaders`
  * and the real cookie policy in `$lib/server/session` all execute here, because each of them is

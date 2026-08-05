@@ -23,8 +23,8 @@ npm run format         # prettier --write
 npm run build          # production build (adapter-cloudflare)
 ```
 
-`npm run check` is exactly what CI runs (`.github/workflows/ci.yml`, on every PR and every push to
-`main`), so a green working copy and a green PR mean the same thing. It covers:
+There is no CI in this repo yet — `npm run check` is the gate a developer runs by hand before
+pushing. It covers:
 
 | Step                                      | Scope                                        |
 | ----------------------------------------- | -------------------------------------------- |
@@ -46,8 +46,8 @@ survived both gates.
 server. Route logic is testable here directly: a `+page.server.ts` exports plain functions, so a
 load or an action can be invoked with a hand-built event and the API client mocked. That is how
 `src/routes/session-lifecycle.test.ts` and `src/routes/confused-deputy.test.ts` pin authorization
-and session behavior. **This is the level to reach for first** — it runs in CI, and it is where a
-regression gets caught.
+and session behavior. **This is the level to reach for first** — it runs in seconds with no server,
+and it is where a regression gets caught.
 
 **End-to-end tests (`npm run test:e2e`)** are Playwright specs in `playwright/tests/`. They need
 two servers running, and `playwright/global-setup.ts` refuses to start without both:
@@ -58,20 +58,20 @@ cd ~/code/platform && ./run.sh && sbt 'project api; run'   # platform API on :93
 npm run test:e2e                                # or test:e2e:ui / :headed / :debug
 ```
 
-### Why the Playwright suite does not run in CI
+### Why the Playwright suite is a developer tool, not a gate
 
 It signs users up for real: `createUserViaApi` POSTs to `/tenant/apibuilder/session/signups` on
-whatever platform API it is pointed at, and the specs then create orgs, tokens, and domains. That
-needs a platform instance CI is allowed to write to — a private Scala service plus Postgres plus
-migrations plus a seeded `apibuilder` tenant. Pointing the suite at the production API instead is
-not an option: it would create real users and real orgs on every run.
+whatever platform API it is pointed at, and the specs then create orgs, tokens, and domains. Running
+it unattended would need a platform instance it's safe to write to — a private Scala service plus
+Postgres plus migrations plus a seeded `apibuilder` tenant — and pointing it at the production API
+instead is not an option: it would create real users and real orgs on every run.
 
-So this suite is a developer tool, not a gate, and the config says so — `playwright.config.ts` has
-no `process.env['CI']` branches, because a `forbidOnly`/`retries`/`workers` split by CI would imply
-coverage that does not exist.
+So nobody but a developer with `platform` running locally executes this suite, and the config says
+so — `playwright.config.ts` has no `process.env['CI']` branches, because a `forbidOnly`/`retries`/
+`workers` split by CI would imply an automated run that does not happen.
 
 The practical consequence: **an auth or authorization change needs a unit test, not only an e2e
 spec.** ISS-493 was filed after three consecutive commits changed the logout and dev-login paths
-with no executed coverage at all — the specs compiled on every PR, which proved they were valid
-TypeScript and nothing more. Standing this up in CI properly would mean a platform test instance;
-until that exists, `src/**/*.test.ts` is where auth behavior gets pinned.
+with no executed coverage at all — the specs compiled on every push, which proved they were valid
+TypeScript and nothing more. Until this suite runs somewhere unattended, `src/**/*.test.ts` is where
+auth behavior gets pinned.

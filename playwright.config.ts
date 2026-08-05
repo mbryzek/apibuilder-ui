@@ -4,9 +4,10 @@ import { defineConfig, devices } from '@playwright/test';
  * Playwright Test Configuration for API Builder UI
  *
  * This suite runs on a developer machine only — it needs a platform API it is allowed to create
- * users in, which CI has no way to provide. There are therefore no `process.env['CI']` branches
- * here: a `forbidOnly`/`retries`/`workers` split by CI would read as "CI runs this" and it does
- * not. See "Why the Playwright suite does not run in CI" in README.md.
+ * users in, which nothing unattended can safely provide. There are therefore no
+ * `process.env['CI']` branches here: a `forbidOnly`/`retries`/`workers` split by CI would read as
+ * "CI runs this" and no CI runs this. See "Why the Playwright suite is a developer tool, not a
+ * gate" in README.md.
  */
 
 const FRONTEND_BASE_URL = process.env['FRONTEND_BASE_URL'] || 'http://localhost:5173';
