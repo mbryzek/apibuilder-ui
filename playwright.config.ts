@@ -2,6 +2,12 @@ import { defineConfig, devices } from '@playwright/test';
 
 /**
  * Playwright Test Configuration for API Builder UI
+ *
+ * This suite runs on a developer machine only — it needs a platform API it is allowed to create
+ * users in, which nothing unattended can safely provide. There are therefore no
+ * `process.env['CI']` branches here: a `forbidOnly`/`retries`/`workers` split by CI would read as
+ * "CI runs this" and no CI runs this. See "Why the Playwright suite is a developer tool, not a
+ * gate" in README.md.
  */
 
 const FRONTEND_BASE_URL = process.env['FRONTEND_BASE_URL'] || 'http://localhost:5173';
@@ -22,11 +28,7 @@ export default defineConfig({
 
   fullyParallel: true,
 
-  forbidOnly: !!process.env['CI'],
-
-  retries: process.env['CI'] ? 2 : 0,
-
-  workers: process.env['CI'] ? 1 : 20,
+  workers: 20,
 
   reporter: [
     ['list'],

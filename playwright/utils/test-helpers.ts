@@ -9,6 +9,9 @@ import type { Page } from '@playwright/test';
 import { config } from '../config';
 import type { ContextOrPage } from '../types';
 
+/** Password used for every throwaway account `signupAndLogin` creates. */
+const TEST_PASSWORD = 'testpassword';
+
 /**
  * Generate a random UUID
  */
@@ -50,21 +53,28 @@ export async function createUserViaApi(
 }
 
 /**
- * API Helper: Authenticate a user via the platform login endpoint
+ * API Helper: ask the platform whether a session id still authenticates.
+ *
+ * The only way to tell a real logout from a cleared cookie: the browser has forgotten the id
+ * either way, so the assertion has to be made against the platform.
  */
-export async function authenticateViaApi(email: string, password: string): Promise<{ session: { id: string }; user: { id: string } }> {
-  const response = await fetch(`${config.API_BASE_URL}/tenant/${config.TENANT_ID}/session/logins`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'X-Bypass-Rate-Limit': 'true' },
-    body: JSON.stringify({ email, password })
+export async function sessionIsValid(sessionId: string): Promise<boolean> {
+  const response = await fetch(`${config.API_BASE_URL}/tenant/${config.TENANT_ID}/session`, {
+    headers: { session_id: sessionId, 'X-Bypass-Rate-Limit': 'true' }
   });
 
-  if (!response.ok) {
-    const errorBody = await response.text();
-    throw new Error(`Failed to authenticate via API: ${response.status} ${errorBody}`);
-  }
+  return response.ok;
+}
 
-  return response.json();
+/**
+ * Create a throwaway user and put its session in the browser, the way every authenticated spec
+ * starts. Returns the pieces a caller may need to assert against the platform afterwards.
+ */
+export async function signupAndLogin(page: Page): Promise<{ email: string; sessionId: string }> {
+  const email = generateRandomEmail();
+  const result = await createUserViaApi(email, TEST_PASSWORD);
+  await setSessionCookie(page, result.session.id);
+  return { email, sessionId: result.session.id };
 }
 
 /**
@@ -202,7 +212,9 @@ export async function safeClick(page: Page, buttonLabel: string): Promise<boolea
     } catch (error) {
       if (i === retries - 1) {
         await takeScreenshot(page, 'click-failed');
-        throw new Error(`Button with text '${buttonLabel}' not found`);
+        // Carry the Playwright error forward — "not found" alone hides whether the button was
+        // missing, hidden, or covered by something else.
+        throw new Error(`Button with text '${buttonLabel}' not found: ${error instanceof Error ? error.message : String(error)}`);
       }
       await page.waitForTimeout(250);
     }
