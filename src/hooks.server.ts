@@ -55,20 +55,17 @@ export const handle: Handle = async ({ event, resolve }) => {
     res.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
   }
 
-  res.headers.set(
-    'Content-Security-Policy',
-    [
-      "default-src 'self'",
-      "script-src 'self' 'unsafe-inline'",
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "font-src 'self' https://fonts.gstatic.com",
-      "img-src 'self' data: https:",
-      "connect-src 'self' " + config.apiBaseUrl,
-      "frame-ancestors 'none'",
-      "base-uri 'self'",
-      "form-action 'self'"
-    ].join('; ')
-  );
+  // The page policy is NOT set here -- it comes from `kit.csp` in svelte.config.js, because only
+  // SvelteKit can nonce the hydration bootstrap it injects. Setting Content-Security-Policy
+  // unconditionally here would overwrite that nonced header and take the whole app down, which is
+  // the trap the previous hand-built version worked around by allowing 'unsafe-inline'.
+  //
+  // What SvelteKit does not cover is everything it did not render: the +server.ts endpoints
+  // (service.json, original, the generator download, the type example). Those return JSON or plain
+  // text and load no subresources at all, so they get the strictest policy there is.
+  if (!res.headers.has('Content-Security-Policy')) {
+    res.headers.set('Content-Security-Policy', "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'");
+  }
 
   return res;
 };
