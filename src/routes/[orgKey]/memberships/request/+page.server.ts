@@ -2,6 +2,7 @@ import type { PageServerLoad, Actions } from './$types';
 import { fail } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
+import { dataOr, loadErrorFrom } from '$lib/api/load-error';
 import { requireAuth, requireAuthForAction } from '$lib/server/auth';
 import type { Membership, MembershipRequest, Organization } from '$generated/com-bryzek-apibuilder';
 import { MembershipRole } from '$generated/com-bryzek-apibuilder';
@@ -15,15 +16,17 @@ export const load: PageServerLoad = async (event) => {
   const membershipsResponse = await handleApiCall<Membership[]>(() =>
     apiBuilderClient().getMemberships({ orgKey: params.orgKey, userId: session.user.id, limit: 25, offset: 0, headers })
   );
-  const isMember = 'data' in membershipsResponse && membershipsResponse.data.length > 0;
+  const isMember = dataOr(membershipsResponse, []).length > 0;
 
   // Check if already requested
   const requestsResponse = await handleApiCall<MembershipRequest[]>(() =>
     apiBuilderClient().getMembershipRequests({ orgKey: params.orgKey, userId: session.user.id, limit: 25, offset: 0, headers })
   );
-  const hasPendingRequest = 'data' in requestsResponse && requestsResponse.data.length > 0;
+  const hasPendingRequest = dataOr(requestsResponse, []).length > 0;
 
-  return { isMember, hasPendingRequest };
+  // Both checks default to false, which is exactly the state that offers the join
+  // button — so a failed lookup must suppress the form rather than invite a duplicate.
+  return { isMember, hasPendingRequest, loadError: loadErrorFrom(membershipsResponse, requestsResponse) };
 };
 
 export const actions: Actions = {

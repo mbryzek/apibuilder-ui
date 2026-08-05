@@ -1,7 +1,8 @@
 import type { PageServerLoad, Actions } from './$types';
 import { fail } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
-import { handleApiCall } from '$lib/api/error-handler';
+import { handleApiCall, type ApiResponse } from '$lib/api/error-handler';
+import { dataOr, loadErrorFrom } from '$lib/api/load-error';
 import { requireAuth, requireAdminForAction } from '$lib/server/auth';
 import type { Membership, User, MembershipRequest, Organization } from '$generated/com-bryzek-apibuilder';
 import { MembershipRole } from '$generated/com-bryzek-apibuilder';
@@ -17,18 +18,18 @@ export const load: PageServerLoad = async (event) => {
   );
 
   let pendingRequestsCount = 0;
+  let requestsResponse: ApiResponse<MembershipRequest[]> | null = null;
   if (isAdmin) {
-    const requestsResponse = await handleApiCall<MembershipRequest[]>(() =>
+    requestsResponse = await handleApiCall<MembershipRequest[]>(() =>
       apiBuilderClient().getMembershipRequests({ orgKey: params.orgKey, limit: 25, offset: 0, headers })
     );
-    if ('data' in requestsResponse) {
-      pendingRequestsCount = requestsResponse.data.length;
-    }
+    pendingRequestsCount = dataOr(requestsResponse, []).length;
   }
 
   return {
-    memberships: 'data' in membershipsResponse ? membershipsResponse.data : [],
-    pendingRequestsCount
+    memberships: dataOr(membershipsResponse, []),
+    pendingRequestsCount,
+    loadError: loadErrorFrom(membershipsResponse, requestsResponse)
   };
 };
 

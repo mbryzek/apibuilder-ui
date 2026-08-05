@@ -3,12 +3,15 @@
   import type { Organization, Subscription } from '$generated/com-bryzek-apibuilder';
   import { Publication } from '$generated/com-bryzek-apibuilder';
   import type { ApiErrorItem } from '$lib/api/error-handler';
+  import type { LoadError } from '$lib/api/load-error';
+  import LoadErrorBanner from '$lib/components/LoadErrorBanner.svelte';
 
   interface Props {
     data: {
       org: Organization;
       isAdmin: boolean;
       subscriptions: Subscription[];
+      loadError: LoadError | null;
     };
     form: { errors?: ApiErrorItem[]; success?: boolean } | null;
   }
@@ -52,41 +55,47 @@
     </div>
   {/if}
 
-  <div class="space-y-3">
-    {#each visiblePublications as publication (publication)}
-      {@const subId = getSubscriptionId(publication)}
-      {@const isSubscribed = !!subId}
-      <div class="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3">
-        <div>
-          <div class="text-ab-dark-blue font-medium">{publicationLabels[publication] || publication}</div>
-          <span
-            class="mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-medium {isSubscribed
-              ? 'bg-green-100 text-green-800'
-              : 'bg-gray-100 text-gray-600'}"
+  <!-- With no subscription list every row would read "Not subscribed", and subscribing
+       again would file a duplicate. Say so instead of guessing. -->
+  {#if data.loadError}
+    <LoadErrorBanner error={data.loadError} />
+  {:else}
+    <div class="space-y-3">
+      {#each visiblePublications as publication (publication)}
+        {@const subId = getSubscriptionId(publication)}
+        {@const isSubscribed = !!subId}
+        <div class="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3">
+          <div>
+            <div class="text-ab-dark-blue font-medium">{publicationLabels[publication] || publication}</div>
+            <span
+              class="mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-medium {isSubscribed
+                ? 'bg-green-100 text-green-800'
+                : 'bg-gray-100 text-gray-600'}"
+            >
+              {isSubscribed ? 'Subscribed' : 'Not subscribed'}
+            </span>
+          </div>
+          <form
+            method="POST"
+            action="?/toggle"
+            use:enhance={() => {
+              isSubmitting = true;
+              return async ({ update }) => {
+                isSubmitting = false;
+                await update();
+              };
+            }}
           >
-            {isSubscribed ? 'Subscribed' : 'Not subscribed'}
-          </span>
+            <input type="hidden" name="publication" value={publication} />
+            {#if subId}
+              <input type="hidden" name="subscription_id" value={subId} />
+            {/if}
+            <button type="submit" class="{isSubscribed ? 'btn-secondary' : 'btn-primary'} px-4 py-2 text-sm" disabled={isSubmitting}>
+              {isSubscribed ? 'Unsubscribe' : 'Subscribe'}
+            </button>
+          </form>
         </div>
-        <form
-          method="POST"
-          action="?/toggle"
-          use:enhance={() => {
-            isSubmitting = true;
-            return async ({ update }) => {
-              isSubmitting = false;
-              await update();
-            };
-          }}
-        >
-          <input type="hidden" name="publication" value={publication} />
-          {#if subId}
-            <input type="hidden" name="subscription_id" value={subId} />
-          {/if}
-          <button type="submit" class="{isSubscribed ? 'btn-secondary' : 'btn-primary'} px-4 py-2 text-sm" disabled={isSubmitting}>
-            {isSubscribed ? 'Unsubscribe' : 'Subscribe'}
-          </button>
-        </form>
-      </div>
-    {/each}
-  </div>
+      {/each}
+    </div>
+  {/if}
 </div>

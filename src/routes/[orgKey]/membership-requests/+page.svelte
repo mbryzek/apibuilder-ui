@@ -2,11 +2,14 @@
   import { enhance } from '$app/forms';
   import type { Organization, MembershipRequest } from '$generated/com-bryzek-apibuilder';
   import type { ApiErrorItem } from '$lib/api/error-handler';
+  import type { LoadError } from '$lib/api/load-error';
+  import LoadErrorBanner from '$lib/components/LoadErrorBanner.svelte';
 
   interface Props {
     data: {
       org: Organization;
       requests: MembershipRequest[];
+      loadError: LoadError | null;
     };
     form: { errors?: ApiErrorItem[]; success?: boolean } | null;
   }
@@ -25,6 +28,10 @@
 <div>
   <h1 class="text-ab-dark-blue mb-6 text-2xl font-bold">Membership Requests</h1>
 
+  {#if data.loadError}
+    <LoadErrorBanner error={data.loadError} />
+  {/if}
+
   {#if formResult?.errors}
     <div class="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
       {#each formResult.errors as err}
@@ -33,9 +40,7 @@
     </div>
   {/if}
 
-  {#if requests.length === 0}
-    <p class="text-ab-gray">No pending membership requests.</p>
-  {:else}
+  {#if requests.length > 0}
     <div class="space-y-4">
       {#each requests as req (req.id)}
         <div class="card flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -77,5 +82,7 @@
         </div>
       {/each}
     </div>
+  {:else if !data.loadError}
+    <p class="text-ab-gray">No pending membership requests.</p>
   {/if}
 </div>

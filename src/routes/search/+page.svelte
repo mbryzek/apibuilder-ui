@@ -1,7 +1,9 @@
 <script lang="ts">
   import { onDestroy } from 'svelte';
   import { goto } from '$app/navigation';
+  import LoadErrorBanner from '$lib/components/LoadErrorBanner.svelte';
   import Pagination from '$lib/components/Pagination.svelte';
+  import type { LoadError } from '$lib/api/load-error';
   import type { Item } from '$generated/com-bryzek-apibuilder';
 
   interface Props {
@@ -11,6 +13,7 @@
       offset: number;
       limit: number;
       hasMore: boolean;
+      loadError: LoadError | null;
     };
   }
 
@@ -62,10 +65,12 @@
     </div>
   </form>
 
+  {#if data.loadError}
+    <LoadErrorBanner error={data.loadError} />
+  {/if}
+
   {#if data.q}
-    {#if items.length === 0}
-      <p class="text-ab-gray">No results found for "{data.q}".</p>
-    {:else}
+    {#if items.length > 0}
       <div class="space-y-3">
         {#each items as item (item.id)}
           <div class="card">
@@ -80,6 +85,8 @@
       </div>
 
       <Pagination offset={data.offset} limit={data.limit} hasMore={data.hasMore} baseUrl={paginationBaseUrl} />
+    {:else if !data.loadError}
+      <p class="text-ab-gray">No results found for "{data.q}".</p>
     {/if}
   {/if}
 </div>

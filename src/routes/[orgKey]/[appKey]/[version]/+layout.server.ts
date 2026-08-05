@@ -1,7 +1,7 @@
 import type { LayoutServerLoad } from './$types';
-import { error } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
+import { dataOr, dataOrThrow, loadErrorFrom } from '$lib/api/load-error';
 import type { Version, Watch } from '$generated/com-bryzek-apibuilder';
 
 export const load: LayoutServerLoad = async ({ params, locals }) => {
@@ -12,11 +12,7 @@ export const load: LayoutServerLoad = async ({ params, locals }) => {
     client.getVersionByVersion({ orgKey: params.orgKey, appKey: params.appKey, version: params.version, headers })
   );
 
-  if (!('data' in versionResponse)) {
-    throw error(404, 'Version not found');
-  }
-
-  const version = versionResponse.data;
+  const version = dataOrThrow(versionResponse, 'Version not found');
 
   const watchResponse = locals.session
     ? await handleApiCall<Watch[]>(() =>
@@ -31,13 +27,16 @@ export const load: LayoutServerLoad = async ({ params, locals }) => {
       )
     : null;
 
-  const watchData = watchResponse && 'data' in watchResponse ? watchResponse.data : [];
+  const watchData = watchResponse ? dataOr(watchResponse, []) : [];
   const currentWatch = watchData.length > 0 ? watchData[0] : null;
 
   return {
     version,
     service: version.service,
     isWatching: currentWatch !== null,
-    watchGuid: currentWatch?.id
+    watchGuid: currentWatch?.id,
+    // Without this the toggle renders "not watching" for a lookup that never
+    // answered, and pressing it would file a second watch on the same application.
+    watchLoadError: loadErrorFrom(watchResponse)
   };
 };

@@ -3,6 +3,8 @@
   import type { Organization, Membership } from '$generated/com-bryzek-apibuilder';
   import { MembershipRole } from '$generated/com-bryzek-apibuilder';
   import type { ApiErrorItem } from '$lib/api/error-handler';
+  import type { LoadError } from '$lib/api/load-error';
+  import LoadErrorBanner from '$lib/components/LoadErrorBanner.svelte';
 
   interface Props {
     data: {
@@ -10,6 +12,7 @@
       isAdmin: boolean;
       memberships: Membership[];
       pendingRequestsCount: number;
+      loadError: LoadError | null;
     };
     form: { errors?: ApiErrorItem[]; success?: boolean } | null;
   }
@@ -35,6 +38,10 @@
       </a>
     {/if}
   </div>
+
+  {#if data.loadError}
+    <LoadErrorBanner error={data.loadError} />
+  {/if}
 
   {#if formResult?.errors}
     <div class="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
@@ -77,9 +84,7 @@
     </div>
   {/if}
 
-  {#if memberships.length === 0}
-    <p class="text-ab-gray">No members found.</p>
-  {:else}
+  {#if memberships.length > 0}
     <div class="overflow-x-auto">
       <table class="w-full text-left">
         <thead>
@@ -187,5 +192,7 @@
         </tbody>
       </table>
     </div>
+  {:else if !data.loadError}
+    <p class="text-ab-gray">No members found.</p>
   {/if}
 </div>

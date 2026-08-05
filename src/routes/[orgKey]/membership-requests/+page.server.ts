@@ -2,6 +2,7 @@ import type { PageServerLoad, Actions } from './$types';
 import { error, fail } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
+import { dataOr, loadErrorFrom } from '$lib/api/load-error';
 import { requireAuth, requireAdminForAction } from '$lib/server/auth';
 import type { MembershipRequest, Membership } from '$generated/com-bryzek-apibuilder';
 
@@ -18,7 +19,8 @@ export const load: PageServerLoad = async (event) => {
   );
 
   return {
-    requests: 'data' in response ? response.data : []
+    requests: dataOr(response, []),
+    loadError: loadErrorFrom(response)
   };
 };
 

@@ -1,7 +1,7 @@
 import type { PageServerLoad } from './$types';
-import { error } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
+import { dataOrThrow } from '$lib/api/load-error';
 import type { Code } from '$generated/com-bryzek-apibuilder';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
@@ -17,12 +17,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
     })
   );
 
-  if (!('data' in codeResponse)) {
-    throw error(404, 'Generated code not found');
-  }
-
   return {
-    code: codeResponse.data,
+    code: dataOrThrow(codeResponse, 'Generated code not found'),
     generatorKey: params.generatorKey
   };
 };

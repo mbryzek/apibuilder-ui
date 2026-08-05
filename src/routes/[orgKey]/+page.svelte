@@ -1,17 +1,21 @@
 <script lang="ts">
   import type { Organization, Application } from '$generated/com-bryzek-apibuilder';
+  import LoadErrorBanner from '$lib/components/LoadErrorBanner.svelte';
   import Pagination from '$lib/components/Pagination.svelte';
+  import type { LoadError } from '$lib/api/load-error';
 
   interface Props {
     data: {
       org: Organization;
       isMember: boolean;
       isAdmin: boolean;
+      membershipLoadError: LoadError | null;
       applications: Application[];
       offset: number;
       limit: number;
       hasMore: boolean;
       hasPendingRequests: boolean;
+      loadError: LoadError | null;
       session?: { id: string; user: { id: string; person: { email?: { address: string } } } };
     };
   }
@@ -43,7 +47,7 @@
     </div>
   {/if}
 
-  {#if !data.isMember && data.session}
+  {#if !data.isMember && data.session && !data.membershipLoadError}
     <div class="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4">
       <p class="text-sm text-blue-800">
         You are not a member of this organization.
@@ -52,9 +56,11 @@
     </div>
   {/if}
 
-  {#if apps.length === 0}
-    <p class="text-ab-gray">No applications with published versions.</p>
-  {:else}
+  {#if data.loadError}
+    <LoadErrorBanner error={data.loadError} />
+  {/if}
+
+  {#if apps.length > 0}
     <div class="overflow-x-auto">
       <table class="w-full text-left">
         <thead>
@@ -89,5 +95,7 @@
       </table>
     </div>
     <Pagination offset={data.offset} limit={data.limit} hasMore={data.hasMore} baseUrl="/{org.key}" />
+  {:else if !data.loadError}
+    <p class="text-ab-gray">No applications with published versions.</p>
   {/if}
 </div>

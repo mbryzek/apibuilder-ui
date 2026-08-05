@@ -1,5 +1,7 @@
 <script lang="ts">
+  import LoadErrorBanner from '$lib/components/LoadErrorBanner.svelte';
   import Pagination from '$lib/components/Pagination.svelte';
+  import type { LoadError } from '$lib/api/load-error';
   import type { Generator } from '$generated/com-bryzek-apibuilder-generator';
 
   interface Props {
@@ -8,6 +10,7 @@
       offset: number;
       limit: number;
       hasMore: boolean;
+      loadError: LoadError | null;
     };
   }
 
@@ -43,9 +46,11 @@
     />
   </div>
 
-  {#if filtered.length === 0}
-    <p class="text-ab-gray">{searchQuery ? 'No generators match your filter.' : 'No generators found.'}</p>
-  {:else}
+  {#if data.loadError}
+    <LoadErrorBanner error={data.loadError} />
+  {/if}
+
+  {#if filtered.length > 0}
     <div class="overflow-x-auto">
       <table class="w-full text-left">
         <thead>
@@ -74,5 +79,7 @@
     {#if !searchQuery}
       <Pagination offset={data.offset} limit={data.limit} hasMore={data.hasMore} baseUrl="/generators" />
     {/if}
+  {:else if !data.loadError}
+    <p class="text-ab-gray">{searchQuery ? 'No generators match your filter.' : 'No generators found.'}</p>
   {/if}
 </div>
