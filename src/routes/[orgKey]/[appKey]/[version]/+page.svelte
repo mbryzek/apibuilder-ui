@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { PublicSession } from '$lib/session';
   import { enhance } from '$app/forms';
   import { page } from '$app/stores';
   import type { Service } from '$generated/com-bryzek-apibuilder-spec';
@@ -13,7 +14,7 @@
       isWatching: boolean;
       watchGuid?: string;
       watchLoadError: LoadError | null;
-      session?: { id: string; user: { id: string; person: { email?: { address: string } } } };
+      session?: PublicSession;
     };
     form: {
       errors?: { message: string }[];

@@ -1,7 +1,9 @@
 <script lang="ts">
+  import type { PublicSession } from '$lib/session';
   import type { Snippet } from 'svelte';
   import { page } from '$app/stores';
   import AppSidebar from '$lib/components/AppSidebar.svelte';
+  import LoadErrorBanner from '$lib/components/LoadErrorBanner.svelte';
   import type { Organization } from '$generated/com-bryzek-apibuilder';
   import type { Service } from '$generated/com-bryzek-apibuilder-spec';
   import type { LoadError } from '$lib/api/load-error';
@@ -16,7 +18,7 @@
       isWatching: boolean;
       watchGuid?: string;
       watchLoadError: LoadError | null;
-      session?: { id: string; user: { id: string; person: { email?: { address: string } } } };
+      session?: PublicSession;
     };
     children: Snippet;
   }
@@ -32,6 +34,13 @@
 <svelte:head>
   <title>{service.name} {version.version} - {data.org.name} - API Builder</title>
 </svelte:head>
+
+{#if data.watchLoadError}
+  <!-- Previously surfaced only as a `title` on a disabled button: no hover on touch, and a
+       disabled control is not reliably reachable by assistive tech, so on a phone the entire
+       signal was a greyed-out icon with no explanation. -->
+  <LoadErrorBanner error={data.watchLoadError} />
+{/if}
 
 <div class="flex gap-10">
   <AppSidebar {orgKey} {appKey} version={version.version} appName={service.name} isMember={data.isMember} isAdmin={data.isAdmin} />

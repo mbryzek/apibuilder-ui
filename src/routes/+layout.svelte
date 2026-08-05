@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { PublicSession } from '$lib/session';
   import '../app.css';
   import Header from '$lib/components/Header.svelte';
   import Footer from '$lib/components/Footer.svelte';
@@ -8,7 +9,7 @@
   import type { Snippet } from 'svelte';
 
   interface Props {
-    data: { session?: { user: { id: string; person: { email?: { address: string } } } } };
+    data: { session?: PublicSession };
     children: Snippet;
   }
 

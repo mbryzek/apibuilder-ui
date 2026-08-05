@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { PublicSession } from '$lib/session';
   import type { Organization, Application } from '$generated/com-bryzek-apibuilder';
   import LoadErrorBanner from '$lib/components/LoadErrorBanner.svelte';
   import Pagination from '$lib/components/Pagination.svelte';
@@ -16,7 +17,7 @@
       hasMore: boolean;
       hasPendingRequests: boolean;
       loadError: LoadError | null;
-      session?: { id: string; user: { id: string; person: { email?: { address: string } } } };
+      session?: PublicSession;
     };
   }
 

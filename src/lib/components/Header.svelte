@@ -1,11 +1,12 @@
 <script lang="ts">
+  import type { PublicSession } from '$lib/session';
   /**
    * App Header Component
    * Main navigation header with API Builder branding
    */
 
   interface Props {
-    session?: { user: { id: string; person: { email?: { address: string } } } } | undefined;
+    session?: PublicSession | undefined;
   }
 
   let { session }: Props = $props();
