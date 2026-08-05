@@ -2,10 +2,13 @@ import type { RequestHandler } from './$types';
 import { error } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
+import { dataOrThrow } from '$lib/api/load-error';
 import type { Code } from '$generated/com-bryzek-apibuilder';
 import { attachmentHeader } from '$lib/server/download';
+import { assertSafePathParams } from '$lib/server/path-params';
 
 export const GET: RequestHandler = async ({ params, locals }) => {
+  assertSafePathParams(params);
   const headers = getSessionHeaders(locals.session?.id);
 
   const response = await handleApiCall<Code>(() =>
@@ -18,11 +21,15 @@ export const GET: RequestHandler = async ({ params, locals }) => {
     })
   );
 
-  if (!('data' in response) || response.data.files.length === 0) {
+  // Keep "the API did not answer" apart from "this generator produced nothing". Folding them
+  // together told a user mid-outage that the generator emits no files, so they stopped retrying.
+  const code = dataOrThrow(response, 'No generated files found');
+
+  if (code.files.length === 0) {
     throw error(404, 'No generated files found');
   }
 
-  const files = response.data.files;
+  const files = code.files;
 
   // For single file, return it directly
   if (files.length === 1) {

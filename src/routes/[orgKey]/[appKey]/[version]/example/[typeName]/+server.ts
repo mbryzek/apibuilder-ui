@@ -22,13 +22,22 @@ export const GET: RequestHandler = async ({ params, locals, url }) => {
   const queryString = query.toString();
   const fetchUrl = `${config.apiBaseUrl}/apibuilder/${path}${queryString ? `?${queryString}` : ''}`;
 
-  const response = await fetch(fetchUrl, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      ...headers
-    }
-  });
+  // This is the one endpoint that bypasses handleApiCall, so it is also the one place nothing
+  // catches a rejected fetch: an unreachable upstream (DNS failure, connection refused, a pod
+  // restart) escaped as an unhandled 500 while a *reachable* failure three lines below was mapped
+  // to a clean 502.
+  let response: Response;
+  try {
+    response = await fetch(fetchUrl, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...headers
+      }
+    });
+  } catch {
+    throw error(502, 'Upstream unavailable');
+  }
 
   if (!response.ok) {
     // Do not collapse every upstream failure to 404: a private spec (401/403), a rate limit, or an
@@ -43,7 +52,13 @@ export const GET: RequestHandler = async ({ params, locals, url }) => {
     throw error(502, `Upstream error (${response.status})`);
   }
 
-  const data: unknown = await response.json();
+  // Same reasoning: a proxy that answers 200 with an HTML error page rejects here.
+  let data: unknown;
+  try {
+    data = await response.json();
+  } catch {
+    throw error(502, 'Upstream returned an unreadable response');
+  }
 
   return new Response(JSON.stringify(data, null, 2), {
     headers: {
