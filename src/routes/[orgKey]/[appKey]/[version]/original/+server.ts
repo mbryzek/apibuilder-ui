@@ -2,10 +2,11 @@ import type { RequestHandler } from './$types';
 import { error } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
+import { attachmentHeader } from '$lib/server/download';
 import type { Version } from '$generated/com-bryzek-apibuilder';
 
 export const GET: RequestHandler = async ({ params, locals }) => {
-  const headers = locals.session ? getSessionHeaders(locals.session.id) : {};
+  const headers = getSessionHeaders(locals.session?.id);
   const client = apiBuilderClient();
 
   const response = await handleApiCall<Version>(() =>
@@ -21,7 +22,7 @@ export const GET: RequestHandler = async ({ params, locals }) => {
   return new Response(original.data, {
     headers: {
       'Content-Type': 'application/json',
-      'Content-Disposition': `attachment; filename="${params.appKey}-${params.version}.json"`
+      'Content-Disposition': attachmentHeader(`${params.appKey}-${params.version}.json`)
     }
   });
 };
