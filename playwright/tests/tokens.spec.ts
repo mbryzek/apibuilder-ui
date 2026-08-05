@@ -3,13 +3,7 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { generateRandomEmail, createUserViaApi, setSessionCookie, loadUrl, safeClick, waitForCondition } from '../utils/test-helpers';
-
-async function signupAndLogin(page: import('@playwright/test').Page): Promise<void> {
-  const email = generateRandomEmail();
-  const result = await createUserViaApi(email, 'testpassword');
-  await setSessionCookie(page, result.session.id);
-}
+import { loadUrl, safeClick, signupAndLogin, waitForCondition } from '../utils/test-helpers';
 
 test.describe('Tokens', () => {
   test('creates a token and shows cleartext token on detail page', async ({ page, context }) => {
@@ -50,7 +44,7 @@ test.describe('Tokens', () => {
     expect(selectAllClass).toContain('select-all');
   });
 
-  test('token cleartext is hidden on second visit', async ({ page, context }) => {
+  test('token cleartext is hidden on second visit', async ({ page }) => {
     await signupAndLogin(page);
 
     await loadUrl(page, '/tokens/create');

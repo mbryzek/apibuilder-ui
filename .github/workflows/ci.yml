@@ -1,0 +1,42 @@
+name: CI
+
+# `npm run check` is the whole gate: svelte-check, tsc over the Playwright sources, eslint
+# (warnings included), prettier, and the vitest suite. It is deliberately the same command a
+# developer runs locally, so a green PR and a green working copy mean the same thing.
+#
+# The Playwright suite is NOT here. It signs users up against a live platform API, which CI has
+# no way to provide — see "Why the Playwright suite does not run in CI" in README.md.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# A new push supersedes the run in flight for the same ref.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run check
+
+      # `check` never builds, so an error only the production build sees — an adapter failure, a
+      # bad import in a `+page.svelte` that svelte-check tolerates — would otherwise reach main.
+      - run: npm run build

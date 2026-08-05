@@ -5,14 +5,31 @@
     "target": "ES2021",
     "lib": ["ES2021", "DOM"],
     "types": ["@playwright/test", "node"],
-    "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "allowImportingTsExtensions": true
+    "allowImportingTsExtensions": true,
+
+    // Keep the block below identical to tsconfig.json's. The e2e specs are the least-exercised
+    // code in the repo — they compile far more often than they run — so weakening the compiler
+    // here is exactly backwards. While these drifted, a dead `authenticateViaApi` import in
+    // org.spec.ts survived both `npm run check` and review, because only this file omitted
+    // noUnusedLocals.
+    "verbatimModuleSyntax": true,
+    "strict": true,
+    "exactOptionalPropertyTypes": true,
+    "noUncheckedIndexedAccess": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "noImplicitOverride": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
   },
   "include": ["playwright/**/*.ts", "playwright.config.ts"],
   "exclude": ["node_modules", "src/lib/**"]
