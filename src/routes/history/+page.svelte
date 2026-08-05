@@ -6,6 +6,7 @@
     data: {
       changes: Change[];
       offset: number;
+      limit: number;
       hasMore: boolean;
     };
   }
@@ -62,6 +63,6 @@
       </table>
     </div>
 
-    <Pagination offset={data.offset} limit={25} hasMore={data.hasMore} baseUrl="/history" />
+    <Pagination offset={data.offset} limit={data.limit} hasMore={data.hasMore} baseUrl="/history" />
   {/if}
 </div>

@@ -9,6 +9,7 @@
       items: Item[];
       q: string;
       offset: number;
+      limit: number;
       hasMore: boolean;
     };
   }
@@ -78,7 +79,7 @@
         {/each}
       </div>
 
-      <Pagination offset={data.offset} limit={25} hasMore={data.hasMore} baseUrl={paginationBaseUrl} />
+      <Pagination offset={data.offset} limit={data.limit} hasMore={data.hasMore} baseUrl={paginationBaseUrl} />
     {/if}
   {/if}
 </div>

@@ -6,6 +6,7 @@
     data: {
       tokens: Token[];
       offset: number;
+      limit: number;
       hasMore: boolean;
     };
   }
@@ -45,6 +46,6 @@
       {/each}
     </div>
 
-    <Pagination offset={data.offset} limit={25} hasMore={data.hasMore} baseUrl="/tokens" />
+    <Pagination offset={data.offset} limit={data.limit} hasMore={data.hasMore} baseUrl="/tokens" />
   {/if}
 </div>

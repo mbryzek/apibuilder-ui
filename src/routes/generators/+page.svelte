@@ -6,6 +6,7 @@
     data: {
       generators: Generator[];
       offset: number;
+      limit: number;
       hasMore: boolean;
     };
   }
@@ -71,7 +72,7 @@
     </div>
 
     {#if !searchQuery}
-      <Pagination offset={data.offset} limit={25} hasMore={data.hasMore} baseUrl="/generators" />
+      <Pagination offset={data.offset} limit={data.limit} hasMore={data.hasMore} baseUrl="/generators" />
     {/if}
   {/if}
 </div>

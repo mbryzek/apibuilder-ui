@@ -9,6 +9,7 @@
       isAdmin: boolean;
       applications: Application[];
       offset: number;
+      limit: number;
       hasMore: boolean;
       hasPendingRequests: boolean;
       session?: { id: string; user: { id: string; person: { email?: { address: string } } } };
@@ -87,6 +88,6 @@
         </tbody>
       </table>
     </div>
-    <Pagination offset={data.offset} limit={25} hasMore={data.hasMore} baseUrl="/{org.key}" />
+    <Pagination offset={data.offset} limit={data.limit} hasMore={data.hasMore} baseUrl="/{org.key}" />
   {/if}
 </div>

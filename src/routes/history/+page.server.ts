@@ -2,20 +2,20 @@ import type { PageServerLoad } from './$types';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import type { Change } from '$generated/com-bryzek-apibuilder';
-
-const LIMIT = 25;
+import { PAGE_LIMIT, parseOffset } from '$lib/pagination';
 
 export const load: PageServerLoad = async ({ url, locals }) => {
-  const headers = locals.session ? getSessionHeaders(locals.session.id) : {};
-  const offset = Number(url.searchParams.get('offset') || '0');
+  const headers = getSessionHeaders(locals.session?.id);
+  const offset = parseOffset(url);
 
-  const response = await handleApiCall<Change[]>(() => apiBuilderClient().getChanges({ limit: LIMIT, offset, headers }));
+  const response = await handleApiCall<Change[]>(() => apiBuilderClient().getChanges({ limit: PAGE_LIMIT, offset, headers }));
 
   const changes = 'data' in response ? response.data : [];
 
   return {
     changes,
     offset,
-    hasMore: changes.length >= LIMIT
+    limit: PAGE_LIMIT,
+    hasMore: changes.length >= PAGE_LIMIT
   };
 };
