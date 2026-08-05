@@ -1,6 +1,7 @@
 import { type Handle } from '@sveltejs/kit';
 import { clients, getSessionHeaders } from '$lib/api/clients';
-import { handleApiCall } from '$lib/api/error-handler';
+import { handleApiCall, isApiError } from '$lib/api/error-handler';
+import { isUnavailable } from '$lib/api/load-error';
 import { SESSION_COOKIE, config } from '$lib/config';
 import { clearSessionCookie } from '$lib/server/session';
 import type { TenantSession } from '$generated/com-bryzek-platform';
@@ -32,6 +33,12 @@ export const handle: Handle = async ({ event, resolve }) => {
       };
     } else {
       event.locals.session = undefined;
+      // A 401 above already cleared the cookie and genuinely means "signed out". Every other
+      // failure -- 5xx, a rate limit, a dropped connection -- means we do not KNOW who this is,
+      // and reporting that as "not signed in" bounced signed-in users to /login with their form
+      // input lost, while their cookie was still perfectly valid. Record the difference; the
+      // guards in lib/server/auth.ts decide what to do with it.
+      event.locals.sessionUnavailable = isApiError(response) && isUnavailable(response.status);
     }
   } else {
     event.locals.session = undefined;

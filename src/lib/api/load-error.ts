@@ -100,6 +100,13 @@ function isHttpErrorStatus(status: number): boolean {
   return status >= 400 && status <= 599;
 }
 
-function isUnavailable(status: number): boolean {
+/**
+ * The API gave no answer: our network sentinel (0), a rate limit, or a 5xx.
+ *
+ * Exported because `hooks.server.ts` needs the same test but cannot use `throwIfUnavailable` — an
+ * error thrown from `handle` would take down every public page, not just the ones that need a
+ * session.
+ */
+export function isUnavailable(status: number): boolean {
   return status === 0 || status === 429 || status >= 500;
 }
