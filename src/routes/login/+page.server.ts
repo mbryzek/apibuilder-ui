@@ -3,9 +3,8 @@ import { redirect, fail } from '@sveltejs/kit';
 import { clients, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { config } from '$lib/config';
-import { redirectWithFlash } from '$lib/server/flash';
-import { setSessionCookie } from '$lib/server/session';
-import { isTenantSession, type SessionState } from '$generated/com-bryzek-platform';
+import { completeSession } from '$lib/server/auth-completion';
+import type { SessionState } from '$generated/com-bryzek-platform';
 
 export const load: PageServerLoad = async ({ locals, url }) => {
   if (locals.session) {
@@ -43,15 +42,6 @@ export const actions: Actions = {
       client.platform.createTenantSessionLogins({ tenantId: config.tenantId, body: { email, password }, headers: getSessionHeaders() })
     );
 
-    if ('data' in response && response.data && isTenantSession(response.data)) {
-      setSessionCookie(cookies, response.data.session.id);
-      redirectWithFlash(redirectTo, 'Welcome back!');
-    }
-
-    if ('errors' in response) {
-      return fail(400, { errors: response.errors });
-    }
-
-    return fail(500, { errors: [{ message: 'An unexpected error occurred' }] });
+    return completeSession(cookies, response, redirectTo, 'Welcome back!');
   }
 };

@@ -3,9 +3,8 @@ import { redirect, fail } from '@sveltejs/kit';
 import { clients, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { config } from '$lib/config';
-import { redirectWithFlash } from '$lib/server/flash';
-import { setSessionCookie } from '$lib/server/session';
-import { isTenantSession, type SessionState } from '$generated/com-bryzek-platform';
+import { completeSession } from '$lib/server/auth-completion';
+import type { SessionState } from '$generated/com-bryzek-platform';
 
 export const load: PageServerLoad = async ({ locals }) => {
   if (locals.session) {
@@ -37,15 +36,12 @@ export const actions: Actions = {
       })
     );
 
+    // Handled here rather than in completeSession so the submitted values survive the round-trip
+    // and the form can be re-rendered with them.
     if ('errors' in response) {
       return fail(400, { errors: response.errors, email, name });
     }
 
-    if ('data' in response && response.data && isTenantSession(response.data)) {
-      setSessionCookie(cookies, response.data.session.id);
-      redirectWithFlash('/org/create', 'Welcome to API Builder! Create your first organization to get started.');
-    }
-
-    redirectWithFlash('/login', 'Account created! Please sign in.');
+    return completeSession(cookies, response, '/org/create', 'Welcome to API Builder! Create your first organization to get started.');
   }
 };
