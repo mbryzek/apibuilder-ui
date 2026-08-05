@@ -3,6 +3,7 @@
   import { goto } from '$app/navigation';
   import LoadErrorBanner from '$lib/components/LoadErrorBanner.svelte';
   import Pagination from '$lib/components/Pagination.svelte';
+  import { listUrl } from '$lib/pagination';
   import type { LoadError } from '$lib/api/load-error';
   import type { Item } from '$generated/com-bryzek-apibuilder';
 
@@ -20,14 +21,14 @@
   let { data }: Props = $props();
 
   const items = $derived(data.items);
-  const paginationBaseUrl = $derived(`/search?q=${encodeURIComponent(data.q)}`);
+  const paginationBaseUrl = $derived(listUrl('/search', { q: data.q }));
 
   let debounceTimer: ReturnType<typeof setTimeout> | undefined;
 
   function search(query: string) {
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
-      goto(`/search?q=${encodeURIComponent(query)}`, { keepFocus: true });
+      goto(listUrl('/search', { q: query }), { keepFocus: true });
     }, 250);
   }
 
@@ -39,7 +40,7 @@
     event.preventDefault();
     const input = (event.currentTarget as HTMLFormElement).querySelector('input[name="q"]') as HTMLInputElement;
     clearTimeout(debounceTimer);
-    goto(`/search?q=${encodeURIComponent(input.value)}`, { keepFocus: true });
+    goto(listUrl('/search', { q: input.value }), { keepFocus: true });
   }
 
   onDestroy(() => {

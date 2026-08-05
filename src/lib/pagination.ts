@@ -37,6 +37,34 @@ export interface Page<T> {
 }
 
 /**
+ * Build a list page's URL from its path and whatever filters are currently applied.
+ *
+ * Two rules, both of which this codebase has been bitten by:
+ *
+ *  - the result carries the named filters and nothing else. Any query string already on `path` is
+ *    discarded, so `offset` in particular cannot survive: narrowing a filter can only shrink the
+ *    result set, and reusing the current offset across a filter change lands past the end of the
+ *    new set — an empty page that reads as "no matches". Every filter change restarts at page one.
+ *  - a blank value is dropped rather than sent as `?q=`, so the canonical URL of an unfiltered
+ *    list is the bare path.
+ *
+ * This is also exactly what `<Pagination baseUrl>` wants: it sets `offset` on top of what it is
+ * given, so the active filter rides along on Previous/Next instead of being lost on the first
+ * page turn.
+ */
+export function listUrl(path: string, filters: Record<string, string | undefined> = {}): string {
+  const url = new URL(path, 'http://localhost');
+  url.search = '';
+  for (const [name, value] of Object.entries(filters)) {
+    const trimmed = value?.trim();
+    if (trimmed) {
+      url.searchParams.set(name, trimmed);
+    }
+  }
+  return url.pathname + url.search;
+}
+
+/**
  * Read the `offset` query param as a non-negative, safely representable integer.
  *
  * `Number(url.searchParams.get('offset') || '0')` yields `NaN` for anything non-numeric, which then

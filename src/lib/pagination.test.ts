@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { PAGE_FETCH_LIMIT, PAGE_LIMIT, parseOffset, toPage } from './pagination';
+import { PAGE_FETCH_LIMIT, PAGE_LIMIT, listUrl, parseOffset, toPage } from './pagination';
 
 function offsetOf(query: string): number {
   return parseOffset(new URL(`http://localhost/history${query}`));
@@ -68,5 +68,36 @@ describe('toPage', () => {
 
   it('carries the offset through so Previous can be computed from it', () => {
     expect(toPage(rows(5), 75).offset).toBe(75);
+  });
+});
+
+describe('listUrl', () => {
+  it('is the bare path when nothing is filtered', () => {
+    expect(listUrl('/generators')).toBe('/generators');
+    expect(listUrl('/generators', { q: '' })).toBe('/generators');
+    expect(listUrl('/generators', { q: undefined })).toBe('/generators');
+    expect(listUrl('/generators', { q: '   ' })).toBe('/generators');
+  });
+
+  it('carries the filters it is given', () => {
+    expect(listUrl('/generators', { q: 'scala' })).toBe('/generators?q=scala');
+    expect(listUrl('/search', { q: 'play', org_key: 'bryzek' })).toBe('/search?q=play&org_key=bryzek');
+  });
+
+  it('encodes values that would otherwise change the URL structure', () => {
+    expect(listUrl('/search', { q: 'a b&c=d#e' })).toBe('/search?q=a+b%26c%3Dd%23e');
+  });
+
+  it('trims, so a stray space does not produce a different URL for the same filter', () => {
+    expect(listUrl('/generators', { q: '  scala  ' })).toBe('/generators?q=scala');
+  });
+
+  // The rule this function exists for. `<Pagination>` sets `offset` on top of the base URL, so a
+  // base URL that carried the current one would send Previous/Next to a stale page — and, worse,
+  // a filter typed while on page 3 would land past the end of the smaller filtered set and render
+  // as "no matches".
+  it('never carries an offset, even when the path already has one', () => {
+    expect(listUrl('/generators?offset=50', { q: 'scala' })).toBe('/generators?q=scala');
+    expect(listUrl('/generators?offset=50')).toBe('/generators');
   });
 });
