@@ -31,7 +31,7 @@
 
 {#if unions.length > 0}
   <div class="space-y-6">
-    {#each unions as union}
+    {#each unions as union (union.name)}
       {@const showDetails = hasAnyDetails(union)}
       <div id={union.name} class="scroll-mt-16 overflow-hidden rounded-lg border border-gray-200">
         <div class="bg-ab-light-gray flex items-center justify-between gap-2 px-4 py-3">
@@ -47,7 +47,12 @@
             <p class="text-ab-dark-gray mb-3 text-sm">{union.description}</p>
           {/if}
           {#if union.discriminator}
-            <p class="text-ab-gray mb-2 text-xs">Discriminator: <code class="font-mono">{union.discriminator}</code></p>
+            <p class="text-ab-gray mb-2 text-xs">
+              Discriminator: <code class="font-mono">{union.discriminator.name}</code>
+              {#if union.discriminator.enum}
+                <span class="ml-1">enum: <TypeLink typeStr={union.discriminator.enum} {service} /></span>
+              {/if}
+            </p>
           {/if}
           {#if union.interfaces && union.interfaces.length > 0}
             <p class="text-ab-gray mb-2 text-xs">
@@ -65,7 +70,7 @@
                 </tr>
               </thead>
               <tbody>
-                {#each union.variants as variant}
+                {#each union.variants as variant (isVariantLiteral(variant) ? `literal:${variant.literal}` : `type:${variant.type}`)}
                   <tr class="border-b border-gray-100 last:border-b-0">
                     <td class="py-2.5 pr-6 align-top font-mono text-sm">
                       {#if isVariantLiteral(variant)}
@@ -76,6 +81,11 @@
                         {#if variant.discriminator_value}
                           <span class="text-ab-gray ml-1 text-xs">({variant.discriminator_value})</span>
                         {/if}
+                      {:else}
+                        <!-- `Variant` is dispatched by duck-typing, so a third variant kind added to
+                             the spec would render an empty cell and vanish from the docs with nothing
+                             red anywhere. Say so instead. -->
+                        <span class="text-red-600">unsupported variant</span>
                       {/if}
                     </td>
                     {#if showDetails}

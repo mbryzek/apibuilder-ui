@@ -12,7 +12,7 @@
 
 {#if resources.length > 0}
   <div class="space-y-8">
-    {#each resources as resource}
+    {#each resources as resource (resource.type)}
       <div id={resource.type} class="scroll-mt-16">
         <div class="mb-3 flex items-center gap-2">
           <h3 class="text-ab-dark-blue text-lg font-bold">{resource.type}</h3>
@@ -24,7 +24,7 @@
           <p class="text-ab-gray mb-3 text-sm">Path: <code class="font-mono">{resource.path}</code></p>
         {/if}
         <div class="space-y-4">
-          {#each resource.operations as operation}
+          {#each resource.operations as operation (`${operation.method} ${operation.path}`)}
             <OperationDetail {operation} {service} />
           {/each}
         </div>

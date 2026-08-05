@@ -14,7 +14,7 @@
 
 {#if models.length > 0}
   <div class="space-y-6">
-    {#each models as model}
+    {#each models as model (model.name)}
       <div id={model.name} class="scroll-mt-16 overflow-hidden rounded-lg border border-gray-200">
         <div class="bg-ab-light-gray flex items-center justify-between gap-2 px-4 py-3">
           <div class="flex min-w-0 items-center gap-2">
