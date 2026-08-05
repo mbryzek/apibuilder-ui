@@ -34,8 +34,10 @@
 
   const visiblePublications = $derived(Object.values(Publication).filter((p) => data.isAdmin || !adminOnlyPublications.has(p)));
 
-  function getSubscriptionId(publication: string): string | undefined {
-    return subscriptions.find((s) => s.publication === publication)?.id;
+  // Only whether the caller is subscribed — the id is deliberately not sent to the server, which
+  // resolves the subscription itself from the org and publication. See `+page.server.ts`.
+  function isSubscribedTo(publication: string): boolean {
+    return subscriptions.some((s) => s.publication === publication);
   }
 </script>
 
@@ -62,8 +64,7 @@
   {:else}
     <div class="space-y-3">
       {#each visiblePublications as publication (publication)}
-        {@const subId = getSubscriptionId(publication)}
-        {@const isSubscribed = !!subId}
+        {@const isSubscribed = isSubscribedTo(publication)}
         <div class="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3">
           <div>
             <div class="text-ab-dark-blue font-medium">{publicationLabels[publication] || publication}</div>
@@ -87,9 +88,6 @@
             }}
           >
             <input type="hidden" name="publication" value={publication} />
-            {#if subId}
-              <input type="hidden" name="subscription_id" value={subId} />
-            {/if}
             <button type="submit" class="{isSubscribed ? 'btn-secondary' : 'btn-primary'} px-4 py-2 text-sm" disabled={isSubmitting}>
               {isSubscribed ? 'Unsubscribe' : 'Subscribe'}
             </button>
