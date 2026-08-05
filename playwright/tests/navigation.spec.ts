@@ -4,13 +4,7 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { generateRandomEmail, createUserViaApi, setSessionCookie, loadUrl } from '../utils/test-helpers';
-
-async function signupAndLogin(page: import('@playwright/test').Page): Promise<void> {
-  const email = generateRandomEmail();
-  const result = await createUserViaApi(email, 'testpassword');
-  await setSessionCookie(page, result.session.id);
-}
+import { loadUrl, signupAndLogin } from '../utils/test-helpers';
 
 test.describe('Public pages load', () => {
   test('home page', async ({ page }) => {

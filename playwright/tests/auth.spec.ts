@@ -3,7 +3,16 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { generateRandomEmail, fillField, loadUrl, waitForCondition, createUserViaApi, safeClick } from '../utils/test-helpers';
+import {
+  generateRandomEmail,
+  fillField,
+  loadUrl,
+  waitForCondition,
+  createUserViaApi,
+  safeClick,
+  sessionIsValid,
+  signupAndLogin
+} from '../utils/test-helpers';
 
 test.describe('Signup', () => {
   test('creates a new account and redirects to org create', async ({ page }) => {
@@ -138,5 +147,34 @@ test.describe('Login', () => {
     await waitForCondition(() => !page.url().includes('/login'), { description: 'navigation away from login page', maxAttempts: 20 });
 
     expect(page.url()).not.toContain('/login');
+  });
+});
+
+test.describe('Logout', () => {
+  test('the logout form revokes the session on the platform', async ({ page }) => {
+    // Clearing the cookie is not logging out: the cookie is minted with a one-year maxAge, so any
+    // copy of its value keeps authenticating until the platform is told to revoke it. Both halves
+    // are asserted — the browser forgets the session AND the id itself stops working.
+    const { email, sessionId } = await signupAndLogin(page);
+    expect(await sessionIsValid(sessionId)).toBe(true);
+
+    await loadUrl(page, '/');
+    await page.getByRole('button', { name: email }).click();
+    await page.locator('form[action="/logout"] button').first().click();
+
+    await page.waitForURL('**/logged-out');
+    await expect(page.getByRole('heading', { name: 'You are now logged out' })).toBeVisible();
+    expect(await sessionIsValid(sessionId)).toBe(false);
+  });
+
+  test('GET /logout logs nobody out', async ({ page }) => {
+    // SvelteKit's origin check only guards POST form actions, so a state-changing GET here would
+    // be reachable from any third-party page via `<img src=".../logout">`.
+    const { sessionId } = await signupAndLogin(page);
+
+    await loadUrl(page, '/logout');
+
+    expect(new URL(page.url()).pathname).toBe('/');
+    expect(await sessionIsValid(sessionId)).toBe(true);
   });
 });

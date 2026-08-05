@@ -4,21 +4,10 @@
 
 import { test, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
-import {
-  generateRandomEmail,
-  generateUUID,
-  fillField,
-  loadUrl,
-  waitForCondition,
-  createUserViaApi,
-  setSessionCookie,
-  safeClick
-} from '../utils/test-helpers';
+import { generateUUID, fillField, loadUrl, waitForCondition, signupAndLogin, safeClick } from '../utils/test-helpers';
 
 async function createOrgAndLogin(page: Page): Promise<string> {
-  const email = generateRandomEmail();
-  const result = await createUserViaApi(email, 'testpassword');
-  await setSessionCookie(page, result.session.id);
+  await signupAndLogin(page);
 
   await loadUrl(page, '/org/create');
 

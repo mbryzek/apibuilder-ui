@@ -19,7 +19,9 @@ export default [
   // TypeScript files (server-side, utils, etc.)
   {
     files: ['**/*.ts'],
-    ignores: ['**/*.svelte.ts'],
+    // `playwright/` is type-checked by tsconfig.playwright.json, not tsconfig.json — linting it
+    // under this block's `project` would fail with "file not included in project".
+    ignores: ['**/*.svelte.ts', 'playwright/**/*.ts'],
     languageOptions: {
       parser: tsparser,
       parserOptions: {
@@ -56,6 +58,32 @@ export default [
             'Avoid shorthand properties in conditional spreads. Use explicit { field_name: value } to prevent property name mismatches with API types.'
         }
       ]
+    }
+  },
+
+  // Playwright e2e specs and helpers — same rules as src, its own tsconfig
+  {
+    files: ['playwright/**/*.ts'],
+    languageOptions: {
+      parser: tsparser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        project: './tsconfig.playwright.json'
+      },
+      globals: {
+        ...globals.browser,
+        ...globals.node
+      }
+    },
+    plugins: {
+      '@typescript-eslint': tseslint
+    },
+    rules: {
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/consistent-type-imports': 'error'
     }
   },
 

@@ -3,28 +3,7 @@
  */
 
 import { test, expect } from '@playwright/test';
-import {
-  generateRandomEmail,
-  generateUUID,
-  fillField,
-  loadUrl,
-  waitForCondition,
-  createUserViaApi,
-  setSessionCookie,
-  authenticateViaApi,
-  safeClick
-} from '../utils/test-helpers';
-
-async function signupAndLogin(page: import('@playwright/test').Page): Promise<{
-  email: string;
-  sessionId: string;
-}> {
-  const email = generateRandomEmail();
-  const password = 'testpassword';
-  const result = await createUserViaApi(email, password);
-  await setSessionCookie(page, result.session.id);
-  return { email, sessionId: result.session.id };
-}
+import { generateUUID, fillField, loadUrl, waitForCondition, signupAndLogin, safeClick } from '../utils/test-helpers';
 
 test.describe('Organization Creation', () => {
   test('creates an organization and redirects to org page', async ({ page }) => {
