@@ -1,11 +1,12 @@
 <script lang="ts">
+  import type { PublicSession } from '$lib/session';
   import LoadErrorBanner from '$lib/components/LoadErrorBanner.svelte';
   import type { LoadError } from '$lib/api/load-error';
   import type { Organization } from '$generated/com-bryzek-apibuilder';
 
   interface Props {
     data: {
-      session?: { id: string; user: { id: string; person: { email?: { address: string } } } };
+      session?: PublicSession;
       publicOrgs?: Organization[];
       myOrgs: Organization[];
       loadError: LoadError | null;
@@ -29,8 +30,10 @@
       <LoadErrorBanner error={data.loadError} />
     {/if}
 
-    {#if myOrgs.length > 1}
-      <!-- Multiple orgs — let user pick -->
+    <!-- Heading and Create link sit outside the list guard: when the memberships call fails the
+         loader correctly suppresses the redirects, and without this the page was a lone red box
+         with no way forward. -->
+    {#if myOrgs.length > 1 || data.loadError}
       <div class="mb-12">
         <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <h1 class="text-ab-dark-blue text-2xl font-bold">My Organizations</h1>
