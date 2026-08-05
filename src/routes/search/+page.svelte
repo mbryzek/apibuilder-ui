@@ -83,10 +83,11 @@
           </div>
         {/each}
       </div>
-
-      <Pagination offset={data.offset} limit={data.limit} hasMore={data.hasMore} baseUrl={paginationBaseUrl} />
     {:else if !data.loadError}
       <p class="text-ab-gray">No results found for "{data.q}".</p>
     {/if}
+
+    <!-- Outside the list guard on purpose: an empty page still needs its Previous link. -->
+    <Pagination offset={data.offset} limit={data.limit} hasMore={data.hasMore} baseUrl={paginationBaseUrl} />
   {/if}
 </div>

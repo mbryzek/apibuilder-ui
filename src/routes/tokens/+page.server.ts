@@ -4,7 +4,7 @@ import { handleApiCall } from '$lib/api/error-handler';
 import { dataOr, loadErrorFrom } from '$lib/api/load-error';
 import { requireAuth } from '$lib/server/auth';
 import type { Token } from '$generated/com-bryzek-platform';
-import { PAGE_LIMIT, parseOffset } from '$lib/pagination';
+import { PAGE_FETCH_LIMIT, parseOffset, toPage } from '$lib/pagination';
 
 export const load: PageServerLoad = async (event) => {
   const session = requireAuth(event);
@@ -12,16 +12,14 @@ export const load: PageServerLoad = async (event) => {
   const offset = parseOffset(event.url);
 
   const response = await handleApiCall<Token[]>(() =>
-    platformClient().getTokensUsersByUserId({ userId: session.user.id, limit: PAGE_LIMIT, offset, headers })
+    platformClient().getTokensUsersByUserId({ userId: session.user.id, limit: PAGE_FETCH_LIMIT, offset, headers })
   );
 
-  const tokens = dataOr(response, []);
+  const { rows: tokens, ...page } = toPage(dataOr(response, []), offset);
 
   return {
     tokens,
-    offset,
-    limit: PAGE_LIMIT,
-    hasMore: tokens.length >= PAGE_LIMIT,
+    ...page,
     loadError: loadErrorFrom(response)
   };
 };

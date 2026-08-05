@@ -75,11 +75,13 @@
         </tbody>
       </table>
     </div>
-
-    {#if !searchQuery}
-      <Pagination offset={data.offset} limit={data.limit} hasMore={data.hasMore} baseUrl="/generators" />
-    {/if}
   {:else if !data.loadError}
     <p class="text-ab-gray">{searchQuery ? 'No generators match your filter.' : 'No generators found.'}</p>
+  {/if}
+
+  <!-- Outside the list guard on purpose: an empty page still needs its Previous link. Still
+       suppressed while a client-side filter is active, since the filter only sees this page. -->
+  {#if !searchQuery}
+    <Pagination offset={data.offset} limit={data.limit} hasMore={data.hasMore} baseUrl="/generators" />
   {/if}
 </div>

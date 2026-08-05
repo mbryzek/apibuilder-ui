@@ -67,9 +67,10 @@
         </tbody>
       </table>
     </div>
-
-    <Pagination offset={data.offset} limit={data.limit} hasMore={data.hasMore} baseUrl="/history" />
   {:else if !data.loadError}
     <p class="text-ab-gray">No changes found.</p>
   {/if}
+
+  <!-- Outside the list guard on purpose: an empty page still needs its Previous link. -->
+  <Pagination offset={data.offset} limit={data.limit} hasMore={data.hasMore} baseUrl="/history" />
 </div>

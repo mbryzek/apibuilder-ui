@@ -5,13 +5,18 @@
   import type { ApiErrorItem } from '$lib/api/error-handler';
   import type { LoadError } from '$lib/api/load-error';
   import LoadErrorBanner from '$lib/components/LoadErrorBanner.svelte';
+  import Pagination from '$lib/components/Pagination.svelte';
 
   interface Props {
     data: {
       org: Organization;
       isAdmin: boolean;
       memberships: Membership[];
+      offset: number;
+      limit: number;
+      hasMore: boolean;
       pendingRequestsCount: number;
+      pendingRequestsCapped: boolean;
       loadError: LoadError | null;
     };
     form: { errors?: ApiErrorItem[]; success?: boolean } | null;
@@ -34,7 +39,7 @@
     <h1 class="text-ab-dark-blue text-2xl font-bold">Members</h1>
     {#if data.isAdmin && data.pendingRequestsCount > 0}
       <a href="/{org.key}/membership-requests" class="btn-secondary mt-3 inline-block text-center sm:mt-0">
-        Pending Requests ({data.pendingRequestsCount})
+        Pending Requests ({data.pendingRequestsCount}{data.pendingRequestsCapped ? '+' : ''})
       </a>
     {/if}
   </div>
@@ -195,4 +200,7 @@
   {:else if !data.loadError}
     <p class="text-ab-gray">No members found.</p>
   {/if}
+
+  <!-- Outside the list guard on purpose: an empty page still needs its Previous link. -->
+  <Pagination offset={data.offset} limit={data.limit} hasMore={data.hasMore} baseUrl="/{org.key}/members" />
 </div>
