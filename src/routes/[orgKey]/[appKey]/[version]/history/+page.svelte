@@ -70,14 +70,15 @@
         </tbody>
       </table>
     </div>
-
-    <Pagination
-      offset={data.offset}
-      limit={data.limit}
-      hasMore={data.hasMore}
-      baseUrl="/{data.orgKey}/{data.appKey}/{data.versionName}/history"
-    />
   {:else if !data.loadError}
     <p class="text-ab-gray">No changes found for this application.</p>
   {/if}
+
+  <!-- Outside the list guard on purpose: an empty page still needs its Previous link. -->
+  <Pagination
+    offset={data.offset}
+    limit={data.limit}
+    hasMore={data.hasMore}
+    baseUrl="/{data.orgKey}/{data.appKey}/{data.versionName}/history"
+  />
 </div>

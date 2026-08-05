@@ -4,6 +4,7 @@ import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall, type ApiResponse } from '$lib/api/error-handler';
 import { dataOr, loadErrorFrom } from '$lib/api/load-error';
 import { requireAuth, requireAdminForAction } from '$lib/server/auth';
+import { PAGE_FETCH_LIMIT, PAGE_LIMIT, parseOffset, toPage } from '$lib/pagination';
 import type { Membership, User, MembershipRequest, Organization } from '$generated/com-bryzek-apibuilder';
 import { MembershipRole } from '$generated/com-bryzek-apibuilder';
 
@@ -13,22 +14,34 @@ export const load: PageServerLoad = async (event) => {
   const { params, parent } = event;
   const { isAdmin } = await parent();
 
+  const offset = parseOffset(event.url);
+
   const membershipsResponse = await handleApiCall<Membership[]>(() =>
-    apiBuilderClient().getMemberships({ orgKey: params.orgKey, limit: 100, offset: 0, headers })
+    apiBuilderClient().getMemberships({ orgKey: params.orgKey, limit: PAGE_FETCH_LIMIT, offset, headers })
   );
 
+  // The badge used to render the length of a limit-capped page as though it were a total, so an
+  // org with 40 pending requests read "Pending Requests (25)". Over-fetch by one and say "25+"
+  // rather than asserting a number we cannot know.
   let pendingRequestsCount = 0;
+  let pendingRequestsCapped = false;
   let requestsResponse: ApiResponse<MembershipRequest[]> | null = null;
   if (isAdmin) {
     requestsResponse = await handleApiCall<MembershipRequest[]>(() =>
-      apiBuilderClient().getMembershipRequests({ orgKey: params.orgKey, limit: 25, offset: 0, headers })
+      apiBuilderClient().getMembershipRequests({ orgKey: params.orgKey, limit: PAGE_FETCH_LIMIT, offset: 0, headers })
     );
-    pendingRequestsCount = dataOr(requestsResponse, []).length;
+    const pending = dataOr(requestsResponse, []);
+    pendingRequestsCount = Math.min(pending.length, PAGE_LIMIT);
+    pendingRequestsCapped = pending.length > PAGE_LIMIT;
   }
 
+  const { rows: memberships, ...page } = toPage(dataOr(membershipsResponse, []), offset);
+
   return {
-    memberships: dataOr(membershipsResponse, []),
+    memberships,
+    ...page,
     pendingRequestsCount,
+    pendingRequestsCapped,
     loadError: loadErrorFrom(membershipsResponse, requestsResponse)
   };
 };

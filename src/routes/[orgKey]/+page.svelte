@@ -94,8 +94,10 @@
         </tbody>
       </table>
     </div>
-    <Pagination offset={data.offset} limit={data.limit} hasMore={data.hasMore} baseUrl="/{org.key}" />
   {:else if !data.loadError}
     <p class="text-ab-gray">No applications with published versions.</p>
   {/if}
+
+  <!-- Outside the list guard on purpose: an empty page still needs its Previous link. -->
+  <Pagination offset={data.offset} limit={data.limit} hasMore={data.hasMore} baseUrl="/{org.key}" />
 </div>
