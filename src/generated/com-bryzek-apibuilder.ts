@@ -54,6 +54,16 @@ export interface Application {
   visibility: Visibility;
 }
 
+/**
+ * Every difference between one application's previous and current spec, in apibuilder's own terms.
+ */
+export interface ApplicationDiff {
+  organization_key: string;
+  application_key: string;
+  /** Empty when the two specs describe the same contract. */
+  diffs: Diff[];
+}
+
 export interface ApplicationForm {
   name: string;
   key?: string;
@@ -88,6 +98,37 @@ export interface CodeFile {
   name: string;
   dir?: string;
   contents: string;
+}
+
+/**
+ * One application in a diff request. `original` is the spec as it is now; `previous` is the spec it is being compared against. Applications that did not change omit `previous` and are present only so imports resolve against this payload set rather than the registry -- the same payload-first resolution codegen uses.
+ */
+export interface DiffApplicationForm {
+  organization_key: string;
+  application_key: string;
+  /** api_json for this application AFTER the change. */
+  original: any;
+  /** api_json for this application BEFORE the change. Absent means this application did not change: it is resolved as import context and no diff is returned for it. */
+  previous?: any;
+}
+
+export interface DiffBreaking {
+  discriminator: 'diff_breaking';
+  description: string;
+  is_material: boolean;
+}
+
+/**
+ * A set of applications to diff together. Both sides are resolved hermetically -- nothing is persisted, no version is created, and `latest` never moves.
+ */
+export interface DiffForm {
+  applications: DiffApplicationForm[];
+}
+
+export interface DiffNonBreaking {
+  discriminator: 'diff_non_breaking';
+  description: string;
+  is_material: boolean;
 }
 
 export interface Domain {
@@ -226,6 +267,24 @@ export interface WatchForm {
 // ============================================================================
 
 /**
+ * A single difference between two versions of a spec. `breaking` means code generated against the previous spec no longer works against the current one; `non_breaking` means it still does. `is_material` distinguishes a change to the contract itself from bookkeeping (a version number, an import's metadata) that no consumer can observe. The two variants carry identical fields, so the union is discriminated explicitly rather than structurally.
+ */
+export type Diff = DiffBreaking | DiffNonBreaking;
+
+export const DiffDiscriminator = {
+  DiffBreaking: 'diff_breaking',
+  DiffNonBreaking: 'diff_non_breaking'
+} as const;
+
+export function isDiffBreaking(obj: Diff): obj is DiffBreaking {
+  return obj.discriminator === 'diff_breaking';
+}
+
+export function isDiffNonBreaking(obj: Diff): obj is DiffNonBreaking {
+  return obj.discriminator === 'diff_non_breaking';
+}
+
+/**
  * Identifies a specific version. Either the literal 'latest' for the most recent version, or an ISO date-time for a specific version.
  */
 export type VersionIdentifier = 'latest' | string;
@@ -278,6 +337,11 @@ export interface UpdateApplicationByAppKeyOptions {
 export interface DeleteApplicationByAppKeyOptions {
   orgKey: string;
   appKey: string;
+  headers?: Record<string, string>;
+}
+
+export interface CreateApplicationDiffsOptions {
+  body: DiffForm;
   headers?: Record<string, string>;
 }
 
@@ -634,6 +698,35 @@ export class ApiClient {
 
     if (response.status === 404) {
       throw new VoidResponse(response);
+    }
+
+    throw new ApiException(response, `Request failed with status ${response.status}`);
+
+  }
+
+  async createApplicationDiffs(params: CreateApplicationDiffsOptions): Promise<ApplicationDiff[]> {
+    const url = `${this.baseUrl}/apibuilder/diffs`;
+
+      const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(params.headers || {}),
+      },
+      body: JSON.stringify(params.body),
+    });
+
+    if (response.status === 200) {
+      const data = await response.json();
+      return data;
+    }
+
+    if (response.status === 401) {
+      throw new UnauthorizedErrorResponse(response);
+    }
+
+    if (response.status === 422) {
+      throw new ValidationErrorsResponse(response);
     }
 
     throw new ApiException(response, `Request failed with status ${response.status}`);
