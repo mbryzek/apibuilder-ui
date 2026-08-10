@@ -15,3 +15,14 @@ applications = new Listing<AppGroup> {
   new { names { "apibuilder-spec"; "apibuilder"; "apibuilder-generator"; "platform-error" }
                                       generators = module.singleGenerator("typescript", tsSrc) }
 }
+
+// playwright/ is its own codegen root: it regenerates a narrower client into
+// playwright/generated, which must not land in src/ and reach the shipped
+// bundle. Naming it here is what makes a single `api` at the repo root cover
+// both — without it the copy only updated if you remembered to cd into
+// playwright/ and run `api` again, and it silently rotted (hackathon hit exactly
+// this, #54). `dev codegen sync` resolves a repo's codegen roots from this list
+// too, so an undeclared root is one the nightly sweep leaves alone (ISS-1489).
+nestedConfigs {
+  "playwright"
+}
