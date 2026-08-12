@@ -21,6 +21,11 @@
           {#if iface.description}
             <p class="text-ab-dark-gray mb-3 text-sm">{iface.description}</p>
           {/if}
+          {#if iface.type_parameters && iface.type_parameters.length > 0}
+            <p class="text-ab-gray mb-2 text-xs">
+              Type parameters: {iface.type_parameters.join(', ')}
+            </p>
+          {/if}
           <FieldsTable fields={iface.fields} {service} />
         </div>
       </div>
