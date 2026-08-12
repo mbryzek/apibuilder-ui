@@ -23,8 +23,15 @@ npm run format         # prettier --write
 npm run build          # production build (adapter-cloudflare)
 ```
 
-There is no CI in this repo yet — `npm run check` is the gate a developer runs by hand before
-pushing. It covers:
+CI runs on every pull request (ISS-2172). `ci/build.sh` is the whole of it — the fleet verifies a
+repo exactly when that file exists at a pull request's head sha, and the `ci` commit status it
+posts is what the merge lane reads, so a red one parks the PR. It runs `npm ci`, then `npm run
+check`, then `npm run build`. The build is deliberately a separate step: SvelteKit's
+"`$lib/server` imported into browser code" guard is a vite build plugin, so `svelte-check` cannot
+give that verdict.
+
+`npm run check` is therefore both what CI runs and what a developer runs by hand before pushing.
+It covers:
 
 | Step                                      | Scope                                        |
 | ----------------------------------------- | -------------------------------------------- |
@@ -66,9 +73,12 @@ it unattended would need a platform instance it's safe to write to — a private
 Postgres plus migrations plus a seeded `apibuilder` tenant — and pointing it at the production API
 instead is not an option: it would create real users and real orgs on every run.
 
-So nobody but a developer with `platform` running locally executes this suite, and the config says
-so — `playwright.config.ts` has no `process.env['CI']` branches, because a `forbidOnly`/`retries`/
-`workers` split by CI would imply an automated run that does not happen.
+So nobody but a developer with `platform` running locally executes this suite, and both the CI
+script and the config say so — `ci/build.sh` deliberately omits `npm run test:e2e` (a suite that
+is red for an infrastructure reason is worse than no suite, because the merge lane cannot tell it
+apart from a real failure), and `playwright.config.ts` has no `process.env['CI']` branches,
+because a `forbidOnly`/`retries`/`workers` split by CI would imply an automated run that does not
+happen.
 
 The practical consequence: **an auth or authorization change needs a unit test, not only an e2e
 spec.** ISS-493 was filed after three consecutive commits changed the logout and dev-login paths
