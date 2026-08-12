@@ -35,16 +35,55 @@ export const actions: Actions = {
     return fail(400, { errors: 'errors' in response ? response.errors : [{ message: 'Failed to watch' }] });
   },
 
-  unwatch: async ({ params, locals, request }) => {
+  /**
+   * The watch to delete is resolved from the caller's own watches for *this* application rather
+   * than taken from a `watch_guid` form field, so there is no id to forge. This was the last
+   * mutation in the app that passed a raw guid from the request body straight to a delete, and
+   * nothing tied that guid to the session submitting it — `$lib/server/scoped-id` explains the
+   * shape, and watches are conspicuously absent from the list of resources it records the
+   * platform as re-resolving under the caller's own authorization. `[orgKey]/subscriptions`
+   * dropped its `subscription_id` field for exactly this reason; this is the same fix.
+   *
+   * Nothing is lost by not trusting the form: the layout already performs this very lookup to
+   * decide which way to render the toggle. The toggle now unwatches whatever the server actually
+   * has rather than what the browser last saw, which is what a toggle should do.
+   *
+   * The delete result is also checked now, matching the sibling `watch` action above. Discarding
+   * it redirected as though a failed unwatch had succeeded, with nothing shown to the user.
+   */
+  unwatch: async ({ params, locals }) => {
     const session = requireAuthForAction(locals);
     const headers = getSessionHeaders(session.id);
     const client = apiBuilderClient();
 
-    const formData = await request.formData();
-    const watchGuid = formData.get('watch_guid') as string;
+    const watches = await handleApiCall<Watch[]>(() =>
+      client.getWatches({
+        userId: session.user.id,
+        organizationKey: params.orgKey,
+        applicationKey: params.appKey,
+        limit: 1,
+        offset: 0,
+        headers
+      })
+    );
 
-    if (watchGuid) {
-      await handleApiCall<void>(() => client.deleteWatchById(watchGuid, { headers }));
+    if (!('data' in watches)) {
+      return fail(Math.max(watches.status, 400), {
+        errors: 'errors' in watches ? watches.errors : [{ message: 'Failed to unwatch' }]
+      });
+    }
+
+    // Already unwatched is not a failure — fall through to the redirect and let the layout
+    // re-render the toggle from what the server actually has.
+    const watch = watches.data[0];
+    if (watch) {
+      const response = await handleApiCall<void>(() => client.deleteWatchById(watch.id, { headers }));
+
+      if (!('data' in response)) {
+        return fail(Math.max(response.status, 400), {
+          errors: 'errors' in response ? response.errors : [{ message: 'Failed to unwatch' }]
+        });
+      }
     }
 
     throw redirect(303, `/${params.orgKey}/${params.appKey}/${params.version}`);

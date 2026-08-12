@@ -16,7 +16,6 @@
       version: { version: string };
       service: Service;
       isWatching: boolean;
-      watchGuid?: string;
       watchLoadError: LoadError | null;
       session?: PublicSession;
     };
