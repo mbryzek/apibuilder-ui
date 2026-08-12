@@ -8,9 +8,24 @@ import path from 'path';
 import type { Page } from '@playwright/test';
 import { config } from '../config';
 import type { ContextOrPage } from '../types';
+import { ApiClient as PlatformClient, isTenantSession } from '../generated/com-bryzek-platform';
+import type { PersonForm, TenantSession } from '../generated/com-bryzek-platform';
+import { UnauthorizedErrorResponse } from '../generated/generated-error-unauthorized-error-response';
+import { VoidResponse } from '../generated/generated-error-void-response';
 
 /** Password used for every throwaway account `signupAndLogin` creates. */
 const TEST_PASSWORD = 'testpassword';
+
+/**
+ * The platform client the specs talk to, generated from the same apibuilder specs the app is
+ * built against. Hand-rolled `fetch()` calls were typed by hand and could not notice the
+ * contract moving underneath them — signup returns a `SessionState` union, not the
+ * `{ session, user }` object the old helper declared.
+ */
+const platform = new PlatformClient(config.API_BASE_URL);
+
+/** A full run signs up dozens of throwaway accounts; without this the platform rate-limits it. */
+const BYPASS_RATE_LIMIT: Record<string, string> = { 'X-Bypass-Rate-Limit': 'true' };
 
 /**
  * Generate a random UUID
@@ -28,28 +43,24 @@ export function generateRandomEmail(): string {
 
 /**
  * API Helper: Create a user via the platform signup endpoint
- * Returns a TenantSession with session and user
+ *
+ * Signup answers a `SessionState`, so an inactive user comes back as a variant carrying no
+ * session at all. Fail loudly here rather than letting a caller read `.session.id` off it.
  */
-export async function createUserViaApi(
-  email: string,
-  password: string,
-  name?: string
-): Promise<{ session: { id: string }; user: { id: string } }> {
-  const person: Record<string, string> = { email };
-  if (name) person['name'] = name;
+export async function createUserViaApi(email: string, password: string, name?: string): Promise<TenantSession> {
+  const person: PersonForm = name ? { email, name } : { email };
 
-  const response = await fetch(`${config.API_BASE_URL}/tenant/${config.TENANT_ID}/session/signups`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'X-Bypass-Rate-Limit': 'true' },
-    body: JSON.stringify({ user: { person }, password })
+  const state = await platform.createTenantSessionSignups({
+    tenantId: config.TENANT_ID,
+    body: { user: { person }, password },
+    headers: BYPASS_RATE_LIMIT
   });
 
-  if (!response.ok) {
-    const errorBody = await response.text();
-    throw new Error(`Failed to create user via API: ${response.status} ${errorBody}`);
+  if (!isTenantSession(state)) {
+    throw new Error(`Signup for ${email} returned '${state.discriminator}' rather than a session`);
   }
 
-  return response.json();
+  return state;
 }
 
 /**
@@ -59,11 +70,20 @@ export async function createUserViaApi(
  * either way, so the assertion has to be made against the platform.
  */
 export async function sessionIsValid(sessionId: string): Promise<boolean> {
-  const response = await fetch(`${config.API_BASE_URL}/tenant/${config.TENANT_ID}/session`, {
-    headers: { session_id: sessionId, 'X-Bypass-Rate-Limit': 'true' }
-  });
-
-  return response.ok;
+  try {
+    await platform.getTenantSession(config.TENANT_ID, {
+      headers: { ...BYPASS_RATE_LIMIT, session_id: sessionId }
+    });
+    return true;
+  } catch (error) {
+    // Only the platform saying "not you" answers the question. Anything else — a 500, a
+    // connection refused — is the platform being broken, and reading that as "logged out"
+    // would turn an outage into a passing logout assertion.
+    if (error instanceof UnauthorizedErrorResponse || error instanceof VoidResponse) {
+      return false;
+    }
+    throw error;
+  }
 }
 
 /**
