@@ -95,7 +95,10 @@ export function resolveType(typeStr: string, service: Service): ResolvedType {
         href: `/${matchingImport.organization.key}/${matchingImport.application.key}/${matchingImport.version}#${encodeURIComponent(shortName)}`,
         isArray,
         isMap,
-        innerType: inner
+        // Display the short name — every other resolution path displays a bare name, and the
+        // namespace is already carried by the href. There is no matching import below, so the
+        // fallback keeps the qualified string it was given.
+        innerType: shortName
       };
     }
 
