@@ -3,28 +3,34 @@ import { error } from '@sveltejs/kit';
 /**
  * Reject route params that would steer the upstream API request somewhere else.
  *
- * The generated clients interpolate path params into the upstream URL **without encoding them** —
- * e.g. `getVersionByVersion` builds
- *
- *     `${this.baseUrl}/apibuilder/${params.orgKey}/${params.appKey}/${String(params.version)}`
- *
- * (src/generated/com-bryzek-apibuilder.ts). SvelteKit decodes route params before a handler sees
- * them, so `%2F` arrives as a literal `/` and `%3F` as `?`, and `new URL()` then normalizes the
- * result. Demonstrated against a stand-in upstream:
+ * SvelteKit decodes route params before a handler sees them, so `%2F` arrives as a literal `/`
+ * and `%3F` as `?`. This guard was written when the generated clients interpolated path params
+ * into the upstream URL **without encoding them**, which made that decode a server-side request
+ * forgery primitive against whatever `config.apiBaseUrl` points at, reachable without signing in.
+ * Demonstrated at the time against a stand-in upstream:
  *
  *     GET /gilt/apidoc/..%2F..%2F..%2Fusers/service.json  ->  upstream received GET /users
  *     GET /gilt/apidoc/1.0.0%3Flimit%3D999/service.json   ->  upstream received ?limit=999
  *
- * The forged request carries the caller's `session_id` header, so this is a server-side request
- * forgery primitive against whatever `config.apiBaseUrl` points at, reachable without signing in.
+ * **That is no longer how the clients are generated, and this comment used to say otherwise.**
+ * The codegen template now wraps every interpolated path param — `getVersionByVersion` builds
+ *
+ *     `${this.baseUrl}/apibuilder/${encodeURIComponent(params.orgKey)}/...`
+ *
+ * (src/generated/com-bryzek-apibuilder.ts) — so the SSRF above is closed at the source, for every
+ * caller, and re-running those two requests today sends the traversal upstream as one opaque,
+ * percent-encoded segment.
+ *
+ * **Do not conclude from that that this guard is now dead.** What it still closes is an open
+ * redirect: several actions reflect `params.orgKey` into `redirect(303, `/${params.orgKey}/...`)`,
+ * and SvelteKit sets `Location` verbatim, so an `orgKey` of `/evil.com` yields a scheme-relative
+ * `//evil.com/...` that browsers resolve to another host. `$lib/server/auth`'s
+ * `requireMemberForAction`/`requireAdminForAction` call `assertSafeSegment` for exactly this
+ * reason, which is why every org-scoped action is covered without repeating the call.
  *
  * Validating rather than encoding is deliberate: these are keys, not free text. A key that is not
  * shaped like a key is a malformed request, and saying so is more honest than quietly rewriting it
  * into a lookup that will 404 anyway.
- *
- * The real fix belongs in the apibuilder codegen template, which should encode path params for
- * every generated client — see the note in the PR. This guard is the boundary defence this repo
- * can own on its own, and it stays useful even after the template is fixed.
  */
 
 /**
