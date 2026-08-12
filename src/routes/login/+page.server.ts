@@ -5,6 +5,7 @@ import { handleApiCall } from '$lib/api/error-handler';
 import { config } from '$lib/config';
 import { completeSession } from '$lib/server/auth-completion';
 import type { SessionState } from '$generated/com-bryzek-platform';
+import { safeRedirectPath } from '$lib/server/safe-redirect';
 
 export const load: PageServerLoad = async ({ locals, url }) => {
   if (locals.session) {
@@ -14,17 +15,6 @@ export const load: PageServerLoad = async ({ locals, url }) => {
     redirectTo: url.searchParams.get('redirect') || '/'
   };
 };
-
-/**
- * Validate that a redirect path is same-origin (must start with '/' but not '//')
- * to prevent open-redirect attacks.
- */
-function safeRedirectPath(path: string | null | undefined): string {
-  if (!path || !path.startsWith('/') || path.startsWith('//')) {
-    return '/';
-  }
-  return path;
-}
 
 export const actions: Actions = {
   default: async ({ request, cookies, url }) => {
