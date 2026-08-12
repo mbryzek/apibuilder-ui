@@ -1,7 +1,8 @@
 import type { PageServerLoad, Actions } from './$types';
 import { fail } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
-import { handleApiCall, type ApiResponse } from '$lib/api/error-handler';
+import { handleApiCall, isApiError, isApiSuccess, type ApiResponse } from '$lib/api/error-handler';
+import { actionFail, actionFailMissing } from '$lib/api/action-error';
 import { dataOr, loadErrorFrom } from '$lib/api/load-error';
 import { requireAuth, requireAdminForAction } from '$lib/server/auth';
 import { PAGE_FETCH_LIMIT, PAGE_LIMIT, parseOffset, toPage } from '$lib/pagination';
@@ -60,50 +61,46 @@ export const actions: Actions = {
       return fail(400, { errors: [{ message: 'Email or nickname is required' }] });
     }
 
-    // Find user by email or nickname
-    const usersResponse = await handleApiCall<User[]>(() => apiBuilderClient().getUsers({ email: emailOrNickname, headers }));
+    // Find user by email or nickname. The email lookup is allowed to fail — an `emailOrNickname`
+    // that is a nickname is not a valid email — so the last lookup is the one that decides, and
+    // `actionFailMissing` keeps an unanswered one from reading as "no such user".
+    let lookup = await handleApiCall<User[]>(() => apiBuilderClient().getUsers({ email: emailOrNickname, headers }));
+    let user = isApiSuccess(lookup) ? lookup.data[0] : undefined;
 
-    let user: User | undefined;
-    if ('data' in usersResponse && usersResponse.data.length > 0) {
-      user = usersResponse.data[0];
-    } else {
-      const nicknameResponse = await handleApiCall<User[]>(() => apiBuilderClient().getUsers({ nickname: emailOrNickname, headers }));
-      if ('data' in nicknameResponse && nicknameResponse.data.length > 0) {
-        user = nicknameResponse.data[0];
-      }
+    if (!user) {
+      lookup = await handleApiCall<User[]>(() => apiBuilderClient().getUsers({ nickname: emailOrNickname, headers }));
+      user = isApiSuccess(lookup) ? lookup.data[0] : undefined;
     }
 
     if (!user) {
-      return fail(400, { errors: [{ message: `User not found: ${emailOrNickname}` }] });
+      return actionFailMissing(lookup, `User not found: ${emailOrNickname}`);
     }
 
     const orgResponse = await handleApiCall<Organization>(() => apiBuilderClient().getOrganizationByKey(params.orgKey, { headers }));
-    if (!('data' in orgResponse)) {
-      return fail(400, { errors: [{ message: 'Organization not found' }] });
+    if (isApiError(orgResponse)) {
+      return actionFailMissing(orgResponse, 'Organization not found');
     }
 
     const requestResponse = await handleApiCall<MembershipRequest>(() =>
       apiBuilderClient().createMembershipRequest({
-        body: { org_id: orgResponse.data.id, user_id: user!.id, role: role as MembershipRole },
+        body: { org_id: orgResponse.data.id, user_id: user.id, role: role as MembershipRole },
         headers
       })
     );
 
-    if ('data' in requestResponse) {
-      const acceptResponse = await handleApiCall<Membership>(() =>
-        apiBuilderClient().createMembershipRequestAcceptById(requestResponse.data.id, { headers })
-      );
-      if ('errors' in acceptResponse) {
-        return fail(400, { errors: acceptResponse.errors });
-      }
-      return { success: true };
+    if (isApiError(requestResponse)) {
+      return actionFail(requestResponse);
     }
 
-    if ('errors' in requestResponse) {
-      return fail(400, { errors: requestResponse.errors });
+    const acceptResponse = await handleApiCall<Membership>(() =>
+      apiBuilderClient().createMembershipRequestAcceptById(requestResponse.data.id, { headers })
+    );
+
+    if (isApiError(acceptResponse)) {
+      return actionFail(acceptResponse);
     }
 
-    return fail(500, { errors: [{ message: 'An unexpected error occurred' }] });
+    return { success: true };
   },
 
   removeMember: async ({ request, locals, params }) => {
@@ -128,8 +125,8 @@ export const actions: Actions = {
 
     const response = await handleApiCall<void>(() => apiBuilderClient().deleteMembershipById(membership.id, { headers }));
 
-    if ('errors' in response) {
-      return fail(400, { errors: response.errors });
+    if (isApiError(response)) {
+      return actionFail(response);
     }
 
     return { success: true };
@@ -146,8 +143,8 @@ export const actions: Actions = {
     }
 
     const orgResponse = await handleApiCall<Organization>(() => apiBuilderClient().getOrganizationByKey(params.orgKey, { headers }));
-    if (!('data' in orgResponse)) {
-      return fail(400, { errors: [{ message: 'Organization not found' }] });
+    if (isApiError(orgResponse)) {
+      return actionFailMissing(orgResponse, 'Organization not found');
     }
 
     const requestResponse = await handleApiCall<MembershipRequest>(() =>
@@ -157,21 +154,19 @@ export const actions: Actions = {
       })
     );
 
-    if ('data' in requestResponse) {
-      const acceptResponse = await handleApiCall<Membership>(() =>
-        apiBuilderClient().createMembershipRequestAcceptById(requestResponse.data.id, { headers })
-      );
-      if ('errors' in acceptResponse) {
-        return fail(400, { errors: acceptResponse.errors });
-      }
-      return { success: true };
+    if (isApiError(requestResponse)) {
+      return actionFail(requestResponse);
     }
 
-    if ('errors' in requestResponse) {
-      return fail(400, { errors: requestResponse.errors });
+    const acceptResponse = await handleApiCall<Membership>(() =>
+      apiBuilderClient().createMembershipRequestAcceptById(requestResponse.data.id, { headers })
+    );
+
+    if (isApiError(acceptResponse)) {
+      return actionFail(acceptResponse);
     }
 
-    return fail(500, { errors: [{ message: 'An unexpected error occurred' }] });
+    return { success: true };
   },
 
   revokeAdmin: async ({ request, locals, params }) => {
@@ -189,20 +184,17 @@ export const actions: Actions = {
       apiBuilderClient().getMemberships({ orgKey: params.orgKey, userId, role: MembershipRole.Admin, limit: 100, offset: 0, headers })
     );
 
-    if ('data' in membershipsResponse) {
-      for (const m of membershipsResponse.data) {
-        const deleteResponse = await handleApiCall<void>(() => apiBuilderClient().deleteMembershipById(m.id, { headers }));
-        if ('errors' in deleteResponse) {
-          return fail(400, { errors: deleteResponse.errors });
-        }
+    if (isApiError(membershipsResponse)) {
+      return actionFail(membershipsResponse);
+    }
+
+    for (const m of membershipsResponse.data) {
+      const deleteResponse = await handleApiCall<void>(() => apiBuilderClient().deleteMembershipById(m.id, { headers }));
+      if (isApiError(deleteResponse)) {
+        return actionFail(deleteResponse);
       }
-      return { success: true };
     }
 
-    if ('errors' in membershipsResponse) {
-      return fail(400, { errors: membershipsResponse.errors });
-    }
-
-    return fail(500, { errors: [{ message: 'An unexpected error occurred' }] });
+    return { success: true };
   }
 };

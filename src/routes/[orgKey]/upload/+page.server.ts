@@ -1,7 +1,8 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
-import { handleApiCall } from '$lib/api/error-handler';
+import { handleApiCall, isApiError } from '$lib/api/error-handler';
+import { actionFail } from '$lib/api/action-error';
 import { requireAuth, requireMemberForAction } from '$lib/server/auth';
 import type { Version, OriginalForm } from '$generated/com-bryzek-apibuilder';
 
@@ -65,15 +66,11 @@ export const actions: Actions = {
       })
     );
 
-    if ('data' in response) {
-      throw redirect(303, `/${params.orgKey}/${targetAppKey}/${response.data.version}`);
+    if (isApiError(response)) {
+      return actionFail(response, { appKey, visibility, specType });
     }
 
-    if ('errors' in response) {
-      return fail(Math.max(response.status, 400), { errors: response.errors, appKey, visibility, specType });
-    }
-
-    return fail(500, { errors: [{ message: 'An unexpected error occurred' }] });
+    throw redirect(303, `/${params.orgKey}/${targetAppKey}/${response.data.version}`);
   }
 };
 

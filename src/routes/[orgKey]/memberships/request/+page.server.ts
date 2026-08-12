@@ -1,7 +1,7 @@
 import type { PageServerLoad, Actions } from './$types';
-import { fail } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
-import { handleApiCall } from '$lib/api/error-handler';
+import { handleApiCall, isApiError } from '$lib/api/error-handler';
+import { actionFail, actionFailMissing } from '$lib/api/action-error';
 import { dataOr, loadErrorFrom } from '$lib/api/load-error';
 import { requireAuth, requireAuthForAction } from '$lib/server/auth';
 import type { Membership, MembershipRequest, Organization } from '$generated/com-bryzek-apibuilder';
@@ -35,8 +35,8 @@ export const actions: Actions = {
     const headers = getSessionHeaders(session.id);
 
     const orgResponse = await handleApiCall<Organization>(() => apiBuilderClient().getOrganizationByKey(params.orgKey, { headers }));
-    if (!('data' in orgResponse)) {
-      return fail(400, { errors: [{ message: 'Organization not found' }] });
+    if (isApiError(orgResponse)) {
+      return actionFailMissing(orgResponse, 'Organization not found');
     }
 
     const response = await handleApiCall<MembershipRequest>(() =>
@@ -46,14 +46,10 @@ export const actions: Actions = {
       })
     );
 
-    if ('data' in response) {
-      return { success: true };
+    if (isApiError(response)) {
+      return actionFail(response);
     }
 
-    if ('errors' in response) {
-      return fail(400, { errors: response.errors });
-    }
-
-    return fail(500, { errors: [{ message: 'An unexpected error occurred' }] });
+    return { success: true };
   }
 };

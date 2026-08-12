@@ -9,30 +9,14 @@
  */
 
 import { error } from '@sveltejs/kit';
-import { isApiError, isApiSuccess, type ApiError, type ApiResponse, type ApiResponseError } from './error-handler';
+import { isApiError, isApiSuccess, type ApiResponse, type ApiResponseError } from './error-handler';
+import { isUnavailable, messageFor } from './api-message';
 
 /** Why a page's data could not be loaded, phrased for the person reading the page. */
 export interface LoadError {
   status: number;
   message: string;
 }
-
-const UNAVAILABLE = 'We could not reach the server. Please try again in a moment.';
-const GENERIC = 'We could not load this data. Please try again.';
-
-/**
- * Statuses whose message was written for a human: our own network sentinel (0), and
- * the validation responses. Every other failure arrives as `HTTP 500: Request failed
- * with status 500` from the generated client, which is not something to show anyone.
- */
-const MESSAGE_FROM_API = new Set([0, 400, 409, 422]);
-
-const MESSAGE_BY_STATUS: Record<number, string> = {
-  401: 'Your session has expired. Please sign in again.',
-  403: 'You do not have permission to view this.',
-  404: 'We could not find this.',
-  429: 'Too many requests. Please wait a moment and try again.'
-};
 
 /** The data from a successful call, or `fallback` when the call failed. */
 export function dataOr<T>(response: ApiResponse<T>, fallback: T): T {
@@ -85,28 +69,6 @@ function toLoadError(response: ApiResponseError): LoadError {
   return { status: response.status, message: messageFor(response) };
 }
 
-function messageFor({ status, errors }: ApiResponseError): string {
-  if (MESSAGE_FROM_API.has(status)) {
-    return firstMessage(errors) ?? UNAVAILABLE;
-  }
-  return MESSAGE_BY_STATUS[status] ?? (status >= 500 ? UNAVAILABLE : GENERIC);
-}
-
-function firstMessage(errors: ApiError[]): string | undefined {
-  return errors.find((e) => e.message.trim().length > 0)?.message;
-}
-
 function isHttpErrorStatus(status: number): boolean {
   return status >= 400 && status <= 599;
-}
-
-/**
- * The API gave no answer: our network sentinel (0), a rate limit, or a 5xx.
- *
- * Exported because `hooks.server.ts` needs the same test but cannot use `throwIfUnavailable` — an
- * error thrown from `handle` would take down every public page, not just the ones that need a
- * session.
- */
-export function isUnavailable(status: number): boolean {
-  return status === 0 || status === 429 || status >= 500;
 }

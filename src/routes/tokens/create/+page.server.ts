@@ -1,7 +1,8 @@
 import type { PageServerLoad, Actions } from './$types';
-import { redirect, fail } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit';
 import { platformClient, getSessionHeaders } from '$lib/api/clients';
-import { handleApiCall } from '$lib/api/error-handler';
+import { handleApiCall, isApiError } from '$lib/api/error-handler';
+import { actionFail } from '$lib/api/action-error';
 import { requireAuth, requireAuthForAction } from '$lib/server/auth';
 import type { Token, TokenForm } from '$generated/com-bryzek-platform';
 
@@ -24,14 +25,10 @@ export const actions: Actions = {
 
     const response = await handleApiCall<Token>(() => platformClient().createToken({ body, headers }));
 
-    if ('data' in response) {
-      throw redirect(303, `/tokens/${response.data.id}`);
+    if (isApiError(response)) {
+      return actionFail(response);
     }
 
-    if ('errors' in response) {
-      return fail(Math.max(response.status, 400), { errors: response.errors });
-    }
-
-    return fail(500, { errors: [{ message: 'An unexpected error occurred' }] });
+    throw redirect(303, `/tokens/${response.data.id}`);
   }
 };

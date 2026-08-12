@@ -1,7 +1,8 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
-import { handleApiCall } from '$lib/api/error-handler';
+import { handleApiCall, isApiError } from '$lib/api/error-handler';
+import { actionFail } from '$lib/api/action-error';
 import { dataOr, loadErrorFrom } from '$lib/api/load-error';
 import { requireAuth } from '$lib/server/auth';
 import { redirectWithFlash } from '$lib/server/flash';
@@ -39,14 +40,10 @@ export const actions: Actions = {
     const headers = getSessionHeaders(locals.session.id);
     const response = await handleApiCall<User>(() => apiBuilderClient().updateUserById({ id: locals.session!.user.id, body, headers }));
 
-    if ('data' in response) {
-      redirectWithFlash('/account/profile', 'Profile updated successfully');
+    if (isApiError(response)) {
+      return actionFail(response);
     }
 
-    if ('errors' in response) {
-      return fail(400, { errors: response.errors });
-    }
-
-    return fail(500, { errors: [{ message: 'An unexpected error occurred' }] });
+    redirectWithFlash('/account/profile', 'Profile updated successfully');
   }
 };

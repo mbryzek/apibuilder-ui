@@ -1,7 +1,8 @@
 import type { PageServerLoad, Actions } from './$types';
 import { fail } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
-import { handleApiCall } from '$lib/api/error-handler';
+import { handleApiCall, isApiError } from '$lib/api/error-handler';
+import { actionFail } from '$lib/api/action-error';
 import { requireAuth, requireAdminForAction } from '$lib/server/auth';
 import { redirectWithFlash } from '$lib/server/flash';
 import type { Organization, OrganizationForm } from '$generated/com-bryzek-apibuilder';
@@ -35,16 +36,11 @@ export const actions: Actions = {
       apiBuilderClient().updateOrganizationByKey({ key: params.orgKey, body: form as OrganizationForm, headers })
     );
 
-    if ('data' in response) {
-      const newKey = response.data.key;
-      redirectWithFlash(`/${newKey}/details`, 'Organization updated');
+    if (isApiError(response)) {
+      return actionFail(response);
     }
 
-    if ('errors' in response) {
-      return fail(400, { errors: response.errors });
-    }
-
-    return fail(500, { errors: [{ message: 'An unexpected error occurred' }] });
+    redirectWithFlash(`/${response.data.key}/details`, 'Organization updated');
   },
 
   delete: async ({ params, locals }) => {
@@ -54,14 +50,10 @@ export const actions: Actions = {
 
     const response = await handleApiCall<void>(() => apiBuilderClient().deleteOrganizationByKey(params.orgKey, { headers }));
 
-    if ('data' in response) {
-      redirectWithFlash('/', 'Organization deleted');
+    if (isApiError(response)) {
+      return actionFail(response);
     }
 
-    if ('errors' in response) {
-      return fail(400, { errors: response.errors });
-    }
-
-    return fail(500, { errors: [{ message: 'An unexpected error occurred' }] });
+    redirectWithFlash('/', 'Organization deleted');
   }
 };

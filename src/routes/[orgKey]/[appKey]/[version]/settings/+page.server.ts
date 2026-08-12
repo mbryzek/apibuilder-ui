@@ -1,7 +1,8 @@
 import type { PageServerLoad, Actions } from './$types';
 import { fail } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
-import { handleApiCall } from '$lib/api/error-handler';
+import { handleApiCall, isApiError } from '$lib/api/error-handler';
+import { actionFail } from '$lib/api/action-error';
 import { requireAuth, requireAdminForAction } from '$lib/server/auth';
 import { redirectWithFlash } from '$lib/server/flash';
 import type { Application, Visibility } from '$generated/com-bryzek-apibuilder';
@@ -35,11 +36,11 @@ export const actions: Actions = {
       })
     );
 
-    if ('data' in response) {
-      redirectWithFlash(`/${params.orgKey}/${response.data.key}/${params.version}/settings`, 'Visibility updated');
+    if (isApiError(response)) {
+      return actionFail(response);
     }
 
-    return fail(Math.max(response.status, 400), { errors: 'errors' in response ? response.errors : [{ message: 'Failed to update' }] });
+    redirectWithFlash(`/${params.orgKey}/${response.data.key}/${params.version}/settings`, 'Visibility updated');
   },
 
   deleteApp: async ({ params, locals }) => {
@@ -51,10 +52,10 @@ export const actions: Actions = {
       client.deleteApplicationByAppKey({ orgKey: params.orgKey, appKey: params.appKey, headers })
     );
 
-    if ('data' in response) {
-      redirectWithFlash(`/${params.orgKey}`, 'Application deleted');
+    if (isApiError(response)) {
+      return actionFail(response);
     }
 
-    return fail(Math.max(response.status, 400), { errors: 'errors' in response ? response.errors : [{ message: 'Failed to delete' }] });
+    redirectWithFlash(`/${params.orgKey}`, 'Application deleted');
   }
 };
