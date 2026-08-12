@@ -3,6 +3,7 @@ import type { RequestEvent } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { throwIfUnavailable } from '$lib/api/load-error';
+import { assertSafeSegment } from '$lib/server/path-params';
 import type { Membership } from '$generated/com-bryzek-apibuilder';
 import { MembershipRole } from '$generated/com-bryzek-apibuilder';
 
@@ -40,7 +41,28 @@ export function requireAuthForAction(locals: App.Locals): NonNullable<App.Locals
   return locals.session;
 }
 
+/**
+ * Validate `orgKey` here rather than at each action.
+ *
+ * `assertSafePathParams` guards the *loads* that pass route params to a generated client, but
+ * actions never run the load pipeline, so none of them inherited it — the previous review round
+ * left "apply the guard to the POST actions" as an open follow-up naming five routes, which is a
+ * list that goes stale the moment a sixth action is added. Every org-scoped action authorizes
+ * through one of these two helpers and passes `params.orgKey` straight in, so this is the one
+ * place that covers all of them and cannot be forgotten by the next one.
+ *
+ * What it closes today is an open redirect, not the SSRF the guard was originally written for:
+ * the generated client now percent-encodes every interpolated path param, but several actions
+ * still reflect `params.orgKey` into `redirect(303, `/${params.orgKey}/...`)`, and SvelteKit
+ * decodes `%2F` before a handler sees it — so an `orgKey` of `/evil.com` produces a
+ * scheme-relative `Location: //evil.com/...`. SvelteKit sets `Location` verbatim.
+ */
+function assertSafeOrgKey(orgKey: string): void {
+  assertSafeSegment(orgKey, 'orgKey');
+}
+
 export async function requireMemberForAction(locals: App.Locals, orgKey: string): Promise<NonNullable<App.Locals['session']>> {
+  assertSafeOrgKey(orgKey);
   const session = requireAuthForAction(locals);
   const headers = getSessionHeaders(session.id);
   const response = await handleApiCall<Membership[]>(() =>
@@ -56,6 +78,7 @@ export async function requireMemberForAction(locals: App.Locals, orgKey: string)
 }
 
 export async function requireAdminForAction(locals: App.Locals, orgKey: string): Promise<NonNullable<App.Locals['session']>> {
+  assertSafeOrgKey(orgKey);
   const session = requireAuthForAction(locals);
   const headers = getSessionHeaders(session.id);
   const response = await handleApiCall<Membership[]>(() =>

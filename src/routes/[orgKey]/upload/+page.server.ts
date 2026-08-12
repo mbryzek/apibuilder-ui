@@ -2,7 +2,7 @@ import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
-import { requireAuth, requireAuthForAction } from '$lib/server/auth';
+import { requireAuth, requireMemberForAction } from '$lib/server/auth';
 import type { Version, OriginalForm } from '$generated/com-bryzek-apibuilder';
 
 export const load: PageServerLoad = async (event) => {
@@ -11,8 +11,18 @@ export const load: PageServerLoad = async (event) => {
 };
 
 export const actions: Actions = {
+  /**
+   * `requireMemberForAction` replaces the bare `requireAuthForAction` to match every sibling
+   * `[orgKey]` write — `details`, `domains`, `members`, `membership-requests` and `settings` all
+   * require admin, `subscriptions` and `deleteVersion` require membership, and this was the only
+   * one that asked for nothing but a signed-in session. The page's own "+ Upload" link is already
+   * gated on `data.isMember` (`[version]/+page.svelte`), so members-only is the intent the UI has
+   * always expressed; the action simply never enforced it, and hiding a link is not access
+   * control. Uploading creates or overwrites an application version under `params.orgKey`, which
+   * is not something a non-member should be able to do by posting the form directly.
+   */
   default: async ({ request, params, locals }) => {
-    const session = requireAuthForAction(locals);
+    const session = await requireMemberForAction(locals, params.orgKey);
     const headers = getSessionHeaders(session.id);
     const formData = await request.formData();
     const client = apiBuilderClient();
