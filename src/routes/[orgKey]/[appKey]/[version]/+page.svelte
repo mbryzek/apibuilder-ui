@@ -12,7 +12,6 @@
       version: { version: string };
       isMember: boolean;
       isWatching: boolean;
-      watchGuid?: string;
       watchLoadError: LoadError | null;
       session?: PublicSession;
     };
@@ -72,9 +71,6 @@
   <div class="flex items-center gap-2">
     {#if data.session}
       <form method="POST" action="{versionBase}?/{data.isWatching ? 'unwatch' : 'watch'}" use:enhance>
-        {#if data.isWatching && data.watchGuid}
-          <input type="hidden" name="watch_guid" value={data.watchGuid} />
-        {/if}
         <button
           type="submit"
           disabled={!!data.watchLoadError}

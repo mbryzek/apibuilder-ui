@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 /**
- * The four actions that authorized one object and then acted on another (ISS-491).
+ * The actions that authorized one object and then acted on another (ISS-491).
  *
  * These assert the wiring, not the helper — `$lib/server/scoped-id` has its own unit tests. The
  * bug was never that the scoped lookup was wrong, it was that the actions did not do one: each
@@ -23,7 +23,9 @@ const client = {
   createSubscription: vi.fn(),
   deleteSubscriptionById: vi.fn(),
   getTokensUsersByUserId: vi.fn(),
-  deleteTokenById: vi.fn()
+  deleteTokenById: vi.fn(),
+  getWatches: vi.fn(),
+  deleteWatchById: vi.fn()
 };
 
 vi.mock('$lib/api/clients', () => ({
@@ -43,6 +45,7 @@ const { actions: membershipRequestActions } = await import('./[orgKey]/membershi
 const { actions: memberActions } = await import('./[orgKey]/members/+page.server');
 const { actions: subscriptionActions } = await import('./[orgKey]/subscriptions/+page.server');
 const { actions: tokenActions } = await import('./tokens/[guid]/+page.server');
+const { actions: versionActions } = await import('./[orgKey]/[appKey]/[version]/+page.server');
 
 /** Invoke an action the way SvelteKit would, with only the fields these actions read. */
 function invoke(
@@ -69,6 +72,7 @@ beforeEach(() => {
   client.getMemberships.mockResolvedValue([]);
   client.getSubscriptions.mockResolvedValue([]);
   client.getTokensUsersByUserId.mockResolvedValue([]);
+  client.getWatches.mockResolvedValue([]);
   client.createSubscription.mockResolvedValue({ id: 'sub-new' });
 });
 
@@ -134,6 +138,43 @@ describe('subscription toggle', () => {
   it('rejects a publication that is not in the enum', async () => {
     expect(await invoke(subscriptionActions['toggle'], { form: { publication: 'not_a_publication' } })).toMatchObject({ status: 400 });
     expect(client.createSubscription).not.toHaveBeenCalled();
+  });
+});
+
+describe('unwatch', () => {
+  const params = { orgKey: 'mallory-org', appKey: 'app', version: '1.0.0' };
+
+  it('ignores a watch guid in the form and deletes nothing it did not resolve', async () => {
+    // The form no longer carries `watch_guid`; a forged one must not reach the delete. Mallory
+    // watches nothing here, so there is nothing of her own to unwatch either.
+    await expect(invoke(versionActions['unwatch'], { form: { watch_guid: 'someone-elses-watch' }, params })).rejects.toMatchObject({
+      status: 303
+    });
+    expect(client.deleteWatchById).not.toHaveBeenCalled();
+  });
+
+  it('unwatches the id it resolved from this application and caller', async () => {
+    client.getWatches.mockResolvedValue([{ id: 'own-watch' }]);
+    client.deleteWatchById.mockResolvedValue(undefined);
+
+    await expect(invoke(versionActions['unwatch'], { form: { watch_guid: 'someone-elses-watch' }, params })).rejects.toMatchObject({
+      status: 303
+    });
+    expect(client.getWatches).toHaveBeenCalledWith(
+      expect.objectContaining({ userId: 'mallory', organizationKey: 'mallory-org', applicationKey: 'app' })
+    );
+    expect(client.deleteWatchById).toHaveBeenCalledWith('own-watch', expect.anything());
+  });
+
+  it('reports a failed delete instead of redirecting as though it worked', async () => {
+    client.getWatches.mockResolvedValue([{ id: 'own-watch' }]);
+    client.deleteWatchById.mockRejectedValue(new Error('fetch failed'));
+
+    // Discarding the result redirected on failure, so the toggle appeared to work and the user
+    // was told nothing. The sibling `watch` action always checked; this one did not.
+    expect(await invoke(versionActions['unwatch'], { params })).toMatchObject({
+      data: { errors: [{ message: expect.any(String) }] }
+    });
   });
 });
 

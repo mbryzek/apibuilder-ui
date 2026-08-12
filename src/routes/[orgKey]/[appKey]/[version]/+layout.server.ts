@@ -39,7 +39,6 @@ export const load: LayoutServerLoad = async ({ params, locals }) => {
     version,
     service: version.service,
     isWatching: currentWatch !== null,
-    watchGuid: currentWatch?.id,
     // Without this the toggle renders "not watching" for a lookup that never
     // answered, and pressing it would file a second watch on the same application.
     watchLoadError: loadErrorFrom(watchResponse)
