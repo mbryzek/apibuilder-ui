@@ -1,7 +1,8 @@
 import type { PageServerLoad, Actions } from './$types';
 import { fail } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
-import { handleApiCall } from '$lib/api/error-handler';
+import { handleApiCall, isApiError } from '$lib/api/error-handler';
+import { actionFail } from '$lib/api/action-error';
 import { requireAuth, requireAdminForAction } from '$lib/server/auth';
 import type { Domain } from '$generated/com-bryzek-apibuilder';
 
@@ -23,15 +24,11 @@ export const actions: Actions = {
 
     const response = await handleApiCall<Domain>(() => apiBuilderClient().createDomain({ orgKey: params.orgKey, body: { name }, headers }));
 
-    if ('data' in response) {
-      return { success: true };
+    if (isApiError(response)) {
+      return actionFail(response);
     }
 
-    if ('errors' in response) {
-      return fail(400, { errors: response.errors });
-    }
-
-    return fail(500, { errors: [{ message: 'An unexpected error occurred' }] });
+    return { success: true };
   },
 
   removeDomain: async ({ request, params, locals }) => {
@@ -46,8 +43,8 @@ export const actions: Actions = {
 
     const response = await handleApiCall<void>(() => apiBuilderClient().deleteDomainByName({ orgKey: params.orgKey, name, headers }));
 
-    if ('errors' in response) {
-      return fail(400, { errors: response.errors });
+    if (isApiError(response)) {
+      return actionFail(response);
     }
 
     return { success: true };

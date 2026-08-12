@@ -1,7 +1,8 @@
 import type { PageServerLoad, Actions } from './$types';
 import { error, fail } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
-import { handleApiCall } from '$lib/api/error-handler';
+import { handleApiCall, isApiError } from '$lib/api/error-handler';
+import { actionFail } from '$lib/api/action-error';
 import { dataOr, loadErrorFrom } from '$lib/api/load-error';
 import { requireAuth, requireAdminForAction } from '$lib/server/auth';
 import { findScopedById, outOfScope } from '$lib/server/scoped-id';
@@ -58,8 +59,8 @@ export const actions: Actions = {
       apiBuilderClient().createMembershipRequestAcceptById(membershipRequest.id, { headers })
     );
 
-    if ('errors' in response) {
-      return fail(400, { errors: response.errors });
+    if (isApiError(response)) {
+      return actionFail(response);
     }
 
     return { success: true };
@@ -84,8 +85,8 @@ export const actions: Actions = {
       apiBuilderClient().createMembershipRequestDeclineById(membershipRequest.id, { headers })
     );
 
-    if ('errors' in response) {
-      return fail(400, { errors: response.errors });
+    if (isApiError(response)) {
+      return actionFail(response);
     }
 
     return { success: true };

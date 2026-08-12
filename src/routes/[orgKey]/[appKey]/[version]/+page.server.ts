@@ -1,7 +1,8 @@
 import type { PageServerLoad, Actions } from './$types';
-import { redirect, fail } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
-import { handleApiCall } from '$lib/api/error-handler';
+import { handleApiCall, isApiError } from '$lib/api/error-handler';
+import { actionFail } from '$lib/api/action-error';
 import { requireAuthForAction, requireMemberForAction } from '$lib/server/auth';
 import { redirectWithFlash } from '$lib/server/flash';
 import type { Watch } from '$generated/com-bryzek-apibuilder';
@@ -28,11 +29,11 @@ export const actions: Actions = {
       })
     );
 
-    if ('data' in response) {
-      throw redirect(303, `/${params.orgKey}/${params.appKey}/${params.version}`);
+    if (isApiError(response)) {
+      return actionFail(response);
     }
 
-    return fail(400, { errors: 'errors' in response ? response.errors : [{ message: 'Failed to watch' }] });
+    throw redirect(303, `/${params.orgKey}/${params.appKey}/${params.version}`);
   },
 
   /**
@@ -67,10 +68,8 @@ export const actions: Actions = {
       })
     );
 
-    if (!('data' in watches)) {
-      return fail(Math.max(watches.status, 400), {
-        errors: 'errors' in watches ? watches.errors : [{ message: 'Failed to unwatch' }]
-      });
+    if (isApiError(watches)) {
+      return actionFail(watches);
     }
 
     // Already unwatched is not a failure — fall through to the redirect and let the layout
@@ -79,10 +78,8 @@ export const actions: Actions = {
     if (watch) {
       const response = await handleApiCall<void>(() => client.deleteWatchById(watch.id, { headers }));
 
-      if (!('data' in response)) {
-        return fail(Math.max(response.status, 400), {
-          errors: 'errors' in response ? response.errors : [{ message: 'Failed to unwatch' }]
-        });
+      if (isApiError(response)) {
+        return actionFail(response);
       }
     }
 
@@ -98,10 +95,10 @@ export const actions: Actions = {
       client.deleteVersionByVersion({ orgKey: params.orgKey, appKey: params.appKey, version: params.version, headers })
     );
 
-    if ('data' in response) {
-      redirectWithFlash(`/${params.orgKey}/${params.appKey}/latest`, 'Version deleted');
+    if (isApiError(response)) {
+      return actionFail(response);
     }
 
-    return fail(400, { errors: 'errors' in response ? response.errors : [{ message: 'Failed to delete version' }] });
+    redirectWithFlash(`/${params.orgKey}/${params.appKey}/latest`, 'Version deleted');
   }
 };

@@ -1,7 +1,8 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
 import { clients, getSessionHeaders } from '$lib/api/clients';
-import { handleApiCall } from '$lib/api/error-handler';
+import { handleApiCall, isApiError } from '$lib/api/error-handler';
+import { actionFail } from '$lib/api/action-error';
 import { config } from '$lib/config';
 import { completeSession } from '$lib/server/auth-completion';
 import type { SessionState } from '$generated/com-bryzek-platform';
@@ -38,8 +39,8 @@ export const actions: Actions = {
 
     // Handled here rather than in completeSession so the submitted values survive the round-trip
     // and the form can be re-rendered with them.
-    if ('errors' in response) {
-      return fail(400, { errors: response.errors, email, name });
+    if (isApiError(response)) {
+      return actionFail(response, { email, name });
     }
 
     return completeSession(cookies, response, '/org/create', 'Welcome to API Builder! Create your first organization to get started.');

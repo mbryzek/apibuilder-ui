@@ -1,7 +1,8 @@
 import type { PageServerLoad, Actions } from './$types';
-import { redirect, fail } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit';
 import { platformClient, getSessionHeaders } from '$lib/api/clients';
-import { handleApiCall } from '$lib/api/error-handler';
+import { handleApiCall, isApiError } from '$lib/api/error-handler';
+import { actionFail } from '$lib/api/action-error';
 import { dataOr, loadErrorFrom } from '$lib/api/load-error';
 import { requireAuth, requireAuthForAction } from '$lib/server/auth';
 import { findScopedById, outOfScope } from '$lib/server/scoped-id';
@@ -41,8 +42,8 @@ export const actions: Actions = {
 
     const response = await handleApiCall<void>(() => platformClient().deleteTokenById(token.id, { headers }));
 
-    if ('errors' in response) {
-      return fail(Math.max(response.status, 400), { errors: response.errors });
+    if (isApiError(response)) {
+      return actionFail(response);
     }
 
     throw redirect(303, '/tokens');

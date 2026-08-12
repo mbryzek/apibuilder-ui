@@ -3,11 +3,10 @@ import type { RequestEvent } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { throwIfUnavailable } from '$lib/api/load-error';
+import { UNAVAILABLE } from '$lib/api/api-message';
 import { assertSafeSegment } from '$lib/server/path-params';
 import type { Membership } from '$generated/com-bryzek-apibuilder';
 import { MembershipRole } from '$generated/com-bryzek-apibuilder';
-
-const UNAVAILABLE = 'We could not reach the server. Please try again in a moment.';
 
 /**
  * Stop before sending someone to sign in when we never learned whether they already are.

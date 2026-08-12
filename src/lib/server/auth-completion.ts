@@ -1,6 +1,7 @@
 import { fail, type ActionFailure, type Cookies } from '@sveltejs/kit';
 import { isTenantSession, isUserInactive, type SessionState } from '$generated/com-bryzek-platform';
-import type { ApiError, ApiResponse } from '$lib/api/error-handler';
+import { isApiError, type ApiError, type ApiResponse } from '$lib/api/error-handler';
+import { actionFail } from '$lib/api/action-error';
 import { redirectWithFlash } from './flash';
 import { setSessionCookie } from './session';
 
@@ -21,8 +22,8 @@ export function completeSession(
   redirectTo: string,
   successMessage: string
 ): ActionFailure<{ errors: ApiError[] }> {
-  if ('errors' in response) {
-    return fail(Math.max(response.status, 400), { errors: response.errors });
+  if (isApiError(response)) {
+    return actionFail(response);
   }
 
   // `handleApiCall` yields `data: undefined` for a 2xx with no body, so guard before narrowing
