@@ -1,5 +1,6 @@
 <script lang="ts">
   import { page } from '$app/stores';
+  import { buildOrgLinks } from '$lib/utils/org-nav';
 
   interface Props {
     orgKey: string;
@@ -15,18 +16,7 @@
     return currentPath === path;
   }
 
-  const links = $derived.by(() => {
-    const items: { href: string; label: string }[] = [];
-    if (isMember) {
-      items.push({ href: `/${orgKey}/subscriptions`, label: 'Subscriptions' });
-      items.push({ href: `/${orgKey}/details`, label: 'Org Details' });
-    }
-    if (isAdmin) {
-      items.push({ href: `/${orgKey}/domains`, label: 'Domains' });
-      items.push({ href: `/${orgKey}/members`, label: 'Members' });
-    }
-    return items;
-  });
+  const links = $derived(buildOrgLinks(orgKey, isMember, isAdmin));
 
   let mobileOpen = $state(false);
 </script>
