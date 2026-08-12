@@ -11,6 +11,12 @@ npm ci
 npm run dev            # http://localhost:5173
 ```
 
+Node `^22.13.0 || >=24`, declared in package.json `engines` and enforced for real: `.npmrc` sets
+`engine-strict=true`, so `npm ci` refuses to install outside that range. `.nvmrc` pins 24, which is
+what CI builds on. Neither is hand-maintained guesswork — `src/node-version.test.ts` fails if the
+declared range admits a version the dependency tree rejects, or if `.nvmrc` falls outside it
+(ISS-2433).
+
 `.env` points the app at a platform API on `http://localhost:9300`; `.env.production` points the
 built artifact at `https://idempotent.io`. Copy `.env.example` if you need to override either.
 
