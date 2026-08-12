@@ -3,6 +3,7 @@
   import TypeLink from './TypeLink.svelte';
   import ParametersTable from './ParametersTable.svelte';
   import ResponsesTable from './ResponsesTable.svelte';
+  import { operationAuthBadge, operationContentTypeBadge, type AuthBadge } from '$lib/utils/operation-badges';
 
   interface Props {
     operation: Operation;
@@ -10,6 +11,16 @@
   }
 
   let { operation, service }: Props = $props();
+
+  const authBadge = $derived(operationAuthBadge(operation, service));
+  const contentType = $derived(operationContentTypeBadge(operation));
+
+  const badgeClass = 'inline-block rounded px-2 py-0.5 font-mono text-xs font-medium';
+  const authBadgeColors: Record<AuthBadge['kind'], string> = {
+    protected: 'bg-amber-100 text-amber-900',
+    public: 'bg-gray-100 text-ab-gray',
+    undeclared: 'bg-red-100 text-red-900'
+  };
 
   const methodColors: Record<string, string> = {
     GET: 'bg-green-100 text-green-800',
@@ -38,6 +49,18 @@
       {operation.method}
     </span>
     <code class="text-ab-dark-blue font-mono text-sm">{operation.path}</code>
+    {#if authBadge}
+      {#if authBadge.href}
+        <a href={authBadge.href} title={authBadge.title} class="{badgeClass} {authBadgeColors[authBadge.kind]} hover:underline">
+          {authBadge.label}
+        </a>
+      {:else}
+        <span title={authBadge.title} class="{badgeClass} {authBadgeColors[authBadge.kind]}">{authBadge.label}</span>
+      {/if}
+    {/if}
+    {#if contentType}
+      <span title="Content-Type of the request body" class="{badgeClass} bg-indigo-100 text-indigo-900">{contentType}</span>
+    {/if}
   </div>
 
   {#if operation.description}

@@ -6,6 +6,8 @@
   import EnumList from './EnumList.svelte';
   import UnionList from './UnionList.svelte';
   import InterfaceList from './InterfaceList.svelte';
+  import AuthSchemeList from './AuthSchemeList.svelte';
+  import { authSchemes, isAuthSchemeAnchor } from '$lib/utils/auth-schemes';
 
   interface Props {
     service: Service;
@@ -21,6 +23,8 @@
     count: number;
   }
 
+  const schemes = $derived(authSchemes(service));
+
   const tabs = $derived<Tab[]>(
     [
       { id: 'resources', label: 'Resources', count: service.resources.length },
@@ -28,6 +32,7 @@
       { id: 'enums', label: 'Enums', count: service.enums.length },
       { id: 'unions', label: 'Unions', count: service.unions.length },
       { id: 'interfaces', label: 'Interfaces', count: service.interfaces?.length ?? 0 },
+      { id: 'auth', label: 'Auth Schemes', count: schemes.length },
       { id: 'imports', label: 'Imports', count: service.imports.length }
     ].filter((t) => t.count > 0)
   );
@@ -52,6 +57,8 @@
       : (service.interfaces ?? [])
   );
 
+  const filteredSchemes = $derived(searchQuery ? schemes.filter((s) => s.type.toLowerCase().includes(searchQuery.toLowerCase())) : schemes);
+
   const filteredResources = $derived(
     searchQuery ? service.resources.filter((r) => r.type.toLowerCase().includes(searchQuery.toLowerCase())) : service.resources
   );
@@ -63,7 +70,8 @@
           { id: 'models', label: 'Models', count: filteredModels.length },
           { id: 'enums', label: 'Enums', count: filteredEnums.length },
           { id: 'unions', label: 'Unions', count: filteredUnions.length },
-          { id: 'interfaces', label: 'Interfaces', count: filteredInterfaces.length }
+          { id: 'interfaces', label: 'Interfaces', count: filteredInterfaces.length },
+          { id: 'auth', label: 'Auth Schemes', count: filteredSchemes.length }
         ].filter((t) => t.count > 0)
       : tabs
   );
@@ -72,6 +80,9 @@
   const currentTab = $derived(activeTab && filteredTabs.some((t) => t.id === activeTab) ? activeTab : defaultTab);
 
   function findTabForName(name: string): string | null {
+    // Checked first: a scheme anchor is prefixed precisely so it cannot be confused with a type
+    // name, and its scheme type is free-form enough to equal one.
+    if (isAuthSchemeAnchor(name)) return 'auth';
     if (service.models.some((m) => m.name === name)) return 'models';
     if (service.enums.some((e) => e.name === name)) return 'enums';
     if (service.unions.some((u) => u.name === name)) return 'unions';
@@ -133,6 +144,8 @@
     <UnionList unions={filteredUnions} {service} exampleBaseUrl={exampleBaseUrl ?? ''} />
   {:else if currentTab === 'interfaces'}
     <InterfaceList interfaces={filteredInterfaces} {service} />
+  {:else if currentTab === 'auth'}
+    <AuthSchemeList schemes={filteredSchemes} {service} />
   {:else if currentTab === 'imports'}
     {#if service.imports.length > 0}
       <div class="space-y-4">
