@@ -3,6 +3,7 @@
   import type { Organization } from '$generated/com-bryzek-apibuilder';
   import type { Service } from '$generated/com-bryzek-apibuilder-spec';
   import { Visibility } from '$generated/com-bryzek-apibuilder';
+  import FormErrors from '$lib/components/FormErrors.svelte';
 
   interface Props {
     data: {
@@ -30,13 +31,7 @@
 <div class="max-w-2xl space-y-8">
   <h2 class="text-ab-dark-blue text-xl font-bold">Application Settings</h2>
 
-  {#if form?.errors}
-    <div class="rounded-lg border border-red-200 bg-red-50 p-4">
-      {#each form.errors as error}
-        <p class="text-sm text-red-700">{error.message}</p>
-      {/each}
-    </div>
-  {/if}
+  <FormErrors errors={form?.errors} class="" />
 
   <!-- Visibility -->
   <!--
