@@ -2,6 +2,7 @@
   import PendingForm from '$lib/components/PendingForm.svelte';
   import type { Organization } from '$generated/com-bryzek-apibuilder';
   import { Visibility, OriginalType } from '$generated/com-bryzek-apibuilder';
+  import FormErrors from '$lib/components/FormErrors.svelte';
 
   interface Props {
     data: {
@@ -29,13 +30,7 @@
 <div class="max-w-2xl">
   <h1 class="text-ab-dark-blue mb-6 text-2xl font-bold">Upload API Specification</h1>
 
-  {#if form?.errors}
-    <div class="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
-      {#each form.errors as error}
-        <p class="text-sm text-red-700">{error.message}</p>
-      {/each}
-    </div>
-  {/if}
+  <FormErrors errors={form?.errors} />
 
   <PendingForm enctype="multipart/form-data" class="space-y-5">
     {#snippet children(pending)}

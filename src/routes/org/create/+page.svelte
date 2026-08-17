@@ -2,14 +2,13 @@
   import PendingForm from '$lib/components/PendingForm.svelte';
   import { Visibility } from '$generated/com-bryzek-apibuilder';
   import type { ApiErrorItem } from '$lib/api/error-handler';
+  import FormErrors from '$lib/components/FormErrors.svelte';
 
   interface Props {
     form: { errors?: ApiErrorItem[] } | null;
   }
 
   let { form }: Props = $props();
-
-  const errors = $derived(form?.errors ?? []);
 </script>
 
 <svelte:head>
@@ -20,13 +19,7 @@
   <div class="mx-auto max-w-lg">
     <h1 class="text-ab-dark-blue mb-8 text-2xl font-bold">Create Organization</h1>
 
-    {#if errors.length > 0}
-      <div class="mb-4 rounded-lg border border-red-200 bg-red-50 p-4">
-        {#each errors as error}
-          <p class="text-sm text-red-800">{error.message}</p>
-        {/each}
-      </div>
-    {/if}
+    <FormErrors errors={form?.errors} />
 
     <PendingForm>
       {#snippet children(pending)}

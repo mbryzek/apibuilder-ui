@@ -1,14 +1,13 @@
 <script lang="ts">
   import PendingForm from '$lib/components/PendingForm.svelte';
   import type { ApiErrorItem } from '$lib/api/error-handler';
+  import FormErrors from '$lib/components/FormErrors.svelte';
 
   interface Props {
     form: { errors?: ApiErrorItem[]; email?: string; name?: string } | null;
   }
 
   let { form }: Props = $props();
-
-  const errors = $derived(form?.errors ?? []);
 </script>
 
 <svelte:head>
@@ -19,13 +18,7 @@
   <div class="mx-auto mt-16 max-w-md">
     <h1 class="text-ab-dark-blue mb-10 text-center text-3xl font-light">Create your account</h1>
 
-    {#if errors.length > 0}
-      <div class="mb-4 rounded-lg border border-red-200 bg-red-50 p-4">
-        {#each errors as error}
-          <p class="text-sm text-red-800">{error.message}</p>
-        {/each}
-      </div>
-    {/if}
+    <FormErrors errors={form?.errors} />
 
     <PendingForm>
       {#snippet children(pending)}

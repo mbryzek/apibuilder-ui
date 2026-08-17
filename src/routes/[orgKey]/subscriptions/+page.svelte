@@ -5,6 +5,7 @@
   import type { ApiErrorItem } from '$lib/api/error-handler';
   import type { LoadError } from '$lib/api/load-error';
   import LoadErrorBanner from '$lib/components/LoadErrorBanner.svelte';
+  import FormErrors from '$lib/components/FormErrors.svelte';
 
   interface Props {
     data: {
@@ -48,13 +49,7 @@
   <h1 class="text-ab-dark-blue mb-2 text-2xl font-bold">Subscriptions</h1>
   <p class="text-ab-gray mb-6 text-sm">Manage email notifications for this organization.</p>
 
-  {#if formResult?.errors}
-    <div class="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
-      {#each formResult.errors as err}
-        <p class="text-sm text-red-800">{err.message}</p>
-      {/each}
-    </div>
-  {/if}
+  <FormErrors errors={formResult?.errors} />
 
   <!-- With no subscription list every row would read "Not subscribed", and subscribing
        again would file a duplicate. Say so instead of guessing. -->

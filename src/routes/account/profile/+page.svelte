@@ -4,6 +4,7 @@
   import type { ApiErrorItem } from '$lib/api/error-handler';
   import type { LoadError } from '$lib/api/load-error';
   import type { User } from '$generated/com-bryzek-apibuilder';
+  import FormErrors from '$lib/components/FormErrors.svelte';
 
   interface Props {
     data: { user: User | null; loadError: LoadError | null };
@@ -12,7 +13,6 @@
 
   let { data, form }: Props = $props();
 
-  const errors = $derived(form?.errors ?? []);
   const user = $derived(data.user);
 </script>
 
@@ -28,13 +28,7 @@
       <LoadErrorBanner error={data.loadError} />
     {/if}
 
-    {#if errors.length > 0}
-      <div class="mb-4 rounded-lg border border-red-200 bg-red-50 p-4">
-        {#each errors as error}
-          <p class="text-sm text-red-800">{error.message}</p>
-        {/each}
-      </div>
-    {/if}
+    <FormErrors errors={form?.errors} />
 
     {#if user}
       <PendingForm>

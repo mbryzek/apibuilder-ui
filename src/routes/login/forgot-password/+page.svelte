@@ -1,5 +1,6 @@
 <script lang="ts">
   import PendingForm from '$lib/components/PendingForm.svelte';
+  import FormErrors from '$lib/components/FormErrors.svelte';
 
   interface Props {
     form: { success?: boolean; errors?: { message: string }[] } | null;
@@ -8,7 +9,6 @@
   let { form }: Props = $props();
 
   const success = $derived(form?.success ?? false);
-  const errors = $derived(form?.errors ?? []);
 </script>
 
 <svelte:head>
@@ -25,13 +25,7 @@
       </div>
     {/if}
 
-    {#if errors.length > 0}
-      <div class="mb-4 rounded-lg border border-red-200 bg-red-50 p-4">
-        {#each errors as error}
-          <p class="text-sm text-red-800">{error.message}</p>
-        {/each}
-      </div>
-    {/if}
+    <FormErrors errors={form?.errors} />
 
     {#if !success}
       <PendingForm>
