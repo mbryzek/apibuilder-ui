@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { enhance } from '$app/forms';
+  import PendingForm from '$lib/components/PendingForm.svelte';
   import type { Organization } from '$generated/com-bryzek-apibuilder';
   import type { ApiErrorItem } from '$lib/api/error-handler';
   import type { LoadError } from '$lib/api/load-error';
@@ -19,7 +19,6 @@
   let { data, form: formResult }: Props = $props();
 
   const org = $derived(data.org);
-  let isSubmitting = $state(false);
 </script>
 
 <svelte:head>
@@ -43,19 +42,12 @@
     </div>
   {:else}
     <p class="text-ab-gray mb-4">Request to join <strong>{org.name}</strong> as a member.</p>
-    <form
-      method="POST"
-      use:enhance={() => {
-        isSubmitting = true;
-        return async ({ update }) => {
-          isSubmitting = false;
-          await update();
-        };
-      }}
-    >
-      <button type="submit" class="btn-primary" disabled={isSubmitting}>
-        {isSubmitting ? 'Requesting...' : 'Request Membership'}
-      </button>
-    </form>
+    <PendingForm>
+      {#snippet children(pending)}
+        <button type="submit" class="btn-primary" disabled={pending}>
+          {pending ? 'Requesting...' : 'Request Membership'}
+        </button>
+      {/snippet}
+    </PendingForm>
   {/if}
 </div>

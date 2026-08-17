@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { enhance } from '$app/forms';
+  import PendingForm from '$lib/components/PendingForm.svelte';
   import FormErrors from '$lib/components/FormErrors.svelte';
 
   interface Props {
@@ -7,8 +7,6 @@
   }
 
   let { form }: Props = $props();
-
-  let isSubmitting = $state(false);
 
   const success = $derived(form?.success ?? false);
 </script>
@@ -30,34 +28,27 @@
     <FormErrors errors={form?.errors} />
 
     {#if !success}
-      <form
-        method="POST"
-        use:enhance={() => {
-          isSubmitting = true;
-          return async ({ update }) => {
-            isSubmitting = false;
-            await update();
-          };
-        }}
-      >
-        <div class="space-y-4">
-          <div>
-            <label for="email" class="text-ab-dark-blue mb-1 block text-sm font-medium">Email</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              required
-              autocomplete="email"
-              class="input-field w-full rounded-lg border px-3 py-2"
-            />
-          </div>
+      <PendingForm>
+        {#snippet children(pending)}
+          <div class="space-y-4">
+            <div>
+              <label for="email" class="text-ab-dark-blue mb-1 block text-sm font-medium">Email</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                required
+                autocomplete="email"
+                class="input-field w-full rounded-lg border px-3 py-2"
+              />
+            </div>
 
-          <button type="submit" disabled={isSubmitting} class="btn-primary w-full">
-            {isSubmitting ? 'Sending...' : 'Send Reset Link'}
-          </button>
-        </div>
-      </form>
+            <button type="submit" disabled={pending} class="btn-primary w-full">
+              {pending ? 'Sending...' : 'Send Reset Link'}
+            </button>
+          </div>
+        {/snippet}
+      </PendingForm>
     {/if}
 
     <p class="text-ab-gray mt-4 text-center text-sm">

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { enhance } from '$app/forms';
+  import PendingForm from '$lib/components/PendingForm.svelte';
   import type { Organization, MembershipRequest } from '$generated/com-bryzek-apibuilder';
   import type { ApiErrorItem } from '$lib/api/error-handler';
   import type { LoadError } from '$lib/api/load-error';
@@ -19,7 +19,6 @@
 
   const org = $derived(data.org);
   const requests = $derived(data.requests);
-  let isSubmitting = $state(false);
 </script>
 
 <svelte:head>
@@ -45,34 +44,18 @@
             <div class="text-ab-gray text-sm">Requested role: <span class="font-medium">{req.role}</span></div>
           </div>
           <div class="flex gap-2">
-            <form
-              method="POST"
-              action="?/accept"
-              use:enhance={() => {
-                isSubmitting = true;
-                return async ({ update }) => {
-                  isSubmitting = false;
-                  await update();
-                };
-              }}
-            >
-              <input type="hidden" name="guid" value={req.id} />
-              <button type="submit" class="btn-primary px-4 py-2 text-sm" disabled={isSubmitting}>Accept</button>
-            </form>
-            <form
-              method="POST"
-              action="?/decline"
-              use:enhance={() => {
-                isSubmitting = true;
-                return async ({ update }) => {
-                  isSubmitting = false;
-                  await update();
-                };
-              }}
-            >
-              <input type="hidden" name="guid" value={req.id} />
-              <button type="submit" class="btn-secondary px-4 py-2 text-sm" disabled={isSubmitting}>Decline</button>
-            </form>
+            <PendingForm action="?/accept">
+              {#snippet children(pending)}
+                <input type="hidden" name="guid" value={req.id} />
+                <button type="submit" class="btn-primary px-4 py-2 text-sm" disabled={pending}>Accept</button>
+              {/snippet}
+            </PendingForm>
+            <PendingForm action="?/decline">
+              {#snippet children(pending)}
+                <input type="hidden" name="guid" value={req.id} />
+                <button type="submit" class="btn-secondary px-4 py-2 text-sm" disabled={pending}>Decline</button>
+              {/snippet}
+            </PendingForm>
           </div>
         </div>
       {/each}

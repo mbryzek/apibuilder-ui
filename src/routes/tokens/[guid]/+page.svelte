@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { enhance } from '$app/forms';
+  import PendingForm from '$lib/components/PendingForm.svelte';
   import type { ApiErrorItem } from '$lib/api/error-handler';
   import type { Token } from '$generated/com-bryzek-platform';
   import FormErrors from '$lib/components/FormErrors.svelte';
@@ -13,7 +13,6 @@
   let { data, form: formResult }: Props = $props();
 
   let confirmDelete = $state(false);
-  let isSubmitting = $state(false);
 
   const token = $derived(data.token);
 </script>
@@ -61,21 +60,13 @@
       <Banner class="">
         <p class="mb-3 text-sm">Are you sure you want to delete this token? This cannot be undone.</p>
         <div class="flex gap-3">
-          <form
-            method="POST"
-            action="?/delete"
-            use:enhance={() => {
-              isSubmitting = true;
-              return async ({ update }) => {
-                isSubmitting = false;
-                await update();
-              };
-            }}
-          >
-            <button type="submit" class="btn-danger" disabled={isSubmitting}>
-              {isSubmitting ? 'Deleting...' : 'Yes, Delete'}
-            </button>
-          </form>
+          <PendingForm action="?/delete">
+            {#snippet children(pending)}
+              <button type="submit" class="btn-danger" disabled={pending}>
+                {pending ? 'Deleting...' : 'Yes, Delete'}
+              </button>
+            {/snippet}
+          </PendingForm>
           <button type="button" class="btn-secondary" onclick={() => (confirmDelete = false)}>Cancel</button>
         </div>
       </Banner>

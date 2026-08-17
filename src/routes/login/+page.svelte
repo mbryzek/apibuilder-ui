@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { enhance } from '$app/forms';
+  import PendingForm from '$lib/components/PendingForm.svelte';
   import type { ApiErrorItem } from '$lib/api/error-handler';
   import FormErrors from '$lib/components/FormErrors.svelte';
 
@@ -11,8 +11,6 @@
   }
 
   let { data, form }: Props = $props();
-
-  let isSubmitting = $state(false);
 </script>
 
 <svelte:head>
@@ -25,48 +23,41 @@
 
     <FormErrors errors={form?.errors} />
 
-    <form
-      method="POST"
-      use:enhance={() => {
-        isSubmitting = true;
-        return async ({ update }) => {
-          isSubmitting = false;
-          await update();
-        };
-      }}
-    >
-      <input type="hidden" name="redirectTo" value={data.redirectTo} />
+    <PendingForm>
+      {#snippet children(pending)}
+        <input type="hidden" name="redirectTo" value={data.redirectTo} />
 
-      <div class="space-y-4">
-        <div>
-          <label for="email" class="text-ab-dark-blue mb-1 block text-sm font-medium">Email</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            required
-            autocomplete="email"
-            class="input-field w-full rounded-lg border px-3 py-2"
-          />
+        <div class="space-y-4">
+          <div>
+            <label for="email" class="text-ab-dark-blue mb-1 block text-sm font-medium">Email</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              required
+              autocomplete="email"
+              class="input-field w-full rounded-lg border px-3 py-2"
+            />
+          </div>
+
+          <div>
+            <label for="password" class="text-ab-dark-blue mb-1 block text-sm font-medium">Password</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              required
+              autocomplete="current-password"
+              class="input-field w-full rounded-lg border px-3 py-2"
+            />
+          </div>
+
+          <button type="submit" disabled={pending} class="btn-primary w-full">
+            {pending ? 'Signing in...' : 'Sign in'}
+          </button>
         </div>
-
-        <div>
-          <label for="password" class="text-ab-dark-blue mb-1 block text-sm font-medium">Password</label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            required
-            autocomplete="current-password"
-            class="input-field w-full rounded-lg border px-3 py-2"
-          />
-        </div>
-
-        <button type="submit" disabled={isSubmitting} class="btn-primary w-full">
-          {isSubmitting ? 'Signing in...' : 'Sign in'}
-        </button>
-      </div>
-    </form>
+      {/snippet}
+    </PendingForm>
 
     <p class="text-ab-gray mt-4 text-center text-sm">
       <a href="/login/forgot-password" class="text-ab-blue hover:text-ab-dark-blue transition-colors"> Forgot password? </a>

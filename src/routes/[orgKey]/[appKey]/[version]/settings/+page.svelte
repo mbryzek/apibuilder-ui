@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { enhance } from '$app/forms';
+  import PendingForm from '$lib/components/PendingForm.svelte';
   import type { Organization } from '$generated/com-bryzek-apibuilder';
   import type { Service } from '$generated/com-bryzek-apibuilder-spec';
   import { Visibility } from '$generated/com-bryzek-apibuilder';
@@ -19,8 +19,6 @@
   let { data, form }: Props = $props();
 
   const service = $derived(data.service);
-
-  let isDeleting = $state(false);
   let showDeleteConfirm = $state(false);
 </script>
 
@@ -43,17 +41,21 @@
   {#if data.isAdmin}
     <div class="card">
       <h3 class="text-ab-dark-blue mb-4 text-lg font-semibold">Visibility</h3>
-      <form method="POST" action="?/updateVisibility" use:enhance class="space-y-4">
-        <input type="hidden" name="name" value={service.name} />
-        <div>
-          <select name="visibility" class="input-field w-full" value={data.org.visibility}>
-            {#each Object.values(Visibility) as v}
-              <option value={v}>{v}</option>
-            {/each}
-          </select>
-        </div>
-        <button type="submit" class="btn-primary">Update Visibility</button>
-      </form>
+      <PendingForm action="?/updateVisibility" class="space-y-4">
+        {#snippet children(pending)}
+          <input type="hidden" name="name" value={service.name} />
+          <div>
+            <select name="visibility" class="input-field w-full" value={data.org.visibility}>
+              {#each Object.values(Visibility) as v}
+                <option value={v}>{v}</option>
+              {/each}
+            </select>
+          </div>
+          <button type="submit" class="btn-primary" disabled={pending}>
+            {pending ? 'Updating...' : 'Update Visibility'}
+          </button>
+        {/snippet}
+      </PendingForm>
     </div>
 
     <!-- Delete -->
@@ -68,21 +70,13 @@
           Are you sure you want to delete <strong>{service.name}</strong>? This action cannot be undone.
         </p>
         <div class="flex gap-3">
-          <form
-            method="POST"
-            action="?/deleteApp"
-            use:enhance={() => {
-              isDeleting = true;
-              return async ({ update }) => {
-                isDeleting = false;
-                await update();
-              };
-            }}
-          >
-            <button type="submit" class="btn-danger" disabled={isDeleting}>
-              {isDeleting ? 'Deleting...' : 'Yes, Delete Application'}
-            </button>
-          </form>
+          <PendingForm action="?/deleteApp">
+            {#snippet children(pending)}
+              <button type="submit" class="btn-danger" disabled={pending}>
+                {pending ? 'Deleting...' : 'Yes, Delete Application'}
+              </button>
+            {/snippet}
+          </PendingForm>
           <button class="btn-secondary" onclick={() => (showDeleteConfirm = false)}> Cancel </button>
         </div>
       {/if}
