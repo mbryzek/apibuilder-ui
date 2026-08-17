@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Operation, Service } from '$generated/com-bryzek-apibuilder-spec';
   import TypeLink from './TypeLink.svelte';
-  import ParametersTable from './ParametersTable.svelte';
+  import PropertiesTable from './PropertiesTable.svelte';
   import ResponsesTable from './ResponsesTable.svelte';
   import { operationAuthBadge, operationContentTypeBadge, type AuthBadge } from '$lib/utils/operation-badges';
 
@@ -15,7 +15,6 @@
   const authBadge = $derived(operationAuthBadge(operation, service));
   const contentType = $derived(operationContentTypeBadge(operation));
 
-  const badgeClass = 'inline-block rounded px-2 py-0.5 font-mono text-xs font-medium';
   const authBadgeColors: Record<AuthBadge['kind'], string> = {
     protected: 'bg-amber-100 text-amber-900',
     public: 'bg-gray-100 text-ab-gray',
@@ -43,23 +42,21 @@
 
 <div class="border-l-4 {getBorderClass(operation.method)} py-3 pl-4">
   <div class="mb-2 flex flex-wrap items-center gap-2">
-    <span
-      class="inline-block rounded px-2 py-0.5 font-mono text-xs font-bold {methodColors[operation.method] ?? 'bg-gray-100 text-gray-800'}"
-    >
+    <span class="spec-chip font-bold {methodColors[operation.method] ?? 'bg-gray-100 text-gray-800'}">
       {operation.method}
     </span>
     <code class="text-ab-dark-blue font-mono text-sm">{operation.path}</code>
     {#if authBadge}
       {#if authBadge.href}
-        <a href={authBadge.href} title={authBadge.title} class="{badgeClass} {authBadgeColors[authBadge.kind]} hover:underline">
+        <a href={authBadge.href} title={authBadge.title} class="spec-chip {authBadgeColors[authBadge.kind]} hover:underline">
           {authBadge.label}
         </a>
       {:else}
-        <span title={authBadge.title} class="{badgeClass} {authBadgeColors[authBadge.kind]}">{authBadge.label}</span>
+        <span title={authBadge.title} class="spec-chip {authBadgeColors[authBadge.kind]}">{authBadge.label}</span>
       {/if}
     {/if}
     {#if contentType}
-      <span title="Content-Type of the request body" class="{badgeClass} bg-indigo-100 text-indigo-900">{contentType}</span>
+      <span title="Content-Type of the request body" class="spec-chip bg-indigo-100 text-indigo-900">{contentType}</span>
     {/if}
   </div>
 
@@ -79,7 +76,7 @@
   {#if operation.parameters.length > 0}
     <div class="mb-3">
       <h5 class="text-ab-gray mb-1 text-xs font-semibold uppercase">Parameters</h5>
-      <ParametersTable parameters={operation.parameters} {service} />
+      <PropertiesTable rows={operation.parameters} {service} nameLabel="Name" />
     </div>
   {/if}
 

@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Response, Service } from '$generated/com-bryzek-apibuilder-spec';
+  import SpecTable from './SpecTable.svelte';
   import TypeLink from './TypeLink.svelte';
 
   interface Props {
@@ -21,29 +22,19 @@
 </script>
 
 {#if responses.length > 0}
-  <div class="overflow-x-auto">
-    <table class="w-full text-left text-sm">
-      <thead>
-        <tr class="border-b border-gray-200">
-          <th class="text-ab-gray pr-4 pb-2 font-semibold">Code</th>
-          <th class="text-ab-gray pr-4 pb-2 font-semibold">Type</th>
-          <th class="text-ab-gray pb-2 font-semibold">Description</th>
-        </tr>
-      </thead>
-      <tbody>
-        {#each responses as resp (resp.code)}
-          <tr class="border-b border-gray-100">
-            <td class="py-2 pr-4">
-              <span class="inline-block rounded px-2 py-0.5 font-mono text-xs font-semibold {statusColorClass(resp.code)}">{resp.code}</span
-              >
-            </td>
-            <td class="py-2 pr-4 font-mono text-sm">
-              <TypeLink typeStr={resp.type} {service} />
-            </td>
-            <td class="text-ab-dark-gray py-2">{resp.description ?? ''}</td>
-          </tr>
-        {/each}
-      </tbody>
-    </table>
-  </div>
+  <!-- No hidden column here: every response has a code and a type, and a response without a
+       description still renders the cell. -->
+  <SpecTable columns={['Code', 'Type', 'Description']}>
+    {#each responses as resp (resp.code)}
+      <tr class="border-b border-gray-100 last:border-b-0">
+        <td class="py-2.5 pr-6 align-top">
+          <span class="spec-chip font-semibold {statusColorClass(resp.code)}">{resp.code}</span>
+        </td>
+        <td class="py-2.5 pr-6 align-top font-mono text-sm whitespace-nowrap">
+          <TypeLink typeStr={resp.type} {service} />
+        </td>
+        <td class="text-ab-dark-gray py-2.5 align-top">{resp.description ?? ''}</td>
+      </tr>
+    {/each}
+  </SpecTable>
 {/if}
