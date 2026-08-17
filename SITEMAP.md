@@ -566,22 +566,18 @@ This is the primary API documentation page. It displays the full service specifi
 **Route:** `GET /tokens/show/:guid`
 **Auth:** Login required
 
-| Element              | Functionality                                |
-| -------------------- | -------------------------------------------- |
-| Masked token display | With "Show full token" link → cleartext page |
-| Description          |                                              |
-| Created date         |                                              |
-| "Delete" link        | Confirmation dialog                          |
+| Element              | Functionality          |
+| -------------------- | ---------------------- |
+| Masked token display |                        |
+| Description          |                        |
+| Created date         |                        |
+| Expires date         | When the token has one |
+| "Delete" link        | Confirmation dialog    |
 
-#### 10c. Token Cleartext
+The token VALUE is not shown here and cannot be: the platform stores only a digest of it, so the
+response to the mint is the only place it ever exists.
 
-**Route:** `GET /tokens/cleartext/:guid`
-**Auth:** Login required
-
-- Displays raw cleartext token value
-- "Back" link to token detail
-
-#### 10d. Create Token
+#### 10c. Create Token
 
 **Route:** `GET /tokens/create` (view), `POST /tokens/postCreate` (submit)
 **Auth:** Login required
@@ -591,6 +587,9 @@ This is the primary API documentation page. It displays the full service specifi
 | Description field | Optional text input |
 | Submit button     | Creates token       |
 | Cancel button     | Back                |
+
+On success the page renders the new token's value in place of the form, with a copy button and a
+link to its detail page. It does NOT redirect: the value is in the mint response and nowhere else.
 
 ---
 
