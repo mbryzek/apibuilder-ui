@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import svelteConfig from '../svelte.config.js';
+import { mockApiClients } from '$lib/test-support/mocks';
 
 /**
  * The Content-Security-Policy moved out of hooks.server.ts and into `kit.csp` (ISS-494).
@@ -61,10 +62,7 @@ describe('page CSP (kit.csp)', () => {
   });
 });
 
-vi.mock('$lib/api/clients', () => ({
-  clients: () => ({}),
-  getSessionHeaders: () => ({})
-}));
+vi.mock('$lib/api/clients', async (importOriginal) => mockApiClients({}, importOriginal));
 
 const { handle } = await import('./hooks.server');
 

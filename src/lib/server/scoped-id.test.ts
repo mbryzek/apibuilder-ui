@@ -1,32 +1,25 @@
 import { describe, expect, it, vi } from 'vitest';
 import { findScopedById, outOfScope } from './scoped-id';
 import type { ApiResponse } from '$lib/api/error-handler';
+import { failed, ok } from '$lib/test-support/api-responses';
+import { caughtAsync } from '$lib/test-support/throws';
 
 interface Row {
   id: string;
 }
 
-const ok = (ids: string[]): ApiResponse<Row[]> => ({ status: 200, data: ids.map((id) => ({ id })) });
-const err = (status: number): ApiResponse<Row[]> => ({ status, errors: [{ message: 'nope' }] });
+/** A page of the listing, one row per id. */
+const rows = (ids: string[]): ApiResponse<Row[]> => ok(ids.map((id) => ({ id })));
+const err = (status: number): ApiResponse<Row[]> => failed(status, 'nope');
 
 /** A listing of `total` rows, served in pages, that records the (limit, offset) it was asked for. */
 function listing(total: number) {
   const calls: Array<{ limit: number; offset: number }> = [];
   const fetchPage = async (limit: number, offset: number): Promise<ApiResponse<Row[]>> => {
     calls.push({ limit, offset });
-    return ok(Array.from({ length: Math.max(0, Math.min(limit, total - offset)) }, (_, i) => `row-${offset + i}`));
+    return rows(Array.from({ length: Math.max(0, Math.min(limit, total - offset)) }, (_, i) => `row-${offset + i}`));
   };
   return { calls, fetchPage };
-}
-
-/** The `HttpError` SvelteKit's `error()` throws. */
-async function caught(fn: () => Promise<unknown>): Promise<{ status: number; body: { message: string } }> {
-  try {
-    await fn();
-  } catch (thrown) {
-    return thrown as { status: number; body: { message: string } };
-  }
-  throw new Error('expected the call to throw');
 }
 
 describe('findScopedById', () => {
@@ -61,7 +54,7 @@ describe('findScopedById', () => {
 
   it('bounds the scan rather than following an endless listing', async () => {
     // A listing that never reports a short page must not spin forever.
-    const fetchPage = vi.fn(async (limit: number) => ok(Array.from({ length: limit }, (_, i) => `filler-${i}`)));
+    const fetchPage = vi.fn(async (limit: number) => rows(Array.from({ length: limit }, (_, i) => `filler-${i}`)));
     expect(await findScopedById('absent', fetchPage)).toBeNull();
     expect(fetchPage).toHaveBeenCalledTimes(25);
   });
@@ -76,7 +69,7 @@ describe('findScopedById', () => {
     // Same reasoning as `requireAdminForAction`: an outage is not a denial. Answering 404 here
     // would tell an admin their own org's membership had vanished.
     for (const status of [0, 429, 500, 503]) {
-      const thrown = await caught(() => findScopedById('anything', async () => err(status)));
+      const thrown = await caughtAsync(() => findScopedById('anything', async () => err(status)));
       expect(thrown.status).toBeGreaterThanOrEqual(429);
     }
   });

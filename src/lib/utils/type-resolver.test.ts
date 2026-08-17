@@ -1,32 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import type { Service } from '$generated/com-bryzek-apibuilder-spec';
 import { resolveType } from './type-resolver';
+import { service } from '$lib/test-support/fixtures';
 
 /**
  * The property under test is that `innerType` is what a table cell SHOWS and `href`/`anchor` is
  * where it goes. Those are independent: a namespace belongs in the link, never in the label, so
  * every resolution path displays a bare short name.
  */
-function service(overrides: Partial<Service> = {}): Service {
-  return {
-    name: 'test',
-    organization: { key: 'test-org' },
-    application: { key: 'test-app' },
-    namespace: 'io.test.v0',
-    version: '1.0.0',
-    info: {},
-    imports: [],
-    enums: [],
-    interfaces: [],
-    unions: [],
-    models: [],
-    resources: [],
-    attributes: {},
-    auth_schemes: [],
-    ...overrides
-  };
-}
-
 function importedService(namespace: string, overrides: Partial<Service> = {}): Service {
   return service({
     namespace,
