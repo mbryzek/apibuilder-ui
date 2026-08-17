@@ -2,6 +2,8 @@
   import { enhance } from '$app/forms';
   import type { ApiErrorItem } from '$lib/api/error-handler';
   import type { Token } from '$generated/com-bryzek-platform';
+  import FormErrors from '$lib/components/FormErrors.svelte';
+  import Banner from '$lib/components/Banner.svelte';
 
   interface Props {
     data: { token: Token };
@@ -27,13 +29,7 @@
 
   <h1 class="text-ab-dark-blue mb-6 text-2xl font-bold">API Token</h1>
 
-  {#if formResult?.errors}
-    <div class="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
-      {#each formResult.errors as err}
-        <p class="text-sm text-red-800">{err.message}</p>
-      {/each}
-    </div>
-  {/if}
+  <FormErrors errors={formResult?.errors} />
 
   <div class="card mb-6">
     <dl class="space-y-3">
@@ -62,8 +58,8 @@
 
   <div>
     {#if confirmDelete}
-      <div class="rounded-lg border border-red-200 bg-red-50 p-4">
-        <p class="mb-3 text-sm text-red-800">Are you sure you want to delete this token? This cannot be undone.</p>
+      <Banner class="">
+        <p class="mb-3 text-sm">Are you sure you want to delete this token? This cannot be undone.</p>
         <div class="flex gap-3">
           <form
             method="POST"
@@ -82,7 +78,7 @@
           </form>
           <button type="button" class="btn-secondary" onclick={() => (confirmDelete = false)}>Cancel</button>
         </div>
-      </div>
+      </Banner>
     {:else}
       <button type="button" class="btn-danger" onclick={() => (confirmDelete = true)}>Delete Token</button>
     {/if}

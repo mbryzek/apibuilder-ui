@@ -2,6 +2,7 @@
   import { enhance } from '$app/forms';
   import type { ApiErrorItem } from '$lib/api/error-handler';
   import type { CreatedToken } from '$generated/com-bryzek-platform';
+  import FormErrors from '$lib/components/FormErrors.svelte';
 
   interface Props {
     form: { errors?: ApiErrorItem[]; created?: CreatedToken } | null;
@@ -38,13 +39,7 @@
 
   <h1 class="text-ab-dark-blue mb-6 text-2xl font-bold">Create API Token</h1>
 
-  {#if formResult?.errors}
-    <div class="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
-      {#each formResult.errors as err}
-        <p class="text-sm text-red-800">{err.message}</p>
-      {/each}
-    </div>
-  {/if}
+  <FormErrors errors={formResult?.errors} />
 
   {#if created}
     <div class="card mb-6">
