@@ -36,6 +36,13 @@
   .error-message {
     @apply text-ab-error-red mt-1 text-sm;
   }
+  /* The one chip in the spec view: an HTTP method, a status code, an auth or content-type
+     badge, a parameter's location. Weight is left to the call site — the method a reader scans
+     for is bolder than the asides beside it — and so is the colour, which is what each chip
+     means. */
+  .spec-chip {
+    @apply inline-block rounded px-2 py-0.5 font-mono text-xs font-medium;
+  }
   .page-container {
     @apply mx-auto max-w-7xl px-6 py-8 sm:px-8 lg:px-10;
   }
