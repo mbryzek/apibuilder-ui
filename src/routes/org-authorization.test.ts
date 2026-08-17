@@ -1,4 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { session } from '$lib/test-support/fixtures';
+import { mockApiClients } from '$lib/test-support/mocks';
+import { caughtAsync } from '$lib/test-support/throws';
 
 /**
  * The org-scoped writes, and who is allowed to make them.
@@ -18,20 +21,16 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
  * not perform one.
  */
 
-const SESSION = { id: 'session-1', user: { id: 'mallory' } };
+const SESSION = session({ user: { id: 'mallory' } });
 /** Only `session` is read by these helpers; the rest of `App.Locals` is irrelevant here. */
-const LOCALS = { session: SESSION } as unknown as App.Locals;
+const LOCALS: App.Locals = { session: SESSION };
 
 const client = {
   getMemberships: vi.fn(),
   updateVersionByVersion: vi.fn()
 };
 
-vi.mock('$lib/api/clients', () => ({
-  apiBuilderClient: () => client,
-  platformClient: () => client,
-  getSessionHeaders: () => ({})
-}));
+vi.mock('$lib/api/clients', async (importOriginal) => mockApiClients(client, importOriginal));
 
 const { actions: uploadActions } = await import('./[orgKey]/upload/+page.server');
 const { requireMemberForAction, requireAdminForAction } = await import('$lib/server/auth');
@@ -50,16 +49,6 @@ function invokeUpload(form: Record<string, string | File>, orgKey = 'victim-org'
   return (uploadActions['default'] as (e: typeof event) => Promise<unknown>)(event);
 }
 
-/** Whatever SvelteKit threw — `error(...)` and `redirect(...)` are both thrown, not returned. */
-async function thrownBy(fn: () => Promise<unknown>): Promise<{ status?: number }> {
-  try {
-    await fn();
-  } catch (e) {
-    return e as { status?: number };
-  }
-  throw new Error('expected a throw');
-}
-
 beforeEach(() => {
   vi.clearAllMocks();
   // Mallory is signed in and belongs to nothing.
@@ -70,7 +59,7 @@ describe('upload requires membership, not merely a session', () => {
   it('refuses a spec upload to an org the caller does not belong to', async () => {
     const spec = new File(['{"name":"whatever"}'], 'api.json', { type: 'application/json' });
 
-    expect((await thrownBy(() => invokeUpload({ file: spec, app_key: 'anything' }))).status).toBe(403);
+    expect((await caughtAsync(() => invokeUpload({ file: spec, app_key: 'anything' }))).status).toBe(403);
     expect(client.updateVersionByVersion).not.toHaveBeenCalled();
   });
 
@@ -80,7 +69,7 @@ describe('upload requires membership, not merely a session', () => {
     const spec = new File(['{"name":"whatever"}'], 'api.json', { type: 'application/json' });
 
     // Success redirects (303), so the throw is the pass condition here.
-    expect((await thrownBy(() => invokeUpload({ file: spec, app_key: 'anything' }))).status).toBe(303);
+    expect((await caughtAsync(() => invokeUpload({ file: spec, app_key: 'anything' }))).status).toBe(303);
     expect(client.getMemberships).toHaveBeenCalledWith(expect.objectContaining({ orgKey: 'victim-org', userId: 'mallory' }));
     expect(client.updateVersionByVersion).toHaveBeenCalled();
   });
@@ -93,8 +82,8 @@ describe('org-scoped action helpers validate orgKey', () => {
 
   for (const orgKey of hostile) {
     it(`rejects ${JSON.stringify(orgKey)} before looking up membership`, async () => {
-      expect((await thrownBy(() => requireMemberForAction(LOCALS, orgKey))).status).toBe(400);
-      expect((await thrownBy(() => requireAdminForAction(LOCALS, orgKey))).status).toBe(400);
+      expect((await caughtAsync(() => requireMemberForAction(LOCALS, orgKey))).status).toBe(400);
+      expect((await caughtAsync(() => requireAdminForAction(LOCALS, orgKey))).status).toBe(400);
       expect(client.getMemberships).not.toHaveBeenCalled();
     });
   }

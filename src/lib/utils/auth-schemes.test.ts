@@ -2,40 +2,10 @@ import { describe, expect, it } from 'vitest';
 import type { AuthScheme, Operation, Resource, Service } from '$generated/com-bryzek-apibuilder-spec';
 import { Method } from '$generated/com-bryzek-apibuilder-spec';
 import { authSchemeAnchorId, authSchemes, declaresAuthScheme, isAuthSchemeAnchor, operationsProtectedBy } from './auth-schemes';
-
-function operation(method: Method, path: string, auth?: string): Operation {
-  return {
-    method,
-    path,
-    parameters: [],
-    responses: [],
-    attributes: {},
-    content_type: 'application/json',
-    ...(auth === undefined ? {} : { auth: auth })
-  };
-}
+import { operation, service } from '$lib/test-support/fixtures';
 
 function resource(type: string, operations: Operation[]): Resource {
   return { type, plural: `${type}s`, operations, attributes: {} };
-}
-
-function service(overrides: Partial<Service> = {}): Service {
-  return {
-    name: 'test',
-    organization: { key: 'test-org' },
-    application: { key: 'test-app' },
-    namespace: 'test.namespace',
-    version: '1.0.0',
-    info: {},
-    imports: [],
-    enums: [],
-    unions: [],
-    models: [],
-    resources: [],
-    attributes: {},
-    auth_schemes: [],
-    ...overrides
-  };
 }
 
 function scheme(type: string): AuthScheme {
@@ -98,12 +68,12 @@ describe('operationsProtectedBy', () => {
     auth_schemes: [scheme('hackathon_admin')],
     resources: [
       resource('event', [
-        operation(Method.Get, '/admin/events', 'hackathon_admin'),
-        operation(Method.Post, '/admin/events', 'hackathon_admin'),
-        operation(Method.Get, '/admin/events/public-feed', 'none'),
-        operation(Method.Get, '/events')
+        operation({ method: Method.Get, path: '/admin/events', auth: 'hackathon_admin' }),
+        operation({ method: Method.Post, path: '/admin/events', auth: 'hackathon_admin' }),
+        operation({ method: Method.Get, path: '/admin/events/public-feed', auth: 'none' }),
+        operation({ method: Method.Get, path: '/events' })
       ]),
-      resource('user', [operation(Method.Get, '/admin/users', 'hackathon_admin')])
+      resource('user', [operation({ method: Method.Get, path: '/admin/users', auth: 'hackathon_admin' })])
     ]
   });
 

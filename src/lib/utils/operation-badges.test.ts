@@ -1,39 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import type { Operation, Service } from '$generated/com-bryzek-apibuilder-spec';
-import { Method } from '$generated/com-bryzek-apibuilder-spec';
+import type { Operation } from '$generated/com-bryzek-apibuilder-spec';
 import { operationAuthBadge, operationContentTypeBadge } from './operation-badges';
+import { operation, service } from '$lib/test-support/fixtures';
 
-function operation(overrides: Partial<Operation> = {}): Operation {
-  return {
-    method: Method.Get,
-    path: '/events',
-    parameters: [],
-    responses: [],
-    attributes: {},
-    content_type: 'application/json',
-    ...overrides
-  };
-}
-
-const service = {
-  name: 'test',
-  organization: { key: 'test-org' },
-  application: { key: 'test-app' },
-  namespace: 'test.namespace',
-  version: '1.0.0',
-  info: {},
-  imports: [],
-  enums: [],
-  unions: [],
-  models: [],
-  resources: [],
-  attributes: {},
-  auth_schemes: [{ type: 'hackathon_admin', attributes: {} }]
-} satisfies Service;
+const svc = service({ auth_schemes: [{ type: 'hackathon_admin', attributes: {} }] });
 
 describe('operationAuthBadge', () => {
   it('links a protected operation to the scheme card that says what the scheme is', () => {
-    expect(operationAuthBadge(operation({ auth: 'hackathon_admin' }), service)).toEqual({
+    expect(operationAuthBadge(operation({ auth: 'hackathon_admin' }), svc)).toEqual({
       kind: 'protected',
       label: 'auth: hackathon_admin',
       href: '#auth-scheme-hackathon_admin',
@@ -45,7 +19,7 @@ describe('operationAuthBadge', () => {
     // The spec requires every `auth` value to be declared, so this is a broken service. The
     // label carries that rather than the title alone: a title is unreachable on touch and
     // invisible to a screen reader, which would leave the badge's colour as the whole signal.
-    const badge = operationAuthBadge(operation({ auth: 'admin' }), service);
+    const badge = operationAuthBadge(operation({ auth: 'admin' }), svc);
     expect(badge?.kind).toBe('undeclared');
     expect(badge?.label).toBe('auth: admin (undeclared)');
     expect(badge?.href).toBeNull();
@@ -54,7 +28,7 @@ describe('operationAuthBadge', () => {
 
   it('marks the reserved `none` value explicitly public', () => {
     // Worth a badge of its own: `none` is how one operation opts out of a protected resource.
-    const badge = operationAuthBadge(operation({ auth: 'none' }), service);
+    const badge = operationAuthBadge(operation({ auth: 'none' }), svc);
     expect(badge?.kind).toBe('public');
     expect(badge?.label).toBe('public');
     expect(badge?.href).toBeNull();
@@ -63,11 +37,11 @@ describe('operationAuthBadge', () => {
   it('renders nothing when the field is absent', () => {
     // Every operation of every service uploaded before `auth` existed is in this state; a
     // "public" chip on all of them would distinguish nothing.
-    expect(operationAuthBadge(operation(), service)).toBeNull();
+    expect(operationAuthBadge(operation(), svc)).toBeNull();
   });
 
   it('treats a blank value as absent rather than as a scheme named ""', () => {
-    expect(operationAuthBadge(operation({ auth: '   ' }), service)).toBeNull();
+    expect(operationAuthBadge(operation({ auth: '   ' }), svc)).toBeNull();
   });
 });
 

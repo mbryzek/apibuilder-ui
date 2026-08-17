@@ -1,15 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { assertSafePathParams, assertSafeSegment } from './path-params';
-
-/** The `HttpError` SvelteKit's `error()` throws. */
-function caught(fn: () => unknown): { status: number; body: { message: string } } {
-  try {
-    fn();
-  } catch (thrown) {
-    return thrown as { status: number; body: { message: string } };
-  }
-  throw new Error('expected the call to throw');
-}
+import { caught } from '$lib/test-support/throws';
 
 describe('assertSafeSegment', () => {
   it('accepts the key shapes the registry actually serves', () => {

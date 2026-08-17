@@ -1,10 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { humanizedErrors, isUnavailable, messageFor } from './api-message';
-import type { ApiError, ApiResponseError } from './error-handler';
-
-function failed(status: number, ...errors: (string | ApiError)[]): ApiResponseError {
-  return { status, errors: errors.map((e) => (typeof e === 'string' ? { message: e } : e)) };
-}
+import { failed } from '$lib/test-support/api-responses';
 
 describe('isUnavailable', () => {
   it('is true for the failures that are not an answer', () => {

@@ -1,28 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { requireAuth, requireAuthForAction } from './auth';
 import type { RequestEvent } from '@sveltejs/kit';
-
-/** The `HttpError` or `Redirect` SvelteKit throws. */
-interface Thrown {
-  status: number;
-  location?: string;
-  body?: { message: string };
-}
-
-function caught(fn: () => unknown): Thrown {
-  try {
-    fn();
-  } catch (thrown) {
-    return thrown as Thrown;
-  }
-  throw new Error('expected the call to throw');
-}
+import { caught } from '$lib/test-support/throws';
+import { session as sessionFixture } from '$lib/test-support/fixtures';
 
 function event(locals: App.Locals, pathname = '/tokens'): RequestEvent {
   return { locals, url: new URL(`http://localhost${pathname}`) } as RequestEvent;
 }
 
-const session = { id: 'sess-1', user: { id: 'user-1' } } as NonNullable<App.Locals['session']>;
+const session = sessionFixture();
 
 describe('requireAuth', () => {
   it('returns the session when there is one', () => {

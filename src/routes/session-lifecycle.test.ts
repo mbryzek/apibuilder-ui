@@ -1,5 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Cookies } from '@sveltejs/kit';
+import { session } from '$lib/test-support/fixtures';
+import { mockApiClients } from '$lib/test-support/mocks';
+import { caughtAsync } from '$lib/test-support/throws';
 
 /**
  * Executed coverage for the two routes that mint and destroy a session (ISS-493).
@@ -32,30 +35,10 @@ const platform = {
   getTenantSession: vi.fn()
 };
 
-vi.mock('$lib/api/clients', async (importOriginal) => ({
-  ...(await (importOriginal as () => Promise<Record<string, unknown>>)()),
-  platformClient: () => platform,
-  clients: () => ({ platform })
-}));
+vi.mock('$lib/api/clients', async (importOriginal) => mockApiClients(platform, importOriginal));
 
 const { load: logoutLoad, actions: logoutActions } = await import('./logout/+page.server');
 const { load: devLoginLoad } = await import('./login/dev/+page.server');
-
-/** The `HttpError` or `Redirect` SvelteKit throws out of a load or an action. */
-interface Thrown {
-  status: number;
-  location?: string;
-  body?: { message: string };
-}
-
-async function caught(fn: () => unknown): Promise<Thrown> {
-  try {
-    await fn();
-  } catch (thrown) {
-    return thrown as Thrown;
-  }
-  throw new Error('expected the call to throw');
-}
 
 interface CookieJar {
   cookies: Cookies;
@@ -76,7 +59,7 @@ function cookieJar(): CookieJar {
   return jar;
 }
 
-const SESSION = { id: 'sess-1', user: { id: 'user-1' } } as NonNullable<App.Locals['session']>;
+const SESSION = session();
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -88,7 +71,7 @@ describe('GET /logout', () => {
   it('logs nobody out', async () => {
     // SvelteKit's origin check only guards POST form actions, so a state-changing GET here is
     // reachable from any third-party page via `<img src="…/logout">`.
-    const thrown = await caught(() => (logoutLoad as () => unknown)());
+    const thrown = await caughtAsync(() => (logoutLoad as () => unknown)());
 
     expect(thrown.status).toBe(303);
     expect(thrown.location).toBe('/');
@@ -107,7 +90,7 @@ describe('POST /logout', () => {
     // proxy log, backup) keeps authenticating for a year unless the platform is told to revoke.
     const jar = cookieJar();
 
-    const thrown = await caught(() => logout(jar, { session: SESSION }));
+    const thrown = await caughtAsync(() => logout(jar, { session: SESSION }));
 
     expect(platform.deleteTenantSession).toHaveBeenCalledWith('apibuilder', {
       headers: expect.objectContaining({ session_id: 'sess-1' })
@@ -122,7 +105,7 @@ describe('POST /logout', () => {
     platform.deleteTenantSession.mockRejectedValue(new Error('fetch failed'));
     const jar = cookieJar();
 
-    const thrown = await caught(() => logout(jar, { session: SESSION }));
+    const thrown = await caughtAsync(() => logout(jar, { session: SESSION }));
 
     expect(jar.deleted).toEqual(['session_id']);
     expect(thrown.location).toBe('/logged-out');
@@ -131,7 +114,7 @@ describe('POST /logout', () => {
   it('does not call the platform for a request that has no session', async () => {
     const jar = cookieJar();
 
-    const thrown = await caught(() => logout(jar, {}));
+    const thrown = await caughtAsync(() => logout(jar, {}));
 
     expect(platform.deleteTenantSession).not.toHaveBeenCalled();
     expect(jar.deleted).toEqual(['session_id']);
@@ -150,7 +133,7 @@ describe('/login/dev', () => {
     config.isProduction = true;
     const jar = cookieJar();
 
-    const thrown = await caught(() => devLogin(jar));
+    const thrown = await caughtAsync(() => devLogin(jar));
 
     expect(thrown.status).toBe(404);
     expect(platform.getTenantSession).not.toHaveBeenCalled();
@@ -161,7 +144,7 @@ describe('/login/dev', () => {
     platform.getTenantSession.mockResolvedValue({ session: { id: 'sess-dev' }, user: { id: 'user-dev' } });
     const jar = cookieJar();
 
-    const thrown = await caught(() => devLogin(jar));
+    const thrown = await caughtAsync(() => devLogin(jar));
 
     expect(platform.getTenantSession).toHaveBeenCalledWith('apibuilder', {
       headers: expect.objectContaining({ session_id: 'dev' })
@@ -176,7 +159,7 @@ describe('/login/dev', () => {
     platform.getTenantSession.mockRejectedValue(new Error('fetch failed'));
     const jar = cookieJar();
 
-    const thrown = await caught(() => devLogin(jar));
+    const thrown = await caughtAsync(() => devLogin(jar));
 
     expect(jar.set).toEqual({});
     expect(thrown.location).toBe('/login?flash=Developer+login+not+enabled&flash_type=error');

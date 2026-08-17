@@ -1,4 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { session } from '$lib/test-support/fixtures';
+import { mockApiClients } from '$lib/test-support/mocks';
 
 /**
  * The actions that authorized one object and then acted on another (ISS-491).
@@ -11,7 +13,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
  * issue, and each fails on the unfixed code.
  */
 
-const SESSION = { id: 'session-1', user: { id: 'mallory' } };
+const SESSION = session({ user: { id: 'mallory' } });
 
 const client = {
   getMembershipRequests: vi.fn(),
@@ -28,11 +30,7 @@ const client = {
   deleteWatchById: vi.fn()
 };
 
-vi.mock('$lib/api/clients', () => ({
-  apiBuilderClient: () => client,
-  platformClient: () => client,
-  getSessionHeaders: () => ({})
-}));
+vi.mock('$lib/api/clients', async (importOriginal) => mockApiClients(client, importOriginal));
 
 vi.mock('$lib/server/auth', () => ({
   requireAuth: () => SESSION,

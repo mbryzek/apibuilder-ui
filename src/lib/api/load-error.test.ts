@@ -1,14 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { dataOr, dataOrThrow, loadErrorFrom, throwIfUnavailable } from './load-error';
-import type { ApiResponse } from './error-handler';
-
-function ok<T>(data: T): ApiResponse<T> {
-  return { status: 200, data };
-}
-
-function failed<T>(status: number, ...messages: string[]): ApiResponse<T> {
-  return { status, errors: messages.map((message) => ({ message })) };
-}
+import { failed, ok } from '$lib/test-support/api-responses';
+import { caught } from '$lib/test-support/throws';
 
 describe('dataOr', () => {
   it('returns the payload of a successful call', () => {
@@ -16,7 +9,7 @@ describe('dataOr', () => {
   });
 
   it('returns the fallback when the call failed', () => {
-    expect(dataOr(failed<string[]>(500, 'HTTP 500: Request failed with status 500'), [])).toEqual([]);
+    expect(dataOr(failed(500, 'HTTP 500: Request failed with status 500'), [])).toEqual([]);
   });
 
   it('keeps a successful empty payload distinct from nothing at all', () => {
@@ -62,16 +55,6 @@ describe('loadErrorFrom', () => {
     expect(loadErrorFrom(failed(418))?.message).toBe('We could not load this data. Please try again.');
   });
 });
-
-/** The `HttpError` SvelteKit's `error()` throws. */
-function caught(fn: () => unknown): { status: number; body: { message: string } } {
-  try {
-    fn();
-  } catch (thrown) {
-    return thrown as { status: number; body: { message: string } };
-  }
-  throw new Error('expected the call to throw');
-}
 
 describe('throwIfUnavailable', () => {
   it('lets a successful call through', () => {
