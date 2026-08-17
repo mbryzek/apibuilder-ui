@@ -4,9 +4,10 @@ import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall, isApiError } from '$lib/api/error-handler';
 import { actionFail } from '$lib/api/action-error';
 import { requireAuth, requireAdminForAction } from '$lib/server/auth';
+import { optionalString, requiredEnum, requiredString } from '$lib/server/form';
 import { redirectWithFlash } from '$lib/server/flash';
 import type { Organization, OrganizationForm } from '$generated/com-bryzek-apibuilder';
-import type { Visibility } from '$generated/com-bryzek-apibuilder';
+import { Visibility } from '$generated/com-bryzek-apibuilder';
 
 export const load: PageServerLoad = async (event) => {
   requireAuth(event);
@@ -19,21 +20,24 @@ export const actions: Actions = {
     const headers = getSessionHeaders(session.id);
     const formData = await request.formData();
 
-    const name = formData.get('name') as string;
-    const namespace = formData.get('namespace') as string;
-    const key = formData.get('key') as string;
-    const visibility = formData.get('visibility') as string;
+    const name = requiredString(formData, 'name');
+    const namespace = requiredString(formData, 'namespace');
+    const key = optionalString(formData, 'key');
+    const visibility = requiredEnum(formData, 'visibility', Object.values(Visibility));
 
     if (!name || !namespace) {
       return fail(400, { errors: [{ message: 'Name and namespace are required' }] });
     }
 
-    const form: { name: string; namespace: string; key?: string; visibility?: Visibility } = { name, namespace };
+    if (!visibility) {
+      return fail(400, { errors: [{ message: 'Visibility is required' }] });
+    }
+
+    const form: OrganizationForm = { name, namespace, visibility };
     if (key) form.key = key;
-    if (visibility) form.visibility = visibility as Visibility;
 
     const response = await handleApiCall<Organization>(() =>
-      apiBuilderClient().updateOrganizationByKey({ key: params.orgKey, body: form as OrganizationForm, headers })
+      apiBuilderClient().updateOrganizationByKey({ key: params.orgKey, body: form, headers })
     );
 
     if (isApiError(response)) {

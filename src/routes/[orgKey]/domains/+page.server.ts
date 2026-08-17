@@ -4,6 +4,7 @@ import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall, isApiError } from '$lib/api/error-handler';
 import { actionFail } from '$lib/api/action-error';
 import { requireAuth, requireAdminForAction } from '$lib/server/auth';
+import { requiredString } from '$lib/server/form';
 import type { Domain } from '$generated/com-bryzek-apibuilder';
 
 export const load: PageServerLoad = async (event) => {
@@ -16,7 +17,7 @@ export const actions: Actions = {
     const session = await requireAdminForAction(locals, params.orgKey);
     const headers = getSessionHeaders(session.id);
     const formData = await request.formData();
-    const name = (formData.get('name') as string)?.trim();
+    const name = requiredString(formData, 'name');
 
     if (!name) {
       return fail(400, { errors: [{ message: 'Domain name is required' }] });
@@ -35,9 +36,9 @@ export const actions: Actions = {
     const session = await requireAdminForAction(locals, params.orgKey);
     const headers = getSessionHeaders(session.id);
     const formData = await request.formData();
-    const name = formData.get('name');
+    const name = requiredString(formData, 'name');
 
-    if (!name || typeof name !== 'string') {
+    if (!name) {
       return fail(400, { errors: [{ message: 'Invalid request' }] });
     }
 

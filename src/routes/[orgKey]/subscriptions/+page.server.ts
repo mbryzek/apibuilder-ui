@@ -5,6 +5,7 @@ import { handleApiCall, isApiError } from '$lib/api/error-handler';
 import { actionFail } from '$lib/api/action-error';
 import { dataOr, loadErrorFrom } from '$lib/api/load-error';
 import { requireAuth, requireMemberForAction } from '$lib/server/auth';
+import { requiredEnum } from '$lib/server/form';
 import type { Subscription } from '$generated/com-bryzek-apibuilder';
 import { Publication } from '$generated/com-bryzek-apibuilder';
 
@@ -41,9 +42,9 @@ export const actions: Actions = {
     const session = await requireMemberForAction(locals, params.orgKey);
     const headers = getSessionHeaders(session.id);
     const formData = await request.formData();
-    const publication = formData.get('publication');
+    const publication = requiredEnum(formData, 'publication', Object.values(Publication));
 
-    if (!publication || typeof publication !== 'string' || !Object.values(Publication).includes(publication as Publication)) {
+    if (!publication) {
       return fail(400, { errors: [{ message: 'Invalid publication' }] });
     }
 
@@ -51,7 +52,7 @@ export const actions: Actions = {
       apiBuilderClient().getSubscriptions({
         organizationKey: params.orgKey,
         userId: session.user.id,
-        publication: publication as Publication,
+        publication,
         limit: 100,
         offset: 0,
         headers
@@ -74,7 +75,7 @@ export const actions: Actions = {
           body: {
             organization_key: params.orgKey,
             user_id: session.user.id,
-            publication: publication as Publication
+            publication
           },
           headers
         })

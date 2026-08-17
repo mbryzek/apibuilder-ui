@@ -4,6 +4,7 @@ import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall, isApiError } from '$lib/api/error-handler';
 import { actionFail } from '$lib/api/action-error';
 import { requireAuth, requireMemberForAction } from '$lib/server/auth';
+import { optionalString } from '$lib/server/form';
 import type { Version, OriginalForm } from '$generated/com-bryzek-apibuilder';
 
 export const load: PageServerLoad = async (event) => {
@@ -28,10 +29,15 @@ export const actions: Actions = {
     const formData = await request.formData();
     const client = apiBuilderClient();
 
-    const appKey = (formData.get('app_key') as string)?.trim();
-    const visibility = (formData.get('visibility') as string) || 'organization';
-    const specType = (formData.get('spec_type') as string) || '';
-    const file = formData.get('file') as File | null;
+    const appKey = optionalString(formData, 'app_key');
+    const visibility = optionalString(formData, 'visibility') ?? 'organization';
+    const specType = optionalString(formData, 'spec_type');
+
+    // `formData.get` answers `File | string | null`, so a text field posted under this name is not
+    // a file. Narrowing rather than casting is what makes the refusal below reachable: `.text()`
+    // on a string is a 500 where "please select a file" is meant.
+    const entry = formData.get('file');
+    const file = typeof entry === 'string' ? null : entry;
 
     if (!file || file.size === 0) {
       return fail(400, { errors: [{ message: 'Please select a file to upload' }], appKey, visibility, specType });

@@ -5,6 +5,7 @@ import { handleApiCall, isApiError } from '$lib/api/error-handler';
 import { actionFail } from '$lib/api/action-error';
 import { config } from '$lib/config';
 import { completeSession } from '$lib/server/auth-completion';
+import { optionalString, requiredSecret, requiredString } from '$lib/server/form';
 import type { SessionState } from '$generated/com-bryzek-platform';
 
 export const load: PageServerLoad = async ({ locals }) => {
@@ -17,9 +18,9 @@ export const load: PageServerLoad = async ({ locals }) => {
 export const actions: Actions = {
   default: async ({ request, cookies }) => {
     const formData = await request.formData();
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
-    const name = formData.get('name') as string;
+    const email = requiredString(formData, 'email');
+    const password = requiredSecret(formData, 'password');
+    const name = optionalString(formData, 'name');
 
     if (!email || !password) {
       return fail(400, { errors: [{ message: 'Email and password are required' }], email, name });

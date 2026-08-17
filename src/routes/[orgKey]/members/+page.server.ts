@@ -5,6 +5,7 @@ import { handleApiCall, isApiError, isApiSuccess, type ApiResponse } from '$lib/
 import { actionFail, actionFailMissing } from '$lib/api/action-error';
 import { dataOr, loadErrorFrom } from '$lib/api/load-error';
 import { requireAuth, requireAdminForAction } from '$lib/server/auth';
+import { requiredEnum, requiredString } from '$lib/server/form';
 import { PAGE_FETCH_LIMIT, PAGE_LIMIT, parseOffset, toPage } from '$lib/pagination';
 import { findScopedById, outOfScope } from '$lib/server/scoped-id';
 import type { Membership, User, MembershipRequest, Organization } from '$generated/com-bryzek-apibuilder';
@@ -53,9 +54,8 @@ export const actions: Actions = {
     const session = await requireAdminForAction(locals, params.orgKey);
     const headers = getSessionHeaders(session.id);
     const formData = await request.formData();
-    const emailOrNickname = (formData.get('email_or_nickname') as string)?.trim();
-    const roleRaw = formData.get('role') as string;
-    const role = Object.values(MembershipRole).includes(roleRaw as MembershipRole) ? roleRaw : 'member';
+    const emailOrNickname = requiredString(formData, 'email_or_nickname');
+    const role = requiredEnum(formData, 'role', Object.values(MembershipRole)) ?? MembershipRole.Member;
 
     if (!emailOrNickname) {
       return fail(400, { errors: [{ message: 'Email or nickname is required' }] });
@@ -83,7 +83,7 @@ export const actions: Actions = {
 
     const requestResponse = await handleApiCall<MembershipRequest>(() =>
       apiBuilderClient().createMembershipRequest({
-        body: { org_id: orgResponse.data.id, user_id: user.id, role: role as MembershipRole },
+        body: { org_id: orgResponse.data.id, user_id: user.id, role },
         headers
       })
     );
@@ -107,9 +107,9 @@ export const actions: Actions = {
     const session = await requireAdminForAction(locals, params.orgKey);
     const headers = getSessionHeaders(session.id);
     const formData = await request.formData();
-    const guid = formData.get('guid');
+    const guid = requiredString(formData, 'guid');
 
-    if (!guid || typeof guid !== 'string') {
+    if (!guid) {
       return fail(400, { errors: [{ message: 'Invalid request' }] });
     }
 
@@ -136,9 +136,9 @@ export const actions: Actions = {
     const session = await requireAdminForAction(locals, params.orgKey);
     const headers = getSessionHeaders(session.id);
     const formData = await request.formData();
-    const userId = formData.get('user_id');
+    const userId = requiredString(formData, 'user_id');
 
-    if (!userId || typeof userId !== 'string') {
+    if (!userId) {
       return fail(400, { errors: [{ message: 'Invalid request' }] });
     }
 
@@ -174,9 +174,9 @@ export const actions: Actions = {
     const session = locals.session!;
     const headers = getSessionHeaders(session.id);
     const formData = await request.formData();
-    const userId = formData.get('user_id');
+    const userId = requiredString(formData, 'user_id');
 
-    if (!userId || typeof userId !== 'string') {
+    if (!userId) {
       return fail(400, { errors: [{ message: 'Invalid request' }] });
     }
 
