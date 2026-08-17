@@ -3,9 +3,11 @@
   import type { Snippet } from 'svelte';
   import type { HTMLFormAttributes } from 'svelte/elements';
 
-  interface Props extends HTMLFormAttributes {
+  // `children` is narrowed from HTMLFormAttributes' parameterless snippet to one taking the
+  // pending flag, so it is replaced rather than extended.
+  interface Props extends Omit<HTMLFormAttributes, 'children'> {
     /** Runs once the action has settled, before the page data is updated. */
-    onSettled?: () => void;
+    onSettled?: (() => void) | undefined;
     /** The form body. Receives whether this form's own submission is in flight. */
     children: Snippet<[boolean]>;
   }

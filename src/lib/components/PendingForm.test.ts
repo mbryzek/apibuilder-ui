@@ -1,24 +1,26 @@
-// @vitest-environment jsdom
+// @vitest-environment happy-dom
 
-import { describe, it, expect, beforeEach } from 'vitest';
-import { createRawSnippet, mount, unmount, flushSync } from 'svelte';
-import PendingForm from './PendingForm.svelte';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { mount, unmount, flushSync } from 'svelte';
+import PendingFormPair from '$lib/test/PendingFormPair.svelte';
 import { submitFunctions } from '$lib/test/app-forms';
 
-const children = createRawSnippet((pending: () => boolean) => ({
-  render: () => `<button type="submit" ${pending() ? 'disabled' : ''}>go</button>`,
-  setup: () => {}
-}));
+let target: HTMLElement;
+let component: Record<string, unknown> | undefined;
 
-function button(target: HTMLElement): HTMLButtonElement {
-  const el = target.querySelector('button');
-  if (!el) throw new Error('no button rendered');
-  return el;
+function button(testid: string): HTMLButtonElement {
+  const el = target.querySelector(`[data-testid="${testid}"]`);
+  if (!el) throw new Error(`no button rendered for ${testid}`);
+  return el as HTMLButtonElement;
+}
+
+function render(props: { onSettled?: () => void } = {}): void {
+  component = mount(PendingFormPair, { target, props });
+  // `use:enhance` is applied by a mount effect, which is queued rather than run inline.
+  flushSync();
 }
 
 describe('PendingForm', () => {
-  let target: HTMLElement;
-
   beforeEach(() => {
     document.body.innerHTML = '';
     submitFunctions.length = 0;
@@ -26,36 +28,31 @@ describe('PendingForm', () => {
     document.body.append(target);
   });
 
+  afterEach(() => {
+    if (component) unmount(component);
+    component = undefined;
+  });
+
   it('leaves a sibling form enabled while one form is in flight', () => {
-    const first = document.createElement('div');
-    const second = document.createElement('div');
-    target.append(first, second);
+    render();
 
-    const a = mount(PendingForm, { target: first, props: { action: '?/a', children } });
-    const b = mount(PendingForm, { target: second, props: { action: '?/b', children } });
-
-    const [submitA] = submitFunctions;
-    const settled = submitA!();
+    const [submitFirst] = submitFunctions;
+    submitFirst!();
     flushSync();
 
-    expect(button(first).disabled).toBe(true);
-    expect(button(second).disabled).toBe(false);
-
-    unmount(a);
-    unmount(b);
+    expect(button('first').disabled).toBe(true);
+    // The regression this component exists for: a page-level flag disabled this one too.
+    expect(button('second').disabled).toBe(false);
   });
 
   it('clears pending and runs onSettled before the page data updates', async () => {
     const order: string[] = [];
-    const component = mount(PendingForm, {
-      target,
-      props: { action: '?/a', children, onSettled: () => order.push('settled') }
-    });
+    render({ onSettled: () => order.push('settled') });
 
-    const [submit] = submitFunctions;
-    const settled = submit!();
+    const [submitFirst] = submitFunctions;
+    const settled = submitFirst!();
     flushSync();
-    expect(button(target).disabled).toBe(true);
+    expect(button('first').disabled).toBe(true);
 
     await settled({
       update: async () => {
@@ -64,9 +61,7 @@ describe('PendingForm', () => {
     });
     flushSync();
 
-    expect(button(target).disabled).toBe(false);
+    expect(button('first').disabled).toBe(false);
     expect(order).toEqual(['settled', 'update']);
-
-    unmount(component);
   });
 });
