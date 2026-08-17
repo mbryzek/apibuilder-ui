@@ -1,10 +1,9 @@
 import type { PageServerLoad, Actions } from './$types';
-import { redirect } from '@sveltejs/kit';
 import { platformClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall, isApiError } from '$lib/api/error-handler';
 import { actionFail } from '$lib/api/action-error';
 import { requireAuth, requireAuthForAction } from '$lib/server/auth';
-import type { Token, TokenForm } from '$generated/com-bryzek-platform';
+import type { CreatedToken, TokenForm } from '$generated/com-bryzek-platform';
 
 export const load: PageServerLoad = async (event) => {
   requireAuth(event);
@@ -12,6 +11,13 @@ export const load: PageServerLoad = async (event) => {
 };
 
 export const actions: Actions = {
+  /**
+   * Mints the token and hands its value straight back to the page.
+   *
+   * NO REDIRECT, deliberately. The platform stores only a digest of the token, so this response is
+   * the one and only time the value exists — redirecting anywhere would discard it, and there is no
+   * endpoint that could fetch it back afterwards.
+   */
   default: async ({ request, locals }) => {
     const session = requireAuthForAction(locals);
     const headers = getSessionHeaders(session.id);
@@ -23,12 +29,12 @@ export const actions: Actions = {
       body.description = description;
     }
 
-    const response = await handleApiCall<Token>(() => platformClient().createToken({ body, headers }));
+    const response = await handleApiCall<CreatedToken>(() => platformClient().createToken({ body, headers }));
 
     if (isApiError(response)) {
       return actionFail(response);
     }
 
-    throw redirect(303, `/tokens/${response.data.id}`);
+    return { created: response.data };
   }
 };
