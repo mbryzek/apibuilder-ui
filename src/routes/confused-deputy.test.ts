@@ -184,12 +184,12 @@ describe('token delete', () => {
     expect(client.deleteTokenById).not.toHaveBeenCalled();
   });
 
-  it('does not spend the one-time cleartext to authorize the delete', async () => {
+  it("resolves the guid against the caller's own tokens before deleting", async () => {
     client.getTokensUsersByUserId.mockResolvedValue([{ id: 'own-token' }]);
     client.deleteTokenById.mockResolvedValue(undefined);
 
-    // `getTokenCleartextById` claims the cleartext on read, so using it as the ownership check
-    // would destroy the value the page exists to display.
+    // The id handed to the mutation is the one the scoped listing returned, never the value from
+    // the URL — see `$lib/server/scoped-id`.
     await expect(invoke(tokenActions['delete'], { params: { guid: 'own-token' } })).rejects.toMatchObject({ status: 303 });
     expect(client.deleteTokenById).toHaveBeenCalledWith('own-token', expect.anything());
   });
