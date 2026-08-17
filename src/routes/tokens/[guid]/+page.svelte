@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { enhance } from '$app/forms';
+  import PendingForm from '$lib/components/PendingForm.svelte';
   import LoadErrorBanner from '$lib/components/LoadErrorBanner.svelte';
   import type { ApiErrorItem } from '$lib/api/error-handler';
   import type { LoadError } from '$lib/api/load-error';
@@ -16,7 +16,6 @@
   let { data, form: formResult }: Props = $props();
 
   let confirmDelete = $state(false);
-  let isSubmitting = $state(false);
   let copied = $state(false);
   let copyTimeout: ReturnType<typeof setTimeout> | undefined;
 
@@ -100,21 +99,13 @@
       <div class="rounded-lg border border-red-200 bg-red-50 p-4">
         <p class="mb-3 text-sm text-red-800">Are you sure you want to delete this token? This cannot be undone.</p>
         <div class="flex gap-3">
-          <form
-            method="POST"
-            action="?/delete"
-            use:enhance={() => {
-              isSubmitting = true;
-              return async ({ update }) => {
-                isSubmitting = false;
-                await update();
-              };
-            }}
-          >
-            <button type="submit" class="btn-danger" disabled={isSubmitting}>
-              {isSubmitting ? 'Deleting...' : 'Yes, Delete'}
-            </button>
-          </form>
+          <PendingForm action="?/delete">
+            {#snippet children(pending)}
+              <button type="submit" class="btn-danger" disabled={pending}>
+                {pending ? 'Deleting...' : 'Yes, Delete'}
+              </button>
+            {/snippet}
+          </PendingForm>
           <button type="button" class="btn-secondary" onclick={() => (confirmDelete = false)}>Cancel</button>
         </div>
       </div>

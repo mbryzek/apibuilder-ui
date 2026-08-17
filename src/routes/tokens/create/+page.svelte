@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { enhance } from '$app/forms';
+  import PendingForm from '$lib/components/PendingForm.svelte';
   import type { ApiErrorItem } from '$lib/api/error-handler';
 
   interface Props {
@@ -7,7 +7,6 @@
   }
 
   let { form: formResult }: Props = $props();
-  let isSubmitting = $state(false);
 </script>
 
 <svelte:head>
@@ -30,30 +29,23 @@
   {/if}
 
   <div class="card">
-    <form
-      method="POST"
-      use:enhance={() => {
-        isSubmitting = true;
-        return async ({ update }) => {
-          isSubmitting = false;
-          await update();
-        };
-      }}
-    >
-      <div class="mb-4">
-        <label for="description" class="text-ab-dark-blue mb-1 block text-sm font-semibold">Description</label>
-        <input
-          type="text"
-          id="description"
-          name="description"
-          placeholder="Optional description for this token"
-          class="input-field w-full"
-        />
-        <p class="text-ab-gray mt-1 text-sm">A description to help you remember what this token is used for.</p>
-      </div>
-      <button type="submit" class="btn-primary" disabled={isSubmitting}>
-        {isSubmitting ? 'Creating...' : 'Create Token'}
-      </button>
-    </form>
+    <PendingForm>
+      {#snippet children(pending)}
+        <div class="mb-4">
+          <label for="description" class="text-ab-dark-blue mb-1 block text-sm font-semibold">Description</label>
+          <input
+            type="text"
+            id="description"
+            name="description"
+            placeholder="Optional description for this token"
+            class="input-field w-full"
+          />
+          <p class="text-ab-gray mt-1 text-sm">A description to help you remember what this token is used for.</p>
+        </div>
+        <button type="submit" class="btn-primary" disabled={pending}>
+          {pending ? 'Creating...' : 'Create Token'}
+        </button>
+      {/snippet}
+    </PendingForm>
   </div>
 </div>

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { enhance } from '$app/forms';
+  import PendingForm from '$lib/components/PendingForm.svelte';
   import type { Organization } from '$generated/com-bryzek-apibuilder';
   import type { ApiErrorItem } from '$lib/api/error-handler';
   import { Visibility } from '$generated/com-bryzek-apibuilder';
@@ -15,7 +15,6 @@
   let { data, form: formResult }: Props = $props();
 
   const org = $derived(data.org);
-  let isSubmitting = $state(false);
   let showDeleteConfirm = $state(false);
 </script>
 
@@ -35,52 +34,44 @@
   {/if}
 
   {#if data.isAdmin}
-    <form
-      method="POST"
-      action="?/update"
-      use:enhance={() => {
-        isSubmitting = true;
-        return async ({ update }) => {
-          isSubmitting = false;
-          await update();
-        };
-      }}
-    >
-      <div class="max-w-lg space-y-4">
-        <div>
-          <label for="name" class="text-ab-dark-blue mb-1 block text-sm font-medium">Name</label>
-          <input type="text" id="name" name="name" value={org.name} required class="input-field w-full rounded-lg border px-3 py-2" />
+    <PendingForm action="?/update">
+      {#snippet children(pending)}
+        <div class="max-w-lg space-y-4">
+          <div>
+            <label for="name" class="text-ab-dark-blue mb-1 block text-sm font-medium">Name</label>
+            <input type="text" id="name" name="name" value={org.name} required class="input-field w-full rounded-lg border px-3 py-2" />
+          </div>
+          <div>
+            <label for="key" class="text-ab-dark-blue mb-1 block text-sm font-medium">Key</label>
+            <input type="text" id="key" name="key" value={org.key} class="input-field w-full rounded-lg border px-3 py-2" />
+          </div>
+          <div>
+            <label for="namespace" class="text-ab-dark-blue mb-1 block text-sm font-medium">Namespace</label>
+            <input
+              type="text"
+              id="namespace"
+              name="namespace"
+              value={org.namespace}
+              required
+              class="input-field w-full rounded-lg border px-3 py-2"
+            />
+          </div>
+          <div>
+            <label for="visibility" class="text-ab-dark-blue mb-1 block text-sm font-medium">Visibility</label>
+            <select id="visibility" name="visibility" class="input-field w-full rounded-lg border px-3 py-2">
+              {#each Object.values(Visibility) as v}
+                <option value={v} selected={org.visibility === v}>{v}</option>
+              {/each}
+            </select>
+          </div>
+          <div>
+            <button type="submit" class="btn-primary" disabled={pending}>
+              {pending ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
         </div>
-        <div>
-          <label for="key" class="text-ab-dark-blue mb-1 block text-sm font-medium">Key</label>
-          <input type="text" id="key" name="key" value={org.key} class="input-field w-full rounded-lg border px-3 py-2" />
-        </div>
-        <div>
-          <label for="namespace" class="text-ab-dark-blue mb-1 block text-sm font-medium">Namespace</label>
-          <input
-            type="text"
-            id="namespace"
-            name="namespace"
-            value={org.namespace}
-            required
-            class="input-field w-full rounded-lg border px-3 py-2"
-          />
-        </div>
-        <div>
-          <label for="visibility" class="text-ab-dark-blue mb-1 block text-sm font-medium">Visibility</label>
-          <select id="visibility" name="visibility" class="input-field w-full rounded-lg border px-3 py-2">
-            {#each Object.values(Visibility) as v}
-              <option value={v} selected={org.visibility === v}>{v}</option>
-            {/each}
-          </select>
-        </div>
-        <div>
-          <button type="submit" class="btn-primary" disabled={isSubmitting}>
-            {isSubmitting ? 'Saving...' : 'Save Changes'}
-          </button>
-        </div>
-      </div>
-    </form>
+      {/snippet}
+    </PendingForm>
 
     <div class="mt-12 border-t border-red-200 pt-8">
       <h2 class="mb-2 text-lg font-bold text-red-600">Danger Zone</h2>
@@ -90,21 +81,13 @@
         <div class="rounded-lg border border-red-200 bg-red-50 p-4">
           <p class="mb-3 text-sm text-red-800">Are you sure you want to delete <strong>{org.name}</strong>?</p>
           <div class="flex gap-3">
-            <form
-              method="POST"
-              action="?/delete"
-              use:enhance={() => {
-                isSubmitting = true;
-                return async ({ update }) => {
-                  isSubmitting = false;
-                  await update();
-                };
-              }}
-            >
-              <button type="submit" class="btn-danger" disabled={isSubmitting}>
-                {isSubmitting ? 'Deleting...' : 'Yes, delete'}
-              </button>
-            </form>
+            <PendingForm action="?/delete">
+              {#snippet children(pending)}
+                <button type="submit" class="btn-danger" disabled={pending}>
+                  {pending ? 'Deleting...' : 'Yes, delete'}
+                </button>
+              {/snippet}
+            </PendingForm>
             <button type="button" class="btn-secondary" onclick={() => (showDeleteConfirm = false)}>Cancel</button>
           </div>
         </div>

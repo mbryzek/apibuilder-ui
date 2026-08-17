@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { enhance } from '$app/forms';
+  import PendingForm from '$lib/components/PendingForm.svelte';
   import type { Organization } from '$generated/com-bryzek-apibuilder';
   import type { ApiErrorItem } from '$lib/api/error-handler';
 
@@ -15,7 +15,6 @@
 
   const org = $derived(data.org);
   const domains = $derived(org.domains);
-  let isSubmitting = $state(false);
   let confirmRemoveName = $state<string | null>(null);
 </script>
 
@@ -40,23 +39,14 @@
   {#if data.isAdmin}
     <div class="card mb-6">
       <h2 class="text-ab-dark-blue mb-3 text-lg font-semibold">Add Domain</h2>
-      <form
-        method="POST"
-        action="?/addDomain"
-        use:enhance={() => {
-          isSubmitting = true;
-          return async ({ update }) => {
-            isSubmitting = false;
-            await update();
-          };
-        }}
-        class="flex flex-col gap-3 sm:flex-row"
-      >
-        <input type="text" name="name" placeholder="example.com" required class="input-field flex-1 rounded-lg border px-3 py-2" />
-        <button type="submit" class="btn-primary" disabled={isSubmitting}>
-          {isSubmitting ? 'Adding...' : 'Add Domain'}
-        </button>
-      </form>
+      <PendingForm action="?/addDomain" class="flex flex-col gap-3 sm:flex-row">
+        {#snippet children(pending)}
+          <input type="text" name="name" placeholder="example.com" required class="input-field flex-1 rounded-lg border px-3 py-2" />
+          <button type="submit" class="btn-primary" disabled={pending}>
+            {pending ? 'Adding...' : 'Add Domain'}
+          </button>
+        {/snippet}
+      </PendingForm>
     </div>
   {/if}
 
@@ -70,23 +60,14 @@
           {#if data.isAdmin}
             {#if confirmRemoveName === domain.name}
               <div class="flex gap-2">
-                <form
-                  method="POST"
-                  action="?/removeDomain"
-                  use:enhance={() => {
-                    isSubmitting = true;
-                    return async ({ update }) => {
-                      isSubmitting = false;
-                      confirmRemoveName = null;
-                      await update();
-                    };
-                  }}
-                >
-                  <input type="hidden" name="name" value={domain.name} />
-                  <button type="submit" class="text-sm font-semibold text-red-600 hover:text-red-800" disabled={isSubmitting}>
-                    Confirm
-                  </button>
-                </form>
+                <PendingForm action="?/removeDomain" onSettled={() => (confirmRemoveName = null)}>
+                  {#snippet children(pending)}
+                    <input type="hidden" name="name" value={domain.name} />
+                    <button type="submit" class="text-sm font-semibold text-red-600 hover:text-red-800" disabled={pending}>
+                      Confirm
+                    </button>
+                  {/snippet}
+                </PendingForm>
                 <button type="button" class="text-ab-gray hover:text-ab-dark-blue text-sm" onclick={() => (confirmRemoveName = null)}>
                   Cancel
                 </button>

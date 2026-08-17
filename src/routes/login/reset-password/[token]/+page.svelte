@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { enhance } from '$app/forms';
+  import PendingForm from '$lib/components/PendingForm.svelte';
   import type { ApiErrorItem } from '$lib/api/error-handler';
 
   interface Props {
@@ -8,8 +8,6 @@
   }
 
   let { form }: Props = $props();
-
-  let isSubmitting = $state(false);
 
   const errors = $derived(form?.errors ?? []);
 </script>
@@ -30,46 +28,39 @@
       </div>
     {/if}
 
-    <form
-      method="POST"
-      use:enhance={() => {
-        isSubmitting = true;
-        return async ({ update }) => {
-          isSubmitting = false;
-          await update();
-        };
-      }}
-    >
-      <div class="space-y-4">
-        <div>
-          <label for="password" class="text-ab-dark-blue mb-1 block text-sm font-medium">New Password</label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            required
-            autocomplete="new-password"
-            class="input-field w-full rounded-lg border px-3 py-2"
-          />
-        </div>
+    <PendingForm>
+      {#snippet children(pending)}
+        <div class="space-y-4">
+          <div>
+            <label for="password" class="text-ab-dark-blue mb-1 block text-sm font-medium">New Password</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              required
+              autocomplete="new-password"
+              class="input-field w-full rounded-lg border px-3 py-2"
+            />
+          </div>
 
-        <div>
-          <label for="confirm_password" class="text-ab-dark-blue mb-1 block text-sm font-medium">Confirm Password</label>
-          <input
-            type="password"
-            id="confirm_password"
-            name="confirm_password"
-            required
-            autocomplete="new-password"
-            class="input-field w-full rounded-lg border px-3 py-2"
-          />
-        </div>
+          <div>
+            <label for="confirm_password" class="text-ab-dark-blue mb-1 block text-sm font-medium">Confirm Password</label>
+            <input
+              type="password"
+              id="confirm_password"
+              name="confirm_password"
+              required
+              autocomplete="new-password"
+              class="input-field w-full rounded-lg border px-3 py-2"
+            />
+          </div>
 
-        <button type="submit" disabled={isSubmitting} class="btn-primary w-full">
-          {isSubmitting ? 'Resetting...' : 'Reset Password'}
-        </button>
-      </div>
-    </form>
+          <button type="submit" disabled={pending} class="btn-primary w-full">
+            {pending ? 'Resetting...' : 'Reset Password'}
+          </button>
+        </div>
+      {/snippet}
+    </PendingForm>
 
     <p class="text-ab-gray mt-4 text-center text-sm">
       <a href="/login" class="text-ab-blue hover:text-ab-dark-blue transition-colors"> Back to login </a>

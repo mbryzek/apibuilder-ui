@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { enhance } from '$app/forms';
+  import PendingForm from '$lib/components/PendingForm.svelte';
   import type { ApiErrorItem } from '$lib/api/error-handler';
 
   interface Props {
@@ -7,8 +7,6 @@
   }
 
   let { form }: Props = $props();
-
-  let isSubmitting = $state(false);
 
   const errors = $derived(form?.errors ?? []);
 </script>
@@ -29,59 +27,52 @@
       </div>
     {/if}
 
-    <form
-      method="POST"
-      use:enhance={() => {
-        isSubmitting = true;
-        return async ({ update }) => {
-          isSubmitting = false;
-          await update();
-        };
-      }}
-    >
-      <div class="space-y-4">
-        <div>
-          <label for="name" class="text-ab-dark-blue mb-1 block text-sm font-medium">Name</label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            value={form?.name ?? ''}
-            autocomplete="name"
-            class="input-field w-full rounded-lg border px-3 py-2"
-          />
-        </div>
+    <PendingForm>
+      {#snippet children(pending)}
+        <div class="space-y-4">
+          <div>
+            <label for="name" class="text-ab-dark-blue mb-1 block text-sm font-medium">Name</label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              value={form?.name ?? ''}
+              autocomplete="name"
+              class="input-field w-full rounded-lg border px-3 py-2"
+            />
+          </div>
 
-        <div>
-          <label for="email" class="text-ab-dark-blue mb-1 block text-sm font-medium">Email</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            required
-            value={form?.email ?? ''}
-            autocomplete="email"
-            class="input-field w-full rounded-lg border px-3 py-2"
-          />
-        </div>
+          <div>
+            <label for="email" class="text-ab-dark-blue mb-1 block text-sm font-medium">Email</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              required
+              value={form?.email ?? ''}
+              autocomplete="email"
+              class="input-field w-full rounded-lg border px-3 py-2"
+            />
+          </div>
 
-        <div>
-          <label for="password" class="text-ab-dark-blue mb-1 block text-sm font-medium">Password</label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            required
-            autocomplete="new-password"
-            class="input-field w-full rounded-lg border px-3 py-2"
-          />
-        </div>
+          <div>
+            <label for="password" class="text-ab-dark-blue mb-1 block text-sm font-medium">Password</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              required
+              autocomplete="new-password"
+              class="input-field w-full rounded-lg border px-3 py-2"
+            />
+          </div>
 
-        <button type="submit" disabled={isSubmitting} class="btn-primary w-full">
-          {isSubmitting ? 'Creating account...' : 'Create account'}
-        </button>
-      </div>
-    </form>
+          <button type="submit" disabled={pending} class="btn-primary w-full">
+            {pending ? 'Creating account...' : 'Create account'}
+          </button>
+        </div>
+      {/snippet}
+    </PendingForm>
 
     <p class="text-ab-gray mt-6 text-center text-sm">
       Already have an account?

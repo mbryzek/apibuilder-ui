@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { enhance } from '$app/forms';
+  import PendingForm from '$lib/components/PendingForm.svelte';
   import type { Organization, Subscription } from '$generated/com-bryzek-apibuilder';
   import { Publication } from '$generated/com-bryzek-apibuilder';
   import type { ApiErrorItem } from '$lib/api/error-handler';
@@ -20,7 +20,6 @@
 
   const org = $derived(data.org);
   const subscriptions = $derived(data.subscriptions);
-  let isSubmitting = $state(false);
 
   const publicationLabels: Record<string, string> = {
     [Publication.MembershipRequestsCreate]: 'New membership requests',
@@ -76,22 +75,14 @@
               {isSubscribed ? 'Subscribed' : 'Not subscribed'}
             </span>
           </div>
-          <form
-            method="POST"
-            action="?/toggle"
-            use:enhance={() => {
-              isSubmitting = true;
-              return async ({ update }) => {
-                isSubmitting = false;
-                await update();
-              };
-            }}
-          >
-            <input type="hidden" name="publication" value={publication} />
-            <button type="submit" class="{isSubscribed ? 'btn-secondary' : 'btn-primary'} px-4 py-2 text-sm" disabled={isSubmitting}>
-              {isSubscribed ? 'Unsubscribe' : 'Subscribe'}
-            </button>
-          </form>
+          <PendingForm action="?/toggle">
+            {#snippet children(pending)}
+              <input type="hidden" name="publication" value={publication} />
+              <button type="submit" class="{isSubscribed ? 'btn-secondary' : 'btn-primary'} px-4 py-2 text-sm" disabled={pending}>
+                {isSubscribed ? 'Unsubscribe' : 'Subscribe'}
+              </button>
+            {/snippet}
+          </PendingForm>
         </div>
       {/each}
     </div>

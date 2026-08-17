@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { enhance } from '$app/forms';
+  import PendingForm from '$lib/components/PendingForm.svelte';
   import type { Organization, Membership } from '$generated/com-bryzek-apibuilder';
   import { MembershipRole } from '$generated/com-bryzek-apibuilder';
   import type { ApiErrorItem } from '$lib/api/error-handler';
@@ -26,7 +26,6 @@
 
   const org = $derived(data.org);
   const memberships = $derived(data.memberships);
-  let isSubmitting = $state(false);
   let confirmRemoveId = $state<string | null>(null);
 </script>
 
@@ -59,33 +58,24 @@
   {#if data.isAdmin}
     <div class="card mb-6">
       <h2 class="text-ab-dark-blue mb-3 text-lg font-semibold">Add Member</h2>
-      <form
-        method="POST"
-        action="?/addMember"
-        use:enhance={() => {
-          isSubmitting = true;
-          return async ({ update }) => {
-            isSubmitting = false;
-            await update();
-          };
-        }}
-        class="flex flex-col gap-3 sm:flex-row"
-      >
-        <input
-          type="text"
-          name="email_or_nickname"
-          placeholder="Email or nickname"
-          required
-          class="input-field flex-1 rounded-lg border px-3 py-2"
-        />
-        <select name="role" class="input-field rounded-lg border px-3 py-2">
-          <option value="member">Member</option>
-          <option value="admin">Admin</option>
-        </select>
-        <button type="submit" class="btn-primary" disabled={isSubmitting}>
-          {isSubmitting ? 'Adding...' : 'Add'}
-        </button>
-      </form>
+      <PendingForm action="?/addMember" class="flex flex-col gap-3 sm:flex-row">
+        {#snippet children(pending)}
+          <input
+            type="text"
+            name="email_or_nickname"
+            placeholder="Email or nickname"
+            required
+            class="input-field flex-1 rounded-lg border px-3 py-2"
+          />
+          <select name="role" class="input-field rounded-lg border px-3 py-2">
+            <option value="member">Member</option>
+            <option value="admin">Admin</option>
+          </select>
+          <button type="submit" class="btn-primary" disabled={pending}>
+            {pending ? 'Adding...' : 'Add'}
+          </button>
+        {/snippet}
+      </PendingForm>
     </div>
   {/if}
 
@@ -124,59 +114,34 @@
                 <td class="py-3 text-right">
                   <div class="flex justify-end gap-2">
                     {#if membership.role === MembershipRole.Admin}
-                      <form
-                        method="POST"
-                        action="?/revokeAdmin"
-                        use:enhance={() => {
-                          isSubmitting = true;
-                          return async ({ update }) => {
-                            isSubmitting = false;
-                            await update();
-                          };
-                        }}
-                      >
-                        <input type="hidden" name="user_id" value={membership.user.id} />
-                        <button type="submit" class="text-ab-blue hover:text-ab-dark-blue text-sm" disabled={isSubmitting}>
-                          Revoke Admin
-                        </button>
-                      </form>
+                      <PendingForm action="?/revokeAdmin">
+                        {#snippet children(pending)}
+                          <input type="hidden" name="user_id" value={membership.user.id} />
+                          <button type="submit" class="text-ab-blue hover:text-ab-dark-blue text-sm" disabled={pending}>
+                            Revoke Admin
+                          </button>
+                        {/snippet}
+                      </PendingForm>
                     {:else}
-                      <form
-                        method="POST"
-                        action="?/makeAdmin"
-                        use:enhance={() => {
-                          isSubmitting = true;
-                          return async ({ update }) => {
-                            isSubmitting = false;
-                            await update();
-                          };
-                        }}
-                      >
-                        <input type="hidden" name="user_id" value={membership.user.id} />
-                        <button type="submit" class="text-ab-blue hover:text-ab-dark-blue text-sm" disabled={isSubmitting}>
-                          Make Admin
-                        </button>
-                      </form>
+                      <PendingForm action="?/makeAdmin">
+                        {#snippet children(pending)}
+                          <input type="hidden" name="user_id" value={membership.user.id} />
+                          <button type="submit" class="text-ab-blue hover:text-ab-dark-blue text-sm" disabled={pending}>
+                            Make Admin
+                          </button>
+                        {/snippet}
+                      </PendingForm>
                     {/if}
 
                     {#if confirmRemoveId === membership.id}
-                      <form
-                        method="POST"
-                        action="?/removeMember"
-                        use:enhance={() => {
-                          isSubmitting = true;
-                          return async ({ update }) => {
-                            isSubmitting = false;
-                            confirmRemoveId = null;
-                            await update();
-                          };
-                        }}
-                      >
-                        <input type="hidden" name="guid" value={membership.id} />
-                        <button type="submit" class="text-sm font-semibold text-red-600 hover:text-red-800" disabled={isSubmitting}>
-                          Confirm Remove
-                        </button>
-                      </form>
+                      <PendingForm action="?/removeMember" onSettled={() => (confirmRemoveId = null)}>
+                        {#snippet children(pending)}
+                          <input type="hidden" name="guid" value={membership.id} />
+                          <button type="submit" class="text-sm font-semibold text-red-600 hover:text-red-800" disabled={pending}>
+                            Confirm Remove
+                          </button>
+                        {/snippet}
+                      </PendingForm>
                       <button type="button" class="text-ab-gray hover:text-ab-dark-blue text-sm" onclick={() => (confirmRemoveId = null)}>
                         Cancel
                       </button>
