@@ -4,8 +4,10 @@ import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall, isApiError } from '$lib/api/error-handler';
 import { actionFail } from '$lib/api/action-error';
 import { requireAuth, requireAdminForAction } from '$lib/server/auth';
+import { requiredEnum, requiredString } from '$lib/server/form';
 import { redirectWithFlash } from '$lib/server/flash';
-import type { Application, Visibility } from '$generated/com-bryzek-apibuilder';
+import type { Application } from '$generated/com-bryzek-apibuilder';
+import { Visibility } from '$generated/com-bryzek-apibuilder';
 
 export const load: PageServerLoad = async (event) => {
   requireAuth(event);
@@ -19,19 +21,21 @@ export const actions: Actions = {
     const formData = await request.formData();
     const client = apiBuilderClient();
 
-    const visibility = formData.get('visibility') as string;
+    const visibility = requiredEnum(formData, 'visibility', Object.values(Visibility));
     if (!visibility) {
       return fail(400, { errors: [{ message: 'Visibility is required' }] });
+    }
+
+    const name = requiredString(formData, 'name');
+    if (!name) {
+      return fail(400, { errors: [{ message: 'Name is required' }] });
     }
 
     const response = await handleApiCall<Application>(() =>
       client.updateApplicationByAppKey({
         orgKey: params.orgKey,
         appKey: params.appKey,
-        body: {
-          name: formData.get('name') as string,
-          visibility: visibility as Visibility
-        },
+        body: { name, visibility },
         headers
       })
     );

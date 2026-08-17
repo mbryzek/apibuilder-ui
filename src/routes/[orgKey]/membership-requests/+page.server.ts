@@ -5,6 +5,7 @@ import { handleApiCall, isApiError } from '$lib/api/error-handler';
 import { actionFail } from '$lib/api/action-error';
 import { dataOr, loadErrorFrom } from '$lib/api/load-error';
 import { requireAuth, requireAdminForAction } from '$lib/server/auth';
+import { requiredString } from '$lib/server/form';
 import { findScopedById, outOfScope } from '$lib/server/scoped-id';
 import type { MembershipRequest, Membership } from '$generated/com-bryzek-apibuilder';
 
@@ -44,9 +45,9 @@ export const actions: Actions = {
     const session = await requireAdminForAction(locals, params.orgKey);
     const headers = getSessionHeaders(session.id);
     const formData = await request.formData();
-    const guid = formData.get('guid');
+    const guid = requiredString(formData, 'guid');
 
-    if (!guid || typeof guid !== 'string') {
+    if (!guid) {
       return fail(400, { errors: [{ message: 'Invalid request' }] });
     }
 
@@ -70,9 +71,9 @@ export const actions: Actions = {
     const session = await requireAdminForAction(locals, params.orgKey);
     const headers = getSessionHeaders(session.id);
     const formData = await request.formData();
-    const guid = formData.get('guid');
+    const guid = requiredString(formData, 'guid');
 
-    if (!guid || typeof guid !== 'string') {
+    if (!guid) {
       return fail(400, { errors: [{ message: 'Invalid request' }] });
     }
 

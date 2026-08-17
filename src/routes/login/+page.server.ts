@@ -6,6 +6,7 @@ import { config } from '$lib/config';
 import { completeSession } from '$lib/server/auth-completion';
 import type { SessionState } from '$generated/com-bryzek-platform';
 import { safeRedirectPath } from '$lib/server/safe-redirect';
+import { optionalString, requiredSecret, requiredString } from '$lib/server/form';
 
 export const load: PageServerLoad = async ({ locals, url }) => {
   if (locals.session) {
@@ -19,9 +20,9 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 export const actions: Actions = {
   default: async ({ request, cookies, url }) => {
     const formData = await request.formData();
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
-    const redirectTo = safeRedirectPath((formData.get('redirectTo') as string) || url.searchParams.get('redirect'));
+    const email = requiredString(formData, 'email');
+    const password = requiredSecret(formData, 'password');
+    const redirectTo = safeRedirectPath(optionalString(formData, 'redirectTo') ?? url.searchParams.get('redirect'));
 
     if (!email || !password) {
       return fail(400, { errors: [{ message: 'Email and password are required' }] });

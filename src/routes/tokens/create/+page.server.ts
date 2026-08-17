@@ -3,6 +3,7 @@ import { platformClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall, isApiError } from '$lib/api/error-handler';
 import { actionFail } from '$lib/api/action-error';
 import { requireAuth, requireAuthForAction } from '$lib/server/auth';
+import { optionalString } from '$lib/server/form';
 import type { CreatedToken, TokenForm } from '$generated/com-bryzek-platform';
 
 export const load: PageServerLoad = async (event) => {
@@ -22,7 +23,7 @@ export const actions: Actions = {
     const session = requireAuthForAction(locals);
     const headers = getSessionHeaders(session.id);
     const formData = await request.formData();
-    const description = formData.get('description') as string;
+    const description = optionalString(formData, 'description');
 
     const body: TokenForm = { user_id: session.user.id };
     if (description) {

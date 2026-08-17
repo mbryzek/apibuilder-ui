@@ -4,6 +4,7 @@ import { platformClient } from '$lib/api/clients';
 import { handleApiCall } from '$lib/api/error-handler';
 import { config } from '$lib/config';
 import { completeSession } from '$lib/server/auth-completion';
+import { requiredSecret } from '$lib/server/form';
 import type { SessionState } from '$generated/com-bryzek-platform';
 
 export const load: PageServerLoad = async ({ params }) => {
@@ -13,8 +14,8 @@ export const load: PageServerLoad = async ({ params }) => {
 export const actions: Actions = {
   default: async ({ request, params, cookies }) => {
     const formData = await request.formData();
-    const password = formData.get('password') as string;
-    const confirmPassword = formData.get('confirm_password') as string;
+    const password = requiredSecret(formData, 'password');
+    const confirmPassword = requiredSecret(formData, 'confirm_password');
 
     if (!password) {
       return fail(400, { errors: [{ message: 'Password is required' }] });

@@ -5,6 +5,7 @@ import { handleApiCall, isApiError } from '$lib/api/error-handler';
 import { actionFail } from '$lib/api/action-error';
 import { dataOr, loadErrorFrom } from '$lib/api/load-error';
 import { requireAuth } from '$lib/server/auth';
+import { optionalString, requiredString } from '$lib/server/form';
 import { redirectWithFlash } from '$lib/server/flash';
 import type { User, UserForm } from '$generated/com-bryzek-apibuilder';
 
@@ -24,9 +25,9 @@ export const actions: Actions = {
     }
 
     const formData = await request.formData();
-    const email = formData.get('email') as string;
-    const nickname = formData.get('nickname') as string;
-    const name = (formData.get('name') as string) || '';
+    const email = requiredString(formData, 'email');
+    const nickname = requiredString(formData, 'nickname');
+    const name = optionalString(formData, 'name');
 
     if (!email || !nickname) {
       return fail(400, { errors: [{ message: 'Email and nickname are required' }] });
