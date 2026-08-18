@@ -159,6 +159,10 @@ export default [
     },
     rules: {
       ...sveltePlugin.configs.recommended.rules,
+      // KEY RULE: {@html} is the only XSS sink in a Svelte app, and the values that reach our
+      // components (names, scraped data, model output) are user-set. Every use must be an
+      // explicit, justified exemption naming why the string is app-authored - never a default.
+      'svelte/no-at-html-tags': 'error',
       'no-unused-vars': 'off',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
       '@typescript-eslint/no-explicit-any': 'warn',
@@ -177,6 +181,18 @@ export default [
             'Avoid shorthand properties in conditional spreads. Use explicit { field_name: value } to prevent property name mismatches with API types.'
         }
       ]
+    }
+  },
+
+  // The only files allowed to use {@html}: the documentation pages, whose every injection is a
+  // static template literal of hand-written code samples with no interpolation and no request
+  // data in it. Anything rendering a value - an organization name, an application key, a
+  // service description - must be rendered as data, so adding a file here is a decision to be
+  // argued for in review rather than a default.
+  {
+    files: ['src/routes/doc/**/+page.svelte'],
+    rules: {
+      'svelte/no-at-html-tags': 'off'
     }
   },
 

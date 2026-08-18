@@ -36,11 +36,11 @@ echo "building ${CI_REPO:-apibuilder-ui} @ ${CI_SHA:-working tree} (${CI_EVENT:-
 # survives every clean.
 npm ci
 
-# svelte-check + the Playwright tsconfig typecheck + eslint (already
-# `--max-warnings 0` here) + prettier --check + `npm run test:unit`. The unit
-# suite is INSIDE `check` in this repo, so there is deliberately no second
-# `npm run test:unit` line below — running it twice would double the suite's
-# wall clock for no additional verdict.
+# svelte-check + the Playwright tsconfig typecheck + eslint --max-warnings 0 +
+# prettier --check + vitest. `npm run check` is the whole gate in every SvelteKit repo
+# in this fleet (ISS-3885), so there is deliberately no second test step below —
+# running the unit suite twice would double the suite's wall clock for no additional
+# verdict.
 npm run check
 
 # THE BUILD IS A VERDICT `npm run check` CANNOT GIVE (ISS-868). SvelteKit's
