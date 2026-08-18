@@ -1,29 +1,29 @@
-import { readFileSync } from 'node:fs';
+// dry-copy: sveltekit/node-version-test — every copy of this region must match; `dev repo copies` checks it (ISS-3894)
+/**
+ * What Node version this repo runs on, said once and kept true (ISS-2442).
+ *
+ * package.json `engines.node` is the one declaration, and `.npmrc`'s `engine-strict=true` is what
+ * makes it a gate: npm refuses to install for anyone outside it and names THIS package rather than
+ * a transitive one. These tests are the other half — they keep the declaration honest, because it
+ * is a hand-written range describing a dependency tree that moves under it on every bump. Without
+ * them the real floor is whatever the tree happens to demand, discoverable only from an install
+ * failure naming a package the repo never mentions.
+ */
+import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { subset, validRange } from 'semver';
 import { describe, expect, it } from 'vitest';
 
-/**
- * What Node version this repo runs on, said once and kept true (ISS-2433).
- *
- * Before this, `.nvmrc` said 26 and nothing read it: package.json declared no `engines`, CI never
- * looked at the file, and the fleet built the repo on 24 the whole time. The floor that was
- * actually ENFORCED came from somewhere nobody would think to look -- `.npmrc`'s `engine-strict=true`
- * applies each individual dependency's own `engines` field, so `npm ci` on Node 18 failed with an
- * EBADENGINE naming a transitive Cloudflare package. A real constraint, arriving by accident, in an
- * error message about a package the repo never mentions.
- *
- * package.json `engines` is now the one declaration, and `engine-strict=true` makes it a real gate:
- * npm refuses to install for anyone outside it and names THIS package rather than a transitive one.
- * These tests are the other half -- they keep that declaration honest, because it is a hand-written
- * range and the tree it has to describe changes under it on every dependency bump.
- */
-
 const root = new URL('../', import.meta.url);
-const read = (name: string) => readFileSync(fileURLToPath(new URL(name, root)), 'utf8');
+const resolve = (name: string) => fileURLToPath(new URL(name, root));
+const read = (name: string) => readFileSync(resolve(name), 'utf8');
 
 const declared: string = JSON.parse(read('package.json')).engines?.node;
-const nvmrc = read('.nvmrc').trim();
+
+// A hint to a version manager, not a second declaration — a repo carries `.nvmrc` only where
+// something reads it. Where there is none there is nothing to drift, so the check below skips
+// rather than inventing a pin, and it starts applying on its own the day a repo adds one.
+const nvmrc = existsSync(resolve('.nvmrc')) ? read('.nvmrc').trim() : null;
 
 interface LockPackage {
   engines?: { node?: string };
@@ -42,10 +42,9 @@ describe('declared Node version', () => {
 
   it('covers no version the dependency tree rejects', () => {
     // The check that stops the declaration going stale. A dependency bump can raise the real floor
-    // silently -- which is exactly how this issue arose -- and `engine-strict` would then surface it
-    // as an EBADENGINE about a package nobody chose. Subset, not "does our floor satisfy each range":
-    // three packages here support 22.13+ and 24+ but NOT 23, so a plain `>=22.13.0` would admit a
-    // version the tree refuses to install on.
+    // silently, and `engine-strict` would then surface that as an EBADENGINE about a package nobody
+    // chose. Subset, not "does our floor satisfy each range": a tree that supports 22.13+ and 24+
+    // but not 23 makes a plain `>=22.13.0` admit a version it refuses to install on.
     const rejects = Object.entries(lockPackages)
       // '' is this package's own entry in the lockfile, not a dependency.
       .filter(([name, pkg]) => name !== '' && pkg.engines?.node && !pkg.os && !pkg.cpu)
@@ -55,12 +54,12 @@ describe('declared Node version', () => {
     expect(rejects).toEqual([]);
   });
 
-  it('is what .nvmrc pins developers to', () => {
-    // The drift this issue was filed for. `.nvmrc` is read as a range ("24" means 24.x), so this
-    // fails if it is bumped to a line the dependency tree rejects, or left behind when the floor
-    // rises. Deliberately NOT an assertion about the version CI happens to run: the fleet upgrades
-    // Node on its own schedule, and a check that pinned the build to one major would park every
-    // pull request in this repo the day that happened.
-    expect(subset(nvmrc, declared)).toBe(true);
+  it.skipIf(nvmrc === null)('is what .nvmrc pins developers to', () => {
+    // Deliberately NOT an assertion about one specific version: the fleet upgrades Node on its own
+    // schedule, and pinning the build to one line would park every pull request in this repo the
+    // day that happened. `nvmrc` is non-null here — `skipIf` above is the guard, which TypeScript
+    // does not follow into the callback.
+    expect(subset(nvmrc!, declared)).toBe(true);
   });
 });
+// dry-copy-end
