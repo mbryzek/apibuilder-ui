@@ -1,11 +1,12 @@
 /**
  * What a failed API call says to the person who caused it.
  *
- * `handleApiCall` reports a failure faithfully — for most statuses that means the generated
- * client's own `HTTP 500: Request failed with status 500`, which is a sentence for a log and not
- * for a user. This module is the one place that decides which failures carry a message worth
- * showing and what the rest say instead, so a page load (`load-error.ts`) and a form submission
- * (`action-error.ts`) cannot drift into describing the same outage two different ways.
+ * `handleApiCall` reports a failure faithfully: the server's own message when the response
+ * carried one, and otherwise the generated `statusMessage` table — accurate, but phrased for
+ * every app that shares that table rather than for this one. This module is the one place that
+ * decides which failures carry a message worth showing and what the rest say instead, so a page
+ * load (`load-error.ts`) and a form submission (`action-error.ts`) cannot drift into describing
+ * the same outage two different ways.
  */
 
 import type { ApiError, ApiResponseError } from './error-handler';
@@ -15,8 +16,9 @@ const GENERIC = 'We could not load this data. Please try again.';
 
 /**
  * Statuses whose message was written for a human: our own network sentinel (0), and
- * the validation responses. Every other failure arrives as `HTTP 500: Request failed
- * with status 500` from the generated client, which is not something to show anyone.
+ * the validation responses, where the server names the field and what is wrong with it.
+ * Every other failure falls back to the shared `statusMessage` wording, which is correct
+ * but says nothing this app's own sentence below does not say better.
  */
 const MESSAGE_FROM_API = new Set([0, 400, 409, 422]);
 
