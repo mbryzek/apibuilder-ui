@@ -58,8 +58,9 @@ test.describe('Tokens', () => {
     await expect(page.getByText('only time this token is shown')).toBeVisible();
     await expect(page.locator('button[title="Copy to clipboard"]')).toBeVisible();
 
-    // The detail page carries the mask and nothing that authenticates.
-    await safeClick(page, 'View token details');
+    // The detail page carries the mask and nothing that authenticates. `safeClick` matches
+    // `button:has-text(...)` and this control is an <a>, so it has to be clicked by its role.
+    await page.getByRole('link', { name: 'View token details' }).click();
     await waitForCondition(() => !page.url().includes('/tokens/create'), {
       description: 'navigation to the token detail page',
       maxAttempts: 30

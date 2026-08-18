@@ -3,6 +3,7 @@
  */
 
 import { test, expect } from '@playwright/test';
+import { config } from '../config';
 import {
   generateRandomEmail,
   fillField,
@@ -172,9 +173,13 @@ test.describe('Logout', () => {
     // be reachable from any third-party page via `<img src=".../logout">`.
     const { sessionId } = await signupAndLogin(page);
 
-    await loadUrl(page, '/logout');
-
-    expect(new URL(page.url()).pathname).toBe('/');
+    // The route's OWN redirect, unfollowed. Following it lands wherever `/` sends this user, and
+    // that depends on how many organizations they have — a fresh signup has none, so `/` forwards
+    // again to /org/create and an assertion on the final pathname is about the org list rather
+    // than about logout. `page.request` carries the page's cookies, so the session is the same one.
+    const res = await page.request.get(`${config.FRONTEND_BASE_URL}/logout`, { maxRedirects: 0 });
+    expect(res.status()).toBe(303);
+    expect(res.headers()['location']).toBe('/');
     expect(await sessionIsValid(sessionId)).toBe(true);
   });
 });

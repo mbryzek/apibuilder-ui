@@ -72,30 +72,32 @@ cd ~/code/platform && ./run.sh && sbt 'project api; run'   # platform API on :93
 npm run test:e2e                                # or test:e2e:ui / :headed / :debug
 ```
 
-### Why the Playwright suite is a developer tool, not a gate
+### Where the Playwright suite runs
 
 It signs users up for real: `createUserViaApi` POSTs to `/tenant/apibuilder/session/signups` on
-whatever platform API it is pointed at, and the specs then create orgs, tokens, and domains. Running
-it unattended would need a platform instance it's safe to write to — a private Scala service plus
-Postgres plus migrations plus a seeded `apibuilder` tenant — and pointing it at the production API
-instead is not an option: it would create real users and real orgs on every run.
+whatever platform API it is pointed at, and the specs then create orgs, tokens, and domains. So it
+needs a platform instance it is safe to write to, and pointing it at the production API is not an
+option — it would create real users and real orgs on every run.
 
-So nobody but a developer with `platform` running locally executes this suite, and both the CI
-script and the config say so — `ci/build.sh` deliberately omits `npm run test:e2e` (a suite that
-is red for an infrastructure reason is worse than no suite, because the merge lane cannot tell it
-apart from a real failure), and `playwright.config.ts` has no `process.env['CI']` branches,
-because a `forbidOnly`/`retries`/`workers` split by CI would imply an automated run that does not
-happen.
+`ci/e2e.sh` provides one per build: `dev e2e run` pulls the newest released `platform` image, boots
+it in `Mode.Test` against a throwaway session database, hands this suite the URLs, and removes both
+afterwards. That runs post-merge on `main` and posts an `e2e` commit status.
 
-The practical consequence: **an auth or authorization change needs a unit test, not only an e2e
-spec.** ISS-493 was filed after three consecutive commits changed the logout and dev-login paths
-with no executed coverage at all — the specs compiled on every push, which proved they were valid
-TypeScript and nothing more. Until this suite runs somewhere unattended, `src/**/*.test.ts` is where
-auth behavior gets pinned.
+**`e2e` does not gate a merge, and `ci` does.** The merge lane reads `ci` — `ci/build.sh`, which
+still deliberately omits `npm run test:e2e` — so a red browser suite files an issue rather than
+parking every pull request in this repo. `devops/docs/ci.md` carries the three-step rollout that is
+the first step of.
 
-The helpers under `playwright/utils/` are the exception, and only because they are plain modules:
-`playwright/utils/test-helpers.test.ts` runs under vitest and pins the requests the two
-platform-API helpers put on the wire. The specs that drive a browser still do not run here.
+The practical consequence has not changed: **an auth or authorization change needs a unit test, not
+only an e2e spec.** ISS-493 was filed after three consecutive commits changed the logout and
+dev-login paths with no executed coverage at all — the specs compiled on every push, which proved
+they were valid TypeScript and nothing more. The browser suite now runs, but it runs after the
+merge and against the released backend, so `src/**/*.test.ts` is still where auth behavior is
+pinned at the gate.
+
+The helpers under `playwright/utils/` are plain modules, and
+`playwright/utils/test-helpers.test.ts` runs under vitest to pin the requests the two platform-API
+helpers put on the wire — inside `ci`, on every push.
 
 ### The e2e suite talks to the platform through the generated client
 
