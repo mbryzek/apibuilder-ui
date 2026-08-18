@@ -35,11 +35,13 @@ import { throwIfUnavailable } from '$lib/api/load-error';
 export type FetchPage<T> = (limit: number, offset: number) => Promise<ApiResponse<T[]>>;
 
 /**
- * Rows per request. The apibuilder API rejects a limit above 101
- * (`Invalid limit '200' - Must be > 0 and <= 101`), so this sits just under the ceiling and
- * matches the `limit: 100` the existing loaders use.
+ * Rows per request. A round number just under what these endpoints accept, matching the
+ * `limit: 100` the existing loaders use — NOT the ceiling itself, which is each operation's spec to
+ * declare and the generated client's to emit. `scoped-id.test.ts` checks this against the declared
+ * bound of every operation a caller scans, so a limit the API would reject fails there rather than
+ * arriving as a 422 that this function cannot tell from "not in scope".
  */
-const SCAN_LIMIT = 100;
+export const SCAN_LIMIT = 100;
 
 /**
  * A bound on the scan, so a listing that never reports a short page cannot spin forever. 2,500
