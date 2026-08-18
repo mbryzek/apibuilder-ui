@@ -426,63 +426,75 @@ import { VoidResponse } from './generated-error-void-response.ts';
 import { UnauthorizedErrorResponse } from './generated-error-unauthorized-error-response.ts';
 import { ValidationErrorsResponse } from './generated-error-validation-errors-response.ts';
 import { ApiException } from "./generated-util.ts";
+import type { ApiClientOptions } from "./generated-util.ts";
 
 export interface UpdateEmailVerificationByTokenOptions {
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface CreatePhoneOptinAndResendByIdOptions {
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface GetTenantSessionOptions {
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface CreateTenantSessionLoginsOptions {
   tenantId: string;
   body: LoginForm;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface CreateTenantSessionSignupsOptions {
   tenantId: string;
   body: SignupForm;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface CreateTenantSessionPasswordAndChangesOptions {
   tenantId: string;
   body: PasswordChangeForm;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface CreateTenantSessionPasswordAndResetsOptions {
   tenantId: string;
   body: PasswordResetForm;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface CreateTenantSessionLoginAndLinkAndRequestsOptions {
   tenantId: string;
   body: LoginLinkRequestForm;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface CreateTenantSessionLoginAndPhoneAndRequestsOptions {
   tenantId: string;
   body: LoginPhoneRequestForm;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface CreateTenantSessionLoginAndPhoneAndVerificationsOptions {
   tenantId: string;
   body: LoginPhoneVerifyForm;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface DeleteTenantSessionOptions {
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface GetTokensUsersByUserIdOptions {
@@ -490,15 +502,18 @@ export interface GetTokensUsersByUserIdOptions {
   limit: number;
   offset: number;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface CreateTokenOptions {
   body: TokenForm;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface DeleteTokenByIdOptions {
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface GetUsersOptions {
@@ -511,85 +526,140 @@ export interface GetUsersOptions {
   role?: UserRole[];
   sort?: string;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface GetUserByIdOptions {
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface CreateUserTenantByTenantIdOptions {
   tenantId: string;
   body: UserForm;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface UpdateUserByIdOptions {
   id: string;
   body: UserForm;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface UpdateUserSecondaryByIdOptions {
   id: string;
   body: UserSecondaryForm;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface UpdateUserPrimaryByIdOptions {
   id: string;
   body: UserPrimaryForm;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface UpdateActiveUserByIdOptions {
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface UpdateInactiveUserByIdOptions {
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface UpdateUserRoleByIdAndRoleOptions {
   id: string;
   role: UserRole;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface UpdateUserPasswordByIdOptions {
   id: string;
   body: UserPasswordForm;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface CreateUserPasswordAndResetsByIdOptions {
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface CreateUserPasswordAndSuggestionsOptions {
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface CreateUserEmailAndVerificationsByIdOptions {
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export class ApiClient {
   private baseUrl: string;
+  private defaultHeaders: Record<string, string>;
+  private timeoutMs: number | undefined;
+  private fetchImpl: typeof fetch;
 
-  constructor(baseUrl: string) {
-    this.baseUrl = baseUrl;
+  /**
+   * Accepts a bare base URL for backwards compatibility, or an options object carrying
+   * the headers every call should send, a request timeout, and a fetch implementation.
+   */
+  constructor(options: string | ApiClientOptions) {
+    const resolved: ApiClientOptions = typeof options === 'string' ? { baseUrl: options } : options;
+    this.baseUrl = resolved.baseUrl;
+    this.defaultHeaders = resolved.headers ?? {};
+    this.timeoutMs = resolved.timeoutMs;
+    const fetchImpl = resolved.fetch;
+    this.fetchImpl = fetchImpl ?? ((input: RequestInfo | URL, init?: RequestInit) => fetch(input, init));
+  }
+
+  private async request(
+    url: string,
+    init: Omit<RequestInit, 'headers' | 'signal'>,
+    contentType: string,
+    headers: Record<string, string>,
+    signal?: AbortSignal
+  ): Promise<Response> {
+    const requestInit: RequestInit = {
+      ...init,
+      headers: { 'Content-Type': contentType, ...this.defaultHeaders, ...headers },
+    };
+    if (this.timeoutMs === undefined) {
+      return this.fetchImpl(url, { ...requestInit, signal: signal ?? null });
+    }
+    const controller = new AbortController();
+    const abort = () => controller.abort();
+    if (signal !== undefined) {
+      if (signal.aborted) {
+        controller.abort();
+      } else {
+        signal.addEventListener('abort', abort, { once: true });
+      }
+    }
+    const timer = setTimeout(abort, this.timeoutMs);
+    try {
+      return await this.fetchImpl(url, { ...requestInit, signal: controller.signal });
+    } finally {
+      clearTimeout(timer);
+      if (signal !== undefined) {
+        signal.removeEventListener('abort', abort);
+      }
+    }
   }
 
   async updateEmailVerificationByToken(token: string, options?: UpdateEmailVerificationByTokenOptions): Promise<void> {
     const url = `${this.baseUrl}/email/verifications/${encodeURIComponent(token)}`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(options?.headers || {}),
-      },
-    });
+    }, 'application/json', options?.headers || {}, options?.signal);
 
     if (response.status === 204) {
       return;
@@ -606,13 +676,9 @@ export class ApiClient {
   async createPhoneOptinAndResendById(id: string, options?: CreatePhoneOptinAndResendByIdOptions): Promise<SmsOptinRequestResult> {
     const url = `${this.baseUrl}/phones/${encodeURIComponent(id)}/optin/resend`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(options?.headers || {}),
-      },
-    });
+    }, 'application/json', options?.headers || {}, options?.signal);
 
     if (response.status === 200) {
       const data = await response.json();
@@ -638,13 +704,9 @@ export class ApiClient {
   async getTenantSession(tenantId: string, options?: GetTenantSessionOptions): Promise<TenantSession> {
     const url = `${this.baseUrl}/tenant/${encodeURIComponent(tenantId)}/session`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(options?.headers || {}),
-      },
-    });
+    }, 'application/json', options?.headers || {}, options?.signal);
 
     if (response.status === 200) {
       const data = await response.json();
@@ -666,14 +728,10 @@ export class ApiClient {
   async createTenantSessionLogins(params: CreateTenantSessionLoginsOptions): Promise<SessionState> {
     const url = `${this.baseUrl}/tenant/${encodeURIComponent(params.tenantId)}/session/logins`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
       body: JSON.stringify(params.body),
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 201) {
       const data = await response.json();
@@ -691,14 +749,10 @@ export class ApiClient {
   async createTenantSessionSignups(params: CreateTenantSessionSignupsOptions): Promise<SessionState> {
     const url = `${this.baseUrl}/tenant/${encodeURIComponent(params.tenantId)}/session/signups`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
       body: JSON.stringify(params.body),
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 201) {
       const data = await response.json();
@@ -716,14 +770,10 @@ export class ApiClient {
   async createTenantSessionPasswordAndChanges(params: CreateTenantSessionPasswordAndChangesOptions): Promise<SessionState> {
     const url = `${this.baseUrl}/tenant/${encodeURIComponent(params.tenantId)}/session/password/changes`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
       body: JSON.stringify(params.body),
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 201) {
       const data = await response.json();
@@ -741,14 +791,10 @@ export class ApiClient {
   async createTenantSessionPasswordAndResets(params: CreateTenantSessionPasswordAndResetsOptions): Promise<void> {
     const url = `${this.baseUrl}/tenant/${encodeURIComponent(params.tenantId)}/session/password/resets`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
       body: JSON.stringify(params.body),
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 204) {
       return;
@@ -765,14 +811,10 @@ export class ApiClient {
   async createTenantSessionLoginAndLinkAndRequests(params: CreateTenantSessionLoginAndLinkAndRequestsOptions): Promise<void> {
     const url = `${this.baseUrl}/tenant/${encodeURIComponent(params.tenantId)}/session/login/link/requests`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
       body: JSON.stringify(params.body),
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 204) {
       return;
@@ -789,14 +831,10 @@ export class ApiClient {
   async createTenantSessionLoginAndPhoneAndRequests(params: CreateTenantSessionLoginAndPhoneAndRequestsOptions): Promise<void> {
     const url = `${this.baseUrl}/tenant/${encodeURIComponent(params.tenantId)}/session/login/phone/requests`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
       body: JSON.stringify(params.body),
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 204) {
       return;
@@ -813,14 +851,10 @@ export class ApiClient {
   async createTenantSessionLoginAndPhoneAndVerifications(params: CreateTenantSessionLoginAndPhoneAndVerificationsOptions): Promise<SessionState> {
     const url = `${this.baseUrl}/tenant/${encodeURIComponent(params.tenantId)}/session/login/phone/verifications`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
       body: JSON.stringify(params.body),
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 201) {
       const data = await response.json();
@@ -838,13 +872,9 @@ export class ApiClient {
   async deleteTenantSession(tenantId: string, options?: DeleteTenantSessionOptions): Promise<void> {
     const url = `${this.baseUrl}/tenant/${encodeURIComponent(tenantId)}/session`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(options?.headers || {}),
-      },
-    });
+    }, 'application/json', options?.headers || {}, options?.signal);
 
     if (response.status === 204) {
       return;
@@ -865,13 +895,9 @@ export class ApiClient {
     const queryString = queryParts.length > 0 ? '?' + queryParts.join('&') : '';
     const url = `${this.baseUrl}/tokens/users/${encodeURIComponent(params.userId)}${queryString}`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
       const data = await response.json();
@@ -889,14 +915,10 @@ export class ApiClient {
   async createToken(params: CreateTokenOptions): Promise<CreatedToken> {
     const url = `${this.baseUrl}/tokens`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
       body: JSON.stringify(params.body),
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 201) {
       const data = await response.json();
@@ -918,13 +940,9 @@ export class ApiClient {
   async deleteTokenById(id: string, options?: DeleteTokenByIdOptions): Promise<void> {
     const url = `${this.baseUrl}/tokens/${encodeURIComponent(id)}`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(options?.headers || {}),
-      },
-    });
+    }, 'application/json', options?.headers || {}, options?.signal);
 
     if (response.status === 204) {
       return;
@@ -967,13 +985,9 @@ export class ApiClient {
     const queryString = queryParts.length > 0 ? '?' + queryParts.join('&') : '';
     const url = `${this.baseUrl}/users${queryString}`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
       const data = await response.json();
@@ -995,13 +1009,9 @@ export class ApiClient {
   async getUserById(id: string, options?: GetUserByIdOptions): Promise<User> {
     const url = `${this.baseUrl}/users/${encodeURIComponent(id)}`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(options?.headers || {}),
-      },
-    });
+    }, 'application/json', options?.headers || {}, options?.signal);
 
     if (response.status === 200) {
       const data = await response.json();
@@ -1023,14 +1033,10 @@ export class ApiClient {
   async createUserTenantByTenantId(params: CreateUserTenantByTenantIdOptions): Promise<User> {
     const url = `${this.baseUrl}/users/tenant/${encodeURIComponent(params.tenantId)}`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
       body: JSON.stringify(params.body),
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 201) {
       const data = await response.json();
@@ -1052,14 +1058,10 @@ export class ApiClient {
   async updateUserById(params: UpdateUserByIdOptions): Promise<User> {
     const url = `${this.baseUrl}/users/${encodeURIComponent(params.id)}`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
       body: JSON.stringify(params.body),
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
       const data = await response.json();
@@ -1085,14 +1087,10 @@ export class ApiClient {
   async updateUserSecondaryById(params: UpdateUserSecondaryByIdOptions): Promise<User> {
     const url = `${this.baseUrl}/users/${encodeURIComponent(params.id)}/secondary`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
       body: JSON.stringify(params.body),
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
       const data = await response.json();
@@ -1118,14 +1116,10 @@ export class ApiClient {
   async updateUserPrimaryById(params: UpdateUserPrimaryByIdOptions): Promise<User> {
     const url = `${this.baseUrl}/users/${encodeURIComponent(params.id)}/primary`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
       body: JSON.stringify(params.body),
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
       const data = await response.json();
@@ -1151,13 +1145,9 @@ export class ApiClient {
   async updateActiveUserById(id: string, options?: UpdateActiveUserByIdOptions): Promise<User> {
     const url = `${this.baseUrl}/users/${encodeURIComponent(id)}/active`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(options?.headers || {}),
-      },
-    });
+    }, 'application/json', options?.headers || {}, options?.signal);
 
     if (response.status === 200) {
       const data = await response.json();
@@ -1183,13 +1173,9 @@ export class ApiClient {
   async updateInactiveUserById(id: string, options?: UpdateInactiveUserByIdOptions): Promise<User> {
     const url = `${this.baseUrl}/users/${encodeURIComponent(id)}/inactive`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(options?.headers || {}),
-      },
-    });
+    }, 'application/json', options?.headers || {}, options?.signal);
 
     if (response.status === 200) {
       const data = await response.json();
@@ -1215,13 +1201,9 @@ export class ApiClient {
   async updateUserRoleByIdAndRole(params: UpdateUserRoleByIdAndRoleOptions): Promise<User> {
     const url = `${this.baseUrl}/users/${encodeURIComponent(params.id)}/role/${encodeURIComponent(String(params.role))}`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
       const data = await response.json();
@@ -1247,14 +1229,10 @@ export class ApiClient {
   async updateUserPasswordById(params: UpdateUserPasswordByIdOptions): Promise<void> {
     const url = `${this.baseUrl}/users/${encodeURIComponent(params.id)}/password`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
       body: JSON.stringify(params.body),
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 204) {
       return;
@@ -1279,13 +1257,9 @@ export class ApiClient {
   async createUserPasswordAndResetsById(id: string, options?: CreateUserPasswordAndResetsByIdOptions): Promise<void> {
     const url = `${this.baseUrl}/users/${encodeURIComponent(id)}/password/resets`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(options?.headers || {}),
-      },
-    });
+    }, 'application/json', options?.headers || {}, options?.signal);
 
     if (response.status === 204) {
       return;
@@ -1310,13 +1284,9 @@ export class ApiClient {
   async createUserPasswordAndSuggestions(params: CreateUserPasswordAndSuggestionsOptions): Promise<UserPasswordSuggestion> {
     const url = `${this.baseUrl}/users/password/suggestions`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 201) {
       const data = await response.json();
@@ -1330,13 +1300,9 @@ export class ApiClient {
   async createUserEmailAndVerificationsById(id: string, options?: CreateUserEmailAndVerificationsByIdOptions): Promise<void> {
     const url = `${this.baseUrl}/users/${encodeURIComponent(id)}/email/verifications`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(options?.headers || {}),
-      },
-    });
+    }, 'application/json', options?.headers || {}, options?.signal);
 
     if (response.status === 204) {
       return;

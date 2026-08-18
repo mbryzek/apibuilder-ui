@@ -1,167 +1,24 @@
 /**
- * API Error Handling Utilities
- * Convert generated API client exceptions to consistent response format
+ * API error handling — the parts that are this app's alone.
+ *
+ * The response envelope (`ApiResponse`/`ApiError`), the status→message table and the
+ * decoding of whatever a generated client throws all live in `$generated/generated-util`,
+ * emitted by the apibuilder TypeScript generator into every repo that consumes these
+ * APIs. This module re-exports them from the module path the call sites already import
+ * from, and adds the one name that is local to this app.
+ *
+ * Nothing about a failure is phrased for a user here: `api-message.ts` owns that, and it
+ * is the only thing that should read `status` to decide what a person is told.
  */
 
-import { ValidationErrorsResponse } from '$generated/generated-error-validation-errors-response';
-import { UnauthorizedErrorResponse } from '$generated/generated-error-unauthorized-error-response';
-import { VoidResponse } from '$generated/generated-error-void-response';
-import { ApiException } from '$generated/generated-util';
-import type { ValidationError } from '$generated/com-bryzek-platform-error';
+import type { ApiError } from '$generated/generated-util';
 
-// ============================================================================
-// Response Types
-// ============================================================================
+export { handleApiCall, isApiError, isApiSuccess, statusMessage } from '$generated/generated-util';
+export type { ApiCallOptions, ApiError, ApiResponse, ApiResponseError, ApiResponseSuccess } from '$generated/generated-util';
 
 /**
- * API error with optional field reference
- */
-export interface ApiError {
-  message: string;
-  field?: string;
-}
-
-/**
- * Alias for backward compatibility with .svelte files
+ * The form-error item type, under the name the `.svelte` files already import. Every
+ * `form: { errors?: ApiErrorItem[] }` prop in this repo names it, so it stays as an
+ * alias rather than becoming a rename across thirteen components.
  */
 export type ApiErrorItem = ApiError;
-
-/**
- * Successful API response with data
- */
-export interface ApiResponseSuccess<T> {
-  data: T;
-  status: number;
-}
-
-/**
- * Error API response with errors
- */
-export interface ApiResponseError {
-  errors: ApiError[];
-  status: number;
-}
-
-/**
- * Standard API response wrapper - discriminated union
- */
-export type ApiResponse<T> = ApiResponseSuccess<T> | ApiResponseError;
-
-/**
- * Type guard to check if response is an error
- */
-export function isApiError<T>(response: ApiResponse<T>): response is ApiResponseError {
-  return 'errors' in response;
-}
-
-/**
- * Type guard to check if response is successful
- */
-export function isApiSuccess<T>(response: ApiResponse<T>): response is ApiResponseSuccess<T> {
-  return 'data' in response;
-}
-
-/**
- * Options for API call handling
- */
-export interface ApiCallOptions {
-  onUnauthorized?: () => void;
-}
-
-// ============================================================================
-// Error Handling
-// ============================================================================
-
-/**
- * Execute an API call and convert exceptions to ApiResponse format.
- * Works with generated API clients that throw typed exceptions.
- */
-export async function handleApiCall<T>(apiCall: () => Promise<T>, options?: ApiCallOptions): Promise<ApiResponse<T>> {
-  try {
-    const data = await apiCall();
-    return { status: 200, data };
-  } catch (error) {
-    if (error instanceof ValidationErrorsResponse) {
-      const validationErrors = await error.validationErrors();
-      return {
-        status: error.response.status,
-        errors: parseValidationErrors(validationErrors)
-      };
-    }
-
-    if (error instanceof UnauthorizedErrorResponse) {
-      if (options?.onUnauthorized) {
-        options.onUnauthorized();
-      }
-      const unauthorizedError = await error.unauthorizedError();
-      return {
-        status: error.response.status,
-        errors: [{ message: unauthorizedError.message || 'Unauthorized' }]
-      };
-    }
-
-    if (error instanceof VoidResponse) {
-      const status = error.response.status;
-      const isSuccess = status >= 200 && status < 300;
-
-      if (isSuccess) {
-        return {
-          status,
-          data: undefined as T
-        };
-      }
-      // The message must follow the status. Hardcoding 'Not found' made every void-returning
-      // endpoint report 401, 403, 409, 410, and 500 as a missing resource — and callers surface
-      // this string verbatim (e.g. email-verifications/[token] flashes it), so an expired token
-      // and a platform outage read identically to the user.
-      return {
-        status,
-        errors: [{ message: status === 404 ? 'Not found' : `Request failed with status ${status}` }]
-      };
-    }
-
-    if (error instanceof ApiException) {
-      return {
-        status: error.response.status,
-        errors: [{ message: error.message }]
-      };
-    }
-
-    let errorMessage = 'Unable to connect to the server. Please check your internet connection and try again.';
-
-    if (error instanceof Error) {
-      const msg = error.message.toLowerCase();
-      if (msg.includes('fetch failed') || msg.includes('failed to fetch')) {
-        errorMessage = 'Unable to connect to the server. Please check your internet connection and try again.';
-      } else if (msg.includes('network')) {
-        errorMessage = 'Network error occurred. Please check your internet connection and try again.';
-      } else if (msg.includes('timeout')) {
-        errorMessage = 'Request timed out. Please try again.';
-      } else {
-        errorMessage = error.message;
-      }
-    }
-
-    return {
-      status: 0,
-      errors: [{ message: errorMessage }]
-    };
-  }
-}
-
-/**
- * Parse ValidationError[] into ApiError[]
- */
-function parseValidationErrors(errors: ValidationError[]): ApiError[] {
-  return errors.map((err) => ({
-    message: err.message,
-    ...(err.field && { field: err.field })
-  }));
-}
-
-/**
- * Get all errors that don't have a specific field
- */
-export function getGeneralErrors(errors: ApiError[] | undefined): ApiError[] {
-  return errors?.filter((e) => !e.field) ?? [];
-}

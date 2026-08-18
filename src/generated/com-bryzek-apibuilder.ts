@@ -301,9 +301,11 @@ import { UnauthorizedErrorResponse } from './generated-error-unauthorized-error-
 import { VoidResponse } from './generated-error-void-response.ts';
 import { ValidationErrorsResponse } from './generated-error-validation-errors-response.ts';
 import { ApiException } from "./generated-util.ts";
+import type { ApiClientOptions } from "./generated-util.ts";
 
 export interface CreateAnonymousOrgOptions {
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface GetApplicationsOptions {
@@ -313,18 +315,21 @@ export interface GetApplicationsOptions {
   hasVersion?: boolean;
   key?: string;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface GetApplicationByAppKeyOptions {
   orgKey: string;
   appKey: string;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface CreateApplicationOptions {
   orgKey: string;
   body: ApplicationForm;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface UpdateApplicationByAppKeyOptions {
@@ -332,17 +337,20 @@ export interface UpdateApplicationByAppKeyOptions {
   appKey: string;
   body: ApplicationForm;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface DeleteApplicationByAppKeyOptions {
   orgKey: string;
   appKey: string;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface CreateApplicationDiffsOptions {
   body: DiffForm;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface GetChangesOptions {
@@ -351,6 +359,7 @@ export interface GetChangesOptions {
   orgKey?: string;
   applicationKey?: string;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface GetCodeOptions {
@@ -360,18 +369,21 @@ export interface GetCodeOptions {
   generatorKey: string;
   attributes?: string;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface CreateDomainOptions {
   orgKey: string;
   body: Domain;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface DeleteDomainByNameOptions {
   orgKey: string;
   name: string;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface GetItemsOptions {
@@ -380,6 +392,7 @@ export interface GetItemsOptions {
   q?: string;
   orgKey?: string;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface GetMembershipsOptions {
@@ -389,10 +402,12 @@ export interface GetMembershipsOptions {
   userId?: string;
   role?: MembershipRole;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface DeleteMembershipByIdOptions {
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface GetMembershipRequestsOptions {
@@ -401,19 +416,23 @@ export interface GetMembershipRequestsOptions {
   orgKey?: string;
   userId?: string;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface CreateMembershipRequestOptions {
   body: MembershipRequestForm;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface CreateMembershipRequestAcceptByIdOptions {
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface CreateMembershipRequestDeclineByIdOptions {
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface GetOrganizationsOptions {
@@ -421,25 +440,30 @@ export interface GetOrganizationsOptions {
   offset: number;
   key?: string;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface GetOrganizationByKeyOptions {
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface CreateOrganizationOptions {
   body: OrganizationForm;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface UpdateOrganizationByKeyOptions {
   key: string;
   body: OrganizationForm;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface DeleteOrganizationByKeyOptions {
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface GetSubscriptionsOptions {
@@ -449,15 +473,18 @@ export interface GetSubscriptionsOptions {
   userId?: string;
   publication?: Publication;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface CreateSubscriptionOptions {
   body: SubscriptionForm;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface DeleteSubscriptionByIdOptions {
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface GetUsersOptions {
@@ -465,21 +492,25 @@ export interface GetUsersOptions {
   email?: string;
   nickname?: string;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface GetUserByIdOptions {
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface UpdateUserByIdOptions {
   id: string;
   body: UserForm;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface CreateValidationOptions {
   body: OriginalForm;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface GetVersionsOptions {
@@ -488,6 +519,7 @@ export interface GetVersionsOptions {
   limit: number;
   offset: number;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface GetVersionByVersionOptions {
@@ -495,6 +527,7 @@ export interface GetVersionByVersionOptions {
   appKey: string;
   version: VersionIdentifier;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface UpdateVersionByVersionOptions {
@@ -503,6 +536,7 @@ export interface UpdateVersionByVersionOptions {
   version: VersionIdentifier;
   body: VersionForm;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface DeleteVersionByVersionOptions {
@@ -510,6 +544,7 @@ export interface DeleteVersionByVersionOptions {
   appKey: string;
   version: VersionIdentifier;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface GetWatchesOptions {
@@ -519,34 +554,79 @@ export interface GetWatchesOptions {
   organizationKey?: string;
   applicationKey?: string;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface CreateWatchOptions {
   body: WatchForm;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export interface DeleteWatchByIdOptions {
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export class ApiClient {
   private baseUrl: string;
+  private defaultHeaders: Record<string, string>;
+  private timeoutMs: number | undefined;
+  private fetchImpl: typeof fetch;
 
-  constructor(baseUrl: string) {
-    this.baseUrl = baseUrl;
+  /**
+   * Accepts a bare base URL for backwards compatibility, or an options object carrying
+   * the headers every call should send, a request timeout, and a fetch implementation.
+   */
+  constructor(options: string | ApiClientOptions) {
+    const resolved: ApiClientOptions = typeof options === 'string' ? { baseUrl: options } : options;
+    this.baseUrl = resolved.baseUrl;
+    this.defaultHeaders = resolved.headers ?? {};
+    this.timeoutMs = resolved.timeoutMs;
+    const fetchImpl = resolved.fetch;
+    this.fetchImpl = fetchImpl ?? ((input: RequestInfo | URL, init?: RequestInit) => fetch(input, init));
+  }
+
+  private async request(
+    url: string,
+    init: Omit<RequestInit, 'headers' | 'signal'>,
+    contentType: string,
+    headers: Record<string, string>,
+    signal?: AbortSignal
+  ): Promise<Response> {
+    const requestInit: RequestInit = {
+      ...init,
+      headers: { 'Content-Type': contentType, ...this.defaultHeaders, ...headers },
+    };
+    if (this.timeoutMs === undefined) {
+      return this.fetchImpl(url, { ...requestInit, signal: signal ?? null });
+    }
+    const controller = new AbortController();
+    const abort = () => controller.abort();
+    if (signal !== undefined) {
+      if (signal.aborted) {
+        controller.abort();
+      } else {
+        signal.addEventListener('abort', abort, { once: true });
+      }
+    }
+    const timer = setTimeout(abort, this.timeoutMs);
+    try {
+      return await this.fetchImpl(url, { ...requestInit, signal: controller.signal });
+    } finally {
+      clearTimeout(timer);
+      if (signal !== undefined) {
+        signal.removeEventListener('abort', abort);
+      }
+    }
   }
 
   async createAnonymousOrg(params: CreateAnonymousOrgOptions): Promise<AnonymousOrg> {
     const url = `${this.baseUrl}/apibuilder/anonymous`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 201) {
       const data = await response.json();
@@ -570,13 +650,9 @@ export class ApiClient {
     const queryString = queryParts.length > 0 ? '?' + queryParts.join('&') : '';
     const url = `${this.baseUrl}/apibuilder/${encodeURIComponent(params.orgKey)}/applications${queryString}`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
       const data = await response.json();
@@ -594,13 +670,9 @@ export class ApiClient {
   async getApplicationByAppKey(params: GetApplicationByAppKeyOptions): Promise<Application> {
     const url = `${this.baseUrl}/apibuilder/${encodeURIComponent(params.orgKey)}/applications/${encodeURIComponent(params.appKey)}`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
       const data = await response.json();
@@ -622,14 +694,10 @@ export class ApiClient {
   async createApplication(params: CreateApplicationOptions): Promise<Application> {
     const url = `${this.baseUrl}/apibuilder/${encodeURIComponent(params.orgKey)}/applications`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
       body: JSON.stringify(params.body),
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 201) {
       const data = await response.json();
@@ -651,14 +719,10 @@ export class ApiClient {
   async updateApplicationByAppKey(params: UpdateApplicationByAppKeyOptions): Promise<Application> {
     const url = `${this.baseUrl}/apibuilder/${encodeURIComponent(params.orgKey)}/applications/${encodeURIComponent(params.appKey)}`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
       body: JSON.stringify(params.body),
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
       const data = await response.json();
@@ -680,13 +744,9 @@ export class ApiClient {
   async deleteApplicationByAppKey(params: DeleteApplicationByAppKeyOptions): Promise<void> {
     const url = `${this.baseUrl}/apibuilder/${encodeURIComponent(params.orgKey)}/applications/${encodeURIComponent(params.appKey)}`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 204) {
       return;
@@ -707,14 +767,10 @@ export class ApiClient {
   async createApplicationDiffs(params: CreateApplicationDiffsOptions): Promise<ApplicationDiff[]> {
     const url = `${this.baseUrl}/apibuilder/diffs`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
       body: JSON.stringify(params.body),
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
       const data = await response.json();
@@ -746,13 +802,9 @@ export class ApiClient {
     const queryString = queryParts.length > 0 ? '?' + queryParts.join('&') : '';
     const url = `${this.baseUrl}/apibuilder/changes${queryString}`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
       const data = await response.json();
@@ -775,13 +827,9 @@ export class ApiClient {
     const queryString = queryParts.length > 0 ? '?' + queryParts.join('&') : '';
     const url = `${this.baseUrl}/apibuilder/${encodeURIComponent(params.orgKey)}/${encodeURIComponent(params.appKey)}/${encodeURIComponent(String(params.version))}/${encodeURIComponent(params.generatorKey)}${queryString}`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
       const data = await response.json();
@@ -807,14 +855,10 @@ export class ApiClient {
   async createDomain(params: CreateDomainOptions): Promise<Domain> {
     const url = `${this.baseUrl}/apibuilder/domains/${encodeURIComponent(params.orgKey)}`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
       body: JSON.stringify(params.body),
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 201) {
       const data = await response.json();
@@ -836,13 +880,9 @@ export class ApiClient {
   async deleteDomainByName(params: DeleteDomainByNameOptions): Promise<void> {
     const url = `${this.baseUrl}/apibuilder/domains/${encodeURIComponent(params.orgKey)}/${encodeURIComponent(params.name)}`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 204) {
       return;
@@ -873,13 +913,9 @@ export class ApiClient {
     const queryString = queryParts.length > 0 ? '?' + queryParts.join('&') : '';
     const url = `${this.baseUrl}/apibuilder/items${queryString}`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
       const data = await response.json();
@@ -910,13 +946,9 @@ export class ApiClient {
     const queryString = queryParts.length > 0 ? '?' + queryParts.join('&') : '';
     const url = `${this.baseUrl}/apibuilder/memberships${queryString}`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
       const data = await response.json();
@@ -934,13 +966,9 @@ export class ApiClient {
   async deleteMembershipById(id: string, options?: DeleteMembershipByIdOptions): Promise<void> {
     const url = `${this.baseUrl}/apibuilder/memberships/${encodeURIComponent(id)}`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(options?.headers || {}),
-      },
-    });
+    }, 'application/json', options?.headers || {}, options?.signal);
 
     if (response.status === 204) {
       return;
@@ -971,13 +999,9 @@ export class ApiClient {
     const queryString = queryParts.length > 0 ? '?' + queryParts.join('&') : '';
     const url = `${this.baseUrl}/apibuilder/membership/requests${queryString}`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
       const data = await response.json();
@@ -995,14 +1019,10 @@ export class ApiClient {
   async createMembershipRequest(params: CreateMembershipRequestOptions): Promise<MembershipRequest> {
     const url = `${this.baseUrl}/apibuilder/membership/requests`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
       body: JSON.stringify(params.body),
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 201) {
       const data = await response.json();
@@ -1024,13 +1044,9 @@ export class ApiClient {
   async createMembershipRequestAcceptById(id: string, options?: CreateMembershipRequestAcceptByIdOptions): Promise<Membership> {
     const url = `${this.baseUrl}/apibuilder/membership/requests/${encodeURIComponent(id)}/accept`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(options?.headers || {}),
-      },
-    });
+    }, 'application/json', options?.headers || {}, options?.signal);
 
     if (response.status === 200) {
       const data = await response.json();
@@ -1056,13 +1072,9 @@ export class ApiClient {
   async createMembershipRequestDeclineById(id: string, options?: CreateMembershipRequestDeclineByIdOptions): Promise<void> {
     const url = `${this.baseUrl}/apibuilder/membership/requests/${encodeURIComponent(id)}/decline`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(options?.headers || {}),
-      },
-    });
+    }, 'application/json', options?.headers || {}, options?.signal);
 
     if (response.status === 204) {
       return;
@@ -1090,13 +1102,9 @@ export class ApiClient {
     const queryString = queryParts.length > 0 ? '?' + queryParts.join('&') : '';
     const url = `${this.baseUrl}/apibuilder/organizations${queryString}`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
       const data = await response.json();
@@ -1114,13 +1122,9 @@ export class ApiClient {
   async getOrganizationByKey(key: string, options?: GetOrganizationByKeyOptions): Promise<Organization> {
     const url = `${this.baseUrl}/apibuilder/organizations/${encodeURIComponent(key)}`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(options?.headers || {}),
-      },
-    });
+    }, 'application/json', options?.headers || {}, options?.signal);
 
     if (response.status === 200) {
       const data = await response.json();
@@ -1142,14 +1146,10 @@ export class ApiClient {
   async createOrganization(params: CreateOrganizationOptions): Promise<Organization> {
     const url = `${this.baseUrl}/apibuilder/organizations`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
       body: JSON.stringify(params.body),
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 201) {
       const data = await response.json();
@@ -1171,14 +1171,10 @@ export class ApiClient {
   async updateOrganizationByKey(params: UpdateOrganizationByKeyOptions): Promise<Organization> {
     const url = `${this.baseUrl}/apibuilder/organizations/${encodeURIComponent(params.key)}`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
       body: JSON.stringify(params.body),
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
       const data = await response.json();
@@ -1200,13 +1196,9 @@ export class ApiClient {
   async deleteOrganizationByKey(key: string, options?: DeleteOrganizationByKeyOptions): Promise<void> {
     const url = `${this.baseUrl}/apibuilder/organizations/${encodeURIComponent(key)}`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(options?.headers || {}),
-      },
-    });
+    }, 'application/json', options?.headers || {}, options?.signal);
 
     if (response.status === 204) {
       return;
@@ -1240,13 +1232,9 @@ export class ApiClient {
     const queryString = queryParts.length > 0 ? '?' + queryParts.join('&') : '';
     const url = `${this.baseUrl}/apibuilder/subscriptions${queryString}`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
       const data = await response.json();
@@ -1264,14 +1252,10 @@ export class ApiClient {
   async createSubscription(params: CreateSubscriptionOptions): Promise<Subscription> {
     const url = `${this.baseUrl}/apibuilder/subscriptions`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
       body: JSON.stringify(params.body),
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 201) {
       const data = await response.json();
@@ -1293,13 +1277,9 @@ export class ApiClient {
   async deleteSubscriptionById(id: string, options?: DeleteSubscriptionByIdOptions): Promise<void> {
     const url = `${this.baseUrl}/apibuilder/subscriptions/${encodeURIComponent(id)}`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(options?.headers || {}),
-      },
-    });
+    }, 'application/json', options?.headers || {}, options?.signal);
 
     if (response.status === 204) {
       return;
@@ -1331,13 +1311,9 @@ export class ApiClient {
     const queryString = queryParts.length > 0 ? '?' + queryParts.join('&') : '';
     const url = `${this.baseUrl}/apibuilder/users${queryString}`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
       const data = await response.json();
@@ -1355,13 +1331,9 @@ export class ApiClient {
   async getUserById(id: string, options?: GetUserByIdOptions): Promise<User> {
     const url = `${this.baseUrl}/apibuilder/users/${encodeURIComponent(id)}`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(options?.headers || {}),
-      },
-    });
+    }, 'application/json', options?.headers || {}, options?.signal);
 
     if (response.status === 200) {
       const data = await response.json();
@@ -1383,14 +1355,10 @@ export class ApiClient {
   async updateUserById(params: UpdateUserByIdOptions): Promise<User> {
     const url = `${this.baseUrl}/apibuilder/users/${encodeURIComponent(params.id)}`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
       body: JSON.stringify(params.body),
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
       const data = await response.json();
@@ -1412,14 +1380,10 @@ export class ApiClient {
   async createValidation(params: CreateValidationOptions): Promise<Validation> {
     const url = `${this.baseUrl}/apibuilder/validations`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
       body: JSON.stringify(params.body),
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
       const data = await response.json();
@@ -1441,13 +1405,9 @@ export class ApiClient {
     const queryString = queryParts.length > 0 ? '?' + queryParts.join('&') : '';
     const url = `${this.baseUrl}/apibuilder/${encodeURIComponent(params.orgKey)}/${encodeURIComponent(params.appKey)}${queryString}`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
       const data = await response.json();
@@ -1465,13 +1425,9 @@ export class ApiClient {
   async getVersionByVersion(params: GetVersionByVersionOptions): Promise<Version> {
     const url = `${this.baseUrl}/apibuilder/${encodeURIComponent(params.orgKey)}/${encodeURIComponent(params.appKey)}/${encodeURIComponent(String(params.version))}`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
       const data = await response.json();
@@ -1493,14 +1449,10 @@ export class ApiClient {
   async updateVersionByVersion(params: UpdateVersionByVersionOptions): Promise<Version> {
     const url = `${this.baseUrl}/apibuilder/${encodeURIComponent(params.orgKey)}/${encodeURIComponent(params.appKey)}/${encodeURIComponent(String(params.version))}`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
       body: JSON.stringify(params.body),
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
       const data = await response.json();
@@ -1522,13 +1474,9 @@ export class ApiClient {
   async deleteVersionByVersion(params: DeleteVersionByVersionOptions): Promise<void> {
     const url = `${this.baseUrl}/apibuilder/${encodeURIComponent(params.orgKey)}/${encodeURIComponent(params.appKey)}/${encodeURIComponent(String(params.version))}`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 204) {
       return;
@@ -1562,13 +1510,9 @@ export class ApiClient {
     const queryString = queryParts.length > 0 ? '?' + queryParts.join('&') : '';
     const url = `${this.baseUrl}/apibuilder/watches${queryString}`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
       const data = await response.json();
@@ -1586,14 +1530,10 @@ export class ApiClient {
   async createWatch(params: CreateWatchOptions): Promise<Watch> {
     const url = `${this.baseUrl}/apibuilder/watches`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(params.headers || {}),
-      },
       body: JSON.stringify(params.body),
-    });
+    }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 201) {
       const data = await response.json();
@@ -1615,13 +1555,9 @@ export class ApiClient {
   async deleteWatchById(id: string, options?: DeleteWatchByIdOptions): Promise<void> {
     const url = `${this.baseUrl}/apibuilder/watches/${encodeURIComponent(id)}`;
 
-      const response = await fetch(url, {
+      const response = await this.request(url, {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(options?.headers || {}),
-      },
-    });
+    }, 'application/json', options?.headers || {}, options?.signal);
 
     if (response.status === 204) {
       return;
