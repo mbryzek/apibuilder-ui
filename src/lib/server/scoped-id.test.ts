@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
-import { findScopedById, outOfScope } from './scoped-id';
+import { parameterBounds as apibuilderBounds } from '$generated/com-bryzek-apibuilder';
+import { parameterBounds as platformBounds } from '$generated/com-bryzek-platform';
+import { findScopedById, outOfScope, SCAN_LIMIT } from './scoped-id';
 import type { ApiResponse } from '$lib/api/error-handler';
 import { failed, ok } from '$lib/test-support/api-responses';
 import { caughtAsync } from '$lib/test-support/throws';
@@ -21,6 +23,20 @@ function listing(total: number) {
   };
   return { calls, fetchPage };
 }
+
+// The three scoped listings a caller hands to `findScopedById`, with the ceiling each declares —
+// read from the generated client, so the scan's page size follows the spec instead of a copy of it.
+// A limit above the ceiling is a 422, and this function reads a definitive failure as "not in
+// scope", so it would answer 404 on a row the caller genuinely owns.
+describe('SCAN_LIMIT', () => {
+  it.each([
+    ['GET /apibuilder/:orgKey/memberships', apibuilderBounds.getMemberships.limit],
+    ['GET /apibuilder/:orgKey/membership_requests', apibuilderBounds.getMembershipRequests.limit],
+    ['GET /tokens/users/:userId', platformBounds.getTokensUsersByUserId.limit]
+  ])('is within the ceiling %s declares', (_operation, limit) => {
+    expect(SCAN_LIMIT).toBeLessThanOrEqual(limit.maximum);
+  });
+});
 
 describe('findScopedById', () => {
   it('returns the row when the id is in the scoped listing', async () => {

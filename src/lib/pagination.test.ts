@@ -1,4 +1,10 @@
+import { readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
+import { parameterBounds as apibuilderBounds } from '$generated/com-bryzek-apibuilder';
+import { parameterBounds as generatorBounds } from '$generated/com-bryzek-apibuilder-generator';
+import { parameterBounds as platformBounds } from '$generated/com-bryzek-platform';
 import { PAGE_FETCH_LIMIT, PAGE_LIMIT, listUrl, parseOffset, toPage } from './pagination';
 
 function offsetOf(query: string): number {
@@ -36,6 +42,56 @@ describe('parseOffset', () => {
 
   it('accepts the largest offset that still round-trips as an integer', () => {
     expect(offsetOf(`?offset=${Number.MAX_SAFE_INTEGER}`)).toBe(Number.MAX_SAFE_INTEGER);
+  });
+});
+
+// The ceiling on `limit` is the spec's, and the generated client emits it per operation as
+// `parameterBounds`. Each loader's own operation is checked rather than one standing in for the
+// rest: the ceilings are not obliged to be the same number, and sending a limit above one is a 422
+// that renders as an empty list. Keyed by generated method name so the second test can check the
+// list covers every call site.
+const CEILINGS: Record<string, { readonly maximum: number }> = {
+  getApplications: apibuilderBounds.getApplications.limit,
+  getChanges: apibuilderBounds.getChanges.limit,
+  getItems: apibuilderBounds.getItems.limit,
+  getMemberships: apibuilderBounds.getMemberships.limit,
+  getMembershipRequests: apibuilderBounds.getMembershipRequests.limit,
+  getGenerators: generatorBounds.getGenerators.limit,
+  getTokensUsersByUserId: platformBounds.getTokensUsersByUserId.limit
+};
+
+/** Every generated method a loader that sends `PAGE_FETCH_LIMIT` calls, read off the sources. */
+function operationsSentTheFetchLimit(): string[] {
+  const routes = fileURLToPath(new URL('../routes/', import.meta.url));
+  const found = new Set<string>();
+  for (const file of readdirSync(routes, { recursive: true, encoding: 'utf8' })) {
+    if (!file.endsWith('+page.server.ts')) {
+      continue;
+    }
+    const source = readFileSync(join(routes, file), 'utf8');
+    // The client method a `limit: PAGE_FETCH_LIMIT` belongs to is the last one called before it:
+    // the argument object is that call's, and a loader that sends the limit to two operations
+    // (members does) has one such call per operation.
+    for (const before of source.split(/\blimit: PAGE_FETCH_LIMIT\b/).slice(0, -1)) {
+      const calls = [...before.matchAll(/\.(\w+)\(/g)];
+      const method = calls.at(-1)?.[1];
+      if (method) {
+        found.add(method);
+      }
+    }
+  }
+  return [...found].sort();
+}
+
+describe('PAGE_FETCH_LIMIT', () => {
+  it.each(Object.entries(CEILINGS))('is within the ceiling %s declares', (_method, limit) => {
+    expect(PAGE_FETCH_LIMIT).toBeLessThanOrEqual(limit.maximum);
+  });
+
+  // Without this, a loader added against an operation with a lower ceiling is simply unchecked --
+  // the assertions above would still pass, and the 422 would be found in production.
+  it('is checked against every operation a loader sends it to', () => {
+    expect(operationsSentTheFetchLimit()).toEqual(Object.keys(CEILINGS).sort());
   });
 });
 

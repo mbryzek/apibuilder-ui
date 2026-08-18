@@ -8,23 +8,17 @@
 export const PAGE_LIMIT = 25;
 
 /**
- * The API's hard ceiling on `limit`, from the platform's own validation message:
- *
- *     GET /apibuilder/generators?limit=200
- *     [{"discriminator":"validation","message":"Invalid limit '200' - Must be > 0 and <= 101"}]
- *
- * Recorded here so the over-fetch below is visibly within budget, and so a future page size is
- * chosen against a known ceiling rather than discovered by a 409 in production.
- */
-export const MAX_API_LIMIT = 101;
-
-/**
  * The `limit` a loader sends: one row more than it renders.
  *
  * Whether a next page exists cannot be inferred from a full page — `rows.length === PAGE_LIMIT` is
  * equally consistent with "there are more" and "that was exactly the last one", and these list
  * endpoints return no total count. Asking for one extra row makes the difference observable: if it
  * comes back, there is at least one more row than we are showing.
+ *
+ * Every list endpoint caps `limit`, and the cap is the spec's to state: each operation declares it
+ * and the generated client emits it as `parameterBounds`. `pagination.test.ts` checks this value
+ * against the declared ceiling of every operation a loader sends it to, so a page size that grew
+ * past what an endpoint accepts fails there rather than as a 422 in production.
  */
 export const PAGE_FETCH_LIMIT = PAGE_LIMIT + 1;
 
