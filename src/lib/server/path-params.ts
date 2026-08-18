@@ -34,14 +34,27 @@ import { error } from '@sveltejs/kit';
  */
 
 /**
- * Characters that can appear in an org key, application key, version or generator key.
+ * Characters that can appear in an org key, application key or generator key.
  *
  * Verified against live data: generator keys are `[a-z0-9_]` (`play_2_x_routes`, `psql_scala`),
- * versions are semver-ish (`1.0.0`, `0.2.1-dev`) plus the literal `latest`. `+` is allowed for
- * semver build metadata; `~` because it is an unreserved URL character. Everything that acts as a
- * delimiter — `/ ? # % \ :` — and every control or non-ASCII character is excluded.
+ * org/app keys are slug-shaped. `+` and `~` are unreserved URL characters kept for parity with the
+ * version charset below. Everything that acts as a delimiter — `/ ? # % \ :` — and every control
+ * or non-ASCII character is excluded.
  */
 const SAFE_SEGMENT = /^[A-Za-z0-9._~+-]+$/;
+
+/**
+ * Characters that can appear in a version identifier.
+ *
+ * This app's `VersionIdentifier` (`com.bryzek.apibuilder.models`) is not semver — the backend
+ * only ever parses the literal `latest` or an ISO-8601 date-time
+ * (`VersionIdentifier.fromString` in `BryzekPlayModelComBryzekApibuilder.scala`), e.g.
+ * `2026-07-22T16:44:49.201Z`. `:` has to be allowed for that `T16:44:49` timestamp portion; it is
+ * safe to add because `:` is a valid `pchar` within a URL path segment (RFC 3986) — only `/` acts
+ * as a path delimiter, so a colon can't be used to smuggle in an extra segment or traverse.
+ * `? # % \` and control/non-ASCII characters stay excluded.
+ */
+const SAFE_VERSION_SEGMENT = /^[A-Za-z0-9._~+:-]+$/;
 
 /**
  * The route params that reach the upstream URL **path**. Query-string params are encoded by the
@@ -59,7 +72,8 @@ const PATH_PARAMS = ['orgKey', 'appKey', 'version', 'generatorKey'] as const;
  * traverse — `/apibuilder/org/app/..` normalizes to `/apibuilder/org`.
  */
 export function assertSafeSegment(value: string, name: string): void {
-  if (value === '.' || value === '..' || !SAFE_SEGMENT.test(value)) {
+  const pattern = name === 'version' ? SAFE_VERSION_SEGMENT : SAFE_SEGMENT;
+  if (value === '.' || value === '..' || !pattern.test(value)) {
     throw error(400, `Invalid ${name}`);
   }
 }

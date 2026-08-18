@@ -10,6 +10,18 @@ describe('assertSafeSegment', () => {
     }
   });
 
+  it('accepts an ISO-8601 version, the shape VersionIdentifier actually parses', () => {
+    // com.bryzek.apibuilder.models.VersionIdentifier.fromString only ever matches `latest` or an
+    // ISO-8601 date-time, e.g. `2026-07-22T16:44:49.201Z` — not semver.
+    expect(() => assertSafeSegment('2026-07-22T16:44:49.201Z', 'version')).not.toThrow();
+  });
+
+  it('rejects a colon in every param except version', () => {
+    for (const name of ['orgKey', 'appKey', 'generatorKey']) {
+      expect(caught(() => assertSafeSegment('2026-07-22T16:44:49.201Z', name)).status).toBe(400);
+    }
+  });
+
   it('rejects the delimiters that would retarget the upstream request', () => {
     // Each of these reached the upstream URL because SvelteKit decodes params before we see them
     // and the generated client interpolates them raw.
