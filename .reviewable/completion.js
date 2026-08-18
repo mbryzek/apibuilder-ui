@@ -1,7 +1,13 @@
 // Reviewable review completion condition — https://docs.reviewable.io/admincenter.html
 //
-// BACKEND repo. Mike reviews these in Reviewable, so completion falls back to
-// Reviewable's default condition (all files reviewed + discussions resolved).
+// MIKE REVIEWS THIS REPO. Completion therefore falls back to Reviewable's
+// default condition (all files reviewed + discussions resolved) — the script
+// never marks the review complete on its own.
+//
+// The label is the REVIEW POLICY, not the stack: this is a SvelteKit frontend
+// and so are several repos that DO auto-complete. `~/code/CLAUDE.md` names the
+// auto-completing set; anything not in it is reviewed here.
+//
 // This script only:
 //   - groups files in the matrix (specs first, tests last, generated last), and
 //   - marks generated code reviewed + vendored so it's collapsed and never
@@ -15,7 +21,7 @@ function isGenerated(path) {
 function groupOf(path) {
   if (isGenerated(path)) return '4. Generated';
   if (/\.json$/.test(path)) return '1. Specs & JSON';
-  if (/(^|\/)tests?\//i.test(path) || /Spec\.scala$/.test(path) || /\.(test|spec)\.[jt]s$/.test(path)) return '3. Tests';
+  if (/(^|\/)(tests?|playwright)\//i.test(path) || /\.(test|spec)\.[jt]s$/.test(path)) return '3. Tests';
   return '2. Source';
 }
 
