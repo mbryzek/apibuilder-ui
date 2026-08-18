@@ -2,8 +2,11 @@
   "compilerOptions": {
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "target": "ES2021",
-    "lib": ["ES2021", "DOM"],
+    // ES2022 for `Error.cause`, which `preserve-caught-error` (new in eslint@10's recommended
+    // set) requires a rethrow to carry. The suite runs on the same node as everything else here,
+    // so ES2021 was a floor nothing was holding, not a runtime constraint.
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM"],
     "types": ["@playwright/test", "node"],
     "esModuleInterop": true,
     "skipLibCheck": true,

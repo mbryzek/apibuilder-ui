@@ -233,8 +233,11 @@ export async function safeClick(page: Page, buttonLabel: string): Promise<boolea
       if (i === retries - 1) {
         await takeScreenshot(page, 'click-failed');
         // Carry the Playwright error forward — "not found" alone hides whether the button was
-        // missing, hidden, or covered by something else.
-        throw new Error(`Button with text '${buttonLabel}' not found: ${error instanceof Error ? error.message : String(error)}`);
+        // missing, hidden, or covered by something else. `cause` keeps its stack, which the
+        // interpolated message alone throws away.
+        throw new Error(`Button with text '${buttonLabel}' not found: ${error instanceof Error ? error.message : String(error)}`, {
+          cause: error
+        });
       }
       await page.waitForTimeout(250);
     }
