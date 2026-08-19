@@ -15,7 +15,7 @@ export const load: PageServerLoad = async (event) => {
 };
 
 export const actions: Actions = {
-  update: async ({ request, params, locals }) => {
+  update: async ({ request, params, locals, cookies }) => {
     const session = await requireAdminForAction(locals, params.orgKey);
     const headers = getSessionHeaders(session.id);
     const formData = await request.formData();
@@ -44,10 +44,10 @@ export const actions: Actions = {
       return actionFail(response);
     }
 
-    redirectWithFlash(`/${response.data.key}/details`, 'Organization updated');
+    redirectWithFlash(cookies, `/${response.data.key}/details`, 'Organization updated');
   },
 
-  delete: async ({ params, locals }) => {
+  delete: async ({ params, locals, cookies }) => {
     await requireAdminForAction(locals, params.orgKey);
     const session = locals.session!;
     const headers = getSessionHeaders(session.id);
@@ -58,6 +58,6 @@ export const actions: Actions = {
       return actionFail(response);
     }
 
-    redirectWithFlash('/', 'Organization deleted');
+    redirectWithFlash(cookies, '/', 'Organization deleted');
   }
 };

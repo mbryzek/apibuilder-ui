@@ -4,12 +4,11 @@
   import Header from '$lib/components/Header.svelte';
   import Footer from '$lib/components/Footer.svelte';
   import Toast from '$lib/components/Toast.svelte';
-  import { page } from '$app/stores';
-  import { goto } from '$app/navigation';
+  import type { Flash } from '$lib/flash';
   import type { Snippet } from 'svelte';
 
   interface Props {
-    data: { session?: PublicSession };
+    data: { session?: PublicSession; flash?: Flash };
     children: Snippet;
   }
 
@@ -17,27 +16,17 @@
 
   const session = $derived(data?.session);
 
-  let flashMessage = $state<string | null>(null);
-  let flashVariant = $state<'success' | 'error' | 'info'>('success');
-
-  $effect(() => {
-    const msg = $page.url.searchParams.get('flash');
-    const variant = $page.url.searchParams.get('flash_type') as 'success' | 'error' | 'info' | null;
-    if (msg) {
-      flashMessage = msg;
-      flashVariant = variant || 'success';
-      const newUrl = new URL($page.url);
-      newUrl.searchParams.delete('flash');
-      newUrl.searchParams.delete('flash_type');
-      goto(newUrl.pathname + newUrl.search, {
-        replaceState: true,
-        noScroll: true
-      });
-    }
-  });
+  // The flash comes from the root server load, which reads the one-shot cookie the redirect set and
+  // clears it. Reading it from `$page.url` instead let any link render its own text as our toast.
+  //
+  // Derived rather than copied into state by an effect, so the toast is in the server-rendered HTML
+  // rather than appearing a beat later on hydration. Dismissal records WHICH flash was dismissed,
+  // so the next one still shows.
+  let dismissed = $state<Flash | null>(null);
+  const flash = $derived(data?.flash && data.flash !== dismissed ? data.flash : null);
 
   function handleDismissFlash() {
-    flashMessage = null;
+    dismissed = data?.flash ?? null;
   }
 </script>
 
@@ -48,8 +37,8 @@
 <div class="flex min-h-screen flex-col">
   <Header {session} />
 
-  {#if flashMessage}
-    <Toast message={flashMessage} variant={flashVariant} onDismiss={handleDismissFlash} />
+  {#if flash}
+    <Toast message={flash.message} variant={flash.type} onDismiss={handleDismissFlash} />
   {/if}
 
   <main class="flex-1">

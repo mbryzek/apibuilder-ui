@@ -90,7 +90,7 @@ export const actions: Actions = {
     throw redirect(303, `/${params.orgKey}/${params.appKey}/${params.version}`);
   },
 
-  deleteVersion: async ({ params, locals }) => {
+  deleteVersion: async ({ params, locals, cookies }) => {
     const session = await requireMemberForAction(locals, params.orgKey);
     const headers = getSessionHeaders(session.id);
     const client = apiBuilderClient({ headers });
@@ -103,6 +103,6 @@ export const actions: Actions = {
       return actionFail(response);
     }
 
-    redirectWithFlash(`/${params.orgKey}/${params.appKey}/latest`, 'Version deleted');
+    redirectWithFlash(cookies, `/${params.orgKey}/${params.appKey}/latest`, 'Version deleted');
   }
 };

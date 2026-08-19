@@ -15,7 +15,7 @@ export const load: PageServerLoad = async (event) => {
 };
 
 export const actions: Actions = {
-  default: async ({ request, locals }) => {
+  default: async ({ request, locals, cookies }) => {
     if (!locals.session) {
       throw redirect(302, '/login');
     }
@@ -42,6 +42,6 @@ export const actions: Actions = {
       return actionFail(response);
     }
 
-    redirectWithFlash('/' + response.data.key, 'Organization created successfully');
+    redirectWithFlash(cookies, '/' + response.data.key, 'Organization created successfully');
   }
 };

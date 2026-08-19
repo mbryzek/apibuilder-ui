@@ -55,7 +55,8 @@ function invoke(action: unknown, form: Record<string, string>) {
     locals: { session: SESSION },
     params: { orgKey: 'my-org' },
     url: new URL('http://localhost/login'),
-    cookies: {}
+    // Real cookie methods: the success path sets a one-shot flash cookie before redirecting.
+    cookies: { get: () => undefined, set: () => {}, delete: () => {} }
   };
   return (action as (e: typeof event) => Promise<unknown>)(event);
 }

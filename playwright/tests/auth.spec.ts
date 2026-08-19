@@ -88,10 +88,10 @@ test.describe('Login', () => {
     expect(page.url()).not.toContain('/login');
   });
 
-  test('preserves redirect target query string and shows flash after login', async ({ page }) => {
-    // Pins the fix for the double-`?` bug: when the redirect target already carries
-    // a query string, the login redirect must append flash params with `&`, not a
-    // second `?`, so both the flash and the original params survive.
+  test('lands on the redirect target with its query string intact and no flash in the URL', async ({ page }) => {
+    // Two invariants at once. The redirect target is emitted verbatim, so an existing query string
+    // survives; and the flash rides in an httpOnly cookie, so nothing about the message appears in
+    // the address bar — a `?flash=` the layout trusted let any link render its own text as our toast.
     const email = generateRandomEmail();
     const password = 'testpassword123';
     await createUserViaApi(email, password);
@@ -106,13 +106,20 @@ test.describe('Login', () => {
     await waitForCondition(() => !page.url().includes('/login'), { description: 'navigation away from login page', maxAttempts: 20 });
 
     const url = new URL(page.url());
-    // Original query param must survive (not corrupted by a second `?`).
-    expect(url.searchParams.get('tab')).toBe('settings');
-    // Flash must be parseable (would be swallowed if concatenated with a second `?`).
-    // The layout strips flash params after showing the toast, so it may already be gone;
-    // the invariant we pin is that `tab` is never mangled into `settings?flash=...`.
-    expect(url.searchParams.get('tab')).not.toContain('flash');
     expect(url.pathname).toBe('/account/profile');
+    expect(url.searchParams.get('tab')).toBe('settings');
+    expect(url.search).not.toContain('flash');
+
+    // The toast is what the server sent, delivered out of band.
+    await expect(page.getByRole('status')).toContainText('Welcome back!');
+  });
+
+  test("does not render a flash query param as the app's own toast", async ({ page }) => {
+    // A crafted link is request input; only a message this server sent may wear the app's chrome.
+    await loadUrl(page, '/?flash=Your+account+has+been+suspended&flash_type=error');
+
+    await expect(page.getByRole('status')).toHaveCount(0);
+    await expect(page.getByText('Your account has been suspended')).toHaveCount(0);
   });
 
   test('shows error for invalid credentials', async ({ page }) => {

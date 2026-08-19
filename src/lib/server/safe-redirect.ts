@@ -12,10 +12,9 @@
  * separator for http(s), so `/\evil.com` passed that check and `new URL('/\\evil.com', origin)`
  * resolves to `http://evil.com/`.
  *
- * Nothing exploited it, and the reason is worth writing down so the guard is not "simplified" back:
- * the one call site funnels through `redirectWithFlash` -> `buildFlashUrl`, which rebuilds the URL
- * and keeps only `pathname + search`, discarding the injected host. So this was safe by accident of
- * a helper two calls away, while the function whose entire job is to be the boundary was not one.
+ * Nothing downstream sanitizes on its behalf: `redirectWithFlash` emits the path it is given
+ * verbatim, so whatever comes back from here is exactly what lands in the `Location` header. This
+ * function is the boundary, and it is the only one.
  *
  * Hence resolve rather than pattern-match: parse against an opaque base and keep only the parts
  * that cannot name another origin. Anything that fails to parse, or resolves elsewhere, becomes `/`.
