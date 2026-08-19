@@ -23,7 +23,9 @@ export const actions: Actions = {
       return fail(400, { errors: [{ message: 'Domain name is required' }] });
     }
 
-    const response = await handleApiCall<Domain>(() => apiBuilderClient().createDomain({ orgKey: params.orgKey, body: { name }, headers }));
+    const response = await handleApiCall<Domain>(() =>
+      apiBuilderClient({ headers }).createDomain({ orgKey: params.orgKey, body: { name } })
+    );
 
     if (isApiError(response)) {
       return actionFail(response);
@@ -42,7 +44,7 @@ export const actions: Actions = {
       return fail(400, { errors: [{ message: 'Invalid request' }] });
     }
 
-    const response = await handleApiCall<void>(() => apiBuilderClient().deleteDomainByName({ orgKey: params.orgKey, name, headers }));
+    const response = await handleApiCall<void>(() => apiBuilderClient({ headers }).deleteDomainByName({ orgKey: params.orgKey, name }));
 
     if (isApiError(response)) {
       return actionFail(response);

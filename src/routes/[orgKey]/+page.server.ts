@@ -8,10 +8,11 @@ import { PAGE_FETCH_LIMIT, parseOffset, toPage } from '$lib/pagination';
 export const load: PageServerLoad = async ({ params, parent, locals, url }) => {
   const { isAdmin } = await parent();
   const headers = getSessionHeaders(locals.session?.id);
+  const client = apiBuilderClient({ headers });
   const offset = parseOffset(url);
 
   const appsResponse = await handleApiCall<Application[]>(() =>
-    apiBuilderClient().getApplications({ orgKey: params.orgKey, hasVersion: true, limit: PAGE_FETCH_LIMIT, offset, headers })
+    client.getApplications({ orgKey: params.orgKey, hasVersion: true, limit: PAGE_FETCH_LIMIT, offset })
   );
 
   const { rows: applications, ...page } = toPage(dataOr(appsResponse, []), offset);
@@ -20,7 +21,7 @@ export const load: PageServerLoad = async ({ params, parent, locals, url }) => {
   let requestsResponse: ApiResponse<MembershipRequest[]> | null = null;
   if (isAdmin && locals.session) {
     requestsResponse = await handleApiCall<MembershipRequest[]>(() =>
-      apiBuilderClient().getMembershipRequests({ orgKey: params.orgKey, limit: 1, offset: 0, headers })
+      client.getMembershipRequests({ orgKey: params.orgKey, limit: 1, offset: 0 })
     );
     hasPendingRequests = dataOr(requestsResponse, []).length > 0;
   }

@@ -7,8 +7,9 @@ import { MembershipRole } from '$generated/com-bryzek-apibuilder';
 
 export const load: LayoutServerLoad = async ({ params, locals }) => {
   const headers = getSessionHeaders(locals.session?.id);
+  const client = apiBuilderClient({ headers });
 
-  const orgResponse = await handleApiCall<Organization>(() => apiBuilderClient().getOrganizationByKey(params.orgKey, { headers }));
+  const orgResponse = await handleApiCall<Organization>(() => client.getOrganizationByKey(params.orgKey));
   const org = dataOrThrow(orgResponse, 'Organization not found');
 
   let isMember = false;
@@ -19,7 +20,7 @@ export const load: LayoutServerLoad = async ({ params, locals }) => {
 
   if (locals.session) {
     const membershipsResponse = await handleApiCall<Membership[]>(() =>
-      apiBuilderClient().getMemberships({ orgKey: params.orgKey, userId: locals.session!.user.id, limit: 25, offset: 0, headers })
+      client.getMemberships({ orgKey: params.orgKey, userId: locals.session!.user.id, limit: 25, offset: 0 })
     );
     // Falling back to "not a member" would tell a member they need to request access.
     membershipLoadError = loadErrorFrom(membershipsResponse);

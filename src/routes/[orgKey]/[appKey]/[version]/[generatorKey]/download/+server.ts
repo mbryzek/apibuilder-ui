@@ -12,12 +12,11 @@ export const GET: RequestHandler = async ({ params, locals }) => {
   const headers = getSessionHeaders(locals.session?.id);
 
   const response = await handleApiCall<Code>(() =>
-    apiBuilderClient().getCode({
+    apiBuilderClient({ headers }).getCode({
       orgKey: params.orgKey,
       appKey: params.appKey,
       version: params.version,
-      generatorKey: params.generatorKey,
-      headers
+      generatorKey: params.generatorKey
     })
   );
 

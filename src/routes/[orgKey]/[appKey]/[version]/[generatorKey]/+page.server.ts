@@ -11,12 +11,11 @@ export const load: PageServerLoad = async ({ params, locals }) => {
   const headers = getSessionHeaders(locals.session?.id);
 
   const codeResponse = await handleApiCall<Code>(() =>
-    apiBuilderClient().getCode({
+    apiBuilderClient({ headers }).getCode({
       orgKey: params.orgKey,
       appKey: params.appKey,
       version: params.version,
-      generatorKey: params.generatorKey,
-      headers
+      generatorKey: params.generatorKey
     })
   );
 

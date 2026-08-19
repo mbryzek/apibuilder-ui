@@ -10,21 +10,18 @@ export const handle: Handle = async ({ event, resolve }) => {
   const sessionId = event.cookies.get(SESSION_COOKIE) || undefined;
 
   if (sessionId) {
-    const client = clients();
-    const response = await handleApiCall<TenantSession>(
-      () => client.platform.getTenantSession(config.tenantId, { headers: getSessionHeaders(sessionId) }),
-      {
-        onUnauthorized: () => {
-          // Stale/invalid cookie: clear it and treat the request as anonymous. Do NOT
-          // force a global redirect to /login here -- that would bounce users off public
-          // routes (e.g. /doc/*, home, /generators) just because they carry an expired
-          // cookie. Protected routes enforce auth in their own load via requireAuth(),
-          // which produces the correct /login?redirect=<path> only when actually needed.
-          clearSessionCookie(event.cookies);
-          event.locals.session = undefined;
-        }
+    const client = clients({ headers: getSessionHeaders(sessionId) });
+    const response = await handleApiCall<TenantSession>(() => client.platform.getTenantSession(config.tenantId), {
+      onUnauthorized: () => {
+        // Stale/invalid cookie: clear it and treat the request as anonymous. Do NOT
+        // force a global redirect to /login here -- that would bounce users off public
+        // routes (e.g. /doc/*, home, /generators) just because they carry an expired
+        // cookie. Protected routes enforce auth in their own load via requireAuth(),
+        // which produces the correct /login?redirect=<path> only when actually needed.
+        clearSessionCookie(event.cookies);
+        event.locals.session = undefined;
       }
-    );
+    });
 
     if ('data' in response && response.data) {
       event.locals.session = {

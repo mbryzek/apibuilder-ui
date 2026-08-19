@@ -27,7 +27,7 @@ export const actions: Actions = {
     const session = await requireMemberForAction(locals, params.orgKey);
     const headers = getSessionHeaders(session.id);
     const formData = await request.formData();
-    const client = apiBuilderClient();
+    const client = apiBuilderClient({ headers });
 
     const appKey = optionalString(formData, 'app_key');
     const visibility = optionalString(formData, 'visibility') ?? 'organization';
@@ -67,8 +67,7 @@ export const actions: Actions = {
         orgKey: params.orgKey,
         appKey: targetAppKey,
         version,
-        body: { original_form: originalForm as OriginalForm },
-        headers
+        body: { original_form: originalForm as OriginalForm }
       })
     );
 

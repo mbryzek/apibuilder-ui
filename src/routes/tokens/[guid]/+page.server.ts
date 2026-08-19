@@ -23,7 +23,7 @@ export const load: PageServerLoad = async (event) => {
   const headers = getSessionHeaders(session.id);
 
   const token = await findScopedById<Token>(event.params.guid, (limit, offset) =>
-    handleApiCall<Token[]>(() => platformClient().getTokensUsersByUserId({ userId: session.user.id, limit, offset, headers }))
+    handleApiCall<Token[]>(() => platformClient({ headers }).getTokensUsersByUserId({ userId: session.user.id, limit, offset }))
   );
   if (!token) {
     throw error(404, 'Not found');
@@ -36,17 +36,18 @@ export const actions: Actions = {
   delete: async ({ params, locals }) => {
     const session = requireAuthForAction(locals);
     const headers = getSessionHeaders(session.id);
+    const client = platformClient({ headers });
 
     // See `$lib/server/scoped-id`: the guid is a selector among the caller's own tokens, never an
     // id trusted straight from the URL.
     const token = await findScopedById<Token>(params.guid, (limit, offset) =>
-      handleApiCall<Token[]>(() => platformClient().getTokensUsersByUserId({ userId: session.user.id, limit, offset, headers }))
+      handleApiCall<Token[]>(() => client.getTokensUsersByUserId({ userId: session.user.id, limit, offset }))
     );
     if (!token) {
       return outOfScope();
     }
 
-    const response = await handleApiCall<void>(() => platformClient().deleteTokenById(token.id, { headers }));
+    const response = await handleApiCall<void>(() => client.deleteTokenById(token.id));
 
     if (isApiError(response)) {
       return actionFail(response);

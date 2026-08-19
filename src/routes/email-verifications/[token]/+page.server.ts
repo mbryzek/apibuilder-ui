@@ -16,7 +16,7 @@ const INVALID_TOKEN = 'That verification link is no longer valid. Please request
 export const load: PageServerLoad = async ({ params, locals }) => {
   const headers = getSessionHeaders(locals.session?.id);
 
-  const response = await handleApiCall<void>(() => platformClient().updateEmailVerificationByToken(params.token, { headers }));
+  const response = await handleApiCall<void>(() => platformClient({ headers }).updateEmailVerificationByToken(params.token));
 
   if (isApiSuccess(response)) {
     redirectWithFlash('/', 'Email verified');

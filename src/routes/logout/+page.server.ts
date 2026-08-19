@@ -21,7 +21,7 @@ export const actions: Actions = {
     // keeps authenticating for a year after the user "logs out".
     if (locals.session) {
       await handleApiCall<void>(() =>
-        platformClient().deleteTenantSession(config.tenantId, { headers: getSessionHeaders(locals.session!.id) })
+        platformClient({ headers: getSessionHeaders(locals.session!.id) }).deleteTenantSession(config.tenantId)
       );
     }
 

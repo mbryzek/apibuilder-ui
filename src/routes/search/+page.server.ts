@@ -15,7 +15,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
   let loadError: LoadError | null = null;
 
   if (q) {
-    const response = await handleApiCall<Item[]>(() => apiBuilderClient().getItems({ q, limit: PAGE_FETCH_LIMIT, offset, headers }));
+    const response = await handleApiCall<Item[]>(() => apiBuilderClient({ headers }).getItems({ q, limit: PAGE_FETCH_LIMIT, offset }));
     const page = toPage(dataOr(response, []), offset);
     items = page.rows;
     hasMore = page.hasMore;

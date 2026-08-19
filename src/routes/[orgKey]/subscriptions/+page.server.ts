@@ -14,7 +14,7 @@ export const load: PageServerLoad = async (event) => {
   const headers = getSessionHeaders(session.id);
 
   const response = await handleApiCall<Subscription[]>(() =>
-    apiBuilderClient().getSubscriptions({ limit: 100, offset: 0, organizationKey: event.params.orgKey, userId: session.user.id, headers })
+    apiBuilderClient({ headers }).getSubscriptions({ limit: 100, offset: 0, organizationKey: event.params.orgKey, userId: session.user.id })
   );
 
   return {
@@ -41,6 +41,7 @@ export const actions: Actions = {
   toggle: async ({ request, params, locals }) => {
     const session = await requireMemberForAction(locals, params.orgKey);
     const headers = getSessionHeaders(session.id);
+    const client = apiBuilderClient({ headers });
     const formData = await request.formData();
     const publication = requiredEnum(formData, 'publication', Object.values(Publication));
 
@@ -49,13 +50,12 @@ export const actions: Actions = {
     }
 
     const existing = await handleApiCall<Subscription[]>(() =>
-      apiBuilderClient().getSubscriptions({
+      client.getSubscriptions({
         organizationKey: params.orgKey,
         userId: session.user.id,
         publication,
         limit: 100,
-        offset: 0,
-        headers
+        offset: 0
       })
     );
     if (isApiError(existing)) {
@@ -64,20 +64,19 @@ export const actions: Actions = {
 
     if (existing.data.length > 0) {
       for (const subscription of existing.data) {
-        const response = await handleApiCall<void>(() => apiBuilderClient().deleteSubscriptionById(subscription.id, { headers }));
+        const response = await handleApiCall<void>(() => client.deleteSubscriptionById(subscription.id));
         if (isApiError(response)) {
           return actionFail(response);
         }
       }
     } else {
       const response = await handleApiCall<Subscription>(() =>
-        apiBuilderClient().createSubscription({
+        client.createSubscription({
           body: {
             organization_key: params.orgKey,
             user_id: session.user.id,
             publication
-          },
-          headers
+          }
         })
       );
       if (isApiError(response)) {

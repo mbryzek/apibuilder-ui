@@ -16,10 +16,8 @@ export const load: PageServerLoad = async ({ cookies }) => {
     throw error(404, 'Not found');
   }
 
-  const client = clients();
-  const response = await handleApiCall<TenantSession>(() =>
-    client.platform.getTenantSession(config.tenantId, { headers: getSessionHeaders('dev') })
-  );
+  const client = clients({ headers: getSessionHeaders('dev') });
+  const response = await handleApiCall<TenantSession>(() => client.platform.getTenantSession(config.tenantId));
 
   if ('data' in response && response.data) {
     setSessionCookie(cookies, response.data.session.id);

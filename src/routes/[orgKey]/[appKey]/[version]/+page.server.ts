@@ -16,7 +16,7 @@ export const actions: Actions = {
   watch: async ({ params, locals }) => {
     const session = requireAuthForAction(locals);
     const headers = getSessionHeaders(session.id);
-    const client = apiBuilderClient();
+    const client = apiBuilderClient({ headers });
 
     const response = await handleApiCall<Watch>(() =>
       client.createWatch({
@@ -24,8 +24,7 @@ export const actions: Actions = {
           user_id: session.user.id,
           organization_key: params.orgKey,
           application_key: params.appKey
-        },
-        headers
+        }
       })
     );
 
@@ -55,7 +54,7 @@ export const actions: Actions = {
   unwatch: async ({ params, locals }) => {
     const session = requireAuthForAction(locals);
     const headers = getSessionHeaders(session.id);
-    const client = apiBuilderClient();
+    const client = apiBuilderClient({ headers });
 
     const watches = await handleApiCall<Watch[]>(() =>
       client.getWatches({
@@ -63,8 +62,7 @@ export const actions: Actions = {
         organizationKey: params.orgKey,
         applicationKey: params.appKey,
         limit: 1,
-        offset: 0,
-        headers
+        offset: 0
       })
     );
 
@@ -76,7 +74,7 @@ export const actions: Actions = {
     // re-render the toggle from what the server actually has.
     const watch = watches.data[0];
     if (watch) {
-      const response = await handleApiCall<void>(() => client.deleteWatchById(watch.id, { headers }));
+      const response = await handleApiCall<void>(() => client.deleteWatchById(watch.id));
 
       if (isApiError(response)) {
         return actionFail(response);
@@ -89,10 +87,10 @@ export const actions: Actions = {
   deleteVersion: async ({ params, locals }) => {
     const session = await requireMemberForAction(locals, params.orgKey);
     const headers = getSessionHeaders(session.id);
-    const client = apiBuilderClient();
+    const client = apiBuilderClient({ headers });
 
     const response = await handleApiCall<void>(() =>
-      client.deleteVersionByVersion({ orgKey: params.orgKey, appKey: params.appKey, version: params.version, headers })
+      client.deleteVersionByVersion({ orgKey: params.orgKey, appKey: params.appKey, version: params.version })
     );
 
     if (isApiError(response)) {

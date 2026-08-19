@@ -28,9 +28,9 @@ export const actions: Actions = {
       return fail(400, { errors: [{ message: 'Email and password are required' }] });
     }
 
-    const client = clients();
+    const client = clients({ headers: getSessionHeaders() });
     const response = await handleApiCall<SessionState>(() =>
-      client.platform.createTenantSessionLogins({ tenantId: config.tenantId, body: { email, password }, headers: getSessionHeaders() })
+      client.platform.createTenantSessionLogins({ tenantId: config.tenantId, body: { email, password } })
     );
 
     return completeSession(cookies, response, redirectTo, 'Welcome back!');

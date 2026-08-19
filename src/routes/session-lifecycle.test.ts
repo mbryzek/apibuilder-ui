@@ -37,6 +37,9 @@ const platform = {
 
 vi.mock('$lib/api/clients', async (importOriginal) => mockApiClients(platform, importOriginal));
 
+// The session id rides on client construction now, so it is the factory call that carries it.
+const { clients: clientsFactory, platformClient } = await import('$lib/api/clients');
+
 const { load: logoutLoad, actions: logoutActions } = await import('./logout/+page.server');
 const { load: devLoginLoad } = await import('./login/dev/+page.server');
 
@@ -92,9 +95,8 @@ describe('POST /logout', () => {
 
     const thrown = await caughtAsync(() => logout(jar, { session: SESSION }));
 
-    expect(platform.deleteTenantSession).toHaveBeenCalledWith('apibuilder', {
-      headers: expect.objectContaining({ session_id: 'sess-1' })
-    });
+    expect(platformClient).toHaveBeenCalledWith({ headers: expect.objectContaining({ session_id: 'sess-1' }) });
+    expect(platform.deleteTenantSession).toHaveBeenCalledWith('apibuilder');
     expect(jar.deleted).toEqual(['session_id']);
     expect(thrown.status).toBe(303);
     expect(thrown.location).toBe('/logged-out');
@@ -146,9 +148,8 @@ describe('/login/dev', () => {
 
     const thrown = await caughtAsync(() => devLogin(jar));
 
-    expect(platform.getTenantSession).toHaveBeenCalledWith('apibuilder', {
-      headers: expect.objectContaining({ session_id: 'dev' })
-    });
+    expect(clientsFactory).toHaveBeenCalledWith({ headers: expect.objectContaining({ session_id: 'dev' }) });
+    expect(platform.getTenantSession).toHaveBeenCalledWith('apibuilder');
     expect(jar.set['session_id']?.value).toBe('sess-dev');
     expect(jar.set['session_id']?.options).toMatchObject({ path: '/', httpOnly: true, sameSite: 'lax' });
     expect(thrown.status).toBe(303);

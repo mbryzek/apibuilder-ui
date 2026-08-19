@@ -36,7 +36,7 @@ export const actions: Actions = {
     }
 
     const headers = getSessionHeaders(locals.session.id);
-    const response = await handleApiCall<Organization>(() => apiBuilderClient().createOrganization({ body, headers }));
+    const response = await handleApiCall<Organization>(() => apiBuilderClient({ headers }).createOrganization({ body }));
 
     if (isApiError(response)) {
       return actionFail(response);
