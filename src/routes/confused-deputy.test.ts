@@ -20,6 +20,7 @@ const client = {
   createMembershipRequestAcceptById: vi.fn(),
   createMembershipRequestDeclineById: vi.fn(),
   getMemberships: vi.fn(),
+  updateMembershipById: vi.fn(),
   deleteMembershipById: vi.fn(),
   getSubscriptions: vi.fn(),
   createSubscription: vi.fn(),
@@ -107,6 +108,22 @@ describe('removeMember', () => {
 
     expect(await invoke(memberActions['removeMember'], { form: { guid: 'own-membership' } })).toEqual({ success: true });
     expect(client.deleteMembershipById).toHaveBeenCalledWith('own-membership');
+  });
+});
+
+describe('makeAdmin / revokeAdmin', () => {
+  it('does not change the role of a membership belonging to another org', async () => {
+    expectNotFound(await invoke(memberActions['makeAdmin'], { form: { guid: 'victim-org-membership' } }));
+    expectNotFound(await invoke(memberActions['revokeAdmin'], { form: { guid: 'victim-org-membership' } }));
+    expect(client.updateMembershipById).not.toHaveBeenCalled();
+  });
+
+  it('changes the role of a membership that is genuinely in this org', async () => {
+    client.getMemberships.mockResolvedValue([{ id: 'own-membership' }]);
+    client.updateMembershipById.mockResolvedValue({ id: 'own-membership' });
+
+    expect(await invoke(memberActions['revokeAdmin'], { form: { guid: 'own-membership' } })).toEqual({ success: true });
+    expect(client.updateMembershipById).toHaveBeenCalledWith({ id: 'own-membership', body: { role: 'member' } });
   });
 });
 

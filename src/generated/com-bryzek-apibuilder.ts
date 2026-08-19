@@ -160,6 +160,13 @@ export interface Membership {
   role: MembershipRole;
 }
 
+/**
+ * The mutable part of a membership. A membership's organization and user are fixed at creation -- only the role can change, and changing it is how a member is promoted or demoted without leaving the organization.
+ */
+export interface MembershipForm {
+  role: MembershipRole;
+}
+
 export interface MembershipRequest {
   id: string;
   user: User;
@@ -435,6 +442,13 @@ export interface GetMembershipsOptions {
   orgKey?: string;
   userId?: string;
   role?: MembershipRole;
+  headers?: Record<string, string>;
+  signal?: AbortSignal;
+}
+
+export interface UpdateMembershipByIdOptions {
+  id: string;
+  body: MembershipForm;
   headers?: Record<string, string>;
   signal?: AbortSignal;
 }
@@ -991,6 +1005,31 @@ export class ApiClient {
 
     if (response.status === 401) {
       throw new UnauthorizedErrorResponse(response);
+    }
+
+    throw new ApiException(response, `Request failed with status ${response.status}`);
+
+  }
+
+  async updateMembershipById(params: UpdateMembershipByIdOptions): Promise<Membership> {
+    const url = `${this.baseUrl}/apibuilder/memberships/${encodeURIComponent(params.id)}`;
+
+      const response = await this.request(url, {
+      method: 'PUT',
+      body: JSON.stringify(params.body),
+    }, 'application/json', params.headers || {}, params.signal);
+
+    if (response.status === 200) {
+      const data = await response.json();
+      return data;
+    }
+
+    if (response.status === 401) {
+      throw new UnauthorizedErrorResponse(response);
+    }
+
+    if (response.status === 422) {
+      throw new ValidationErrorsResponse(response);
     }
 
     throw new ApiException(response, `Request failed with status ${response.status}`);
