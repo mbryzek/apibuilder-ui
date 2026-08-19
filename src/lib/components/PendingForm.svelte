@@ -26,9 +26,17 @@
   use:enhance={() => {
     pending = true;
     return async ({ update }) => {
-      pending = false;
       onSettled?.();
+      // Cleared AFTER the page has updated, not before. `update()` runs `applyAction` and
+      // `invalidateAll` — further round-trips, during which the old markup is still mounted. A
+      // flag cleared first re-enables the submit button over that window, and the control the
+      // user sees there is still the one they just pressed: on /tokens/create that is "Create
+      // Token", so a second click mints a second real API token.
+      //
+      // A success path that redirects unmounts this component instead of returning here, so the
+      // flag cannot be left stuck true.
       await update();
+      pending = false;
     };
   }}
 >
