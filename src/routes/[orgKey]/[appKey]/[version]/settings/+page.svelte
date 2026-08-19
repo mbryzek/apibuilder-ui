@@ -1,15 +1,18 @@
 <script lang="ts">
   import PendingForm from '$lib/components/PendingForm.svelte';
-  import type { Organization } from '$generated/com-bryzek-apibuilder';
+  import type { Application } from '$generated/com-bryzek-apibuilder';
   import type { Service } from '$generated/com-bryzek-apibuilder-spec';
   import { Visibility } from '$generated/com-bryzek-apibuilder';
   import FormErrors from '$lib/components/FormErrors.svelte';
+  import LoadErrorBanner from '$lib/components/LoadErrorBanner.svelte';
+  import type { LoadError } from '$lib/api/load-error';
 
   interface Props {
     data: {
-      org: Organization;
       isAdmin: boolean;
       service: Service;
+      application: Application | null;
+      applicationLoadError: LoadError | null;
     };
     form: {
       errors?: { message: string }[];
@@ -19,6 +22,7 @@
   let { data, form }: Props = $props();
 
   const service = $derived(data.service);
+  const application = $derived(data.application);
   let showDeleteConfirm = $state(false);
 </script>
 
@@ -41,21 +45,24 @@
   {#if data.isAdmin}
     <div class="card">
       <h3 class="text-ab-dark-blue mb-4 text-lg font-semibold">Visibility</h3>
-      <PendingForm action="?/updateVisibility" class="space-y-4">
-        {#snippet children(pending)}
-          <input type="hidden" name="name" value={service.name} />
-          <div>
-            <select name="visibility" class="input-field w-full" value={data.org.visibility}>
-              {#each Object.values(Visibility) as v}
-                <option value={v}>{v}</option>
-              {/each}
-            </select>
-          </div>
-          <button type="submit" class="btn-primary" disabled={pending}>
-            {pending ? 'Updating...' : 'Update Visibility'}
-          </button>
-        {/snippet}
-      </PendingForm>
+      {#if data.applicationLoadError}
+        <LoadErrorBanner error={data.applicationLoadError} />
+      {:else if application}
+        <PendingForm action="?/updateVisibility" class="space-y-4">
+          {#snippet children(pending)}
+            <div>
+              <select name="visibility" class="input-field w-full" value={application.visibility}>
+                {#each Object.values(Visibility) as v}
+                  <option value={v}>{v}</option>
+                {/each}
+              </select>
+            </div>
+            <button type="submit" class="btn-primary" disabled={pending}>
+              {pending ? 'Updating...' : 'Update Visibility'}
+            </button>
+          {/snippet}
+        </PendingForm>
+      {/if}
     </div>
 
     <!-- Delete -->
