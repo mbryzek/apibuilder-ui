@@ -10,8 +10,17 @@ import { defineConfig, devices } from '@playwright/test';
  */
 
 const FRONTEND_BASE_URL = process.env['FRONTEND_BASE_URL'] || 'http://localhost:5173';
-const HEADLESS = process.env['HEADLESS'] === 'true';
 const TEST_RUN_DIR = process.env['TEST_RUN_DIR'] || '/tmp/playwright-apibuilder-screenshots';
+const HEADLESS = process.env['HEADLESS'] === 'true';
+
+/**
+ * `slowMo` pauses before every browser action so a HUMAN can follow along, which is only ever
+ * worth paying for in a headed run somebody is watching. In CI nobody is: 50ms lands on every
+ * click, fill, goto and waitForSelector across the whole suite, serialized on one worker and
+ * repeated for each retry. `CI` — not `HEADLESS` — is what says nobody is watching, because a CI
+ * build sets no `HEADLESS` at all.
+ */
+const SLOW_MO_MS = process.env['CI'] || HEADLESS ? 0 : 50;
 
 /**
  * The port CI told this build to serve the frontend on (`dev e2e run`, ISS-2193).
@@ -81,7 +90,7 @@ export default defineConfig({
         ...devices['Desktop Chrome'],
         viewport: { width: 1920, height: 1080 },
         launchOptions: {
-          slowMo: HEADLESS ? 0 : 50
+          slowMo: SLOW_MO_MS
         }
       }
     }
