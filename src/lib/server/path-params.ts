@@ -26,7 +26,9 @@ import { error } from '@sveltejs/kit';
  * and SvelteKit sets `Location` verbatim, so an `orgKey` of `/evil.com` yields a scheme-relative
  * `//evil.com/...` that browsers resolve to another host. `$lib/server/auth`'s
  * `requireMemberForAction`/`requireAdminForAction` call `assertSafeSegment` for exactly this
- * reason, which is why every org-scoped action is covered without repeating the call.
+ * reason, so an action that authorizes through one of them is covered. An action that only needs
+ * a session, and a load that redirects without calling upstream at all, are not — those call
+ * `assertSafePathParams` directly.
  *
  * Validating rather than encoding is deliberate: these are keys, not free text. A key that is not
  * shaped like a key is a malformed request, and saying so is more honest than quietly rewriting it

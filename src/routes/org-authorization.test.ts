@@ -27,12 +27,20 @@ const LOCALS: App.Locals = { session: SESSION };
 
 const client = {
   getMemberships: vi.fn(),
-  updateVersionByVersion: vi.fn()
+  updateVersionByVersion: vi.fn(),
+  createWatch: vi.fn(),
+  getWatches: vi.fn(),
+  deleteWatchById: vi.fn(),
+  getOrganizationByKey: vi.fn(),
+  createMembershipRequest: vi.fn()
 };
 
 vi.mock('$lib/api/clients', async (importOriginal) => mockApiClients(client, importOriginal));
 
 const { actions: uploadActions } = await import('./[orgKey]/upload/+page.server');
+const { actions: versionActions } = await import('./[orgKey]/[appKey]/[version]/+page.server');
+const { actions: joinActions } = await import('./[orgKey]/memberships/request/+page.server');
+const { load: appRedirectLoad } = await import('./[orgKey]/[appKey]/+page.server');
 const { requireMemberForAction, requireAdminForAction } = await import('$lib/server/auth');
 
 /** Invoke an action the way SvelteKit would, with only the fields these actions read. */
@@ -91,5 +99,60 @@ describe('org-scoped action helpers validate orgKey', () => {
   it('still accepts a normal org key', async () => {
     client.getMemberships.mockResolvedValue([{ id: 'membership-1' }]);
     await expect(requireMemberForAction(LOCALS, 'gilt')).resolves.toEqual(SESSION);
+  });
+});
+
+/**
+ * The org-scoped writes that do NOT go through the membership guards.
+ *
+ * `requireAuthForAction` authorizes a session and validates nothing about the route, so an action
+ * using it inherits no `orgKey` check — and `watch`/`unwatch` reflect `params.orgKey` straight
+ * into their redirect target. `[orgKey]/[appKey]`'s load is the same shape without an action: it
+ * redirects on two params it never validates, refused today only because a sibling layout happens
+ * to 404 first.
+ *
+ * This walks them rather than testing the guard again, because the guard was never wrong — the
+ * gap was a route that did not call it, which is the thing a helper's own unit test cannot see.
+ */
+describe('org-scoped routes outside the membership guards validate orgKey too', () => {
+  const hostile = ['/evil.com', '..', '.', 'org?limit=999', 'org#frag'];
+
+  /** Invoke an action the way SvelteKit would, with only the fields these actions read. */
+  function invoke(action: unknown, orgKey: string) {
+    const event = {
+      request: new Request('http://localhost/', { method: 'POST', body: new FormData() }),
+      locals: LOCALS,
+      params: { orgKey, appKey: 'app', version: '1.0.0' }
+    };
+    return (action as (e: typeof event) => Promise<unknown>)(event);
+  }
+
+  const sites: [string, (orgKey: string) => unknown][] = [
+    ['[appKey]/[version] watch', (orgKey) => invoke(versionActions['watch'], orgKey)],
+    ['[appKey]/[version] unwatch', (orgKey) => invoke(versionActions['unwatch'], orgKey)],
+    ['memberships/request', (orgKey) => invoke(joinActions['default'], orgKey)],
+    ['[appKey] latest-version redirect', (orgKey) => appRedirectLoad({ params: { orgKey, appKey: 'app' } } as never)]
+  ];
+
+  for (const [name, call] of sites) {
+    for (const orgKey of hostile) {
+      it(`${name} refuses ${JSON.stringify(orgKey)}`, async () => {
+        const thrown = await caughtAsync(() => call(orgKey));
+
+        expect(thrown.status).toBe(400);
+        // A 400 that arrives after the redirect has been built is not a refusal.
+        expect(thrown.location).toBeUndefined();
+        expect(client.createWatch).not.toHaveBeenCalled();
+        expect(client.getWatches).not.toHaveBeenCalled();
+        expect(client.getOrganizationByKey).not.toHaveBeenCalled();
+      });
+    }
+  }
+
+  it('still redirects a normal org key to the latest version', async () => {
+    const thrown = await caughtAsync(() => appRedirectLoad({ params: { orgKey: 'gilt', appKey: 'apidoc' } } as never));
+
+    expect(thrown.status).toBe(302);
+    expect(thrown.location).toBe('/gilt/apidoc/latest');
   });
 });
