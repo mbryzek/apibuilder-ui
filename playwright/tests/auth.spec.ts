@@ -52,15 +52,20 @@ test.describe('Signup', () => {
     expect(errorText).toBeTruthy();
   });
 
-  test('shows error for missing email', async ({ page }) => {
+  test('blocks submission when email is missing', async ({ page }) => {
     await loadUrl(page, '/signup');
 
     await fillField(page, 'input[name="password"]', 'testpassword123');
     await safeClick(page, 'Create account');
 
-    // Browser validation should prevent submission (email has required attribute)
-    const stillOnSignup = page.url().includes('/signup');
-    expect(stillOnSignup).toBe(true);
+    // The email input carrying `required` is what blocks submission, so `:invalid` is the thing
+    // to assert: it is what would stop being true if the attribute were dropped and the form
+    // posted. It is also the assertion that survives a LATE navigation — the locator resolves
+    // against whatever page is loaded when it retries, so a submission that went through leaves
+    // nothing matching. Reading page.url() straight after the click asserts neither: navigation
+    // is asynchronous, so the URL is still /signup at that instant either way.
+    await expect(page.locator('input[name="email"]:invalid')).toHaveCount(1);
+    await expect(page).toHaveURL(/\/signup/);
   });
 });
 
