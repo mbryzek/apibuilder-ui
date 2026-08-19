@@ -24,8 +24,8 @@ export default defineConfig({
     // servers and never run unattended, but the helpers that talk to the platform API are plain
     // modules, and this is the only place their behavior gets executed.
     include: ['src/**/*.test.ts', 'playwright/**/*.test.ts'],
-    // Component tests opt into jsdom per file with a `@vitest-environment jsdom` docblock; every
-    // other suite here is plain modules and does not need a DOM.
+    // Component tests opt into a DOM per file with a `@vitest-environment happy-dom` docblock;
+    // every other suite here is plain modules and does not need one.
     environment: 'node'
   }
 });
