@@ -79,6 +79,16 @@
   const defaultTab = $derived(filteredTabs.length > 0 ? filteredTabs[0]!.id : 'resources');
   const currentTab = $derived(activeTab && filteredTabs.some((t) => t.id === activeTab) ? activeTab : defaultTab);
 
+  /**
+   * A filter the reader typed that nothing in the service matches.
+   *
+   * Held apart from a service that declares nothing, because otherwise the two states render the
+   * same sentence: with no tab left to select, `defaultTab` falls back to `resources` and an empty
+   * `ResourceList` says "No resources defined." for a service full of them, beside an empty tab
+   * bar. The whole page then reads as an empty spec rather than as a filter with no matches.
+   */
+  const noMatches = $derived(searchQuery !== '' && filteredTabs.length === 0);
+
   function findTabForName(name: string): string | null {
     // Checked first: a scheme anchor is prefixed precisely so it cannot be confused with a type
     // name, and its scheme type is free-form enough to equal one.
@@ -113,87 +123,92 @@
   });
 </script>
 
-<!-- Tab navigation -->
-<div class="mb-6 overflow-x-auto">
-  <div class="flex min-w-max gap-2" role="tablist" aria-label="Spec sections">
-    {#each filteredTabs as tab (tab.id)}
-      <button
-        role="tab"
-        aria-selected={currentTab === tab.id}
-        class="rounded-full px-4 py-1.5 text-sm font-medium whitespace-nowrap transition-colors {currentTab === tab.id
-          ? 'bg-ab-blue text-white'
-          : 'text-ab-gray hover:text-ab-dark-gray bg-gray-100 hover:bg-gray-200'}"
-        onclick={() => (activeTab = tab.id)}
-      >
-        {tab.label}
-        <span class="ml-0.5 text-xs opacity-75">{tab.count}</span>
-      </button>
-    {/each}
+{#if noMatches}
+  <p class="text-ab-gray text-sm">No types match "{searchQuery}".</p>
+{:else}
+  <!-- Tab navigation -->
+  <div class="mb-6 overflow-x-auto">
+    <div class="flex min-w-max gap-2" role="tablist" aria-label="Spec sections">
+      {#each filteredTabs as tab (tab.id)}
+        <button
+          role="tab"
+          aria-selected={currentTab === tab.id}
+          class="rounded-full px-4 py-1.5 text-sm font-medium whitespace-nowrap transition-colors {currentTab === tab.id
+            ? 'bg-ab-blue text-white'
+            : 'text-ab-gray hover:text-ab-dark-gray bg-gray-100 hover:bg-gray-200'}"
+          onclick={() => (activeTab = tab.id)}
+        >
+          {tab.label}
+          <span class="ml-0.5 text-xs opacity-75">{tab.count}</span>
+        </button>
+      {/each}
+    </div>
   </div>
-</div>
 
-<!-- Tab content -->
-<div>
-  {#if currentTab === 'resources'}
-    <ResourceList resources={filteredResources} {service} />
-  {:else if currentTab === 'models'}
-    <ModelList models={filteredModels} {service} exampleBaseUrl={exampleBaseUrl ?? ''} />
-  {:else if currentTab === 'enums'}
-    <EnumList enums={filteredEnums} exampleBaseUrl={exampleBaseUrl ?? ''} />
-  {:else if currentTab === 'unions'}
-    <UnionList unions={filteredUnions} {service} exampleBaseUrl={exampleBaseUrl ?? ''} />
-  {:else if currentTab === 'interfaces'}
-    <InterfaceList interfaces={filteredInterfaces} {service} />
-  {:else if currentTab === 'auth'}
-    <AuthSchemeList schemes={filteredSchemes} {service} />
-  {:else if currentTab === 'imports'}
-    {#if service.imports.length > 0}
-      <div class="space-y-4">
-        {#each service.imports as imp}
-          {@const impBase = `/${imp.organization.key}/${imp.application.key}/${imp.version}`}
-          <div class="rounded-lg border border-gray-200 p-4">
-            <a href={impBase} class="text-ab-blue hover:text-ab-dark-blue font-medium">
-              {imp.namespace}
-            </a>
-            <p class="text-ab-gray mt-1 text-xs">Version: {imp.version}</p>
-            {#if imp.models.length > 0}
-              <p class="text-ab-gray text-xs">
-                Models:
-                {#each imp.models as model, i}<a href="{impBase}#{model.name}" class="text-ab-blue hover:text-ab-dark-blue">{model.name}</a
-                  >{#if i < imp.models.length - 1},
-                  {/if}{/each}
-              </p>
-            {/if}
-            {#if imp.enums.length > 0}
-              <p class="text-ab-gray text-xs">
-                Enums:
-                {#each imp.enums as enumItem, i}<a href="{impBase}#{enumItem.name}" class="text-ab-blue hover:text-ab-dark-blue"
-                    >{enumItem.name}</a
-                  >{#if i < imp.enums.length - 1},
-                  {/if}{/each}
-              </p>
-            {/if}
-            {#if imp.unions.length > 0}
-              <p class="text-ab-gray text-xs">
-                Unions:
-                {#each imp.unions as unionItem, i}<a href="{impBase}#{unionItem.name}" class="text-ab-blue hover:text-ab-dark-blue"
-                    >{unionItem.name}</a
-                  >{#if i < imp.unions.length - 1},
-                  {/if}{/each}
-              </p>
-            {/if}
-            {#if imp.interfaces && imp.interfaces.length > 0}
-              <p class="text-ab-gray text-xs">
-                Interfaces:
-                {#each imp.interfaces as ifaceItem, i}<a href="{impBase}#{ifaceItem.name}" class="text-ab-blue hover:text-ab-dark-blue"
-                    >{ifaceItem.name}</a
-                  >{#if i < imp.interfaces.length - 1},
-                  {/if}{/each}
-              </p>
-            {/if}
-          </div>
-        {/each}
-      </div>
+  <!-- Tab content -->
+  <div>
+    {#if currentTab === 'resources'}
+      <ResourceList resources={filteredResources} {service} />
+    {:else if currentTab === 'models'}
+      <ModelList models={filteredModels} {service} exampleBaseUrl={exampleBaseUrl ?? ''} />
+    {:else if currentTab === 'enums'}
+      <EnumList enums={filteredEnums} exampleBaseUrl={exampleBaseUrl ?? ''} />
+    {:else if currentTab === 'unions'}
+      <UnionList unions={filteredUnions} {service} exampleBaseUrl={exampleBaseUrl ?? ''} />
+    {:else if currentTab === 'interfaces'}
+      <InterfaceList interfaces={filteredInterfaces} {service} />
+    {:else if currentTab === 'auth'}
+      <AuthSchemeList schemes={filteredSchemes} {service} />
+    {:else if currentTab === 'imports'}
+      {#if service.imports.length > 0}
+        <div class="space-y-4">
+          {#each service.imports as imp}
+            {@const impBase = `/${imp.organization.key}/${imp.application.key}/${imp.version}`}
+            <div class="rounded-lg border border-gray-200 p-4">
+              <a href={impBase} class="text-ab-blue hover:text-ab-dark-blue font-medium">
+                {imp.namespace}
+              </a>
+              <p class="text-ab-gray mt-1 text-xs">Version: {imp.version}</p>
+              {#if imp.models.length > 0}
+                <p class="text-ab-gray text-xs">
+                  Models:
+                  {#each imp.models as model, i}<a href="{impBase}#{model.name}" class="text-ab-blue hover:text-ab-dark-blue"
+                      >{model.name}</a
+                    >{#if i < imp.models.length - 1},
+                    {/if}{/each}
+                </p>
+              {/if}
+              {#if imp.enums.length > 0}
+                <p class="text-ab-gray text-xs">
+                  Enums:
+                  {#each imp.enums as enumItem, i}<a href="{impBase}#{enumItem.name}" class="text-ab-blue hover:text-ab-dark-blue"
+                      >{enumItem.name}</a
+                    >{#if i < imp.enums.length - 1},
+                    {/if}{/each}
+                </p>
+              {/if}
+              {#if imp.unions.length > 0}
+                <p class="text-ab-gray text-xs">
+                  Unions:
+                  {#each imp.unions as unionItem, i}<a href="{impBase}#{unionItem.name}" class="text-ab-blue hover:text-ab-dark-blue"
+                      >{unionItem.name}</a
+                    >{#if i < imp.unions.length - 1},
+                    {/if}{/each}
+                </p>
+              {/if}
+              {#if imp.interfaces && imp.interfaces.length > 0}
+                <p class="text-ab-gray text-xs">
+                  Interfaces:
+                  {#each imp.interfaces as ifaceItem, i}<a href="{impBase}#{ifaceItem.name}" class="text-ab-blue hover:text-ab-dark-blue"
+                      >{ifaceItem.name}</a
+                    >{#if i < imp.interfaces.length - 1},
+                    {/if}{/each}
+                </p>
+              {/if}
+            </div>
+          {/each}
+        </div>
+      {/if}
     {/if}
-  {/if}
-</div>
+  </div>
+{/if}
