@@ -18,7 +18,7 @@ export const load: PageServerLoad = async (event) => {
   const headers = getSessionHeaders(session.id);
 
   const response = await handleApiCall<MembershipRequest[]>(() =>
-    apiBuilderClient().getMembershipRequests({ orgKey: event.params.orgKey, limit: 25, offset: 0, headers })
+    apiBuilderClient({ headers }).getMembershipRequests({ orgKey: event.params.orgKey, limit: 25, offset: 0 })
   );
 
   return {
@@ -36,7 +36,7 @@ export const load: PageServerLoad = async (event) => {
  */
 async function findRequestInOrg(orgKey: string, guid: string, headers: Record<string, string>) {
   return findScopedById<MembershipRequest>(guid, (limit, offset) =>
-    handleApiCall<MembershipRequest[]>(() => apiBuilderClient().getMembershipRequests({ orgKey, limit, offset, headers }))
+    handleApiCall<MembershipRequest[]>(() => apiBuilderClient({ headers }).getMembershipRequests({ orgKey, limit, offset }))
   );
 }
 
@@ -57,7 +57,7 @@ export const actions: Actions = {
     }
 
     const response = await handleApiCall<Membership>(() =>
-      apiBuilderClient().createMembershipRequestAcceptById(membershipRequest.id, { headers })
+      apiBuilderClient({ headers }).createMembershipRequestAcceptById(membershipRequest.id)
     );
 
     if (isApiError(response)) {
@@ -83,7 +83,7 @@ export const actions: Actions = {
     }
 
     const response = await handleApiCall<void>(() =>
-      apiBuilderClient().createMembershipRequestDeclineById(membershipRequest.id, { headers })
+      apiBuilderClient({ headers }).createMembershipRequestDeclineById(membershipRequest.id)
     );
 
     if (isApiError(response)) {

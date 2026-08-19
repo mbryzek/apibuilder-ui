@@ -11,10 +11,10 @@ export const load: LayoutServerLoad = async ({ params, locals }) => {
   // its own — a check here alone would not stop a child's request from going out.
   assertSafePathParams(params);
   const headers = getSessionHeaders(locals.session?.id);
-  const client = apiBuilderClient();
+  const client = apiBuilderClient({ headers });
 
   const versionResponse = await handleApiCall<Version>(() =>
-    client.getVersionByVersion({ orgKey: params.orgKey, appKey: params.appKey, version: params.version, headers })
+    client.getVersionByVersion({ orgKey: params.orgKey, appKey: params.appKey, version: params.version })
   );
 
   const version = dataOrThrow(versionResponse, 'Version not found');
@@ -26,8 +26,7 @@ export const load: LayoutServerLoad = async ({ params, locals }) => {
           organizationKey: params.orgKey,
           applicationKey: params.appKey,
           limit: 100,
-          offset: 0,
-          headers
+          offset: 0
         })
       )
     : null;

@@ -21,7 +21,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
   // Spread rather than `q: q || undefined`: `exactOptionalPropertyTypes` makes an explicit
   // `undefined` a type error, and omitting the param is what "no filter" means on the wire.
   const response = await handleApiCall<Generator[]>(() =>
-    generatorClient().getGenerators({ ...(q ? { q: q } : {}), limit: PAGE_FETCH_LIMIT, offset, headers })
+    generatorClient({ headers }).getGenerators({ ...(q ? { q: q } : {}), limit: PAGE_FETCH_LIMIT, offset })
   );
 
   const { rows: generators, ...page } = toPage(dataOr(response, []), offset);

@@ -9,10 +9,10 @@ import type { Version } from '$generated/com-bryzek-apibuilder';
 export const GET: RequestHandler = async ({ params, locals }) => {
   assertSafePathParams(params);
   const headers = getSessionHeaders(locals.session?.id);
-  const client = apiBuilderClient();
+  const client = apiBuilderClient({ headers });
 
   const response = await handleApiCall<Version>(() =>
-    client.getVersionByVersion({ orgKey: params.orgKey, appKey: params.appKey, version: params.version, headers })
+    client.getVersionByVersion({ orgKey: params.orgKey, appKey: params.appKey, version: params.version })
   );
 
   // The page on the same call already distinguishes these ([version]/+layout.server.ts:15); a flat

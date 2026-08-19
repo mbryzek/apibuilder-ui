@@ -12,7 +12,7 @@ export const load: PageServerLoad = async (event) => {
   const offset = parseOffset(event.url);
 
   const response = await handleApiCall<Token[]>(() =>
-    platformClient().getTokensUsersByUserId({ userId: session.user.id, limit: PAGE_FETCH_LIMIT, offset, headers })
+    platformClient({ headers }).getTokensUsersByUserId({ userId: session.user.id, limit: PAGE_FETCH_LIMIT, offset })
   );
 
   const { rows: tokens, ...page } = toPage(dataOr(response, []), offset);

@@ -9,7 +9,7 @@ export const load: PageServerLoad = async ({ locals }) => {
   if (locals.session) {
     const headers = getSessionHeaders(locals.session.id);
     const membershipsResponse = await handleApiCall<Membership[]>(() =>
-      apiBuilderClient().getMemberships({ userId: locals.session!.user.id, limit: 100, offset: 0, headers })
+      apiBuilderClient({ headers }).getMemberships({ userId: locals.session!.user.id, limit: 100, offset: 0 })
     );
     const loadError = loadErrorFrom(membershipsResponse);
     const myOrgs: Organization[] = dataOr(membershipsResponse, []).map((m) => m.organization);

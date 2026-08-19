@@ -30,7 +30,7 @@ export const actions: Actions = {
       body.description = description;
     }
 
-    const response = await handleApiCall<CreatedToken>(() => platformClient().createToken({ body, headers }));
+    const response = await handleApiCall<CreatedToken>(() => platformClient({ headers }).createToken({ body }));
 
     if (isApiError(response)) {
       return actionFail(response);

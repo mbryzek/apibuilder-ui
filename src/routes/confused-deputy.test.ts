@@ -91,7 +91,7 @@ describe('membership request accept/decline', () => {
 
     expect(await invoke(membershipRequestActions['accept'], { form: { guid: 'own-request' } })).toEqual({ success: true });
     expect(client.getMembershipRequests).toHaveBeenCalledWith(expect.objectContaining({ orgKey: 'mallory-org' }));
-    expect(client.createMembershipRequestAcceptById).toHaveBeenCalledWith('own-request', expect.anything());
+    expect(client.createMembershipRequestAcceptById).toHaveBeenCalledWith('own-request');
   });
 });
 
@@ -106,7 +106,7 @@ describe('removeMember', () => {
     client.deleteMembershipById.mockResolvedValue(undefined);
 
     expect(await invoke(memberActions['removeMember'], { form: { guid: 'own-membership' } })).toEqual({ success: true });
-    expect(client.deleteMembershipById).toHaveBeenCalledWith('own-membership', expect.anything());
+    expect(client.deleteMembershipById).toHaveBeenCalledWith('own-membership');
   });
 });
 
@@ -130,7 +130,7 @@ describe('subscription toggle', () => {
     expect(client.getSubscriptions).toHaveBeenCalledWith(
       expect.objectContaining({ organizationKey: 'mallory-org', userId: 'mallory', publication: 'membership_requests.create' })
     );
-    expect(client.deleteSubscriptionById).toHaveBeenCalledWith('own-subscription', expect.anything());
+    expect(client.deleteSubscriptionById).toHaveBeenCalledWith('own-subscription');
   });
 
   it('rejects a publication that is not in the enum', async () => {
@@ -161,7 +161,7 @@ describe('unwatch', () => {
     expect(client.getWatches).toHaveBeenCalledWith(
       expect.objectContaining({ userId: 'mallory', organizationKey: 'mallory-org', applicationKey: 'app' })
     );
-    expect(client.deleteWatchById).toHaveBeenCalledWith('own-watch', expect.anything());
+    expect(client.deleteWatchById).toHaveBeenCalledWith('own-watch');
   });
 
   it('reports a failed delete instead of redirecting as though it worked', async () => {
@@ -189,6 +189,6 @@ describe('token delete', () => {
     // The id handed to the mutation is the one the scoped listing returned, never the value from
     // the URL — see `$lib/server/scoped-id`.
     await expect(invoke(tokenActions['delete'], { params: { guid: 'own-token' } })).rejects.toMatchObject({ status: 303 });
-    expect(client.deleteTokenById).toHaveBeenCalledWith('own-token', expect.anything());
+    expect(client.deleteTokenById).toHaveBeenCalledWith('own-token');
   });
 });

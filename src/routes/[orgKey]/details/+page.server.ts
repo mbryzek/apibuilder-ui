@@ -37,7 +37,7 @@ export const actions: Actions = {
     if (key) form.key = key;
 
     const response = await handleApiCall<Organization>(() =>
-      apiBuilderClient().updateOrganizationByKey({ key: params.orgKey, body: form, headers })
+      apiBuilderClient({ headers }).updateOrganizationByKey({ key: params.orgKey, body: form })
     );
 
     if (isApiError(response)) {
@@ -52,7 +52,7 @@ export const actions: Actions = {
     const session = locals.session!;
     const headers = getSessionHeaders(session.id);
 
-    const response = await handleApiCall<void>(() => apiBuilderClient().deleteOrganizationByKey(params.orgKey, { headers }));
+    const response = await handleApiCall<void>(() => apiBuilderClient({ headers }).deleteOrganizationByKey(params.orgKey));
 
     if (isApiError(response)) {
       return actionFail(response);

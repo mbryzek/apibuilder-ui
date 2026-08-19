@@ -29,12 +29,11 @@ export const actions: Actions = {
     const person: Record<string, string> = { email };
     if (name) person['name'] = name;
 
-    const client = clients();
+    const client = clients({ headers: getSessionHeaders() });
     const response = await handleApiCall<SessionState>(() =>
       client.platform.createTenantSessionSignups({
         tenantId: config.tenantId,
-        body: { user: { person }, password },
-        headers: getSessionHeaders()
+        body: { user: { person }, password }
       })
     );
 

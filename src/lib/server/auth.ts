@@ -65,7 +65,7 @@ export async function requireMemberForAction(locals: App.Locals, orgKey: string)
   const session = requireAuthForAction(locals);
   const headers = getSessionHeaders(session.id);
   const response = await handleApiCall<Membership[]>(() =>
-    apiBuilderClient().getMemberships({ orgKey, userId: session.user.id, limit: 25, offset: 0, headers })
+    apiBuilderClient({ headers }).getMemberships({ orgKey, userId: session.user.id, limit: 25, offset: 0 })
   );
   // An unanswered membership lookup is not a denial: reporting "Forbidden" for an
   // outage tells a member their access was revoked.
@@ -81,7 +81,7 @@ export async function requireAdminForAction(locals: App.Locals, orgKey: string):
   const session = requireAuthForAction(locals);
   const headers = getSessionHeaders(session.id);
   const response = await handleApiCall<Membership[]>(() =>
-    apiBuilderClient().getMemberships({ orgKey, userId: session.user.id, role: MembershipRole.Admin, limit: 25, offset: 0, headers })
+    apiBuilderClient({ headers }).getMemberships({ orgKey, userId: session.user.id, role: MembershipRole.Admin, limit: 25, offset: 0 })
   );
   throwIfUnavailable(response);
   if (!('data' in response) || response.data.length === 0) {

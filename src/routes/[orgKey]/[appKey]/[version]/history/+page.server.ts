@@ -11,10 +11,10 @@ export const load: PageServerLoad = async ({ url, locals, parent, params }) => {
   const offset = parseOffset(url);
   const orgKey = params.orgKey;
   const appKey = params.appKey;
-  const client = apiBuilderClient();
+  const client = apiBuilderClient({ headers });
 
   const response = await handleApiCall<Change[]>(() =>
-    client.getChanges({ orgKey, applicationKey: appKey, limit: PAGE_FETCH_LIMIT, offset, headers })
+    client.getChanges({ orgKey, applicationKey: appKey, limit: PAGE_FETCH_LIMIT, offset })
   );
 
   const { rows: changes, ...page } = toPage(dataOr(response, []), offset);

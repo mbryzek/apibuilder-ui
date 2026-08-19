@@ -12,7 +12,7 @@ import type { User, UserForm } from '$generated/com-bryzek-apibuilder';
 export const load: PageServerLoad = async (event) => {
   const session = requireAuth(event);
   const headers = getSessionHeaders(session.id);
-  const response = await handleApiCall<User>(() => apiBuilderClient().getUserById(session.user.id, { headers }));
+  const response = await handleApiCall<User>(() => apiBuilderClient({ headers }).getUserById(session.user.id));
   // Never invent a profile: a blank nickname prefilled into the form is one honest
   // Save away from being written back over the real one.
   return { user: dataOr<User | null>(response, null), loadError: loadErrorFrom(response) };
@@ -39,7 +39,7 @@ export const actions: Actions = {
     }
 
     const headers = getSessionHeaders(locals.session.id);
-    const response = await handleApiCall<User>(() => apiBuilderClient().updateUserById({ id: locals.session!.user.id, body, headers }));
+    const response = await handleApiCall<User>(() => apiBuilderClient({ headers }).updateUserById({ id: locals.session!.user.id, body }));
 
     if (isApiError(response)) {
       return actionFail(response);

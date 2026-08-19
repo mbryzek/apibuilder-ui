@@ -19,7 +19,7 @@ export const actions: Actions = {
     const session = await requireAdminForAction(locals, params.orgKey);
     const headers = getSessionHeaders(session.id);
     const formData = await request.formData();
-    const client = apiBuilderClient();
+    const client = apiBuilderClient({ headers });
 
     const visibility = requiredEnum(formData, 'visibility', Object.values(Visibility));
     if (!visibility) {
@@ -35,8 +35,7 @@ export const actions: Actions = {
       client.updateApplicationByAppKey({
         orgKey: params.orgKey,
         appKey: params.appKey,
-        body: { name, visibility },
-        headers
+        body: { name, visibility }
       })
     );
 
@@ -50,11 +49,9 @@ export const actions: Actions = {
   deleteApp: async ({ params, locals }) => {
     const session = await requireAdminForAction(locals, params.orgKey);
     const headers = getSessionHeaders(session.id);
-    const client = apiBuilderClient();
+    const client = apiBuilderClient({ headers });
 
-    const response = await handleApiCall<void>(() =>
-      client.deleteApplicationByAppKey({ orgKey: params.orgKey, appKey: params.appKey, headers })
-    );
+    const response = await handleApiCall<void>(() => client.deleteApplicationByAppKey({ orgKey: params.orgKey, appKey: params.appKey }));
 
     if (isApiError(response)) {
       return actionFail(response);

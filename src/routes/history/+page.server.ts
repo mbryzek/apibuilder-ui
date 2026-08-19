@@ -9,7 +9,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
   const headers = getSessionHeaders(locals.session?.id);
   const offset = parseOffset(url);
 
-  const response = await handleApiCall<Change[]>(() => apiBuilderClient().getChanges({ limit: PAGE_FETCH_LIMIT, offset, headers }));
+  const response = await handleApiCall<Change[]>(() => apiBuilderClient({ headers }).getChanges({ limit: PAGE_FETCH_LIMIT, offset }));
 
   const { rows: changes, ...page } = toPage(dataOr(response, []), offset);
 
