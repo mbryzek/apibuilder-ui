@@ -41,20 +41,23 @@ export function requireAuthForAction(locals: App.Locals): NonNullable<App.Locals
 }
 
 /**
- * Validate `orgKey` here rather than at each action.
+ * Validate `orgKey` here, so an action that authorizes through these helpers cannot forget to.
  *
- * `assertSafePathParams` guards the *loads* that pass route params to a generated client, but
- * actions never run the load pipeline, so none of them inherited it — the previous review round
- * left "apply the guard to the POST actions" as an open follow-up naming five routes, which is a
- * list that goes stale the moment a sixth action is added. Every org-scoped action authorizes
- * through one of these two helpers and passes `params.orgKey` straight in, so this is the one
- * place that covers all of them and cannot be forgotten by the next one.
+ * Actions never run the load pipeline, so none of them inherits the `assertSafePathParams` their
+ * route's loads run. Doing it inside the two membership guards covers every org-scoped action
+ * that requires membership without a per-action call.
  *
- * What it closes today is an open redirect, not the SSRF the guard was originally written for:
- * the generated client now percent-encodes every interpolated path param, but several actions
- * still reflect `params.orgKey` into `redirect(303, `/${params.orgKey}/...`)`, and SvelteKit
- * decodes `%2F` before a handler sees it — so an `orgKey` of `/evil.com` produces a
- * scheme-relative `Location: //evil.com/...`. SvelteKit sets `Location` verbatim.
+ * It does NOT cover an action that only requires a session: `requireAuthForAction` validates
+ * nothing about the route, so an action using it — `[appKey]/[version]`'s watch and unwatch,
+ * `memberships/request` — calls `assertSafePathParams` itself. `org-authorization.test.ts` walks
+ * the org-scoped actions and asserts each one refuses a hostile key, which is what keeps that
+ * true for the next action added rather than this comment.
+ *
+ * What it closes is an open redirect, not the SSRF the guard was originally written for: the
+ * generated client percent-encodes every interpolated path param, but several actions reflect
+ * `params.orgKey` into `redirect(303, `/${params.orgKey}/...`)`, and SvelteKit decodes `%2F`
+ * before a handler sees it — so an `orgKey` of `/evil.com` produces a scheme-relative
+ * `Location: //evil.com/...`. SvelteKit sets `Location` verbatim.
  */
 function assertSafeOrgKey(orgKey: string): void {
   assertSafeSegment(orgKey, 'orgKey');

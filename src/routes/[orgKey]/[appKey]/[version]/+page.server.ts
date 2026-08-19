@@ -4,6 +4,7 @@ import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall, isApiError } from '$lib/api/error-handler';
 import { actionFail } from '$lib/api/action-error';
 import { requireAuthForAction, requireMemberForAction } from '$lib/server/auth';
+import { assertSafePathParams } from '$lib/server/path-params';
 import { redirectWithFlash } from '$lib/server/flash';
 import type { Watch } from '$generated/com-bryzek-apibuilder';
 
@@ -14,6 +15,10 @@ export const load: PageServerLoad = async () => {
 
 export const actions: Actions = {
   watch: async ({ params, locals }) => {
+    // `requireAuthForAction` authorizes a session and validates nothing about the route, and this
+    // action reflects `params.orgKey` into the redirect below. The member/admin guards run this
+    // check themselves; the ones that only need a session have to run it here.
+    assertSafePathParams(params);
     const session = requireAuthForAction(locals);
     const headers = getSessionHeaders(session.id);
     const client = apiBuilderClient({ headers });
@@ -52,6 +57,7 @@ export const actions: Actions = {
    * it redirected as though a failed unwatch had succeeded, with nothing shown to the user.
    */
   unwatch: async ({ params, locals }) => {
+    assertSafePathParams(params);
     const session = requireAuthForAction(locals);
     const headers = getSessionHeaders(session.id);
     const client = apiBuilderClient({ headers });
