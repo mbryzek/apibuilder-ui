@@ -50,6 +50,47 @@ export const load: PageServerLoad = async (event) => {
   };
 };
 
+/**
+ * The membership with this id *within this org*, or null.
+ *
+ * Every action below authorizes `params.orgKey` and then acts on an id that arrived separately in
+ * the form body, so the id has to be resolved against the org that was authorized rather than
+ * trusted. See `$lib/server/scoped-id`.
+ */
+async function findMembershipInOrg(orgKey: string, guid: string, headers: Record<string, string>) {
+  return findScopedById<Membership>(guid, (limit, offset) =>
+    handleApiCall<Membership[]>(() => apiBuilderClient({ headers }).getMemberships({ orgKey, limit, offset }))
+  );
+}
+
+/**
+ * Promotion and demotion are the same act: a role change on the membership the table already
+ * shows, which keeps its id and leaves the person in the organization either way.
+ *
+ * Neither may go through the membership-request path, and demotion in particular may not go
+ * through a delete. A user holds exactly ONE membership per organization — accepting a request
+ * upserts that row — so accepting an `admin` request promotes the row in place, and accepting a
+ * `member` one is a no-op rather than a demotion. Deleting the admin membership therefore does
+ * not demote anybody: it removes them from the organization, which is what "Revoke Admin" did
+ * before ISS-4833.
+ */
+async function changeRole(orgKey: string, guid: string, role: MembershipRole, headers: Record<string, string>) {
+  const membership = await findMembershipInOrg(orgKey, guid, headers);
+  if (!membership) {
+    return outOfScope();
+  }
+
+  const response = await handleApiCall<Membership>(() =>
+    apiBuilderClient({ headers }).updateMembershipById({ id: membership.id, body: { role } })
+  );
+
+  if (isApiError(response)) {
+    return actionFail(response);
+  }
+
+  return { success: true };
+}
+
 export const actions: Actions = {
   addMember: async ({ request, params, locals }) => {
     const session = await requireAdminForAction(locals, params.orgKey);
@@ -113,12 +154,7 @@ export const actions: Actions = {
       return fail(400, { errors: [{ message: 'Invalid request' }] });
     }
 
-    // Resolve the membership within the org that was just authorized, and delete the id that
-    // came back — the same discipline `revokeAdmin` below already used. See
-    // `$lib/server/scoped-id`.
-    const membership = await findScopedById<Membership>(guid, (limit, offset) =>
-      handleApiCall<Membership[]>(() => client.getMemberships({ orgKey: params.orgKey, limit, offset }))
-    );
+    const membership = await findMembershipInOrg(params.orgKey, guid, headers);
     if (!membership) {
       return outOfScope();
     }
@@ -135,65 +171,26 @@ export const actions: Actions = {
   makeAdmin: async ({ request, locals, params }) => {
     const session = await requireAdminForAction(locals, params.orgKey);
     const headers = getSessionHeaders(session.id);
-    const client = apiBuilderClient({ headers });
     const formData = await request.formData();
-    const userId = requiredString(formData, 'user_id');
+    const guid = requiredString(formData, 'guid');
 
-    if (!userId) {
+    if (!guid) {
       return fail(400, { errors: [{ message: 'Invalid request' }] });
     }
 
-    const orgResponse = await handleApiCall<Organization>(() => client.getOrganizationByKey(params.orgKey));
-    if (isApiError(orgResponse)) {
-      return actionFailMissing(orgResponse, 'Organization not found');
-    }
-
-    const requestResponse = await handleApiCall<MembershipRequest>(() =>
-      client.createMembershipRequest({
-        body: { org_id: orgResponse.data.id, user_id: userId, role: MembershipRole.Admin }
-      })
-    );
-
-    if (isApiError(requestResponse)) {
-      return actionFail(requestResponse);
-    }
-
-    const acceptResponse = await handleApiCall<Membership>(() => client.createMembershipRequestAcceptById(requestResponse.data.id));
-
-    if (isApiError(acceptResponse)) {
-      return actionFail(acceptResponse);
-    }
-
-    return { success: true };
+    return changeRole(params.orgKey, guid, MembershipRole.Admin, headers);
   },
 
   revokeAdmin: async ({ request, locals, params }) => {
-    await requireAdminForAction(locals, params.orgKey);
-    const session = locals.session!;
+    const session = await requireAdminForAction(locals, params.orgKey);
     const headers = getSessionHeaders(session.id);
-    const client = apiBuilderClient({ headers });
     const formData = await request.formData();
-    const userId = requiredString(formData, 'user_id');
+    const guid = requiredString(formData, 'guid');
 
-    if (!userId) {
+    if (!guid) {
       return fail(400, { errors: [{ message: 'Invalid request' }] });
     }
 
-    const membershipsResponse = await handleApiCall<Membership[]>(() =>
-      client.getMemberships({ orgKey: params.orgKey, userId, role: MembershipRole.Admin, limit: 100, offset: 0 })
-    );
-
-    if (isApiError(membershipsResponse)) {
-      return actionFail(membershipsResponse);
-    }
-
-    for (const m of membershipsResponse.data) {
-      const deleteResponse = await handleApiCall<void>(() => client.deleteMembershipById(m.id));
-      if (isApiError(deleteResponse)) {
-        return actionFail(deleteResponse);
-      }
-    }
-
-    return { success: true };
+    return changeRole(params.orgKey, guid, MembershipRole.Member, headers);
   }
 };

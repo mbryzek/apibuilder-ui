@@ -111,7 +111,7 @@
                     {#if membership.role === MembershipRole.Admin}
                       <PendingForm action="?/revokeAdmin">
                         {#snippet children(pending)}
-                          <input type="hidden" name="user_id" value={membership.user.id} />
+                          <input type="hidden" name="guid" value={membership.id} />
                           <button type="submit" class="text-ab-blue hover:text-ab-dark-blue text-sm" disabled={pending}>
                             Revoke Admin
                           </button>
@@ -120,7 +120,7 @@
                     {:else}
                       <PendingForm action="?/makeAdmin">
                         {#snippet children(pending)}
-                          <input type="hidden" name="user_id" value={membership.user.id} />
+                          <input type="hidden" name="guid" value={membership.id} />
                           <button type="submit" class="text-ab-blue hover:text-ab-dark-blue text-sm" disabled={pending}>
                             Make Admin
                           </button>
