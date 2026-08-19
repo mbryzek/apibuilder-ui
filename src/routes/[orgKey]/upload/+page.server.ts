@@ -30,7 +30,6 @@ export const actions: Actions = {
     const client = apiBuilderClient({ headers });
 
     const appKey = optionalString(formData, 'app_key');
-    const visibility = optionalString(formData, 'visibility') ?? 'organization';
     const specType = optionalString(formData, 'spec_type');
 
     // `formData.get` answers `File | string | null`, so a text field posted under this name is not
@@ -40,12 +39,12 @@ export const actions: Actions = {
     const file = typeof entry === 'string' ? null : entry;
 
     if (!file || file.size === 0) {
-      return fail(400, { errors: [{ message: 'Please select a file to upload' }], appKey, visibility, specType });
+      return fail(400, { errors: [{ message: 'Please select a file to upload' }], appKey, specType });
     }
 
     const data = await file.text();
     if (!data.trim()) {
-      return fail(400, { errors: [{ message: 'Uploaded file is empty' }], appKey, visibility, specType });
+      return fail(400, { errors: [{ message: 'Uploaded file is empty' }], appKey, specType });
     }
 
     const originalForm = specType ? { data, type: specType } : { data };
@@ -55,7 +54,6 @@ export const actions: Actions = {
       return fail(400, {
         errors: [{ message: 'Please provide an application key or ensure your spec includes a name' }],
         appKey,
-        visibility,
         specType
       });
     }
@@ -72,7 +70,7 @@ export const actions: Actions = {
     );
 
     if (isApiError(response)) {
-      return actionFail(response, { appKey, visibility, specType });
+      return actionFail(response, { appKey, specType });
     }
 
     throw redirect(303, `/${params.orgKey}/${targetAppKey}/${response.data.version}`);
