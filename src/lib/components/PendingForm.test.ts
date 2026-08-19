@@ -45,7 +45,7 @@ describe('PendingForm', () => {
     expect(button('second').disabled).toBe(false);
   });
 
-  it('clears pending and runs onSettled before the page data updates', async () => {
+  it('runs onSettled before the page data updates, and clears pending after', async () => {
     const order: string[] = [];
     render({ onSettled: () => order.push('settled') });
 
@@ -63,5 +63,28 @@ describe('PendingForm', () => {
 
     expect(button('first').disabled).toBe(false);
     expect(order).toEqual(['settled', 'update']);
+  });
+
+  it('keeps the button disabled for the whole of update(), leaving no second-submit window', async () => {
+    render();
+
+    const [submitFirst] = submitFunctions;
+    const settled = submitFirst!();
+    flushSync();
+
+    let disabledDuringUpdate: boolean | undefined;
+    await settled({
+      // `update()` runs applyAction + invalidateAll — round-trips during which the old markup is
+      // still mounted showing the control the user just pressed. On /tokens/create pressing it
+      // again mints a second API token, so the flag has to survive this whole callback.
+      update: async () => {
+        flushSync();
+        disabledDuringUpdate = button('first').disabled;
+      }
+    });
+    flushSync();
+
+    expect(disabledDuringUpdate).toBe(true);
+    expect(button('first').disabled).toBe(false);
   });
 });

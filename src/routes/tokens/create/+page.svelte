@@ -9,21 +9,30 @@
   }
 
   let { form: formResult }: Props = $props();
-  let copied = $state(false);
+  let copyState = $state<'idle' | 'copied' | 'failed'>('idle');
   let copyTimeout: ReturnType<typeof setTimeout> | undefined;
 
   let created = $derived(formResult?.created ?? null);
 
-  function handleCopy(): void {
-    if (created) {
-      navigator.clipboard.writeText(created.cleartext).then(() => {
-        copied = true;
-        clearTimeout(copyTimeout);
-        copyTimeout = setTimeout(() => {
-          copied = false;
-        }, 2000);
-      });
+  /**
+   * The copy has to report its own failure, because this is the only time the value exists.
+   *
+   * `navigator.clipboard` is undefined on a non-secure origin (a TypeError, not a rejection) and
+   * `writeText` rejects on a denied permission or an unfocused document. Silently doing nothing
+   * costs the user the token: the page says, truthfully, that it is not shown again.
+   */
+  async function handleCopy(): Promise<void> {
+    if (!created) return;
+    clearTimeout(copyTimeout);
+    try {
+      await navigator.clipboard.writeText(created.cleartext);
+      copyState = 'copied';
+    } catch {
+      copyState = 'failed';
     }
+    copyTimeout = setTimeout(() => {
+      copyState = 'idle';
+    }, 2000);
   }
 </script>
 
@@ -54,10 +63,12 @@
             title="Copy to clipboard"
             onclick={handleCopy}
           >
-            {#if copied}
+            {#if copyState === 'copied'}
               <svg class="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
+            {:else if copyState === 'failed'}
+              <span class="text-ab-error-red text-xs font-semibold">Failed</span>
             {:else}
               <svg class="text-ab-gray hover:text-ab-dark-blue h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -70,6 +81,9 @@
             {/if}
           </button>
         </div>
+        {#if copyState === 'failed'}
+          <p class="text-ab-error-red mt-2 text-sm">Copy failed. Select the token above and copy it manually.</p>
+        {/if}
         <p class="mt-2 rounded border border-amber-200 bg-amber-50 p-2 text-sm text-amber-700">
           This is the only time this token is shown. Copy it now and store it securely.
         </p>
