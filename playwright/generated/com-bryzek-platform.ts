@@ -419,7 +419,7 @@ export const parameterBounds = {
 import { UnauthorizedErrorResponse } from './generated-error-unauthorized-error-response.ts';
 import { VoidResponse } from './generated-error-void-response.ts';
 import { ValidationErrorsResponse } from './generated-error-validation-errors-response.ts';
-import { ApiException } from "./generated-util.ts";
+import { ApiException, Util } from "./generated-util.ts";
 import type { ApiClientOptions } from "./generated-util.ts";
 
 export interface CreatePhoneOptinAndResendByIdOptions {
@@ -632,8 +632,7 @@ export class ApiClient {
     }, 'application/json', options?.headers || {}, options?.signal);
 
     if (response.status === 200) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParse<SmsOptinRequestResult>(response, "SmsOptinRequestResult");
     }
 
     if (response.status === 401) {
@@ -660,8 +659,7 @@ export class ApiClient {
     }, 'application/json', options?.headers || {}, options?.signal);
 
     if (response.status === 200) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParse<TenantSession>(response, "TenantSession");
     }
 
     if (response.status === 401) {
@@ -685,8 +683,7 @@ export class ApiClient {
     }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 201) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParse<SessionState>(response, "SessionState");
     }
 
     if (response.status === 422) {
@@ -706,8 +703,7 @@ export class ApiClient {
     }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 201) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParse<SessionState>(response, "SessionState");
     }
 
     if (response.status === 422) {
@@ -727,8 +723,7 @@ export class ApiClient {
     }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 201) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParse<SessionState>(response, "SessionState");
     }
 
     if (response.status === 422) {
@@ -808,8 +803,7 @@ export class ApiClient {
     }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 201) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParse<SessionState>(response, "SessionState");
     }
 
     if (response.status === 422) {
@@ -869,8 +863,7 @@ export class ApiClient {
     }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParseArray<User>(response, "User");
     }
 
     if (response.status === 401) {
@@ -893,8 +886,7 @@ export class ApiClient {
     }, 'application/json', options?.headers || {}, options?.signal);
 
     if (response.status === 200) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParse<User>(response, "User");
     }
 
     if (response.status === 401) {
@@ -918,8 +910,7 @@ export class ApiClient {
     }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 201) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParse<User>(response, "User");
     }
 
     if (response.status === 401) {
@@ -943,8 +934,7 @@ export class ApiClient {
     }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParse<User>(response, "User");
     }
 
     if (response.status === 401) {
@@ -972,8 +962,7 @@ export class ApiClient {
     }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParse<User>(response, "User");
     }
 
     if (response.status === 401) {
@@ -1001,8 +990,7 @@ export class ApiClient {
     }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParse<User>(response, "User");
     }
 
     if (response.status === 401) {
@@ -1029,8 +1017,7 @@ export class ApiClient {
     }, 'application/json', options?.headers || {}, options?.signal);
 
     if (response.status === 200) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParse<User>(response, "User");
     }
 
     if (response.status === 401) {
@@ -1057,8 +1044,7 @@ export class ApiClient {
     }, 'application/json', options?.headers || {}, options?.signal);
 
     if (response.status === 200) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParse<User>(response, "User");
     }
 
     if (response.status === 401) {
@@ -1085,8 +1071,7 @@ export class ApiClient {
     }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParse<User>(response, "User");
     }
 
     if (response.status === 401) {
@@ -1168,8 +1153,7 @@ export class ApiClient {
     }, 'application/json', params?.headers || {}, params?.signal);
 
     if (response.status === 201) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParse<UserPasswordSuggestion>(response, "UserPasswordSuggestion");
     }
 
     throw new ApiException(response, `Request failed with status ${response.status}`);

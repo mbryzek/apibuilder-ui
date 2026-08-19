@@ -341,7 +341,7 @@ export const parameterBounds = {
 import { UnauthorizedErrorResponse } from './generated-error-unauthorized-error-response.ts';
 import { VoidResponse } from './generated-error-void-response.ts';
 import { ValidationErrorsResponse } from './generated-error-validation-errors-response.ts';
-import { ApiException } from "./generated-util.ts";
+import { ApiException, Util } from "./generated-util.ts";
 import type { ApiClientOptions } from "./generated-util.ts";
 
 export interface CreateAnonymousOrgOptions {
@@ -677,8 +677,7 @@ export class ApiClient {
     }, 'application/json', params?.headers || {}, params?.signal);
 
     if (response.status === 201) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParse<AnonymousOrg>(response, "AnonymousOrg");
     }
 
     throw new ApiException(response, `Request failed with status ${response.status}`);
@@ -703,8 +702,7 @@ export class ApiClient {
     }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParseArray<Application>(response, "Application");
     }
 
     if (response.status === 401) {
@@ -723,8 +721,7 @@ export class ApiClient {
     }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParse<Application>(response, "Application");
     }
 
     if (response.status === 401) {
@@ -748,8 +745,7 @@ export class ApiClient {
     }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 201) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParse<Application>(response, "Application");
     }
 
     if (response.status === 401) {
@@ -773,8 +769,7 @@ export class ApiClient {
     }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParse<Application>(response, "Application");
     }
 
     if (response.status === 401) {
@@ -821,8 +816,7 @@ export class ApiClient {
     }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParseArray<ApplicationDiff>(response, "ApplicationDiff");
     }
 
     if (response.status === 401) {
@@ -855,8 +849,7 @@ export class ApiClient {
     }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParseArray<Change>(response, "Change");
     }
 
     if (response.status === 401) {
@@ -880,8 +873,7 @@ export class ApiClient {
     }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParse<Code>(response, "Code");
     }
 
     if (response.status === 401) {
@@ -909,8 +901,7 @@ export class ApiClient {
     }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 201) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParse<Domain>(response, "Domain");
     }
 
     if (response.status === 401) {
@@ -966,8 +957,7 @@ export class ApiClient {
     }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParseArray<Item>(response, "Item");
     }
 
     if (response.status === 401) {
@@ -999,8 +989,7 @@ export class ApiClient {
     }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParseArray<Membership>(response, "Membership");
     }
 
     if (response.status === 401) {
@@ -1020,8 +1009,7 @@ export class ApiClient {
     }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParse<Membership>(response, "Membership");
     }
 
     if (response.status === 401) {
@@ -1077,8 +1065,7 @@ export class ApiClient {
     }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParseArray<MembershipRequest>(response, "MembershipRequest");
     }
 
     if (response.status === 401) {
@@ -1098,8 +1085,7 @@ export class ApiClient {
     }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 201) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParse<MembershipRequest>(response, "MembershipRequest");
     }
 
     if (response.status === 401) {
@@ -1122,8 +1108,7 @@ export class ApiClient {
     }, 'application/json', options?.headers || {}, options?.signal);
 
     if (response.status === 200) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParse<Membership>(response, "Membership");
     }
 
     if (response.status === 401) {
@@ -1180,8 +1165,7 @@ export class ApiClient {
     }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParseArray<Organization>(response, "Organization");
     }
 
     if (response.status === 401) {
@@ -1200,8 +1184,7 @@ export class ApiClient {
     }, 'application/json', options?.headers || {}, options?.signal);
 
     if (response.status === 200) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParse<Organization>(response, "Organization");
     }
 
     if (response.status === 401) {
@@ -1225,8 +1208,7 @@ export class ApiClient {
     }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 201) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParse<Organization>(response, "Organization");
     }
 
     if (response.status === 401) {
@@ -1250,8 +1232,7 @@ export class ApiClient {
     }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParse<Organization>(response, "Organization");
     }
 
     if (response.status === 401) {
@@ -1310,8 +1291,7 @@ export class ApiClient {
     }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParseArray<Subscription>(response, "Subscription");
     }
 
     if (response.status === 401) {
@@ -1331,8 +1311,7 @@ export class ApiClient {
     }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 201) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParse<Subscription>(response, "Subscription");
     }
 
     if (response.status === 401) {
@@ -1389,8 +1368,7 @@ export class ApiClient {
     }, 'application/json', params?.headers || {}, params?.signal);
 
     if (response.status === 200) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParseArray<User>(response, "User");
     }
 
     if (response.status === 401) {
@@ -1409,8 +1387,7 @@ export class ApiClient {
     }, 'application/json', options?.headers || {}, options?.signal);
 
     if (response.status === 200) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParse<User>(response, "User");
     }
 
     if (response.status === 401) {
@@ -1434,8 +1411,7 @@ export class ApiClient {
     }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParse<User>(response, "User");
     }
 
     if (response.status === 401) {
@@ -1459,8 +1435,7 @@ export class ApiClient {
     }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParse<Validation>(response, "Validation");
     }
 
     if (response.status === 422) {
@@ -1483,8 +1458,7 @@ export class ApiClient {
     }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParseArray<Version>(response, "Version");
     }
 
     if (response.status === 401) {
@@ -1503,8 +1477,7 @@ export class ApiClient {
     }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParse<Version>(response, "Version");
     }
 
     if (response.status === 401) {
@@ -1528,8 +1501,7 @@ export class ApiClient {
     }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParse<Version>(response, "Version");
     }
 
     if (response.status === 401) {
@@ -1588,8 +1560,7 @@ export class ApiClient {
     }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParseArray<Watch>(response, "Watch");
     }
 
     if (response.status === 401) {
@@ -1609,8 +1580,7 @@ export class ApiClient {
     }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 201) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParse<Watch>(response, "Watch");
     }
 
     if (response.status === 401) {

@@ -95,7 +95,7 @@ export const parameterBounds = {
 
 import { ValidationErrorsResponse } from './generated-error-validation-errors-response.ts';
 import { VoidResponse } from './generated-error-void-response.ts';
-import { ApiException } from "./generated-util.ts";
+import { ApiException, Util } from "./generated-util.ts";
 import type { ApiClientOptions } from "./generated-util.ts";
 
 export interface GetGeneratorsOptions {
@@ -197,8 +197,7 @@ export class ApiClient {
     }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParseArray<Generator>(response, "Generator");
     }
 
     if (response.status === 409) {
@@ -217,8 +216,7 @@ export class ApiClient {
     }, 'application/json', options?.headers || {}, options?.signal);
 
     if (response.status === 200) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParse<Generator>(response, "Generator");
     }
 
     if (response.status === 404) {
@@ -238,8 +236,7 @@ export class ApiClient {
     }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParse<Invocation>(response, "Invocation");
     }
 
     if (response.status === 404) {
@@ -263,8 +260,7 @@ export class ApiClient {
     }, 'application/json', params.headers || {}, params.signal);
 
     if (response.status === 200) {
-      const data = await response.json();
-      return data;
+      return await Util.mustParse<Invocation>(response, "Invocation");
     }
 
     if (response.status === 404) {
