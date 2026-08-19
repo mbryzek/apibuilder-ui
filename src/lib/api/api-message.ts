@@ -43,7 +43,11 @@ export function isUnavailable(status: number): boolean {
 /** The single sentence this failure is worth showing. */
 export function messageFor({ status, errors }: ApiResponseError): string {
   if (MESSAGE_FROM_API.has(status)) {
-    return firstMessage(errors) ?? UNAVAILABLE;
+    // The fallback follows the classification rather than the branch: a validation response
+    // whose errors are absent or blank-messaged is still a validation response, and describing
+    // it as an outage tells the user their form was rejected because the server is down. Only
+    // status 0 in this set is genuinely unavailable, which `isUnavailable` already knows.
+    return firstMessage(errors) ?? (isUnavailable(status) ? UNAVAILABLE : GENERIC);
   }
   return MESSAGE_BY_STATUS[status] ?? (status >= 500 ? UNAVAILABLE : GENERIC);
 }

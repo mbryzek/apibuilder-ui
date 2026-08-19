@@ -51,8 +51,13 @@ describe('loadErrorFrom', () => {
   });
 
   it('falls back to a generic message when the API sent no usable text', () => {
-    expect(loadErrorFrom(failed(400, '   '))?.message).toBe('We could not reach the server. Please try again in a moment.');
+    expect(loadErrorFrom(failed(400, '   '))?.message).toBe('We could not load this data. Please try again.');
     expect(loadErrorFrom(failed(418))?.message).toBe('We could not load this data. Please try again.');
+  });
+
+  it('reserves the unreachable-server sentence for a call that did not get an answer', () => {
+    expect(loadErrorFrom(failed(0))?.message).toBe('We could not reach the server. Please try again in a moment.');
+    expect(loadErrorFrom(failed(500))?.message).toBe('We could not reach the server. Please try again in a moment.');
   });
 });
 

@@ -43,8 +43,17 @@ describe('humanizedErrors', () => {
   });
 
   it('says something rather than rendering an empty list of errors', () => {
-    expect(humanizedErrors(failed(400, '  '))).toEqual([{ message: 'We could not reach the server. Please try again in a moment.' }]);
+    // A message-less 400 is still the server having answered. Saying "we could not reach the
+    // server" would describe a rejected form as an outage, which is the inversion this module
+    // exists to prevent, pointed the other way.
+    expect(humanizedErrors(failed(400, '  '))).toEqual([{ message: 'We could not load this data. Please try again.' }]);
+    expect(humanizedErrors(failed(409))).toEqual([{ message: 'We could not load this data. Please try again.' }]);
     expect(humanizedErrors(failed(404))).toEqual([{ message: 'We could not find this.' }]);
+  });
+
+  it('still calls the network sentinel an outage, because that is what it is', () => {
+    expect(humanizedErrors(failed(0))).toEqual([{ message: 'We could not reach the server. Please try again in a moment.' }]);
+    expect(humanizedErrors(failed(503))).toEqual([{ message: 'We could not reach the server. Please try again in a moment.' }]);
   });
 
   it('does not tell a signed-out user their submission was malformed', () => {
