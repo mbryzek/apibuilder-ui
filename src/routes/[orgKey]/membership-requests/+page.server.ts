@@ -7,6 +7,7 @@ import { dataOr, loadErrorFrom } from '$lib/api/load-error';
 import { requireAuth, requireAdminForAction } from '$lib/server/auth';
 import { requiredString } from '$lib/server/form';
 import { findScopedById, outOfScope } from '$lib/server/scoped-id';
+import { PAGE_FETCH_LIMIT, parseOffset, toPage } from '$lib/pagination';
 import type { MembershipRequest, Membership } from '$generated/com-bryzek-apibuilder';
 
 export const load: PageServerLoad = async (event) => {
@@ -17,12 +18,20 @@ export const load: PageServerLoad = async (event) => {
   }
   const headers = getSessionHeaders(session.id);
 
+  // Accepting a request is only reachable from this list, so a row past the page size is a person
+  // who cannot be admitted at all. The members page already links here saying "25+", so the app
+  // was telling an admin there were more and then showing a page that could not reach them.
+  const offset = parseOffset(event.url);
+
   const response = await handleApiCall<MembershipRequest[]>(() =>
-    apiBuilderClient({ headers }).getMembershipRequests({ orgKey: event.params.orgKey, limit: 25, offset: 0 })
+    apiBuilderClient({ headers }).getMembershipRequests({ orgKey: event.params.orgKey, limit: PAGE_FETCH_LIMIT, offset })
   );
 
+  const { rows: requests, ...page } = toPage(dataOr(response, []), offset);
+
   return {
-    requests: dataOr(response, []),
+    requests,
+    ...page,
     loadError: loadErrorFrom(response)
   };
 };

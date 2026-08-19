@@ -5,11 +5,15 @@
   import type { LoadError } from '$lib/api/load-error';
   import LoadErrorBanner from '$lib/components/LoadErrorBanner.svelte';
   import FormErrors from '$lib/components/FormErrors.svelte';
+  import Pagination from '$lib/components/Pagination.svelte';
 
   interface Props {
     data: {
       org: Organization;
       requests: MembershipRequest[];
+      offset: number;
+      limit: number;
+      hasMore: boolean;
       loadError: LoadError | null;
     };
     form: { errors?: ApiErrorItem[]; success?: boolean } | null;
@@ -63,4 +67,6 @@
   {:else if !data.loadError}
     <p class="text-ab-gray">No pending membership requests.</p>
   {/if}
+
+  <Pagination offset={data.offset} limit={data.limit} hasMore={data.hasMore} baseUrl="/{org.key}/membership-requests" />
 </div>
