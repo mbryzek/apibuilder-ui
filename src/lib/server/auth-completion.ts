@@ -34,7 +34,7 @@ export function completeSession(
 
   if (isTenantSession(response.data)) {
     setSessionCookie(cookies, response.data.session.id);
-    redirectWithFlash(redirectTo, successMessage);
+    redirectWithFlash(cookies, redirectTo, successMessage);
   }
 
   if (isUserInactive(response.data)) {

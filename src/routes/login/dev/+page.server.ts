@@ -21,8 +21,8 @@ export const load: PageServerLoad = async ({ cookies }) => {
 
   if ('data' in response && response.data) {
     setSessionCookie(cookies, response.data.session.id);
-    redirectWithFlash('/', 'Logged in as dev');
+    redirectWithFlash(cookies, '/', 'Logged in as dev');
   }
 
-  redirectWithFlash('/login', 'Developer login not enabled', 'error');
+  redirectWithFlash(cookies, '/login', 'Developer login not enabled', 'error');
 };

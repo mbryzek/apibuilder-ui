@@ -15,7 +15,7 @@ export const load: PageServerLoad = async (event) => {
 };
 
 export const actions: Actions = {
-  updateVisibility: async ({ request, params, locals }) => {
+  updateVisibility: async ({ request, params, locals, cookies }) => {
     const session = await requireAdminForAction(locals, params.orgKey);
     const headers = getSessionHeaders(session.id);
     const formData = await request.formData();
@@ -43,10 +43,10 @@ export const actions: Actions = {
       return actionFail(response);
     }
 
-    redirectWithFlash(`/${params.orgKey}/${response.data.key}/${params.version}/settings`, 'Visibility updated');
+    redirectWithFlash(cookies, `/${params.orgKey}/${response.data.key}/${params.version}/settings`, 'Visibility updated');
   },
 
-  deleteApp: async ({ params, locals }) => {
+  deleteApp: async ({ params, locals, cookies }) => {
     const session = await requireAdminForAction(locals, params.orgKey);
     const headers = getSessionHeaders(session.id);
     const client = apiBuilderClient({ headers });
@@ -57,6 +57,6 @@ export const actions: Actions = {
       return actionFail(response);
     }
 
-    redirectWithFlash(`/${params.orgKey}`, 'Application deleted');
+    redirectWithFlash(cookies, `/${params.orgKey}`, 'Application deleted');
   }
 };

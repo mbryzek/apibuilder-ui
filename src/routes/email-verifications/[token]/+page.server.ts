@@ -13,14 +13,14 @@ import { redirectWithFlash } from '$lib/server/flash';
  */
 const INVALID_TOKEN = 'That verification link is no longer valid. Please request a new one.';
 
-export const load: PageServerLoad = async ({ params, locals }) => {
+export const load: PageServerLoad = async ({ params, locals, cookies }) => {
   const headers = getSessionHeaders(locals.session?.id);
 
   const response = await handleApiCall<void>(() => platformClient({ headers }).updateEmailVerificationByToken(params.token));
 
   if (isApiSuccess(response)) {
-    redirectWithFlash('/', 'Email verified');
+    redirectWithFlash(cookies, '/', 'Email verified');
   }
 
-  redirectWithFlash('/', response.status === 404 ? INVALID_TOKEN : messageFor(response), 'error');
+  redirectWithFlash(cookies, '/', response.status === 404 ? INVALID_TOKEN : messageFor(response), 'error');
 };

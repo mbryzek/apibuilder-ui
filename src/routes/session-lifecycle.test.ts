@@ -153,7 +153,10 @@ describe('/login/dev', () => {
     expect(jar.set['session_id']?.value).toBe('sess-dev');
     expect(jar.set['session_id']?.options).toMatchObject({ path: '/', httpOnly: true, sameSite: 'lax' });
     expect(thrown.status).toBe(303);
-    expect(thrown.location).toBe('/?flash=Logged+in+as+dev&flash_type=success');
+    // The flash rides in an httpOnly cookie, not the URL: anything in the address bar is
+    // caller-supplied, so a `?flash=` the layout trusted let any link speak as the app.
+    expect(thrown.location).toBe('/');
+    expect(JSON.parse(jar.set['flash']?.value ?? 'null')).toEqual({ message: 'Logged in as dev', type: 'success' });
   });
 
   it('sends the caller back to /login when the dev session is not enabled', async () => {
@@ -162,7 +165,8 @@ describe('/login/dev', () => {
 
     const thrown = await caughtAsync(() => devLogin(jar));
 
-    expect(jar.set).toEqual({});
-    expect(thrown.location).toBe('/login?flash=Developer+login+not+enabled&flash_type=error');
+    expect(jar.set['session_id']).toBeUndefined();
+    expect(thrown.location).toBe('/login');
+    expect(JSON.parse(jar.set['flash']?.value ?? 'null')).toEqual({ message: 'Developer login not enabled', type: 'error' });
   });
 });
