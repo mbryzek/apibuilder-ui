@@ -2,7 +2,8 @@
 
 The SvelteKit front end for [API Builder](https://app.apibuilder.io/). It talks to the platform API
 over the TypeScript clients generated into `src/generated/` from the apibuilder specs — never
-hand-edit those. `SITEMAP.md` is the page-by-page inventory of what this UI covers.
+hand-edit those. `SITEMAP.md` is an inventory of the PRE-REWRITE Play Framework UI, kept as a
+reference for what the rewrite has to cover — it is not a description of this app.
 
 ## Running it locally
 
@@ -12,9 +13,10 @@ npm run dev            # http://localhost:5173
 ```
 
 Node `^22.13.0 || >=24`, declared in package.json `engines` and enforced for real: `.npmrc` sets
-`engine-strict=true`, so `npm ci` refuses to install outside that range. `.nvmrc` pins 24, which is
-what CI builds on. Neither is hand-maintained guesswork — `src/node-version.test.ts` fails if the
-declared range admits a version the dependency tree rejects, or if `.nvmrc` falls outside it
+`engine-strict=true`, so `npm ci` refuses to install outside that range — that is the gate, in CI
+and on a laptop alike. `.nvmrc` is a hint for a version manager on a developer's machine; nothing
+in the CI tooling reads it. Neither is hand-maintained guesswork — `src/node-version.test.ts` fails
+if the declared range admits a version the dependency tree rejects, or if `.nvmrc` falls outside it
 (ISS-2433).
 
 `.env` points the app at a platform API on `http://localhost:9300`; `.env.production` points the

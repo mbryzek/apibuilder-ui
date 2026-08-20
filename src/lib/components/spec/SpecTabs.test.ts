@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { mount, unmount, flushSync, type ComponentProps } from 'svelte';
+import { mount, unmount, flushSync, tick, type ComponentProps } from 'svelte';
 import SpecTabs from './SpecTabs.svelte';
 import { operation, service } from '$lib/test-support/fixtures';
 import type { Enum, Model, Resource } from '$generated/com-bryzek-apibuilder-spec';
@@ -72,6 +72,47 @@ describe('SpecTabs', () => {
     expect(target.textContent).toContain('No types match "nosuchtype".');
     expect(target.textContent).not.toContain('No resources defined.');
     expect(tabLabels()).toEqual([]);
+  });
+
+  it('wires the tab pattern it announces: one panel, named both ways', () => {
+    render({ service: populated });
+
+    const tabs = [...target.querySelectorAll('[role="tab"]')];
+    const panel = target.querySelector('[role="tabpanel"]')!;
+
+    expect(panel.id).toBeTruthy();
+    for (const tab of tabs) {
+      expect(tab.getAttribute('aria-controls')).toBe(panel.id);
+      expect(tab.id).toBeTruthy();
+    }
+    // The panel names the tab it is showing, and only that tab is in the tab order.
+    expect(panel.getAttribute('aria-labelledby')).toBe(tabs[0]!.id);
+    expect(tabs.map((t) => t.getAttribute('tabindex'))).toEqual(['0', '-1', '-1']);
+  });
+
+  it('moves between tabs with the arrow keys, as role="tab" promises', async () => {
+    render({ service: populated });
+
+    const tabs = () => [...target.querySelectorAll('[role="tab"]')];
+    tabs()[0]!.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    await tick();
+    flushSync();
+
+    expect(tabs()[1]!.getAttribute('aria-selected')).toBe('true');
+    expect(target.textContent).toContain('user');
+
+    tabs()[1]!.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }));
+    await tick();
+    flushSync();
+
+    expect(tabs()[2]!.getAttribute('aria-selected')).toBe('true');
+
+    // Wraps, so the set is a loop rather than a dead end at either edge.
+    tabs()[2]!.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    await tick();
+    flushSync();
+
+    expect(tabs()[0]!.getAttribute('aria-selected')).toBe('true');
   });
 
   it('still reports a service that genuinely declares nothing', () => {

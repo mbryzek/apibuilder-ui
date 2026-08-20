@@ -17,8 +17,7 @@ import { throwIfUnavailable } from '$lib/api/load-error';
  * collection **scoped to the thing that was authorized** and returns the row only if it is in
  * there, so the id the caller sent can never be more than a selector among rows they were
  * already entitled to. Callers then pass the returned `row.id` to the mutation rather than the
- * value from the form — the same discipline `revokeAdmin` in `[orgKey]/members` already used,
- * generalized so the other four sites can share it.
+ * value from the form.
  *
  * The platform re-checks all of this server-side (`MembershipRequestsServiceImpl`,
  * `MembershipsServiceImpl`, `SubscriptionsServiceImpl`, `core.services.TokensService` each

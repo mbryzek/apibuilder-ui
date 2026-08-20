@@ -96,13 +96,7 @@
                 {/if}
               </td>
               <td class="py-3">
-                <span
-                  class="inline-block rounded-full px-2 py-0.5 text-xs font-medium {membership.role === MembershipRole.Admin
-                    ? 'bg-purple-100 text-purple-800'
-                    : 'bg-blue-100 text-blue-800'}"
-                >
-                  {membership.role}
-                </span>
+                <span class="text-ab-dark-gray text-sm">{membership.role}</span>
               </td>
               {#if data.isAdmin}
                 <td class="py-3 text-right">

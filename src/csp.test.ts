@@ -3,15 +3,14 @@ import svelteConfig from '../svelte.config.js';
 import { mockApiClients } from '$lib/test-support/mocks';
 
 /**
- * The Content-Security-Policy moved out of hooks.server.ts and into `kit.csp` (ISS-494).
+ * The page Content-Security-Policy, declared in `kit.csp` (ISS-494).
  *
- * The header used to be hand-built, which meant it had to allow `script-src 'unsafe-inline'` for
- * SvelteKit's hydration bootstrap to run at all -- and that single directive negated the policy.
- * bd4222d had already reasoned *from this line* when it removed the session id from the page
- * payload; the mitigation it relied on was never actually put in place.
+ * It belongs there rather than in a hand-built header: SvelteKit's hydration bootstrap is an
+ * inline script, so a hand-built header has to allow `script-src 'unsafe-inline'` — one directive
+ * that negates the whole policy. `kit.csp` nonces that script instead, which is what makes a
+ * policy without `unsafe-inline` possible at all.
  *
- * These assert the two directives that are easy to get backwards in opposite directions, and that
- * the move to `kit.csp` did not quietly drop any of the coverage the old header had.
+ * These assert the directives that are easy to get backwards, in both directions.
  */
 
 const directives = svelteConfig.kit?.csp?.directives ?? {};
