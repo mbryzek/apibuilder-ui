@@ -92,3 +92,40 @@ export async function requireAdminForAction(locals: App.Locals, orgKey: string):
   }
   return session;
 }
+
+/**
+ * A client already carrying the caller's session, handed back with the session it authorized.
+ *
+ * Every org-scoped action needs the same three lines — authorize, build the headers, build the
+ * client — and repeating them is what let two sites drop the returned session and reach around it
+ * with `locals.session!`, telling the compiler something the guard had already proved. Returning
+ * both leaves nothing to re-derive.
+ */
+export interface AuthorizedClient {
+  session: NonNullable<App.Locals['session']>;
+  client: ReturnType<typeof apiBuilderClient>;
+}
+
+function clientFor(session: NonNullable<App.Locals['session']>): AuthorizedClient {
+  return { session, client: apiBuilderClient({ headers: getSessionHeaders(session.id) }) };
+}
+
+/** Authorize an org admin and hand back a client acting as them. */
+export async function adminClient(locals: App.Locals, orgKey: string): Promise<AuthorizedClient> {
+  return clientFor(await requireAdminForAction(locals, orgKey));
+}
+
+/** Authorize an org member and hand back a client acting as them. */
+export async function memberClient(locals: App.Locals, orgKey: string): Promise<AuthorizedClient> {
+  return clientFor(await requireMemberForAction(locals, orgKey));
+}
+
+/**
+ * The load for a page that renders a form and nothing else: it needs a signed-in reader and no
+ * data. Written once so the sites that share it cannot drift apart, and so that a page which
+ * later needs data has to say so by replacing this rather than by editing a copy.
+ */
+export function requireAuthLoad(event: RequestEvent): Record<string, never> {
+  requireAuth(event);
+  return {};
+}

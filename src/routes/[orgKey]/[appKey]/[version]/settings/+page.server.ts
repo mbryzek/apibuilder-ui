@@ -4,7 +4,7 @@ import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall, isApiError } from '$lib/api/error-handler';
 import { actionFail, actionFailMissing } from '$lib/api/action-error';
 import { loadErrorFrom } from '$lib/api/load-error';
-import { requireAuth, requireAdminForAction } from '$lib/server/auth';
+import { requireAuth, adminClient } from '$lib/server/auth';
 import { requiredEnum } from '$lib/server/form';
 import { redirectWithFlash } from '$lib/server/flash';
 import type { Application } from '$generated/com-bryzek-apibuilder';
@@ -38,10 +38,8 @@ export const load: PageServerLoad = async (event) => {
 
 export const actions: Actions = {
   updateVisibility: async ({ request, params, locals, cookies }) => {
-    const session = await requireAdminForAction(locals, params.orgKey);
-    const headers = getSessionHeaders(session.id);
+    const { session, client } = await adminClient(locals, params.orgKey);
     const formData = await request.formData();
-    const client = apiBuilderClient({ headers });
 
     const visibility = requiredEnum(formData, 'visibility', Object.values(Visibility));
     if (!visibility) {
@@ -77,9 +75,7 @@ export const actions: Actions = {
   },
 
   deleteApp: async ({ params, locals, cookies }) => {
-    const session = await requireAdminForAction(locals, params.orgKey);
-    const headers = getSessionHeaders(session.id);
-    const client = apiBuilderClient({ headers });
+    const { client } = await adminClient(locals, params.orgKey);
 
     const response = await handleApiCall<void>(() => client.deleteApplicationByAppKey({ orgKey: params.orgKey, appKey: params.appKey }));
 

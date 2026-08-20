@@ -8,7 +8,7 @@
   interface Props {
     unions: Union[];
     service: Service;
-    exampleBaseUrl?: string;
+    exampleBaseUrl?: string | undefined;
   }
 
   let { unions, service, exampleBaseUrl }: Props = $props();

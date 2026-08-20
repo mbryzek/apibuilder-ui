@@ -8,13 +8,13 @@
  * never blocks a submission, and an address field is a text field.
  */
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { mount, unmount } from 'svelte';
+import { mount, unmount, type ComponentProps } from 'svelte';
 import FormField from './FormField.svelte';
 
 let target: HTMLElement;
 let component: Record<string, unknown> | undefined;
 
-function render(props: Record<string, unknown>): { label: HTMLLabelElement; input: HTMLInputElement } {
+function render(props: ComponentProps<typeof FormField>): { label: HTMLLabelElement; input: HTMLInputElement } {
   component = mount(FormField, { target, props });
   const label = target.querySelector('label');
   const input = target.querySelector('input');

@@ -1,23 +1,18 @@
 import type { PageServerLoad, Actions } from './$types';
 import { fail } from '@sveltejs/kit';
-import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall, isApiError } from '$lib/api/error-handler';
 import { actionFail } from '$lib/api/action-error';
-import { requireAuth, requireAdminForAction } from '$lib/server/auth';
+import { requireAuthLoad, adminClient } from '$lib/server/auth';
 import { optionalString, requiredEnum, requiredString } from '$lib/server/form';
 import { redirectWithFlash } from '$lib/server/flash';
 import type { Organization, OrganizationForm } from '$generated/com-bryzek-apibuilder';
 import { Visibility } from '$generated/com-bryzek-apibuilder';
 
-export const load: PageServerLoad = async (event) => {
-  requireAuth(event);
-  return {};
-};
+export const load: PageServerLoad = requireAuthLoad;
 
 export const actions: Actions = {
   update: async ({ request, params, locals, cookies }) => {
-    const session = await requireAdminForAction(locals, params.orgKey);
-    const headers = getSessionHeaders(session.id);
+    const { client } = await adminClient(locals, params.orgKey);
     const formData = await request.formData();
 
     const name = requiredString(formData, 'name');
@@ -36,9 +31,7 @@ export const actions: Actions = {
     const form: OrganizationForm = { name, namespace, visibility };
     if (key) form.key = key;
 
-    const response = await handleApiCall<Organization>(() =>
-      apiBuilderClient({ headers }).updateOrganizationByKey({ key: params.orgKey, body: form })
-    );
+    const response = await handleApiCall<Organization>(() => client.updateOrganizationByKey({ key: params.orgKey, body: form }));
 
     if (isApiError(response)) {
       return actionFail(response);
@@ -48,11 +41,9 @@ export const actions: Actions = {
   },
 
   delete: async ({ params, locals, cookies }) => {
-    await requireAdminForAction(locals, params.orgKey);
-    const session = locals.session!;
-    const headers = getSessionHeaders(session.id);
+    const { client } = await adminClient(locals, params.orgKey);
 
-    const response = await handleApiCall<void>(() => apiBuilderClient({ headers }).deleteOrganizationByKey(params.orgKey));
+    const response = await handleApiCall<void>(() => client.deleteOrganizationByKey(params.orgKey));
 
     if (isApiError(response)) {
       return actionFail(response);

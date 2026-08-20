@@ -7,7 +7,7 @@
   interface Props {
     models: Model[];
     service: Service;
-    exampleBaseUrl?: string;
+    exampleBaseUrl?: string | undefined;
   }
 
   let { models, service, exampleBaseUrl }: Props = $props();

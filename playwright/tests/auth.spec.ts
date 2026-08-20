@@ -52,7 +52,7 @@ test.describe('Signup', () => {
     expect(errorText).toBeTruthy();
   });
 
-  test('refuses a signup with no email, in the app\'s own words', async ({ page }) => {
+  test("refuses a signup with no email, in the app's own words", async ({ page }) => {
     await loadUrl(page, '/signup');
 
     await fillField(page, 'input[name="password"]', 'testpassword123');

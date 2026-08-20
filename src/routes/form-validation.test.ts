@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { mockServerAuth } from '$lib/test-support/mocks';
 
 /**
  * What the actions do with a field that was not filled in.
@@ -28,12 +29,7 @@ vi.mock('$lib/api/clients', () => ({
   getSessionHeaders: () => ({})
 }));
 
-vi.mock('$lib/server/auth', () => ({
-  requireAuth: () => SESSION,
-  requireAuthForAction: () => SESSION,
-  requireMemberForAction: async () => SESSION,
-  requireAdminForAction: async () => SESSION
-}));
+vi.mock('$lib/server/auth', async (importOriginal) => mockServerAuth(SESSION, client, importOriginal));
 
 /** The login action's success path sets a cookie and redirects; the calls are what matter here. */
 vi.mock('$lib/server/auth-completion', () => ({

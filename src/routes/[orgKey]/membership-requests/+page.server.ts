@@ -1,10 +1,10 @@
 import type { PageServerLoad, Actions } from './$types';
 import { error, fail } from '@sveltejs/kit';
-import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
+import { apiBuilderClient, getSessionHeaders, type ApiBuilderClient } from '$lib/api/clients';
 import { handleApiCall, isApiError } from '$lib/api/error-handler';
 import { actionFail } from '$lib/api/action-error';
 import { dataOr, loadErrorFrom } from '$lib/api/load-error';
-import { requireAuth, requireAdminForAction } from '$lib/server/auth';
+import { requireAuth, adminClient } from '$lib/server/auth';
 import { requiredString } from '$lib/server/form';
 import { findScopedById, outOfScope } from '$lib/server/scoped-id';
 import { PAGE_FETCH_LIMIT, parseOffset, toPage } from '$lib/pagination';
@@ -43,16 +43,15 @@ export const load: PageServerLoad = async (event) => {
  * from the org the caller was just checked to administer rather than straight from the form
  * body — where it names whatever org the submitter likes. See `$lib/server/scoped-id`.
  */
-async function findRequestInOrg(orgKey: string, guid: string, headers: Record<string, string>) {
+async function findRequestInOrg(orgKey: string, guid: string, client: ApiBuilderClient) {
   return findScopedById<MembershipRequest>(guid, (limit, offset) =>
-    handleApiCall<MembershipRequest[]>(() => apiBuilderClient({ headers }).getMembershipRequests({ orgKey, limit, offset }))
+    handleApiCall<MembershipRequest[]>(() => client.getMembershipRequests({ orgKey, limit, offset }))
   );
 }
 
 export const actions: Actions = {
   accept: async ({ request, locals, params }) => {
-    const session = await requireAdminForAction(locals, params.orgKey);
-    const headers = getSessionHeaders(session.id);
+    const { client } = await adminClient(locals, params.orgKey);
     const formData = await request.formData();
     const guid = requiredString(formData, 'guid');
 
@@ -60,14 +59,12 @@ export const actions: Actions = {
       return fail(400, { errors: [{ message: 'Invalid request' }] });
     }
 
-    const membershipRequest = await findRequestInOrg(params.orgKey, guid, headers);
+    const membershipRequest = await findRequestInOrg(params.orgKey, guid, client);
     if (!membershipRequest) {
       return outOfScope();
     }
 
-    const response = await handleApiCall<Membership>(() =>
-      apiBuilderClient({ headers }).createMembershipRequestAcceptById(membershipRequest.id)
-    );
+    const response = await handleApiCall<Membership>(() => client.createMembershipRequestAcceptById(membershipRequest.id));
 
     if (isApiError(response)) {
       return actionFail(response);
@@ -77,8 +74,7 @@ export const actions: Actions = {
   },
 
   decline: async ({ request, locals, params }) => {
-    const session = await requireAdminForAction(locals, params.orgKey);
-    const headers = getSessionHeaders(session.id);
+    const { client } = await adminClient(locals, params.orgKey);
     const formData = await request.formData();
     const guid = requiredString(formData, 'guid');
 
@@ -86,14 +82,12 @@ export const actions: Actions = {
       return fail(400, { errors: [{ message: 'Invalid request' }] });
     }
 
-    const membershipRequest = await findRequestInOrg(params.orgKey, guid, headers);
+    const membershipRequest = await findRequestInOrg(params.orgKey, guid, client);
     if (!membershipRequest) {
       return outOfScope();
     }
 
-    const response = await handleApiCall<void>(() =>
-      apiBuilderClient({ headers }).createMembershipRequestDeclineById(membershipRequest.id)
-    );
+    const response = await handleApiCall<void>(() => client.createMembershipRequestDeclineById(membershipRequest.id));
 
     if (isApiError(response)) {
       return actionFail(response);

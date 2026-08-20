@@ -6,7 +6,7 @@
 
   interface Props {
     enums: Enum[];
-    exampleBaseUrl?: string;
+    exampleBaseUrl?: string | undefined;
   }
 
   let { enums, exampleBaseUrl }: Props = $props();

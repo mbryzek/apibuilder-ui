@@ -1,10 +1,10 @@
 import type { PageServerLoad, Actions } from './$types';
 import { fail } from '@sveltejs/kit';
-import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
+import { apiBuilderClient, getSessionHeaders, type ApiBuilderClient } from '$lib/api/clients';
 import { handleApiCall, isApiError, isApiSuccess, type ApiResponse } from '$lib/api/error-handler';
 import { actionFail, actionFailMissing } from '$lib/api/action-error';
 import { dataOr, loadErrorFrom } from '$lib/api/load-error';
-import { requireAuth, requireAdminForAction } from '$lib/server/auth';
+import { requireAuth, adminClient } from '$lib/server/auth';
 import { requiredEnum, requiredString } from '$lib/server/form';
 import { PAGE_FETCH_LIMIT, PAGE_LIMIT, parseOffset, toPage } from '$lib/pagination';
 import { findScopedById, outOfScope } from '$lib/server/scoped-id';
@@ -57,9 +57,9 @@ export const load: PageServerLoad = async (event) => {
  * the form body, so the id has to be resolved against the org that was authorized rather than
  * trusted. See `$lib/server/scoped-id`.
  */
-async function findMembershipInOrg(orgKey: string, guid: string, headers: Record<string, string>) {
+async function findMembershipInOrg(orgKey: string, guid: string, client: ApiBuilderClient) {
   return findScopedById<Membership>(guid, (limit, offset) =>
-    handleApiCall<Membership[]>(() => apiBuilderClient({ headers }).getMemberships({ orgKey, limit, offset }))
+    handleApiCall<Membership[]>(() => client.getMemberships({ orgKey, limit, offset }))
   );
 }
 
@@ -74,15 +74,13 @@ async function findMembershipInOrg(orgKey: string, guid: string, headers: Record
  * not demote anybody: it removes them from the organization, which is what "Revoke Admin" did
  * before ISS-4833.
  */
-async function changeRole(orgKey: string, guid: string, role: MembershipRole, headers: Record<string, string>) {
-  const membership = await findMembershipInOrg(orgKey, guid, headers);
+async function changeRole(orgKey: string, guid: string, role: MembershipRole, client: ApiBuilderClient) {
+  const membership = await findMembershipInOrg(orgKey, guid, client);
   if (!membership) {
     return outOfScope();
   }
 
-  const response = await handleApiCall<Membership>(() =>
-    apiBuilderClient({ headers }).updateMembershipById({ id: membership.id, body: { role } })
-  );
+  const response = await handleApiCall<Membership>(() => client.updateMembershipById({ id: membership.id, body: { role } }));
 
   if (isApiError(response)) {
     return actionFail(response);
@@ -93,9 +91,7 @@ async function changeRole(orgKey: string, guid: string, role: MembershipRole, he
 
 export const actions: Actions = {
   addMember: async ({ request, params, locals }) => {
-    const session = await requireAdminForAction(locals, params.orgKey);
-    const headers = getSessionHeaders(session.id);
-    const client = apiBuilderClient({ headers });
+    const { client } = await adminClient(locals, params.orgKey);
     const formData = await request.formData();
     const emailOrNickname = requiredString(formData, 'email_or_nickname');
     const role = requiredEnum(formData, 'role', Object.values(MembershipRole)) ?? MembershipRole.Member;
@@ -144,9 +140,7 @@ export const actions: Actions = {
   },
 
   removeMember: async ({ request, locals, params }) => {
-    const session = await requireAdminForAction(locals, params.orgKey);
-    const headers = getSessionHeaders(session.id);
-    const client = apiBuilderClient({ headers });
+    const { client } = await adminClient(locals, params.orgKey);
     const formData = await request.formData();
     const guid = requiredString(formData, 'guid');
 
@@ -154,7 +148,7 @@ export const actions: Actions = {
       return fail(400, { errors: [{ message: 'Invalid request' }] });
     }
 
-    const membership = await findMembershipInOrg(params.orgKey, guid, headers);
+    const membership = await findMembershipInOrg(params.orgKey, guid, client);
     if (!membership) {
       return outOfScope();
     }
@@ -169,8 +163,7 @@ export const actions: Actions = {
   },
 
   makeAdmin: async ({ request, locals, params }) => {
-    const session = await requireAdminForAction(locals, params.orgKey);
-    const headers = getSessionHeaders(session.id);
+    const { client } = await adminClient(locals, params.orgKey);
     const formData = await request.formData();
     const guid = requiredString(formData, 'guid');
 
@@ -178,12 +171,11 @@ export const actions: Actions = {
       return fail(400, { errors: [{ message: 'Invalid request' }] });
     }
 
-    return changeRole(params.orgKey, guid, MembershipRole.Admin, headers);
+    return changeRole(params.orgKey, guid, MembershipRole.Admin, client);
   },
 
   revokeAdmin: async ({ request, locals, params }) => {
-    const session = await requireAdminForAction(locals, params.orgKey);
-    const headers = getSessionHeaders(session.id);
+    const { client } = await adminClient(locals, params.orgKey);
     const formData = await request.formData();
     const guid = requiredString(formData, 'guid');
 
@@ -191,6 +183,6 @@ export const actions: Actions = {
       return fail(400, { errors: [{ message: 'Invalid request' }] });
     }
 
-    return changeRole(params.orgKey, guid, MembershipRole.Member, headers);
+    return changeRole(params.orgKey, guid, MembershipRole.Member, client);
   }
 };

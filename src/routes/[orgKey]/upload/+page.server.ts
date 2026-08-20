@@ -1,33 +1,24 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
-import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall, isApiError } from '$lib/api/error-handler';
 import { actionFail } from '$lib/api/action-error';
-import { requireAuth, requireMemberForAction } from '$lib/server/auth';
+import { requireAuthLoad, memberClient } from '$lib/server/auth';
 import { optionalString } from '$lib/server/form';
 import type { Version, OriginalForm } from '$generated/com-bryzek-apibuilder';
 
-export const load: PageServerLoad = async (event) => {
-  requireAuth(event);
-  return {};
-};
+export const load: PageServerLoad = requireAuthLoad;
 
 export const actions: Actions = {
   /**
-   * `requireMemberForAction` replaces the bare `requireAuthForAction` to match every sibling
-   * `[orgKey]` write — `details`, `domains`, `members`, `membership-requests` and `settings` all
-   * require admin, `subscriptions` and `deleteVersion` require membership, and this was the only
-   * one that asked for nothing but a signed-in session. The page's own "+ Upload" link is already
-   * gated on `data.isMember` (`[version]/+page.svelte`), so members-only is the intent the UI has
-   * always expressed; the action simply never enforced it, and hiding a link is not access
-   * control. Uploading creates or overwrites an application version under `params.orgKey`, which
-   * is not something a non-member should be able to do by posting the form directly.
+   * Membership is what this action requires, like every sibling `[orgKey]` write.
+   *
+   * Uploading creates or overwrites an application version under `params.orgKey`. The page's own
+   * "+ Upload" link is gated on `data.isMember` (`[version]/+page.svelte`), and hiding a link is
+   * not access control — a non-member can post the form directly, so the guard is here.
    */
   default: async ({ request, params, locals }) => {
-    const session = await requireMemberForAction(locals, params.orgKey);
-    const headers = getSessionHeaders(session.id);
+    const { client } = await memberClient(locals, params.orgKey);
     const formData = await request.formData();
-    const client = apiBuilderClient({ headers });
 
     const appKey = optionalString(formData, 'app_key');
     const specType = optionalString(formData, 'spec_type');
