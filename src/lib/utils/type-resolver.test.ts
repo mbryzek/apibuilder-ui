@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Service } from '$generated/com-bryzek-apibuilder-spec';
-import { resolveType } from './type-resolver';
+import { resolveType, type TypeWrapper } from './type-resolver';
 import { service } from '$lib/test-support/fixtures';
 
 /**
@@ -28,22 +28,38 @@ describe('resolveType', () => {
       expect(resolveType(name, service())).toEqual({
         anchor: null,
         href: null,
-        isArray: false,
-        isMap: false,
+        wrappers: [],
         innerType: name
       });
     });
   });
 
   describe('containers', () => {
-    it.each<[string, boolean, boolean]>([
-      ['string', false, false],
-      ['[string]', true, false],
-      ['map[string]', false, true]
-    ])('%s parses to isArray=%s isMap=%s', (typeStr, isArray, isMap) => {
+    it.each<[string, TypeWrapper[]]>([
+      ['string', []],
+      ['[string]', ['array']],
+      ['map[string]', ['map']],
+      // Nested containers: peeled to the bare type, with the wrappers kept outermost-first so the
+      // cell can render them back in the order they were written.
+      ['[[string]]', ['array', 'array']],
+      ['map[[string]]', ['map', 'array']],
+      ['[map[string]]', ['array', 'map']],
+      ['map[map[[string]]]', ['map', 'map', 'array']]
+    ])('%s peels to the bare type with wrappers %j', (typeStr, wrappers) => {
       const resolved = resolveType(typeStr, service());
-      expect([resolved.isArray, resolved.isMap]).toEqual([isArray, isMap]);
+      expect(resolved.wrappers).toEqual(wrappers);
       expect(resolved.innerType).toBe('string');
+    });
+
+    it('keeps a local type linked however deeply it is nested', () => {
+      const svc = service({ models: [model('user')] });
+
+      expect(resolveType('map[[user]]', svc)).toEqual({
+        anchor: 'user',
+        href: null,
+        wrappers: ['map', 'array'],
+        innerType: 'user'
+      });
     });
   });
 
@@ -57,8 +73,7 @@ describe('resolveType', () => {
       expect(resolveType('user', svc)).toEqual({
         anchor: 'user',
         href: null,
-        isArray: false,
-        isMap: false,
+        wrappers: [],
         innerType: 'user'
       });
     });
@@ -71,8 +86,7 @@ describe('resolveType', () => {
       expect(resolveType('io.flow.common.v0.models.price', svc)).toEqual({
         anchor: null,
         href: '/flow/common/0.1.0#price',
-        isArray: false,
-        isMap: false,
+        wrappers: [],
         innerType: 'price'
       });
     });
@@ -80,16 +94,27 @@ describe('resolveType', () => {
     it('displays the short name inside a container too', () => {
       const resolved = resolveType('[io.flow.common.v0.models.price]', svc);
       expect(resolved.innerType).toBe('price');
-      expect(resolved.isArray).toBe(true);
+      expect(resolved.wrappers).toEqual(['array']);
       expect(resolved.href).toBe('/flow/common/0.1.0#price');
+    });
+
+    it('displays the short name inside a NESTED container too', () => {
+      // The regression: one strip left `[io.flow.common.v0.models.price]` as the "bare" type, whose
+      // namespace read as `[io.flow.common.v0.models`, matched no import, and lost both the link
+      // and the short name that the un-nested form gets.
+      expect(resolveType('map[[io.flow.common.v0.models.price]]', svc)).toEqual({
+        anchor: null,
+        href: '/flow/common/0.1.0#price',
+        wrappers: ['map', 'array'],
+        innerType: 'price'
+      });
     });
 
     it('keeps the qualified name when no import matches the namespace', () => {
       expect(resolveType('io.flow.unknown.v0.models.price', svc)).toEqual({
         anchor: null,
         href: null,
-        isArray: false,
-        isMap: false,
+        wrappers: [],
         innerType: 'io.flow.unknown.v0.models.price'
       });
     });
@@ -104,8 +129,14 @@ describe('resolveType', () => {
       expect(resolveType('price', svc)).toEqual({
         anchor: null,
         href: '/flow/common/0.1.0#price',
-        isArray: false,
-        isMap: false,
+        wrappers: [],
+        innerType: 'price'
+      });
+
+      expect(resolveType('map[[price]]', svc)).toEqual({
+        anchor: null,
+        href: '/flow/common/0.1.0#price',
+        wrappers: ['map', 'array'],
         innerType: 'price'
       });
     });
@@ -115,8 +146,7 @@ describe('resolveType', () => {
     expect(resolveType('mystery', service())).toEqual({
       anchor: null,
       href: null,
-      isArray: false,
-      isMap: false,
+      wrappers: [],
       innerType: 'mystery'
     });
   });

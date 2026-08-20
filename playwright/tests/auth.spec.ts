@@ -52,19 +52,18 @@ test.describe('Signup', () => {
     expect(errorText).toBeTruthy();
   });
 
-  test('blocks submission when email is missing', async ({ page }) => {
+  test('refuses a signup with no email, in the app\'s own words', async ({ page }) => {
     await loadUrl(page, '/signup');
 
     await fillField(page, 'input[name="password"]', 'testpassword123');
     await safeClick(page, 'Create account');
 
-    // The email input carrying `required` is what blocks submission, so `:invalid` is the thing
-    // to assert: it is what would stop being true if the attribute were dropped and the form
-    // posted. It is also the assertion that survives a LATE navigation — the locator resolves
-    // against whatever page is loaded when it retries, so a submission that went through leaves
-    // nothing matching. Reading page.url() straight after the click asserts neither: navigation
-    // is asynchronous, so the URL is still /signup at that instant either way.
-    await expect(page.locator('input[name="email"]:invalid')).toHaveCount(1);
+    // The browser does NOT block this: no field carries `required`, deliberately, so the server is
+    // the one judge of what a submission needs and its message is the one the user sees — styled,
+    // translatable and logged, rather than a native bubble the app cannot reach.
+    const errorMessage = page.locator('.bg-red-50');
+    await errorMessage.waitFor({ state: 'visible', timeout: 10000 });
+    expect(await errorMessage.textContent()).toContain('Email and password are required');
     await expect(page).toHaveURL(/\/signup/);
   });
 });

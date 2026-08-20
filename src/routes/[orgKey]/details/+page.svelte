@@ -1,5 +1,6 @@
 <script lang="ts">
   import PendingForm from '$lib/components/PendingForm.svelte';
+  import FormField from '$lib/components/FormField.svelte';
   import type { Organization } from '$generated/com-bryzek-apibuilder';
   import type { ApiErrorItem } from '$lib/api/error-handler';
   import { Visibility } from '$generated/com-bryzek-apibuilder';
@@ -33,25 +34,9 @@
     <PendingForm action="?/update">
       {#snippet children(pending)}
         <div class="max-w-lg space-y-4">
-          <div>
-            <label for="name" class="text-ab-dark-blue mb-1 block text-sm font-medium">Name</label>
-            <input type="text" id="name" name="name" value={org.name} required class="input-field w-full rounded-lg border px-3 py-2" />
-          </div>
-          <div>
-            <label for="key" class="text-ab-dark-blue mb-1 block text-sm font-medium">Key</label>
-            <input type="text" id="key" name="key" value={org.key} class="input-field w-full rounded-lg border px-3 py-2" />
-          </div>
-          <div>
-            <label for="namespace" class="text-ab-dark-blue mb-1 block text-sm font-medium">Namespace</label>
-            <input
-              type="text"
-              id="namespace"
-              name="namespace"
-              value={org.namespace}
-              required
-              class="input-field w-full rounded-lg border px-3 py-2"
-            />
-          </div>
+          <FormField label="Name" name="name" value={org.name} />
+          <FormField label="Key" name="key" value={org.key} />
+          <FormField label="Namespace" name="namespace" value={org.namespace} />
           <div>
             <label for="visibility" class="text-ab-dark-blue mb-1 block text-sm font-medium">Visibility</label>
             <select id="visibility" name="visibility" class="input-field w-full rounded-lg border px-3 py-2">

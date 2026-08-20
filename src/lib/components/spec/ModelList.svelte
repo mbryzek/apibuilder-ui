@@ -1,6 +1,5 @@
 <script lang="ts">
   import type { Model, Service } from '$generated/com-bryzek-apibuilder-spec';
-  import ExampleJsonLinks from './ExampleJsonLinks.svelte';
   import PropertiesTable from './PropertiesTable.svelte';
   import SpecCard from './SpecCard.svelte';
   import SpecList from './SpecList.svelte';
@@ -16,12 +15,7 @@
 
 <SpecList items={models} key={(model) => model.name} noun="models">
   {#snippet item(model)}
-    <SpecCard id={model.name} name={model.name} description={model.description}>
-      {#snippet headerRight()}
-        {#if exampleBaseUrl}
-          <ExampleJsonLinks baseUrl={exampleBaseUrl} typeName={model.name} />
-        {/if}
-      {/snippet}
+    <SpecCard id={model.name} name={model.name} description={model.description} {exampleBaseUrl}>
       {#if model.interfaces && model.interfaces.length > 0}
         <p class="text-ab-gray mb-2 text-xs">
           Implements: {model.interfaces.join(', ')}

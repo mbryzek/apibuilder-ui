@@ -32,8 +32,10 @@ export const actions: Actions = {
 
     const response = await handleApiCall<CreatedToken>(() => platformClient({ headers }).createToken({ body }));
 
+    // The description travels back with the failure so a refused submission keeps what was typed:
+    // `load` re-runs after an action and would otherwise re-render an empty field.
     if (isApiError(response)) {
-      return actionFail(response);
+      return actionFail(response, { description: description ?? '' });
     }
 
     return { created: response.data };

@@ -7,8 +7,11 @@ import { completeSession } from '$lib/server/auth-completion';
 import { requiredSecret } from '$lib/server/form';
 import type { SessionState } from '$generated/com-bryzek-platform';
 
-export const load: PageServerLoad = async ({ params }) => {
-  return { token: params.token };
+// The token stays out of the page payload: the action reads it from `params`, and nothing on the
+// page renders it. Returning it would serialize a single-use credential into the hydration payload
+// for no consumer.
+export const load: PageServerLoad = async () => {
+  return {};
 };
 
 export const actions: Actions = {

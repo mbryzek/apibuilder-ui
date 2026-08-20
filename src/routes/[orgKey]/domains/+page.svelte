@@ -36,7 +36,7 @@
       <h2 class="text-ab-dark-blue mb-3 text-lg font-semibold">Add Domain</h2>
       <PendingForm action="?/addDomain" class="flex flex-col gap-3 sm:flex-row">
         {#snippet children(pending)}
-          <input type="text" name="name" placeholder="example.com" required class="input-field flex-1 rounded-lg border px-3 py-2" />
+          <input type="text" name="name" placeholder="example.com" class="input-field flex-1 rounded-lg border px-3 py-2" />
           <button type="submit" class="btn-primary" disabled={pending}>
             {pending ? 'Adding...' : 'Add Domain'}
           </button>

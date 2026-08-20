@@ -55,13 +55,7 @@
       <h2 class="text-ab-dark-blue mb-3 text-lg font-semibold">Add Member</h2>
       <PendingForm action="?/addMember" class="flex flex-col gap-3 sm:flex-row">
         {#snippet children(pending)}
-          <input
-            type="text"
-            name="email_or_nickname"
-            placeholder="Email or nickname"
-            required
-            class="input-field flex-1 rounded-lg border px-3 py-2"
-          />
+          <input type="text" name="email_or_nickname" placeholder="Email or nickname" class="input-field flex-1 rounded-lg border px-3 py-2" />
           <select name="role" class="input-field rounded-lg border px-3 py-2">
             <option value="member">Member</option>
             <option value="admin">Admin</option>
