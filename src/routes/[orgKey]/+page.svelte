@@ -82,13 +82,7 @@
                 {/if}
               </td>
               <td class="hidden py-3 sm:table-cell">
-                <span
-                  class="inline-block rounded-full px-2 py-0.5 text-xs font-medium {app.visibility === 'public'
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-gray-100 text-gray-600'}"
-                >
-                  {app.visibility}
-                </span>
+                <span class="text-ab-dark-gray text-sm">{app.visibility}</span>
               </td>
             </tr>
           {/each}

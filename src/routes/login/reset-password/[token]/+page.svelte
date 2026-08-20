@@ -1,10 +1,10 @@
 <script lang="ts">
   import PendingForm from '$lib/components/PendingForm.svelte';
+  import FormField from '$lib/components/FormField.svelte';
   import type { ApiErrorItem } from '$lib/api/error-handler';
   import FormErrors from '$lib/components/FormErrors.svelte';
 
   interface Props {
-    data: { token: string };
     form: { errors?: ApiErrorItem[] } | null;
   }
 
@@ -24,29 +24,9 @@
     <PendingForm>
       {#snippet children(pending)}
         <div class="space-y-4">
-          <div>
-            <label for="password" class="text-ab-dark-blue mb-1 block text-sm font-medium">New Password</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              required
-              autocomplete="new-password"
-              class="input-field w-full rounded-lg border px-3 py-2"
-            />
-          </div>
+          <FormField label="New Password" name="password" type="password" autocomplete="new-password" />
 
-          <div>
-            <label for="confirm_password" class="text-ab-dark-blue mb-1 block text-sm font-medium">Confirm Password</label>
-            <input
-              type="password"
-              id="confirm_password"
-              name="confirm_password"
-              required
-              autocomplete="new-password"
-              class="input-field w-full rounded-lg border px-3 py-2"
-            />
-          </div>
+          <FormField label="Confirm Password" name="confirm_password" type="password" autocomplete="new-password" />
 
           <button type="submit" disabled={pending} class="btn-primary w-full">
             {pending ? 'Resetting...' : 'Reset Password'}

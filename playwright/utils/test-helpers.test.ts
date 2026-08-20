@@ -1,13 +1,15 @@
 /**
- * The e2e suite itself never runs unattended (see "Why the Playwright suite is a developer tool,
- * not a gate" in README.md), so the two helpers that talk to the platform API get their coverage
- * here instead: these pin the request each one puts on the wire and how it reads the answer.
+ * The browser suite runs post-merge and does not gate a merge (see "Where the Playwright suite
+ * runs" in README.md), so the two helpers that talk to the platform API are pinned here instead,
+ * under vitest, inside `ci`: these assert the request each one puts on the wire and how it reads
+ * the answer.
  *
  * That is the part the generated client changed. If a spec change moves the signup route, the
  * body shape, or the session-state union, `tsc` catches the type half and these catch the rest.
  */
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { config } from '../config';
 import { createUserViaApi, sessionIsValid } from './test-helpers';
 
 type FetchArgs = [string, RequestInit];
@@ -48,7 +50,10 @@ describe('createUserViaApi', () => {
     expect(calls).toHaveLength(1);
 
     const [url, init] = calls[0]!;
-    expect(url).toBe('http://localhost:9300/tenant/apibuilder/session/signups');
+    // Against `config`, not a literal: the base url comes from BACKEND_BASE_URL / API_BASE_URL, so
+    // a hardcoded host turns `npm run check` red for anyone whose shell exports either — which is
+    // exactly the shell of someone running the e2e suite against a non-default backend.
+    expect(url).toBe(`${config.API_BASE_URL}/tenant/apibuilder/session/signups`);
     expect(init.method).toBe('POST');
     // Without the bypass, a full run's burst of signups is rate-limited.
     expect(init.headers).toMatchObject({ 'X-Bypass-Rate-Limit': 'true' });
@@ -93,7 +98,7 @@ describe('sessionIsValid', () => {
     expect(await sessionIsValid('sess-1')).toBe(true);
 
     const [url, init] = calls[0]!;
-    expect(url).toBe('http://localhost:9300/tenant/apibuilder/session');
+    expect(url).toBe(`${config.API_BASE_URL}/tenant/apibuilder/session`);
     expect(init.method).toBe('GET');
     expect(init.headers).toMatchObject({ session_id: 'sess-1', 'X-Bypass-Rate-Limit': 'true' });
   });

@@ -1,13 +1,12 @@
 <script lang="ts">
   import type { Enum } from '$generated/com-bryzek-apibuilder-spec';
-  import ExampleJsonLinks from './ExampleJsonLinks.svelte';
   import SpecCard from './SpecCard.svelte';
   import SpecList from './SpecList.svelte';
   import SpecTable from './SpecTable.svelte';
 
   interface Props {
     enums: Enum[];
-    exampleBaseUrl?: string;
+    exampleBaseUrl?: string | undefined;
   }
 
   let { enums, exampleBaseUrl }: Props = $props();
@@ -20,12 +19,7 @@
 <SpecList items={enums} key={(enumDef) => enumDef.name} noun="enums">
   {#snippet item(enumDef)}
     {@const showDescriptions = hasAnyDescriptions(enumDef)}
-    <SpecCard id={enumDef.name} name={enumDef.name} description={enumDef.description}>
-      {#snippet headerRight()}
-        {#if exampleBaseUrl}
-          <ExampleJsonLinks baseUrl={exampleBaseUrl} typeName={enumDef.name} />
-        {/if}
-      {/snippet}
+    <SpecCard id={enumDef.name} name={enumDef.name} description={enumDef.description} {exampleBaseUrl}>
       <SpecTable columns={showDescriptions ? ['Value', 'Description'] : ['Value']}>
         {#each enumDef.values as value (value.name)}
           <tr class="border-b border-gray-100 last:border-b-0">

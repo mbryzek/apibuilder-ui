@@ -4,7 +4,7 @@ import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall, isApiError } from '$lib/api/error-handler';
 import { actionFail } from '$lib/api/action-error';
 import { dataOr, loadErrorFrom } from '$lib/api/load-error';
-import { requireAuth, requireMemberForAction } from '$lib/server/auth';
+import { requireAuth, memberClient } from '$lib/server/auth';
 import { requiredEnum } from '$lib/server/form';
 import type { Subscription } from '$generated/com-bryzek-apibuilder';
 import { Publication } from '$generated/com-bryzek-apibuilder';
@@ -29,19 +29,14 @@ export const actions: Actions = {
    *
    * The subscription to remove is resolved from the caller's own subscriptions to *this* org
    * rather than taken from a `subscription_id` form field, so there is no id to forge: the form
-   * now carries only the publication, which is validated against the enum. The page was already
-   * deriving that id from the publication client-side, so nothing is lost — and the toggle now
-   * flips whatever the server actually has rather than what the browser last saw, which is what
-   * a toggle should do.
+   * carries only the publication, which is validated against the enum. The toggle therefore flips
+   * whatever the server actually has rather than what the browser last saw.
    *
-   * `requireMemberForAction` replaces the bare `requireAuthForAction` to match the sibling
-   * `[orgKey]` actions and the upstream rule: the platform resolves the org under the caller's
-   * own authorization, so only a member can subscribe to it in the first place.
+   * Membership is what it requires: the platform resolves the org under the caller's own
+   * authorization, so only a member can subscribe to it in the first place.
    */
   toggle: async ({ request, params, locals }) => {
-    const session = await requireMemberForAction(locals, params.orgKey);
-    const headers = getSessionHeaders(session.id);
-    const client = apiBuilderClient({ headers });
+    const { session, client } = await memberClient(locals, params.orgKey);
     const formData = await request.formData();
     const publication = requiredEnum(formData, 'publication', Object.values(Publication));
 

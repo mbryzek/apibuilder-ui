@@ -4,25 +4,19 @@ import { error } from '@sveltejs/kit';
  * Reject route params that would steer the upstream API request somewhere else.
  *
  * SvelteKit decodes route params before a handler sees them, so `%2F` arrives as a literal `/`
- * and `%3F` as `?`. This guard was written when the generated clients interpolated path params
- * into the upstream URL **without encoding them**, which made that decode a server-side request
- * forgery primitive against whatever `config.apiBaseUrl` points at, reachable without signing in.
- * Demonstrated at the time against a stand-in upstream:
+ * and `%3F` as `?` — a param is therefore free to contain a path delimiter unless something says
+ * otherwise.
  *
- *     GET /gilt/apidoc/..%2F..%2F..%2Fusers/service.json  ->  upstream received GET /users
- *     GET /gilt/apidoc/1.0.0%3Flimit%3D999/service.json   ->  upstream received ?limit=999
- *
- * **That is no longer how the clients are generated, and this comment used to say otherwise.**
- * The codegen template now wraps every interpolated path param — `getVersionByVersion` builds
+ * It is NOT what stops that reaching the upstream API. The codegen template wraps every
+ * interpolated path param — `getVersionByVersion` builds
  *
  *     `${this.baseUrl}/apibuilder/${encodeURIComponent(params.orgKey)}/...`
  *
- * (src/generated/com-bryzek-apibuilder.ts) — so the SSRF above is closed at the source, for every
- * caller, and re-running those two requests today sends the traversal upstream as one opaque,
- * percent-encoded segment.
+ * (src/generated/com-bryzek-apibuilder.ts) — so a traversal travels upstream as one opaque,
+ * percent-encoded segment, for every caller.
  *
- * **Do not conclude from that that this guard is now dead.** What it still closes is an open
- * redirect: several actions reflect `params.orgKey` into `redirect(303, `/${params.orgKey}/...`)`,
+ * What this guard closes is an open redirect: several actions reflect `params.orgKey` into
+ * `redirect(303, `/${params.orgKey}/...`)`,
  * and SvelteKit sets `Location` verbatim, so an `orgKey` of `/evil.com` yields a scheme-relative
  * `//evil.com/...` that browsers resolve to another host. `$lib/server/auth`'s
  * `requireMemberForAction`/`requireAdminForAction` call `assertSafeSegment` for exactly this

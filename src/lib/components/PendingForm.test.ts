@@ -2,8 +2,8 @@
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mount, unmount, flushSync } from 'svelte';
-import PendingFormPair from '$lib/test/PendingFormPair.svelte';
-import { submitFunctions } from '$lib/test/app-forms';
+import PendingFormPair from '$lib/test-support/PendingFormPair.svelte';
+import { submitFunctions } from '$lib/test-support/app-forms';
 
 let target: HTMLElement;
 let component: Record<string, unknown> | undefined;

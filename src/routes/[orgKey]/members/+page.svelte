@@ -59,7 +59,6 @@
             type="text"
             name="email_or_nickname"
             placeholder="Email or nickname"
-            required
             class="input-field flex-1 rounded-lg border px-3 py-2"
           />
           <select name="role" class="input-field rounded-lg border px-3 py-2">
@@ -97,13 +96,7 @@
                 {/if}
               </td>
               <td class="py-3">
-                <span
-                  class="inline-block rounded-full px-2 py-0.5 text-xs font-medium {membership.role === MembershipRole.Admin
-                    ? 'bg-purple-100 text-purple-800'
-                    : 'bg-blue-100 text-blue-800'}"
-                >
-                  {membership.role}
-                </span>
+                <span class="text-ab-dark-gray text-sm">{membership.role}</span>
               </td>
               {#if data.isAdmin}
                 <td class="py-3 text-right">

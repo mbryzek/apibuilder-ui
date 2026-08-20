@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { session } from '$lib/test-support/fixtures';
 import { mockApiClients } from '$lib/test-support/mocks';
-import { caughtAsync } from '$lib/test-support/throws';
+import { caught, caughtAsync } from '$lib/test-support/throws';
 
 /**
  * The org-scoped writes, and who is allowed to make them.
@@ -41,7 +41,8 @@ const { actions: uploadActions } = await import('./[orgKey]/upload/+page.server'
 const { actions: versionActions } = await import('./[orgKey]/[appKey]/[version]/+page.server');
 const { actions: joinActions } = await import('./[orgKey]/memberships/request/+page.server');
 const { load: appRedirectLoad } = await import('./[orgKey]/[appKey]/+page.server');
-const { requireMemberForAction, requireAdminForAction } = await import('$lib/server/auth');
+const { requireMemberForAction, requireAdminForAction, adminClient, memberClient, requireAuthLoad } = await import('$lib/server/auth');
+const { apiBuilderClient } = await import('$lib/api/clients');
 
 /** Invoke an action the way SvelteKit would, with only the fields these actions read. */
 function invokeUpload(form: Record<string, string | File>, orgKey = 'victim-org') {
@@ -154,5 +155,56 @@ describe('org-scoped routes outside the membership guards validate orgKey too', 
 
     expect(thrown.status).toBe(302);
     expect(thrown.location).toBe('/gilt/apidoc/latest');
+  });
+});
+
+/**
+ * The two helpers every org-scoped action is built on.
+ *
+ * They exist so a call site cannot get one of the three steps wrong — and in particular cannot
+ * throw the authorized session away and re-derive it from `locals.session!`, which is an
+ * assertion about something the guard has already proved.
+ */
+describe('adminClient / memberClient', () => {
+  it('hands back the session it authorized, with a client carrying that session', async () => {
+    client.getMemberships.mockResolvedValue([{ id: 'membership-1' }]);
+
+    const authorized = await adminClient(LOCALS, 'gilt');
+
+    expect(authorized.session).toEqual(SESSION);
+    expect(authorized.client).toBe(client);
+    expect(apiBuilderClient).toHaveBeenCalledWith({ headers: expect.objectContaining({ session_id: SESSION.id }) });
+  });
+
+  it.each([
+    ['adminClient', adminClient],
+    ['memberClient', memberClient]
+  ])('%s refuses a caller the org does not know', async (_name, authorize) => {
+    expect((await caughtAsync(() => authorize(LOCALS, 'victim-org'))).status).toBe(403);
+  });
+
+  it('checks the org key before looking anything up, like the guards it wraps', async () => {
+    expect((await caughtAsync(() => adminClient(LOCALS, '/evil.com'))).status).toBe(400);
+    expect(client.getMemberships).not.toHaveBeenCalled();
+  });
+
+  it('asks for the admin role, which membership alone does not satisfy', async () => {
+    client.getMemberships.mockResolvedValue([{ id: 'membership-1' }]);
+    await adminClient(LOCALS, 'gilt');
+
+    expect(client.getMemberships).toHaveBeenCalledWith(expect.objectContaining({ role: 'admin' }));
+  });
+});
+
+describe('requireAuthLoad', () => {
+  it('returns no data for a signed-in reader', () => {
+    expect(requireAuthLoad({ locals: LOCALS, url: new URL('http://localhost/org/create') } as never)).toEqual({});
+  });
+
+  it('sends an anonymous reader to sign in, keeping where they were going', () => {
+    const thrown = caught(() => requireAuthLoad({ locals: {}, url: new URL('http://localhost/org/create') } as never));
+
+    expect(thrown.status).toBe(303);
+    expect(thrown.location).toBe('/login?redirect=' + encodeURIComponent('/org/create'));
   });
 });

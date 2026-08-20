@@ -1,5 +1,6 @@
 <script lang="ts">
   import PendingForm from '$lib/components/PendingForm.svelte';
+  import FormField from '$lib/components/FormField.svelte';
   import type { ApiErrorItem } from '$lib/api/error-handler';
   import FormErrors from '$lib/components/FormErrors.svelte';
 
@@ -28,29 +29,9 @@
         <input type="hidden" name="redirectTo" value={data.redirectTo} />
 
         <div class="space-y-4">
-          <div>
-            <label for="email" class="text-ab-dark-blue mb-1 block text-sm font-medium">Email</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              required
-              autocomplete="email"
-              class="input-field w-full rounded-lg border px-3 py-2"
-            />
-          </div>
+          <FormField label="Email" name="email" inputmode="email" autocomplete="email" />
 
-          <div>
-            <label for="password" class="text-ab-dark-blue mb-1 block text-sm font-medium">Password</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              required
-              autocomplete="current-password"
-              class="input-field w-full rounded-lg border px-3 py-2"
-            />
-          </div>
+          <FormField label="Password" name="password" type="password" autocomplete="current-password" />
 
           <button type="submit" disabled={pending} class="btn-primary w-full">
             {pending ? 'Signing in...' : 'Sign in'}

@@ -5,23 +5,10 @@
 import type { BrowserContext, Page } from '@playwright/test';
 
 /**
- * Browser configuration options
- */
-export interface BrowserConfig {
-  headless: boolean;
-  slowMo: number;
-  viewport: {
-    width: number;
-    height: number;
-  };
-}
-
-/**
  * Timeout configuration
  */
 export interface TimeoutConfig {
-  default: number;
-  navigation: number;
+  /** How long a helper waits for one interaction to take effect. */
   action: number;
 }
 
@@ -41,7 +28,6 @@ export interface TestConfig {
   FRONTEND_BASE_URL: string;
   API_BASE_URL: string;
   TENANT_ID: string;
-  BROWSER_CONFIG: BrowserConfig;
   TIMEOUTS: TimeoutConfig;
   SCREENSHOTS: ScreenshotConfig;
 }

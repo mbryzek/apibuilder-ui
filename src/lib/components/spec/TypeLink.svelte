@@ -10,12 +10,15 @@
   let { typeStr, service }: Props = $props();
 
   const resolved = $derived(resolveType(typeStr, service));
+
+  // Rendered from the wrapper sequence rather than from two flags, so a nested container
+  // (`map[[user]]`) comes back out in the order it went in, with the inner type still linked.
+  const open = $derived(resolved.wrappers.map((w) => (w === 'map' ? 'map[' : '[')).join(''));
+  const close = $derived(']'.repeat(resolved.wrappers.length));
 </script>
 
 <span class="type-link"
-  >{#if resolved.isArray}[{/if}{#if resolved.isMap}map[{/if}{#if resolved.href}<a
-      href={resolved.href}
-      class="text-ab-blue hover:text-ab-dark-blue underline">{resolved.innerType}</a
+  >{open}{#if resolved.href}<a href={resolved.href} class="text-ab-blue hover:text-ab-dark-blue underline">{resolved.innerType}</a
     >{:else if resolved.anchor}<a href="#{resolved.anchor}" class="text-ab-blue hover:text-ab-dark-blue underline">{resolved.innerType}</a
-    >{:else}{resolved.innerType}{/if}{#if resolved.isArray}]{/if}{#if resolved.isMap}]{/if}</span
+    >{:else}{resolved.innerType}{/if}{close}</span
 >

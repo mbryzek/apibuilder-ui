@@ -16,15 +16,9 @@ export const config: TestConfig = {
 
   TENANT_ID: process.env['TENANT_ID'] || 'apibuilder',
 
-  BROWSER_CONFIG: {
-    headless: process.env['HEADLESS'] === 'true',
-    slowMo: process.env['HEADLESS'] === 'true' ? 0 : 50,
-    viewport: { width: 1920, height: 1080 }
-  },
-
+  // Headless, slowMo and viewport belong to `playwright.config.ts`, which is the file Playwright
+  // reads. A second copy here is a set of values nothing applies and nobody can tell are ignored.
   TIMEOUTS: {
-    default: 5000,
-    navigation: 10000,
     action: 5000
   },
 

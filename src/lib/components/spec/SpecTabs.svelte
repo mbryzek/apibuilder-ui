@@ -116,6 +116,45 @@
     }
   }
 
+  /**
+   * The tab pattern, wired rather than merely announced.
+   *
+   * `role="tab"` promises a screen reader that a panel exists to move to and that the arrow keys
+   * move between tabs. Both halves are here: `aria-controls` names the one panel, the panel names
+   * the tab it is showing, and only the selected tab is in the tab order — arrow keys move within
+   * the set, which is what stops a long tab bar from costing seven Tab presses to step past.
+   */
+  const PANEL_ID = 'spec-tabpanel';
+
+  function tabId(id: string): string {
+    return `spec-tab-${id}`;
+  }
+
+  async function focusTab(index: number): Promise<void> {
+    const tab = filteredTabs[index];
+    if (!tab) return;
+    activeTab = tab.id;
+    await tick();
+    document.getElementById(tabId(tab.id))?.focus();
+  }
+
+  function onTabKeydown(event: KeyboardEvent, index: number): void {
+    const last = filteredTabs.length - 1;
+    const target =
+      event.key === 'ArrowRight'
+        ? (index + 1) % filteredTabs.length
+        : event.key === 'ArrowLeft'
+          ? (index + last) % filteredTabs.length
+          : event.key === 'Home'
+            ? 0
+            : event.key === 'End'
+              ? last
+              : null;
+    if (target === null) return;
+    event.preventDefault();
+    focusTab(target);
+  }
+
   onMount(() => {
     scrollToHash();
     window.addEventListener('hashchange', scrollToHash);
@@ -129,14 +168,18 @@
   <!-- Tab navigation -->
   <div class="mb-6 overflow-x-auto">
     <div class="flex min-w-max gap-2" role="tablist" aria-label="Spec sections">
-      {#each filteredTabs as tab (tab.id)}
+      {#each filteredTabs as tab, i (tab.id)}
         <button
           role="tab"
+          id={tabId(tab.id)}
           aria-selected={currentTab === tab.id}
+          aria-controls={PANEL_ID}
+          tabindex={currentTab === tab.id ? 0 : -1}
           class="rounded-full px-4 py-1.5 text-sm font-medium whitespace-nowrap transition-colors {currentTab === tab.id
             ? 'bg-ab-blue text-white'
             : 'text-ab-gray hover:text-ab-dark-gray bg-gray-100 hover:bg-gray-200'}"
           onclick={() => (activeTab = tab.id)}
+          onkeydown={(event) => onTabKeydown(event, i)}
         >
           {tab.label}
           <span class="ml-0.5 text-xs opacity-75">{tab.count}</span>
@@ -146,15 +189,15 @@
   </div>
 
   <!-- Tab content -->
-  <div>
+  <div id={PANEL_ID} role="tabpanel" aria-labelledby={tabId(currentTab)}>
     {#if currentTab === 'resources'}
       <ResourceList resources={filteredResources} {service} />
     {:else if currentTab === 'models'}
-      <ModelList models={filteredModels} {service} exampleBaseUrl={exampleBaseUrl ?? ''} />
+      <ModelList models={filteredModels} {service} {exampleBaseUrl} />
     {:else if currentTab === 'enums'}
-      <EnumList enums={filteredEnums} exampleBaseUrl={exampleBaseUrl ?? ''} />
+      <EnumList enums={filteredEnums} {exampleBaseUrl} />
     {:else if currentTab === 'unions'}
-      <UnionList unions={filteredUnions} {service} exampleBaseUrl={exampleBaseUrl ?? ''} />
+      <UnionList unions={filteredUnions} {service} {exampleBaseUrl} />
     {:else if currentTab === 'interfaces'}
       <InterfaceList interfaces={filteredInterfaces} {service} />
     {:else if currentTab === 'auth'}

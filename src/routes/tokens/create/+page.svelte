@@ -1,11 +1,12 @@
 <script lang="ts">
   import PendingForm from '$lib/components/PendingForm.svelte';
+  import FormField from '$lib/components/FormField.svelte';
   import type { ApiErrorItem } from '$lib/api/error-handler';
   import type { CreatedToken } from '$generated/com-bryzek-platform';
   import FormErrors from '$lib/components/FormErrors.svelte';
 
   interface Props {
-    form: { errors?: ApiErrorItem[]; created?: CreatedToken } | null;
+    form: { errors?: ApiErrorItem[]; created?: CreatedToken; description?: string } | null;
   }
 
   let { form: formResult }: Props = $props();
@@ -95,15 +96,13 @@
       <PendingForm>
         {#snippet children(pending)}
           <div class="mb-4">
-            <label for="description" class="text-ab-dark-blue mb-1 block text-sm font-semibold">Description</label>
-            <input
-              type="text"
-              id="description"
+            <FormField
+              label="Description"
               name="description"
               placeholder="Optional description for this token"
-              class="input-field w-full"
+              value={formResult?.description ?? ''}
+              hint="A description to help you remember what this token is used for."
             />
-            <p class="text-ab-gray mt-1 text-sm">A description to help you remember what this token is used for.</p>
           </div>
           <button type="submit" class="btn-primary" disabled={pending}>
             {pending ? 'Creating...' : 'Create Token'}

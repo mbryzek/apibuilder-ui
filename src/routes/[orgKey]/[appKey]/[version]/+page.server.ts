@@ -3,7 +3,7 @@ import { redirect } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall, isApiError } from '$lib/api/error-handler';
 import { actionFail } from '$lib/api/action-error';
-import { requireAuthForAction, requireMemberForAction } from '$lib/server/auth';
+import { requireAuthForAction, memberClient } from '$lib/server/auth';
 import { assertSafePathParams } from '$lib/server/path-params';
 import { redirectWithFlash } from '$lib/server/flash';
 import type { Watch } from '$generated/com-bryzek-apibuilder';
@@ -91,9 +91,7 @@ export const actions: Actions = {
   },
 
   deleteVersion: async ({ params, locals, cookies }) => {
-    const session = await requireMemberForAction(locals, params.orgKey);
-    const headers = getSessionHeaders(session.id);
-    const client = apiBuilderClient({ headers });
+    const { client } = await memberClient(locals, params.orgKey);
 
     const response = await handleApiCall<void>(() =>
       client.deleteVersionByVersion({ orgKey: params.orgKey, appKey: params.appKey, version: params.version })

@@ -1,15 +1,12 @@
 import type { PageServerLoad, Actions } from './$types';
-import { platformClient, getSessionHeaders } from '$lib/api/clients';
+import { getSessionHeaders, platformClient } from '$lib/api/clients';
 import { handleApiCall, isApiError } from '$lib/api/error-handler';
 import { actionFail } from '$lib/api/action-error';
-import { requireAuth, requireAuthForAction } from '$lib/server/auth';
+import { requireAuthLoad, requireAuthForAction } from '$lib/server/auth';
 import { optionalString } from '$lib/server/form';
 import type { CreatedToken, TokenForm } from '$generated/com-bryzek-platform';
 
-export const load: PageServerLoad = async (event) => {
-  requireAuth(event);
-  return {};
-};
+export const load: PageServerLoad = requireAuthLoad;
 
 export const actions: Actions = {
   /**
@@ -32,8 +29,10 @@ export const actions: Actions = {
 
     const response = await handleApiCall<CreatedToken>(() => platformClient({ headers }).createToken({ body }));
 
+    // The description travels back with the failure so a refused submission keeps what was typed:
+    // `load` re-runs after an action and would otherwise re-render an empty field.
     if (isApiError(response)) {
-      return actionFail(response);
+      return actionFail(response, { description: description ?? '' });
     }
 
     return { created: response.data };

@@ -1,5 +1,6 @@
 <script lang="ts">
   import PendingForm from '$lib/components/PendingForm.svelte';
+  import FormField from '$lib/components/FormField.svelte';
   import { Visibility } from '$generated/com-bryzek-apibuilder';
   import type { ApiErrorItem } from '$lib/api/error-handler';
   import FormErrors from '$lib/components/FormErrors.svelte';
@@ -24,36 +25,16 @@
     <PendingForm>
       {#snippet children(pending)}
         <div class="space-y-4">
-          <div>
-            <label for="name" class="text-ab-dark-blue mb-1 block text-sm font-medium">Name <span class="text-ab-error-red">*</span></label>
-            <input type="text" id="name" name="name" required class="input-field w-full rounded-lg border px-3 py-2" />
-          </div>
+          <FormField label="Name" name="name" markRequired />
 
-          <div>
-            <label for="namespace" class="text-ab-dark-blue mb-1 block text-sm font-medium"
-              >Namespace <span class="text-ab-error-red">*</span></label
-            >
-            <input
-              type="text"
-              id="namespace"
-              name="namespace"
-              required
-              placeholder="e.g. com.example"
-              class="input-field w-full rounded-lg border px-3 py-2"
-            />
-          </div>
+          <FormField label="Namespace" name="namespace" placeholder="e.g. com.example" markRequired />
 
-          <div>
-            <label for="key" class="text-ab-dark-blue mb-1 block text-sm font-medium">Key</label>
-            <input
-              type="text"
-              id="key"
-              name="key"
-              placeholder="Auto-generated from name if left blank"
-              class="input-field w-full rounded-lg border px-3 py-2"
-            />
-            <p class="text-ab-gray mt-1 text-xs">Used in URLs. Auto-generated if left blank.</p>
-          </div>
+          <FormField
+            label="Key"
+            name="key"
+            placeholder="Auto-generated from name if left blank"
+            hint="Used in URLs. Auto-generated if left blank."
+          />
 
           <div>
             <label for="visibility" class="text-ab-dark-blue mb-1 block text-sm font-medium">Visibility</label>

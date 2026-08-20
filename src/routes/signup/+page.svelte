@@ -1,5 +1,6 @@
 <script lang="ts">
   import PendingForm from '$lib/components/PendingForm.svelte';
+  import FormField from '$lib/components/FormField.svelte';
   import type { ApiErrorItem } from '$lib/api/error-handler';
   import FormErrors from '$lib/components/FormErrors.svelte';
 
@@ -23,42 +24,11 @@
     <PendingForm>
       {#snippet children(pending)}
         <div class="space-y-4">
-          <div>
-            <label for="name" class="text-ab-dark-blue mb-1 block text-sm font-medium">Name</label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={form?.name ?? ''}
-              autocomplete="name"
-              class="input-field w-full rounded-lg border px-3 py-2"
-            />
-          </div>
+          <FormField label="Name" name="name" value={form?.name ?? ''} autocomplete="name" />
 
-          <div>
-            <label for="email" class="text-ab-dark-blue mb-1 block text-sm font-medium">Email</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              required
-              value={form?.email ?? ''}
-              autocomplete="email"
-              class="input-field w-full rounded-lg border px-3 py-2"
-            />
-          </div>
+          <FormField label="Email" name="email" value={form?.email ?? ''} inputmode="email" autocomplete="email" />
 
-          <div>
-            <label for="password" class="text-ab-dark-blue mb-1 block text-sm font-medium">Password</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              required
-              autocomplete="new-password"
-              class="input-field w-full rounded-lg border px-3 py-2"
-            />
-          </div>
+          <FormField label="Password" name="password" type="password" autocomplete="new-password" />
 
           <button type="submit" disabled={pending} class="btn-primary w-full">
             {pending ? 'Creating account...' : 'Create account'}

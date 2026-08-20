@@ -24,3 +24,31 @@ export async function mockApiClients(
     platformClient: vi.fn(() => client)
   };
 }
+
+/**
+ * `$lib/server/auth` mocked for a test that is exercising what an action DOES, not who it lets in.
+ *
+ * Same reason as the client mock above: a hand-written object listing the guards a module happens
+ * to import today breaks the moment it imports another one, with an error about the mock rather
+ * than about the code. Spreading the real module and overriding only the guards keeps every other
+ * export — `requireAuthLoad`, and whatever comes next — real and present.
+ *
+ * `adminClient` / `memberClient` hand back the same double the client mock does, so an action
+ * built through them talks to the test's client.
+ */
+export async function mockServerAuth(
+  session: unknown,
+  client: unknown,
+  importOriginal: <T = Record<string, unknown>>() => Promise<T>
+): Promise<Record<string, unknown>> {
+  const authorized = { session, client };
+  return {
+    ...(await importOriginal<Record<string, unknown>>()),
+    requireAuth: () => session,
+    requireAuthForAction: () => session,
+    requireMemberForAction: async () => session,
+    requireAdminForAction: async () => session,
+    adminClient: async () => authorized,
+    memberClient: async () => authorized
+  };
+}

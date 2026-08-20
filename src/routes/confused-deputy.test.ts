@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { session } from '$lib/test-support/fixtures';
-import { mockApiClients } from '$lib/test-support/mocks';
+import { mockApiClients, mockServerAuth } from '$lib/test-support/mocks';
 
 /**
  * The actions that authorized one object and then acted on another (ISS-491).
@@ -33,12 +33,7 @@ const client = {
 
 vi.mock('$lib/api/clients', async (importOriginal) => mockApiClients(client, importOriginal));
 
-vi.mock('$lib/server/auth', () => ({
-  requireAuth: () => SESSION,
-  requireAuthForAction: () => SESSION,
-  requireMemberForAction: async () => SESSION,
-  requireAdminForAction: async () => SESSION
-}));
+vi.mock('$lib/server/auth', async (importOriginal) => mockServerAuth(SESSION, client, importOriginal));
 
 const { actions: membershipRequestActions } = await import('./[orgKey]/membership-requests/+page.server');
 const { actions: memberActions } = await import('./[orgKey]/members/+page.server');

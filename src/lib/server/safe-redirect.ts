@@ -1,16 +1,14 @@
 /**
  * Reduce a caller-supplied redirect target to a same-origin path, or `/`.
  *
- * This lived as a private helper in `src/routes/login/+page.server.ts`, where it could not be
- * tested directly — SvelteKit rejects any export from a `+page.server.ts` that is not one of its
- * own hooks — so the only coverage possible was end-to-end through the login action, and that
- * cannot see this function's behaviour at all (see below). It is a boundary, so it belongs beside
- * the other boundaries in `$lib/server`.
+ * It lives in `$lib/server` rather than beside the login action because SvelteKit rejects any
+ * export from a `+page.server.ts` that is not one of its own hooks, so a private helper there
+ * cannot be tested directly. It is a boundary, and boundaries live with the other boundaries.
  *
- * The rule it replaces was a prefix check — starts with `/`, does not start with `//` — and it did
- * not hold. WHATWG URL parsing treats a backslash directly after the leading slash as another host
- * separator for http(s), so `/\evil.com` passed that check and `new URL('/\\evil.com', origin)`
- * resolves to `http://evil.com/`.
+ * A prefix check — starts with `/`, does not start with `//` — does not hold here. WHATWG URL
+ * parsing treats a backslash directly after the leading slash as another host separator for
+ * http(s), so `/\evil.com` passes that check and `new URL('/\\evil.com', origin)` resolves to
+ * `http://evil.com/`.
  *
  * Nothing downstream sanitizes on its behalf: `redirectWithFlash` emits the path it is given
  * verbatim, so whatever comes back from here is exactly what lands in the `Location` header. This

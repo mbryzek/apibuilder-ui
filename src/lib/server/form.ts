@@ -3,20 +3,17 @@
  *
  * `FormData.get` returns `FormDataEntryValue | null` — a string for a text field, a `File` for a
  * file input, `null` for a field that was never submitted. Every action in this app has to narrow
- * that before it can use the value, and there were two spellings of the narrowing:
- *
- *     const guid = formData.get('guid');
- *     if (!guid || typeof guid !== 'string') { ... }        // safe
+ * that before it can use the value, and the tempting spelling is a cast:
  *
  *     const email = formData.get('email') as string;
- *     if (!email) { ... }                                   // the same rule, told to the type
- *                                                           // checker as a fact it cannot check
+ *     if (!email) { ... }                                   // a rule told to the type checker as
+ *                                                           // a fact it cannot check
  *
- * The cast is the problem. `as string` is false for an absent field and false for a file upload,
- * so between the read and the truthiness test the value is typed `string` while holding `null` —
- * and any code inserted in that gap, or any later edit that drops the test, is a type error the
- * compiler has been told not to report. These helpers do the narrowing once, so a call site gets
- * `string | null` and the compiler enforces the check rather than trusting it.
+ * `as string` is false for an absent field and false for a file upload, so between the read and
+ * the truthiness test the value is typed `string` while holding `null` — and any code inserted in
+ * that gap, or any later edit that drops the test, is a type error the compiler has been told not
+ * to report. These helpers do the narrowing once, so a call site gets `string | null` and the
+ * compiler enforces the check rather than trusting it.
  *
  * They deliberately do NOT refuse the submission themselves. The wording of a refusal is the
  * action's own — "Email and password are required", "Domain name is required", "Invalid request"

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { session } from '$lib/test-support/fixtures';
-import { mockApiClients } from '$lib/test-support/mocks';
+import { mockApiClients, mockServerAuth } from '$lib/test-support/mocks';
 import { MembershipRole } from '$generated/com-bryzek-apibuilder';
 
 /**
@@ -30,12 +30,7 @@ const client = {
 
 vi.mock('$lib/api/clients', async (importOriginal) => mockApiClients(client, importOriginal));
 
-vi.mock('$lib/server/auth', () => ({
-  requireAuth: () => SESSION,
-  requireAuthForAction: () => SESSION,
-  requireMemberForAction: async () => SESSION,
-  requireAdminForAction: async () => SESSION
-}));
+vi.mock('$lib/server/auth', async (importOriginal) => mockServerAuth(SESSION, client, importOriginal));
 
 const { actions } = await import('./[orgKey]/members/+page.server');
 

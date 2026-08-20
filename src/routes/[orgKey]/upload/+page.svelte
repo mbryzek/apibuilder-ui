@@ -1,5 +1,6 @@
 <script lang="ts">
   import PendingForm from '$lib/components/PendingForm.svelte';
+  import FormField from '$lib/components/FormField.svelte';
   import type { Organization } from '$generated/com-bryzek-apibuilder';
   import { OriginalType } from '$generated/com-bryzek-apibuilder';
   import FormErrors from '$lib/components/FormErrors.svelte';
@@ -51,7 +52,6 @@
               id="file"
               name="file"
               accept=".json"
-              required
               class="file:bg-ab-blue hover:file:bg-ab-light-blue block w-full text-sm text-gray-500 file:mr-4 file:cursor-pointer file:rounded-lg file:border-0 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white"
               onchange={(e) => {
                 const input = e.currentTarget as HTMLInputElement;
@@ -73,13 +73,13 @@
           </select>
         </div>
 
-        <div>
-          <label for="app_key" class="mb-1 block text-sm font-medium text-gray-700">
-            Application Key
-            <span class="text-ab-gray font-normal">(optional — derived from spec name if omitted)</span>
-          </label>
-          <input type="text" id="app_key" name="app_key" class="input-field w-full" placeholder="e.g. my-api" value={form?.appKey ?? ''} />
-        </div>
+        <FormField
+          label="Application Key"
+          name="app_key"
+          placeholder="e.g. my-api"
+          value={form?.appKey ?? ''}
+          hint="Optional — derived from the spec name if omitted."
+        />
 
         <div class="flex gap-3 pt-2">
           <button type="submit" class="btn-primary" disabled={pending}>
