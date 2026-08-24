@@ -138,7 +138,7 @@
     document.getElementById(tabId(tab.id))?.focus();
   }
 
-  function onTabKeydown(event: KeyboardEvent, index: number): void {
+  async function onTabKeydown(event: KeyboardEvent, index: number): Promise<void> {
     const last = filteredTabs.length - 1;
     const target =
       event.key === 'ArrowRight'
@@ -152,11 +152,13 @@
               : null;
     if (target === null) return;
     event.preventDefault();
-    focusTab(target);
+    await focusTab(target);
   }
 
   onMount(() => {
-    scrollToHash();
+    // Fire-and-forget: onMount must return the listener cleanup synchronously, and nothing
+    // waits on the initial scroll.
+    void scrollToHash();
     window.addEventListener('hashchange', scrollToHash);
     return () => window.removeEventListener('hashchange', scrollToHash);
   });

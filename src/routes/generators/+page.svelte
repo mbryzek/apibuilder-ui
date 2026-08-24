@@ -29,7 +29,8 @@
   function filter(query: string) {
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
-      goto(listUrl('/generators', { q: query }), { keepFocus: true });
+      // Fire-and-forget: the timer fires after the user stopped typing, with nothing awaiting it.
+      void goto(listUrl('/generators', { q: query }), { keepFocus: true });
     }, 250);
   }
 
