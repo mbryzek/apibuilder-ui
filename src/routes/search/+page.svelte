@@ -28,7 +28,8 @@
   function search(query: string) {
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
-      goto(listUrl('/search', { q: query }), { keepFocus: true });
+      // Fire-and-forget: the timer fires after the user stopped typing, with nothing awaiting it.
+      void goto(listUrl('/search', { q: query }), { keepFocus: true });
     }, 250);
   }
 
@@ -36,11 +37,11 @@
     search((event.target as HTMLInputElement).value);
   }
 
-  function handleSubmit(event: SubmitEvent) {
+  async function handleSubmit(event: SubmitEvent): Promise<void> {
     event.preventDefault();
     const input = (event.currentTarget as HTMLFormElement).querySelector('input[name="q"]') as HTMLInputElement;
     clearTimeout(debounceTimer);
-    goto(listUrl('/search', { q: input.value }), { keepFocus: true });
+    await goto(listUrl('/search', { q: input.value }), { keepFocus: true });
   }
 
   onDestroy(() => {

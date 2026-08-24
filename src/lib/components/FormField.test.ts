@@ -29,8 +29,8 @@ describe('FormField', () => {
     document.body.append(target);
   });
 
-  afterEach(() => {
-    if (component) unmount(component);
+  afterEach(async () => {
+    if (component) await unmount(component);
     component = undefined;
   });
 
@@ -74,11 +74,11 @@ describe('FormField', () => {
     expect(input.value).toBe('typed@example.com');
   });
 
-  it('omits the hint line when there is no hint', () => {
+  it('omits the hint line when there is no hint', async () => {
     render({ label: 'Key', name: 'key' });
     expect(target.querySelector('p')).toBeNull();
 
-    unmount(component!);
+    await unmount(component!);
     component = undefined;
 
     render({ label: 'Key', name: 'key', hint: 'Auto-generated if left blank.' });

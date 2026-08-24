@@ -25,8 +25,8 @@ describe('UnionList', () => {
     document.body.append(target);
   });
 
-  afterEach(() => {
-    if (component) unmount(component);
+  afterEach(async () => {
+    if (component) await unmount(component);
     component = undefined;
   });
 
