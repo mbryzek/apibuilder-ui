@@ -1,5 +1,6 @@
 <script lang="ts">
   import { enhance } from '$app/forms';
+  import FormErrors from '$lib/components/FormErrors.svelte';
   import type { Organization } from '$generated/com-bryzek-apibuilder';
   import { Visibility, OriginalType } from '$generated/com-bryzek-apibuilder';
 
@@ -30,13 +31,7 @@
 <div class="max-w-2xl">
   <h1 class="text-ab-dark-blue mb-6 text-2xl font-bold">Upload API Specification</h1>
 
-  {#if form?.errors}
-    <div class="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
-      {#each form.errors as error}
-        <p class="text-sm text-red-700">{error.message}</p>
-      {/each}
-    </div>
-  {/if}
+  <FormErrors errors={form?.errors} />
 
   <form
     method="POST"

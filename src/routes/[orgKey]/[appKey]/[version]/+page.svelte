@@ -4,6 +4,8 @@
   import { page } from '$app/stores';
   import type { Service } from '$generated/com-bryzek-apibuilder-spec';
   import type { LoadError } from '$lib/api/load-error';
+  import Banner from '$lib/components/Banner.svelte';
+  import FormErrors from '$lib/components/FormErrors.svelte';
   import SpecTabs from '$lib/components/spec/SpecTabs.svelte';
 
   interface Props {
@@ -34,13 +36,7 @@
   let isDeleting = $state(false);
 </script>
 
-{#if form?.errors}
-  <div class="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
-    {#each form.errors as error}
-      <p class="text-sm text-red-700">{error.message}</p>
-    {/each}
-  </div>
-{/if}
+<FormErrors errors={form?.errors} />
 
 <!-- Toolbar: search on left, watch + upload on right -->
 <div class="mb-6 flex flex-wrap items-center gap-3">
@@ -125,8 +121,8 @@
 </div>
 
 {#if showDeleteConfirm}
-  <div class="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
-    <p class="mb-3 text-sm font-medium text-red-700">
+  <Banner variant="error" class="mb-6">
+    <p class="mb-3 text-sm font-medium">
       Are you sure you want to delete version <strong>{version.version}</strong>? This action cannot be undone.
     </p>
     <div class="flex gap-3">
@@ -147,7 +143,7 @@
       </form>
       <button class="btn-secondary" onclick={() => (showDeleteConfirm = false)}> Cancel </button>
     </div>
-  </div>
+  </Banner>
 {/if}
 
 <SpecTabs {service} {exampleBaseUrl} {searchQuery} />

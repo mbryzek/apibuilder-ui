@@ -4,6 +4,7 @@
   import { MembershipRole } from '$generated/com-bryzek-apibuilder';
   import type { ApiErrorItem } from '$lib/api/error-handler';
   import type { LoadError } from '$lib/api/load-error';
+  import FormErrors from '$lib/components/FormErrors.svelte';
   import LoadErrorBanner from '$lib/components/LoadErrorBanner.svelte';
   import Pagination from '$lib/components/Pagination.svelte';
 
@@ -48,13 +49,7 @@
     <LoadErrorBanner error={data.loadError} />
   {/if}
 
-  {#if formResult?.errors}
-    <div class="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
-      {#each formResult.errors as err}
-        <p class="text-sm text-red-800">{err.message}</p>
-      {/each}
-    </div>
-  {/if}
+  <FormErrors errors={formResult?.errors} />
 
   {#if data.isAdmin}
     <div class="card mb-6">
