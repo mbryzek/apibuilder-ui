@@ -648,7 +648,7 @@ All doc pages are public and use a dedicated layout with doc sidebar navigation.
 
 ### 14. Email Verification
 
-**Route:** `GET /email-verifications/:token`
+**Route:** `GET /email/verifications/:token`
 **Auth:** Public
 
 - Confirms email verification token
