@@ -1,4 +1,6 @@
+import os from 'node:os';
 import { defineConfig, devices } from '@playwright/test';
+import { localWorkers } from './playwright/utils/workers';
 
 /**
  * Playwright Test Configuration for API Builder UI
@@ -58,10 +60,11 @@ export default defineConfig({
   // not gate a merge, so a retry here buys a diagnosable report rather than a laundered green.
   retries: process.env['CI'] ? 2 : 0,
 
-  // ONE worker in CI. The backend is an emulated amd64 JVM sharing a runner with other builds, so
-  // 20 workers against it is not parallelism, it is a timeout — and every other suite in the
-  // fleet already serializes for exactly that reason.
-  workers: process.env['CI'] ? 1 : 20,
+  // ONE worker in CI. The backend is an emulated amd64 JVM sharing a runner with other builds, and
+  // every other suite in the fleet already serializes against it for that reason. Off CI the count
+  // is derived from this machine and capped: `playwright/utils/workers.ts` says what the cap is
+  // measured against and why it is not a constant.
+  workers: process.env['CI'] ? 1 : localWorkers(os.availableParallelism()),
 
   reporter: [
     ['list'],

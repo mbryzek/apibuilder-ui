@@ -85,7 +85,13 @@ test.describe('Content-Security-Policy', () => {
     await recordCspViolations(page);
     await page.goto('/doc/start');
 
-    // Client-side routing is the observable proof of hydration: SvelteKit only intercepts link
+    // The root layout marks the body once the client has mounted, so this is the first proof that
+    // the bootstrap ran under the policy. It is also what makes the click below a measurement
+    // rather than a race: a click that beats hydration does a full document load too, and on a
+    // loaded machine it did, reading as a blocked bootstrap on a page that hydrated fine.
+    await expect(page.locator('body')).toHaveAttribute('data-hydrated', 'true');
+
+    // Client-side routing is the observable proof of a live router: SvelteKit only intercepts link
     // clicks once its bootstrap has run. If the policy had blocked that script the click would do
     // a full document load and take the probe with it.
     await page.evaluate(() => {
