@@ -51,7 +51,7 @@
     "svelte-eslint-parser": "^1.7.1",
     "typescript": "^5.9.3",
     "vite": "^8.0.16",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.11"
   },
   "dependencies": {
     "@sveltejs/adapter-cloudflare": "^7.2.8",
