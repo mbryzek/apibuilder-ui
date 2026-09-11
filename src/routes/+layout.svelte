@@ -6,6 +6,7 @@
   import Toast from '$lib/components/Toast.svelte';
   import type { Flash } from '$lib/flash';
   import type { Snippet } from 'svelte';
+  import { afterNavigate } from '$app/navigation';
 
   interface Props {
     data: { session?: PublicSession; flash?: Flash };
@@ -28,6 +29,17 @@
   function handleDismissFlash() {
     dismissed = data?.flash ?? null;
   }
+
+  // THE BROWSER SUITE'S HYDRATION SIGNAL. A click that beats hydration is not intercepted by the
+  // client router, so it does a full document load — which is also exactly what a blocked
+  // hydration bootstrap looks like, so a test that clicks without waiting for this cannot tell the
+  // two apart, and a loaded machine turns the race into a red. `afterNavigate` runs once the
+  // component has mounted, initial hydration included, which is the moment handlers are attached
+  // and the router is live. The attribute stays set across client-side navigations: the app
+  // hydrates once per document, and a soft navigation happens because it already had.
+  afterNavigate(() => {
+    document.body.dataset['hydrated'] = 'true';
+  });
 </script>
 
 <svelte:head>
