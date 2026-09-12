@@ -7,6 +7,7 @@ import fs from 'fs';
 import path from 'path';
 import type { Page } from '@playwright/test';
 import { config } from '../config';
+import { explainingFetch } from '../backendUnreachable';
 import type { ContextOrPage } from '../types';
 import { ApiClient as PlatformClient, isTenantSession } from '../generated/com-bryzek-platform';
 import type { PersonForm, TenantSession } from '../generated/com-bryzek-platform';
@@ -22,7 +23,7 @@ const TEST_PASSWORD = 'testpassword';
  * contract moving underneath them — signup returns a `SessionState` union, not the
  * `{ session, user }` object the old helper declared.
  */
-const platform = new PlatformClient(config.API_BASE_URL);
+const platform = new PlatformClient({ baseUrl: config.API_BASE_URL, fetch: explainingFetch });
 
 /** A full run signs up dozens of throwaway accounts; without this the platform rate-limits it. */
 const BYPASS_RATE_LIMIT: Record<string, string> = { 'X-Bypass-Rate-Limit': 'true' };
