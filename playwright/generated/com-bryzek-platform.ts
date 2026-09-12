@@ -506,13 +506,6 @@ export interface GetUserByIdOptions {
   signal?: AbortSignal;
 }
 
-export interface CreateUserTenantByTenantIdOptions {
-  tenantId: string;
-  body: UserForm;
-  headers?: Record<string, string>;
-  signal?: AbortSignal;
-}
-
 export interface UpdateUserByIdOptions {
   id: string;
   body: UserForm;
@@ -530,16 +523,6 @@ export interface UpdateUserSecondaryByIdOptions {
 export interface UpdateUserPrimaryByIdOptions {
   id: string;
   body: UserPrimaryForm;
-  headers?: Record<string, string>;
-  signal?: AbortSignal;
-}
-
-export interface UpdateActiveUserByIdOptions {
-  headers?: Record<string, string>;
-  signal?: AbortSignal;
-}
-
-export interface UpdateInactiveUserByIdOptions {
   headers?: Record<string, string>;
   signal?: AbortSignal;
 }
@@ -903,30 +886,6 @@ export class ApiClient {
 
   }
 
-  async createUserTenantByTenantId(params: CreateUserTenantByTenantIdOptions): Promise<User> {
-    const url = `${this.baseUrl}/users/tenant/${encodeURIComponent(params.tenantId)}`;
-
-      const response = await this.request(url, {
-      method: 'POST',
-      body: JSON.stringify(params.body),
-    }, 'application/json', params.headers || {}, params.signal);
-
-    if (response.status === 201) {
-      return await Util.mustParse<User>(response, "User");
-    }
-
-    if (response.status === 401) {
-      throw new UnauthorizedErrorResponse(response);
-    }
-
-    if (response.status === 422) {
-      throw new ValidationErrorsResponse(response);
-    }
-
-    throw new ApiException(response, `Request failed with status ${response.status}`);
-
-  }
-
   async updateUserById(params: UpdateUserByIdOptions): Promise<User> {
     const url = `${this.baseUrl}/users/${encodeURIComponent(params.id)}`;
 
@@ -990,60 +949,6 @@ export class ApiClient {
       method: 'PUT',
       body: JSON.stringify(params.body),
     }, 'application/json', params.headers || {}, params.signal);
-
-    if (response.status === 200) {
-      return await Util.mustParse<User>(response, "User");
-    }
-
-    if (response.status === 401) {
-      throw new UnauthorizedErrorResponse(response);
-    }
-
-    if (response.status === 404) {
-      throw new VoidResponse(response);
-    }
-
-    if (response.status === 422) {
-      throw new ValidationErrorsResponse(response);
-    }
-
-    throw new ApiException(response, `Request failed with status ${response.status}`);
-
-  }
-
-  async updateActiveUserById(id: string, options?: UpdateActiveUserByIdOptions): Promise<User> {
-    const url = `${this.baseUrl}/users/${encodeURIComponent(id)}/active`;
-
-      const response = await this.request(url, {
-      method: 'PUT',
-    }, 'application/json', options?.headers || {}, options?.signal);
-
-    if (response.status === 200) {
-      return await Util.mustParse<User>(response, "User");
-    }
-
-    if (response.status === 401) {
-      throw new UnauthorizedErrorResponse(response);
-    }
-
-    if (response.status === 404) {
-      throw new VoidResponse(response);
-    }
-
-    if (response.status === 422) {
-      throw new ValidationErrorsResponse(response);
-    }
-
-    throw new ApiException(response, `Request failed with status ${response.status}`);
-
-  }
-
-  async updateInactiveUserById(id: string, options?: UpdateInactiveUserByIdOptions): Promise<User> {
-    const url = `${this.baseUrl}/users/${encodeURIComponent(id)}/inactive`;
-
-      const response = await this.request(url, {
-      method: 'PUT',
-    }, 'application/json', options?.headers || {}, options?.signal);
 
     if (response.status === 200) {
       return await Util.mustParse<User>(response, "User");
