@@ -18,13 +18,13 @@ export enum Method {
   Head = 'HEAD',
   Connect = 'CONNECT',
   Options = 'OPTIONS',
-  Trace = 'TRACE',
+  Trace = 'TRACE'
 }
 
 export enum ParameterLocation {
   Path = 'Path',
   Query = 'Query',
-  Form = 'Form',
+  Form = 'Form'
 }
 
 // ============================================================================
