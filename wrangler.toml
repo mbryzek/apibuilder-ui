@@ -1,17 +1,52 @@
-# Cloudflare Pages Configuration
+# Cloudflare Worker configuration — apibuilder-ui, host www.apibuilder.org.
 name = "apibuilder-ui"
 compatibility_date = "2026-02-08"
 compatibility_flags = ["nodejs_compat"]
 
-# Pages configuration
-pages_build_output_dir = ".svelte-kit/cloudflare"
+# @sveltejs/adapter-cloudflare writes its generated Worker here. Nothing in this repo wraps it,
+# so `main` names the adapter's own output directly (trips composes an entry point of its own on
+# top of this file and has to keep `main` pointing at that instead — see its svelte.config.js).
+main = ".svelte-kit/cloudflare/_worker.js"
+
+# The Worker keeps its `*.workers.dev` URL as well as this route. That is wrangler's default, and
+# it is stated rather than relied on: the cutover from the Pages project is staged through that
+# URL — the Worker has to answer there before www.apibuilder.org moves — so a default that flipped
+# would take the staging step with it. It is a TOP-LEVEL key and has to stay above the first
+# `[table]` below: after one, TOML reads it as a field of that table, and wrangler warns about an
+# unexpected field and ignores it rather than failing.
+workers_dev = true
+
+# Persist Workers Logs. Cloudflare retains nothing a Worker writes unless this block asks it to,
+# so without it a live `wrangler tail` is the only way to see a line and one logged for a question
+# asked afterwards is already gone. That is the whole reason this app is a Worker rather than a
+# Pages project: `[observability]` is a Workers setting, a Pages config cannot carry one, and Pages
+# Function output is live-tail only. `head_sampling_rate = 1` keeps all of it, matching the other
+# Workers on this fleet (plybk-admin, plybk-app, trips, account). Read it with
+# `dev obs worker-logs --app apibuilder-ui`. ISS-13428
+[observability]
+enabled = true
+head_sampling_rate = 1
+
+[assets]
+directory = ".svelte-kit/cloudflare"
+binding = "ASSETS"
+
+# Fixed, single-host route. www.apibuilder.org is served by the Pages project until its custom
+# domain is released; this route is what serves the host afterwards, and it needs the hostname to
+# keep a PROXIED DNS record in the zone. Nothing else on this zone claims the host and no wildcard
+# route covers it, so there is no precedence question to answer once Pages has let go of it.
+[[routes]]
+pattern = "www.apibuilder.org/*"
+zone_name = "apibuilder.org"
 
 # NOTE: do NOT put VITE_* here. `src/lib/config.ts` reads them via `import.meta.env`, which Vite
-# substitutes at BUILD time, and devops/bin/release-sveltekit builds locally before running
-# `wrangler pages deploy`. Pages `[vars]` are a RUNTIME binding, so they never reach the bundle —
+# substitutes at BUILD time, and `dev release sveltekit` builds locally before deploying. wrangler
+# `[vars]` are a RUNTIME Worker binding (`event.platform.env`), so they never reach the bundle —
 # a VITE_* value set here is inert and silently disagrees with the one that actually ships.
 # The production values come from `.env.production`; change them there.
 #
-# Genuine runtime secrets (Pages Functions) go through:
-#   wrangler pages secret put VARIABLE_NAME
-# or Cloudflare Dashboard → Pages → Settings → Environment Variables.
+# Genuine runtime secrets go through `wrangler secret put VARIABLE_NAME`.
+#
+# NO account_id either: the Cloudflare account is pinned by the deploy itself
+# (CLOUDFLARE_ACCOUNT_ID, resolved from the target's label in the env repo's app config), which
+# keeps the account id out of a file every session can read.
