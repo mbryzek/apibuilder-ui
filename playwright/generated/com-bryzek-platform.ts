@@ -416,7 +416,7 @@ export const parameterBounds = {
     id: { length: { minimum: 0, maximum: 100 } },
     status: { length: { minimum: 0, maximum: 100 } },
     role: { length: { minimum: 0, maximum: 100 } },
-    limit: { minimum: 1, maximum: 101 },
+    limit: { minimum: 1, maximum: 100 },
     offset: { minimum: 0 }
   }
 } as const;
