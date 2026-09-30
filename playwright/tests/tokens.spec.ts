@@ -3,7 +3,7 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { loadUrl, safeClick, signupAndLogin, waitForCondition } from '../utils/test-helpers';
+import { loadUrl, safeClick, signupAndLogin, waitForNavigationAway } from '../utils/test-helpers';
 
 test.describe('Tokens', () => {
   test('creates a token and shows its value on the create page', async ({ page, context }) => {
@@ -22,7 +22,7 @@ test.describe('Tokens', () => {
     // NO redirect: the value exists only in the mint response, so the page that made the request is
     // the only one that can render it.
     const tokenCode = page.locator('code');
-    await tokenCode.waitFor({ state: 'visible', timeout: 5000 });
+    await expect(tokenCode).toBeVisible();
     expect(page.url()).toContain('/tokens/create');
 
     const tokenText = await tokenCode.textContent();
@@ -51,7 +51,7 @@ test.describe('Tokens', () => {
     await safeClick(page, 'Create Token');
 
     const tokenCode = page.locator('code');
-    await tokenCode.waitFor({ state: 'visible', timeout: 5000 });
+    await expect(tokenCode).toBeVisible();
     const cleartext = (await tokenCode.textContent())!.trim();
     expect(cleartext.length).toBeGreaterThan(10);
 
@@ -61,10 +61,7 @@ test.describe('Tokens', () => {
     // The detail page carries the mask and nothing that authenticates. `safeClick` matches
     // `button:has-text(...)` and this control is an <a>, so it has to be clicked by its role.
     await page.getByRole('link', { name: 'View token details' }).click();
-    await waitForCondition(() => !page.url().includes('/tokens/create'), {
-      description: 'navigation to the token detail page',
-      maxAttempts: 30
-    });
+    await waitForNavigationAway(page, '/tokens/create');
     expect(page.url()).toMatch(/\/tokens\/[^/]+$/);
     await expect(page.getByText(cleartext)).toHaveCount(0);
 

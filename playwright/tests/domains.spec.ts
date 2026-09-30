@@ -4,7 +4,7 @@
 
 import { test, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
-import { generateUUID, fillField, loadUrl, waitForCondition, signupAndLogin, safeClick } from '../utils/test-helpers';
+import { generateUUID, fillField, loadUrl, waitForNavigationAway, signupAndLogin, safeClick } from '../utils/test-helpers';
 
 async function createOrgAndLogin(page: Page): Promise<string> {
   await signupAndLogin(page);
@@ -18,10 +18,7 @@ async function createOrgAndLogin(page: Page): Promise<string> {
   await fillField(page, 'input[name="namespace"]', namespace);
   await safeClick(page, 'Create Organization');
 
-  await waitForCondition(() => !page.url().includes('/org/create'), {
-    description: 'navigation away from org create page',
-    maxAttempts: 30
-  });
+  await waitForNavigationAway(page, '/org/create');
 
   const url = new URL(page.url());
   const orgKey = url.pathname.split('/').filter(Boolean)[0]!;
@@ -32,14 +29,7 @@ async function addDomainAndWait(page: Page, domainName: string): Promise<void> {
   await fillField(page, 'input[name="name"]', domainName);
   await safeClick(page, 'Add Domain');
 
-  await waitForCondition(
-    async () =>
-      await page
-        .getByText(domainName)
-        .isVisible()
-        .catch(() => false),
-    { description: 'domain to appear in list', maxAttempts: 30 }
-  );
+  await expect(page.getByText(domainName)).toBeVisible();
 }
 
 test.describe('Domains', () => {
@@ -80,14 +70,7 @@ test.describe('Domains', () => {
     await safeClick(page, 'Remove');
     await safeClick(page, 'Confirm');
 
-    await waitForCondition(
-      async () =>
-        !(await page
-          .getByText(domainName)
-          .isVisible()
-          .catch(() => false)),
-      { description: 'domain to be removed from list', maxAttempts: 30 }
-    );
+    await expect(page.getByText(domainName)).toHaveCount(0);
 
     await expect(page.getByText('No domains registered')).toBeVisible();
   });
@@ -103,13 +86,6 @@ test.describe('Domains', () => {
     await fillField(page, 'input[name="name"]', domainName);
     await safeClick(page, 'Add Domain');
 
-    await waitForCondition(
-      async () =>
-        await page
-          .getByText('already exists')
-          .isVisible()
-          .catch(() => false),
-      { description: 'error message to appear', maxAttempts: 30 }
-    );
+    await expect(page.getByText('already exists')).toBeVisible();
   });
 });
