@@ -189,32 +189,15 @@ export async function loadUrl(page: Page, urlPath: string): Promise<void> {
 }
 
 /**
- * Wait for a condition to be met by polling
+ * Wait until the page has navigated off every URL whose path contains `path`.
+ *
+ * Bounded by the config's `navigationTimeout`, not by a fixed poll: the step before this is a form
+ * submit whose server round trip is the slowest thing in the suite. A freshly started CI backend
+ * answers a signup in 8-28s while its startup work holds the connection pool, so a short fixed
+ * budget here fails on the backend's warm-up rather than on the app. ISS-15105
  */
-export async function waitForCondition(
-  conditionFn: () => boolean | Promise<boolean>,
-  options: {
-    intervalMs?: number;
-    maxAttempts?: number;
-    description?: string;
-  } = {}
-): Promise<void> {
-  const intervalMs = options.intervalMs || 250;
-  const maxAttempts = options.maxAttempts || 10;
-  const description = options.description || 'condition to be met';
-
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    const result = await conditionFn();
-    if (result) {
-      return;
-    }
-
-    if (attempt < maxAttempts) {
-      await new Promise((resolve) => setTimeout(resolve, intervalMs));
-    }
-  }
-
-  throw new Error(`Timeout waiting for ${description} after ${maxAttempts} attempts (${maxAttempts * intervalMs}ms)`);
+export async function waitForNavigationAway(page: Page, path: string): Promise<void> {
+  await page.waitForURL((url) => !url.pathname.includes(path), { waitUntil: 'commit' });
 }
 
 /**

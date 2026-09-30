@@ -8,7 +8,7 @@ import {
   generateRandomEmail,
   fillField,
   loadUrl,
-  waitForCondition,
+  waitForNavigationAway,
   createUserViaApi,
   safeClick,
   sessionIsValid,
@@ -26,7 +26,7 @@ test.describe('Signup', () => {
     await fillField(page, 'input[name="password"]', password);
     await safeClick(page, 'Create account');
 
-    await waitForCondition(() => !page.url().includes('/signup'), { description: 'navigation away from signup page', maxAttempts: 20 });
+    await waitForNavigationAway(page, '/signup');
 
     // Should redirect away from signup (to home)
     expect(page.url()).not.toContain('/signup');
@@ -47,9 +47,8 @@ test.describe('Signup', () => {
 
     // Should show error about duplicate email
     const errorMessage = page.locator('.bg-red-50');
-    await errorMessage.waitFor({ state: 'visible', timeout: 10000 });
-    const errorText = await errorMessage.textContent();
-    expect(errorText).toBeTruthy();
+    await expect(errorMessage).toBeVisible();
+    expect(await errorMessage.textContent()).toBeTruthy();
   });
 
   test("refuses a signup with no email, in the app's own words", async ({ page }) => {
@@ -62,7 +61,7 @@ test.describe('Signup', () => {
     // the one judge of what a submission needs and its message is the one the user sees — styled,
     // translatable and logged, rather than a native bubble the app cannot reach.
     const errorMessage = page.locator('.bg-red-50');
-    await errorMessage.waitFor({ state: 'visible', timeout: 10000 });
+    await expect(errorMessage).toBeVisible();
     expect(await errorMessage.textContent()).toContain('Email and password are required');
     await expect(page).toHaveURL(/\/signup/);
   });
@@ -82,7 +81,7 @@ test.describe('Login', () => {
     await fillField(page, 'input[name="password"]', password);
     await safeClick(page, 'Sign in');
 
-    await waitForCondition(() => !page.url().includes('/login'), { description: 'navigation away from login page', maxAttempts: 20 });
+    await waitForNavigationAway(page, '/login');
 
     expect(page.url()).not.toContain('/login');
   });
@@ -102,7 +101,7 @@ test.describe('Login', () => {
     await fillField(page, 'input[name="password"]', password);
     await safeClick(page, 'Sign in');
 
-    await waitForCondition(() => !page.url().includes('/login'), { description: 'navigation away from login page', maxAttempts: 20 });
+    await waitForNavigationAway(page, '/login');
 
     const url = new URL(page.url());
     expect(url.pathname).toBe('/account/profile');
@@ -129,9 +128,8 @@ test.describe('Login', () => {
     await safeClick(page, 'Sign in');
 
     const errorMessage = page.locator('.bg-red-50');
-    await errorMessage.waitFor({ state: 'visible', timeout: 10000 });
-    const errorText = await errorMessage.textContent();
-    expect(errorText).toBeTruthy();
+    await expect(errorMessage).toBeVisible();
+    expect(await errorMessage.textContent()).toBeTruthy();
   });
 
   test('signup then login flow', async ({ page }) => {
@@ -145,7 +143,7 @@ test.describe('Login', () => {
     await fillField(page, 'input[name="password"]', password);
     await safeClick(page, 'Create account');
 
-    await waitForCondition(() => !page.url().includes('/signup'), { description: 'navigation away from signup page', maxAttempts: 20 });
+    await waitForNavigationAway(page, '/signup');
 
     // Log out by clearing cookies
     await page.context().clearCookies();
@@ -156,7 +154,7 @@ test.describe('Login', () => {
     await fillField(page, 'input[name="password"]', password);
     await safeClick(page, 'Sign in');
 
-    await waitForCondition(() => !page.url().includes('/login'), { description: 'navigation away from login page', maxAttempts: 20 });
+    await waitForNavigationAway(page, '/login');
 
     expect(page.url()).not.toContain('/login');
   });

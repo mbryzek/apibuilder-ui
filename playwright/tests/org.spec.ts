@@ -3,7 +3,7 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { generateUUID, fillField, loadUrl, waitForCondition, signupAndLogin, safeClick } from '../utils/test-helpers';
+import { generateUUID, fillField, loadUrl, waitForNavigationAway, signupAndLogin, safeClick } from '../utils/test-helpers';
 
 test.describe('Organization Creation', () => {
   test('creates an organization and redirects to org page', async ({ page }) => {
@@ -18,10 +18,7 @@ test.describe('Organization Creation', () => {
     await fillField(page, 'input[name="namespace"]', namespace);
     await safeClick(page, 'Create Organization');
 
-    await waitForCondition(() => !page.url().includes('/org/create'), {
-      description: 'navigation away from org create page',
-      maxAttempts: 20
-    });
+    await waitForNavigationAway(page, '/org/create');
 
     expect(page.url()).not.toContain('/org/create');
     // Should redirect to the new org's page
