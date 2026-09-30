@@ -165,7 +165,19 @@ export async function fillField(page: Page, selector: string, value: string): Pr
 }
 
 /**
- * Navigate to a URL and wait for page to load
+ * Navigate to a URL and wait until the app has HYDRATED, not merely until the network is quiet.
+ *
+ * Every spec interacts with the page right after this returns, and an interaction that beats
+ * hydration is not the one the user makes: a field filled before Svelte mounts is reset to the
+ * component's own value when it does, and a submit clicked before `use:enhance` is attached goes
+ * out as a native POST. Either way the form reaches the server empty — "Email and password are
+ * required" on /signup, a reload onto /login with both fields cleared — and the spec times out
+ * waiting for a navigation that was never going to happen. With several local workers sharing one
+ * vite dev server, hydration routinely outlasts the network going quiet, which is why a capped
+ * `networkidle` passed at one worker and failed at two.
+ *
+ * The root layout sets `data-hydrated` on `<body>` once the client has mounted (see its
+ * `afterNavigate`), so this waits on that marker, for as long as any other action may take.
  */
 export async function loadUrl(page: Page, urlPath: string): Promise<void> {
   const url = urlPath.startsWith('http') ? urlPath : `${config.FRONTEND_BASE_URL}${urlPath}`;
@@ -181,11 +193,7 @@ export async function loadUrl(page: Page, urlPath: string): Promise<void> {
     throw new Error(`Failed to load ${url}: Expected HTTP 200 but got ${status}`);
   }
 
-  try {
-    await page.waitForLoadState('networkidle', { timeout: 1500 });
-  } catch {
-    // networkidle not reached — page is still usable
-  }
+  await page.locator('body[data-hydrated="true"]').waitFor({ state: 'attached' });
 }
 
 /**
