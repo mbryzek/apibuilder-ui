@@ -31,7 +31,7 @@
     "@playwright/test": "^1.58.2",
     "@sveltejs/kit": "^2.70.2",
     "@sveltejs/vite-plugin-svelte": "^7.1.2",
-    "@tailwindcss/vite": "^4.3.1",
+    "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^25.5.0",
     "@types/semver": "^7.7.1",
     "@typescript-eslint/eslint-plugin": "^8.60.1",
@@ -55,9 +55,7 @@
   "dependencies": {
     "@sveltejs/adapter-cloudflare": "^7.2.8",
     "@tailwindcss/forms": "^0.5.11",
-    "autoprefixer": "^10.4.27",
-    "postcss": "^8.5.25",
-    "tailwindcss": "^4.2.1"
+    "tailwindcss": "^4.3.3"
   },
   "overrides": {
     "undici@7.29.0": "7.29.1"
