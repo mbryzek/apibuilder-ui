@@ -1,5 +1,19 @@
 @import 'tailwindcss';
-@config '../tailwind.config.js';
+@plugin '@tailwindcss/forms';
+
+@theme {
+  --color-ab-dark-blue: #333333;
+  --color-ab-blue: #004d7a;
+  --color-ab-light-blue: #1a8bc0;
+  --color-ab-gray: #666666;
+  --color-ab-light-gray: #f7fafc;
+  --color-ab-dark-gray: #444444;
+  --color-ab-error-red: #e53e3e;
+  --color-ab-success-green: #38a169;
+
+  --font-sans: Poppins, system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', Menlo, monospace;
+}
 
 @layer base {
   html,
