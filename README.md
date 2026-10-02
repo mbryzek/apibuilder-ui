@@ -12,7 +12,7 @@ npm ci
 npm run dev            # http://localhost:5173
 ```
 
-Node `^22.13.0 || >=24`, declared in package.json `engines` and enforced for real: `.npmrc` sets
+Node `^24.16.0 || >=26.0.0`, declared in package.json `engines` and enforced for real: `.npmrc` sets
 `engine-strict=true`, so `npm ci` refuses to install outside that range — that is the gate, in CI
 and on a laptop alike. `.nvmrc` is a hint for a version manager on a developer's machine; nothing
 in the CI tooling reads it. Neither is hand-maintained guesswork — `src/node-version.test.ts` fails
