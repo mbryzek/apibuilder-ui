@@ -1,13 +1,13 @@
 import type { PageServerLoad, Actions } from './$types';
 import { fail } from '@sveltejs/kit';
-import { apiBuilderClient, getSessionHeaders, type ApiBuilderClient } from '$lib/api/clients';
+import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
 import { handleApiCall, isApiError, isApiSuccess, type ApiResponse } from '$lib/api/error-handler';
 import { actionFail, actionFailMissing } from '$lib/api/action-error';
 import { dataOr, loadErrorFrom } from '$lib/api/load-error';
 import { requireAuth, adminClient } from '$lib/server/auth';
 import { requiredEnum, requiredString } from '$lib/server/form';
 import { PAGE_FETCH_LIMIT, PAGE_LIMIT, parseOffset, toPage } from '$lib/pagination';
-import { findScopedById, outOfScope } from '$lib/server/scoped-id';
+import { adminGuidAction, type AdminActionEvent, type OrgScope } from '$lib/server/scoped-action';
 import type { Membership, User, MembershipRequest, Organization } from '$generated/com-bryzek-apibuilder';
 import { MembershipRole } from '$generated/com-bryzek-apibuilder';
 
@@ -51,17 +51,14 @@ export const load: PageServerLoad = async (event) => {
 };
 
 /**
- * The membership with this id *within this org*, or null.
+ * This org's memberships, the scope a form's `guid` is resolved within.
  *
- * Every action below authorizes `params.orgKey` and then acts on an id that arrived separately in
- * the form body, so the id has to be resolved against the org that was authorized rather than
- * trusted. See `$lib/server/scoped-id`.
+ * Every guid action below authorizes `params.orgKey` and then acts on an id that arrived
+ * separately in the form body, so the id has to be resolved against the org that was authorized
+ * rather than trusted. See `$lib/server/scoped-id` and `$lib/server/scoped-action`.
  */
-async function findMembershipInOrg(orgKey: string, guid: string, client: ApiBuilderClient) {
-  return findScopedById<Membership>(guid, (limit, offset) =>
-    handleApiCall<Membership[]>(() => client.getMemberships({ orgKey, limit, offset }))
-  );
-}
+const membershipsInOrg: OrgScope<Membership> = (client, orgKey) => (limit, offset) =>
+  handleApiCall<Membership[]>(() => client.getMemberships({ orgKey, limit, offset }));
 
 /**
  * Promotion and demotion are the same act: a role change on the membership the table already
@@ -74,19 +71,10 @@ async function findMembershipInOrg(orgKey: string, guid: string, client: ApiBuil
  * not demote anybody: it removes them from the organization, which is what "Revoke Admin" did
  * before ISS-4833.
  */
-async function changeRole(orgKey: string, guid: string, role: MembershipRole, client: ApiBuilderClient) {
-  const membership = await findMembershipInOrg(orgKey, guid, client);
-  if (!membership) {
-    return outOfScope();
-  }
-
-  const response = await handleApiCall<Membership>(() => client.updateMembershipById({ id: membership.id, body: { role } }));
-
-  if (isApiError(response)) {
-    return actionFail(response);
-  }
-
-  return { success: true };
+function changeRole(event: AdminActionEvent, role: MembershipRole) {
+  return adminGuidAction(event, membershipsInOrg, (membership, client) =>
+    client.updateMembershipById({ id: membership.id, body: { role } })
+  );
 }
 
 export const actions: Actions = {
@@ -139,50 +127,9 @@ export const actions: Actions = {
     return { success: true };
   },
 
-  removeMember: async ({ request, locals, params }) => {
-    const { client } = await adminClient(locals, params.orgKey);
-    const formData = await request.formData();
-    const guid = requiredString(formData, 'guid');
+  removeMember: (event) => adminGuidAction(event, membershipsInOrg, (membership, client) => client.deleteMembershipById(membership.id)),
 
-    if (!guid) {
-      return fail(400, { errors: [{ message: 'Invalid request' }] });
-    }
+  makeAdmin: (event) => changeRole(event, MembershipRole.Admin),
 
-    const membership = await findMembershipInOrg(params.orgKey, guid, client);
-    if (!membership) {
-      return outOfScope();
-    }
-
-    const response = await handleApiCall<void>(() => client.deleteMembershipById(membership.id));
-
-    if (isApiError(response)) {
-      return actionFail(response);
-    }
-
-    return { success: true };
-  },
-
-  makeAdmin: async ({ request, locals, params }) => {
-    const { client } = await adminClient(locals, params.orgKey);
-    const formData = await request.formData();
-    const guid = requiredString(formData, 'guid');
-
-    if (!guid) {
-      return fail(400, { errors: [{ message: 'Invalid request' }] });
-    }
-
-    return changeRole(params.orgKey, guid, MembershipRole.Admin, client);
-  },
-
-  revokeAdmin: async ({ request, locals, params }) => {
-    const { client } = await adminClient(locals, params.orgKey);
-    const formData = await request.formData();
-    const guid = requiredString(formData, 'guid');
-
-    if (!guid) {
-      return fail(400, { errors: [{ message: 'Invalid request' }] });
-    }
-
-    return changeRole(params.orgKey, guid, MembershipRole.Member, client);
-  }
+  revokeAdmin: (event) => changeRole(event, MembershipRole.Member)
 };
