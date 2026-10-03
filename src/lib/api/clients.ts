@@ -6,7 +6,7 @@
 import { ApiClient as ApiBuilderClient } from '$generated/com-bryzek-apibuilder';
 import { ApiClient as GeneratorClient } from '$generated/com-bryzek-apibuilder-generator';
 import { ApiClient as PlatformClient } from '$generated/com-bryzek-platform';
-import type { ApiClientOptions } from '$generated/generated-util';
+import { sessionHeaders, type ApiClientOptions } from '$generated/generated-util';
 import { config } from '$lib/config';
 
 export { ApiBuilderClient, GeneratorClient, PlatformClient };
@@ -42,20 +42,7 @@ export function platformClient(options?: ClientOptions): PlatformClient {
   return new PlatformClient(clientOptions(options));
 }
 
-function getRateLimitBypassHeaders(): Record<string, string> {
-  if (!config.isProduction) {
-    return { 'X-Bypass-Rate-Limit': 'true' };
-  }
-  return {};
-}
-
+/** The headers that authenticate a call as the signed-in user, plus the bypass headers off production. */
 export function getSessionHeaders(sessionId?: string): Record<string, string> {
-  const baseHeaders = getRateLimitBypassHeaders();
-  if (!sessionId) {
-    return baseHeaders;
-  }
-  return {
-    ...baseHeaders,
-    session_id: sessionId
-  };
+  return sessionHeaders(sessionId, { isProduction: config.isProduction });
 }
