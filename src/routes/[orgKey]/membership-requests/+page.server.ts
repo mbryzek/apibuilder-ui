@@ -1,14 +1,12 @@
 import type { PageServerLoad, Actions } from './$types';
-import { error, fail } from '@sveltejs/kit';
-import { apiBuilderClient, getSessionHeaders, type ApiBuilderClient } from '$lib/api/clients';
-import { handleApiCall, isApiError } from '$lib/api/error-handler';
-import { actionFail } from '$lib/api/action-error';
+import { error } from '@sveltejs/kit';
+import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
+import { handleApiCall } from '$lib/api/error-handler';
 import { dataOr, loadErrorFrom } from '$lib/api/load-error';
-import { requireAuth, adminClient } from '$lib/server/auth';
-import { requiredString } from '$lib/server/form';
-import { findScopedById, outOfScope } from '$lib/server/scoped-id';
+import { requireAuth } from '$lib/server/auth';
+import { adminGuidAction, type OrgScope } from '$lib/server/scoped-action';
 import { PAGE_FETCH_LIMIT, parseOffset, toPage } from '$lib/pagination';
-import type { MembershipRequest, Membership } from '$generated/com-bryzek-apibuilder';
+import type { MembershipRequest } from '$generated/com-bryzek-apibuilder';
 
 export const load: PageServerLoad = async (event) => {
   const session = requireAuth(event);
@@ -37,62 +35,17 @@ export const load: PageServerLoad = async (event) => {
 };
 
 /**
- * The pending request with this id *within this org*, or null.
+ * This org's pending requests, the scope a form's `guid` is resolved within.
  *
  * Accepting a request is the act that grants access to an organization, so the id has to come
  * from the org the caller was just checked to administer rather than straight from the form
- * body — where it names whatever org the submitter likes. See `$lib/server/scoped-id`.
+ * body — where it names whatever org the submitter likes. See `$lib/server/scoped-action`.
  */
-async function findRequestInOrg(orgKey: string, guid: string, client: ApiBuilderClient) {
-  return findScopedById<MembershipRequest>(guid, (limit, offset) =>
-    handleApiCall<MembershipRequest[]>(() => client.getMembershipRequests({ orgKey, limit, offset }))
-  );
-}
+const requestsInOrg: OrgScope<MembershipRequest> = (client, orgKey) => (limit, offset) =>
+  handleApiCall<MembershipRequest[]>(() => client.getMembershipRequests({ orgKey, limit, offset }));
 
 export const actions: Actions = {
-  accept: async ({ request, locals, params }) => {
-    const { client } = await adminClient(locals, params.orgKey);
-    const formData = await request.formData();
-    const guid = requiredString(formData, 'guid');
+  accept: (event) => adminGuidAction(event, requestsInOrg, (req, client) => client.createMembershipRequestAcceptById(req.id)),
 
-    if (!guid) {
-      return fail(400, { errors: [{ message: 'Invalid request' }] });
-    }
-
-    const membershipRequest = await findRequestInOrg(params.orgKey, guid, client);
-    if (!membershipRequest) {
-      return outOfScope();
-    }
-
-    const response = await handleApiCall<Membership>(() => client.createMembershipRequestAcceptById(membershipRequest.id));
-
-    if (isApiError(response)) {
-      return actionFail(response);
-    }
-
-    return { success: true };
-  },
-
-  decline: async ({ request, locals, params }) => {
-    const { client } = await adminClient(locals, params.orgKey);
-    const formData = await request.formData();
-    const guid = requiredString(formData, 'guid');
-
-    if (!guid) {
-      return fail(400, { errors: [{ message: 'Invalid request' }] });
-    }
-
-    const membershipRequest = await findRequestInOrg(params.orgKey, guid, client);
-    if (!membershipRequest) {
-      return outOfScope();
-    }
-
-    const response = await handleApiCall<void>(() => client.createMembershipRequestDeclineById(membershipRequest.id));
-
-    if (isApiError(response)) {
-      return actionFail(response);
-    }
-
-    return { success: true };
-  }
+  decline: (event) => adminGuidAction(event, requestsInOrg, (req, client) => client.createMembershipRequestDeclineById(req.id))
 };
