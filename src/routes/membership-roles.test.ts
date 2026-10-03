@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { session } from '$lib/test-support/fixtures';
+import { invokeAction } from '$lib/test-support/invoke-action';
 import { mockApiClients, mockServerAuth } from '$lib/test-support/mocks';
 import { MembershipRole } from '$generated/com-bryzek-apibuilder';
 
@@ -35,16 +36,7 @@ vi.mock('$lib/server/auth', async (importOriginal) => mockServerAuth(SESSION, cl
 const { actions } = await import('./[orgKey]/members/+page.server');
 
 function invoke(action: unknown, form: Record<string, string>) {
-  const body = new FormData();
-  for (const [name, value] of Object.entries(form)) {
-    body.append(name, value);
-  }
-  const event = {
-    request: new Request('http://localhost/', { method: 'POST', body }),
-    locals: {},
-    params: { orgKey: 'my-org' }
-  };
-  return (action as (e: typeof event) => Promise<unknown>)(event);
+  return invokeAction(action, { form, locals: {}, params: { orgKey: 'my-org' } });
 }
 
 beforeEach(() => {

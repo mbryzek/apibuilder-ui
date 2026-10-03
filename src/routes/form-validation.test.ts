@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { invokeAction } from '$lib/test-support/invoke-action';
 import { mockServerAuth } from '$lib/test-support/mocks';
 
 /**
@@ -42,19 +43,14 @@ const { actions: loginActions } = await import('./login/+page.server');
 
 /** Invoke an action the way SvelteKit would, with only the fields these actions read. */
 function invoke(action: unknown, form: Record<string, string>) {
-  const body = new FormData();
-  for (const [name, value] of Object.entries(form)) {
-    body.append(name, value);
-  }
-  const event = {
-    request: new Request('http://localhost/', { method: 'POST', body }),
+  return invokeAction(action, {
+    form,
     locals: { session: SESSION },
     params: { orgKey: 'my-org' },
     url: new URL('http://localhost/login'),
     // Real cookie methods: the success path sets a one-shot flash cookie before redirecting.
     cookies: { get: () => undefined, set: () => {}, delete: () => {} }
-  };
-  return (action as (e: typeof event) => Promise<unknown>)(event);
+  });
 }
 
 /** `redirectWithFlash` throws on the success path, as every SvelteKit redirect does. */

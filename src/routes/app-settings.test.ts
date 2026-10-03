@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { session } from '$lib/test-support/fixtures';
+import { invokeAction } from '$lib/test-support/invoke-action';
 import { mockApiClients } from '$lib/test-support/mocks';
 import { caughtAsync } from '$lib/test-support/throws';
 
@@ -37,15 +38,8 @@ const { load, actions } = await import('./[orgKey]/[appKey]/[version]/settings/+
 
 const PARAMS = { orgKey: 'my-org', appKey: 'my-app', version: '1.0.0' };
 
-function invokeUpdate(visibility: string) {
-  const body = new FormData();
-  body.append('visibility', visibility);
-  const event = {
-    request: new Request('http://localhost/', { method: 'POST', body }),
-    locals: LOCALS,
-    params: PARAMS
-  };
-  return (actions['updateVisibility'] as (e: typeof event) => Promise<unknown>)(event);
+function invokeUpdate(form: Record<string, string>) {
+  return invokeAction(actions['updateVisibility'], { form, locals: LOCALS, params: PARAMS });
 }
 
 beforeEach(() => {
@@ -77,7 +71,7 @@ describe('the settings page reads the application it edits', () => {
 
 describe('updating visibility changes visibility and nothing else', () => {
   it('preserves the application name and description', async () => {
-    await caughtAsync(() => invokeUpdate('organization'));
+    await caughtAsync(() => invokeUpdate({ visibility: 'organization' }));
 
     expect(client.updateApplicationByAppKey).toHaveBeenCalledWith({
       orgKey: 'my-org',
@@ -87,11 +81,7 @@ describe('updating visibility changes visibility and nothing else', () => {
   });
 
   it('takes the name from the application rather than from the submitted form', async () => {
-    const body = new FormData();
-    body.append('visibility', 'organization');
-    body.append('name', 'renamed-by-a-stale-page');
-    const event = { request: new Request('http://localhost/', { method: 'POST', body }), locals: LOCALS, params: PARAMS };
-    await caughtAsync(() => (actions['updateVisibility'] as (e: typeof event) => Promise<unknown>)(event));
+    await caughtAsync(() => invokeUpdate({ visibility: 'organization', name: 'renamed-by-a-stale-page' }));
 
     expect(client.updateApplicationByAppKey).toHaveBeenCalledWith(
       expect.objectContaining({ body: expect.objectContaining({ name: 'My Application' }) })
@@ -101,13 +91,13 @@ describe('updating visibility changes visibility and nothing else', () => {
   it('does not write at all when the application cannot be read', async () => {
     client.getApplicationByAppKey.mockRejectedValue(new Error('fetch failed'));
 
-    await invokeUpdate('organization');
+    await invokeUpdate({ visibility: 'organization' });
 
     expect(client.updateApplicationByAppKey).not.toHaveBeenCalled();
   });
 
   it('refuses a visibility that is not one the API declares', async () => {
-    await invokeUpdate('everyone-on-the-internet');
+    await invokeUpdate({ visibility: 'everyone-on-the-internet' });
 
     expect(client.updateApplicationByAppKey).not.toHaveBeenCalled();
   });

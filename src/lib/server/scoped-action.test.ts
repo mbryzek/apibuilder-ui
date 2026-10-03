@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { session } from '$lib/test-support/fixtures';
+import { actionEvent } from '$lib/test-support/invoke-action';
 
 /**
  * `adminGuidAction` is the confused-deputy guard every guid-scoped admin action is built on, so
@@ -21,15 +22,7 @@ const { adminGuidAction, INVALID_REQUEST } = await import('./scoped-action');
 type Row = { id: string };
 
 function event(form: Record<string, string>) {
-  const body = new FormData();
-  for (const [name, value] of Object.entries(form)) {
-    body.append(name, value);
-  }
-  return {
-    request: new Request('http://localhost/', { method: 'POST', body }),
-    locals: {} as App.Locals,
-    params: { orgKey: 'my-org' }
-  };
+  return actionEvent({ form, locals: {} as App.Locals, params: { orgKey: 'my-org' } });
 }
 
 const listing = vi.fn();
