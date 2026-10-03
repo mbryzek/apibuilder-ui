@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { session } from '$lib/test-support/fixtures';
+import { invokeAction } from '$lib/test-support/invoke-action';
 import { mockApiClients } from '$lib/test-support/mocks';
 import { caught, caughtAsync } from '$lib/test-support/throws';
 
@@ -46,16 +47,7 @@ const { apiBuilderClient } = await import('$lib/api/clients');
 
 /** Invoke an action the way SvelteKit would, with only the fields these actions read. */
 function invokeUpload(form: Record<string, string | File>, orgKey = 'victim-org') {
-  const body = new FormData();
-  for (const [key, value] of Object.entries(form)) {
-    body.append(key, value);
-  }
-  const event = {
-    request: new Request('http://localhost/', { method: 'POST', body }),
-    locals: LOCALS,
-    params: { orgKey }
-  };
-  return (uploadActions['default'] as (e: typeof event) => Promise<unknown>)(event);
+  return invokeAction(uploadActions['default'], { form, locals: LOCALS, params: { orgKey } });
 }
 
 beforeEach(() => {
@@ -120,12 +112,7 @@ describe('org-scoped routes outside the membership guards validate orgKey too', 
 
   /** Invoke an action the way SvelteKit would, with only the fields these actions read. */
   function invoke(action: unknown, orgKey: string) {
-    const event = {
-      request: new Request('http://localhost/', { method: 'POST', body: new FormData() }),
-      locals: LOCALS,
-      params: { orgKey, appKey: 'app', version: '1.0.0' }
-    };
-    return (action as (e: typeof event) => Promise<unknown>)(event);
+    return invokeAction(action, { locals: LOCALS, params: { orgKey, appKey: 'app', version: '1.0.0' } });
   }
 
   const sites: [string, (orgKey: string) => unknown][] = [

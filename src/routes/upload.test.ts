@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { session } from '$lib/test-support/fixtures';
+import { invokeAction } from '$lib/test-support/invoke-action';
 import { mockApiClients } from '$lib/test-support/mocks';
 import { caughtAsync } from '$lib/test-support/throws';
 
@@ -28,17 +29,11 @@ const { actions } = await import('./[orgKey]/upload/+page.server');
 const SPEC = '{"name":"My API","version":"1.2.3"}';
 
 function upload(fields: Record<string, string> = {}) {
-  const body = new FormData();
-  body.append('file', new File([SPEC], 'api.json', { type: 'application/json' }));
-  for (const [k, v] of Object.entries(fields)) {
-    body.append(k, v);
-  }
-  const event = {
-    request: new Request('http://localhost/', { method: 'POST', body }),
-    locals: { session: session() } as App.Locals,
+  return invokeAction(actions['default'], {
+    form: { file: new File([SPEC], 'api.json', { type: 'application/json' }), ...fields },
+    locals: { session: session() },
     params: { orgKey: 'acme' }
-  };
-  return (actions['default'] as (e: typeof event) => Promise<unknown>)(event);
+  });
 }
 
 beforeEach(() => {

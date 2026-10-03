@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { invokeAction } from '$lib/test-support/invoke-action';
 import { mockApiClients } from '$lib/test-support/mocks';
 
 /**
@@ -19,10 +20,7 @@ vi.mock('$lib/api/clients', async (importOriginal) => mockApiClients(client, imp
 const { actions } = await import('./login/forgot-password/+page.server');
 
 function submit(email: string) {
-  const body = new FormData();
-  body.append('email', email);
-  const event = { request: new Request('http://localhost/', { method: 'POST', body }) };
-  return (actions['default'] as (e: typeof event) => Promise<{ success?: boolean; status?: number; data?: unknown }>)(event);
+  return invokeAction<{ success?: boolean; status?: number; data?: unknown }>(actions['default'], { form: { email } });
 }
 
 beforeEach(() => {

@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { session } from '$lib/test-support/fixtures';
+import { invokeAction } from '$lib/test-support/invoke-action';
 import { mockApiClients, mockServerAuth } from '$lib/test-support/mocks';
 
 /**
@@ -46,12 +47,7 @@ function invoke(
   action: unknown,
   { form = {}, params = { orgKey: 'mallory-org' } }: { form?: Record<string, string>; params?: Record<string, string> } = {}
 ) {
-  const body = new FormData();
-  for (const [key, value] of Object.entries(form)) {
-    body.append(key, value);
-  }
-  const event = { request: new Request('http://localhost/', { method: 'POST', body }), locals: {}, params };
-  return (action as (e: typeof event) => Promise<unknown>)(event);
+  return invokeAction(action, { form, locals: {}, params });
 }
 
 /** SvelteKit's `ActionFailure` — `fail(404, ...)` from `outOfScope()`. */
