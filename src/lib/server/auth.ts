@@ -63,12 +63,17 @@ function assertSafeOrgKey(orgKey: string): void {
   assertSafeSegment(orgKey, 'orgKey');
 }
 
-export async function requireMemberForAction(locals: App.Locals, orgKey: string): Promise<NonNullable<App.Locals['session']>> {
+/**
+ * The one org membership gate: a session holding at least one membership in `orgKey`, of `role`
+ * when one is named. Both exported guards are this with a different `role`, so how an outage or
+ * an empty page is treated cannot drift between them.
+ */
+async function requireOrgRole(locals: App.Locals, orgKey: string, role?: MembershipRole): Promise<NonNullable<App.Locals['session']>> {
   assertSafeOrgKey(orgKey);
   const session = requireAuthForAction(locals);
   const headers = getSessionHeaders(session.id);
   const response = await handleApiCall<Membership[]>(() =>
-    apiBuilderClient({ headers }).getMemberships({ orgKey, userId: session.user.id, limit: 25, offset: 0 })
+    apiBuilderClient({ headers }).getMemberships({ orgKey, userId: session.user.id, ...(role && { role: role }), limit: 25, offset: 0 })
   );
   // An unanswered membership lookup is not a denial: reporting "Forbidden" for an
   // outage tells a member their access was revoked.
@@ -79,18 +84,12 @@ export async function requireMemberForAction(locals: App.Locals, orgKey: string)
   return session;
 }
 
+export async function requireMemberForAction(locals: App.Locals, orgKey: string): Promise<NonNullable<App.Locals['session']>> {
+  return requireOrgRole(locals, orgKey);
+}
+
 export async function requireAdminForAction(locals: App.Locals, orgKey: string): Promise<NonNullable<App.Locals['session']>> {
-  assertSafeOrgKey(orgKey);
-  const session = requireAuthForAction(locals);
-  const headers = getSessionHeaders(session.id);
-  const response = await handleApiCall<Membership[]>(() =>
-    apiBuilderClient({ headers }).getMemberships({ orgKey, userId: session.user.id, role: MembershipRole.Admin, limit: 25, offset: 0 })
-  );
-  throwIfUnavailable(response);
-  if (!('data' in response) || response.data.length === 0) {
-    throw error(403, 'Forbidden');
-  }
-  return session;
+  return requireOrgRole(locals, orgKey, MembershipRole.Admin);
 }
 
 /**
