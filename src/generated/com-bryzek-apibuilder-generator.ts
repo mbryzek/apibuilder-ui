@@ -206,10 +206,6 @@ export class ApiClient {
       return await Util.mustParseArray<Generator>(response, 'Generator');
     }
 
-    if (response.status === 409) {
-      throw new ValidationErrorsResponse(response);
-    }
-
     if (response.status === 422) {
       throw new ValidationErrorsResponse(response);
     }
@@ -263,7 +259,7 @@ export class ApiClient {
       throw new VoidResponse(response);
     }
 
-    if (response.status === 409) {
+    if (response.status === 422) {
       throw new ValidationErrorsResponse(response);
     }
 
