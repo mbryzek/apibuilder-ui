@@ -20,7 +20,7 @@ if the declared range admits a version the dependency tree rejects, or if `.nvmr
 (ISS-2433).
 
 `.env` points the app at a platform API on `http://localhost:9300`; `.env.production` points the
-built artifact at `https://idempotent.io`. Copy `.env.example` if you need to override either.
+built artifact at `https://api.idempotent.io`. Copy `.env.example` if you need to override either.
 
 ## Checks
 
