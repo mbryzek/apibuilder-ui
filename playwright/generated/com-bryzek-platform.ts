@@ -346,6 +346,13 @@ export interface UserSecondaryForm {
   rallyd?: RallydRatingForm[];
 }
 
+/**
+ * Body for PUT /users/:id/status.
+ */
+export interface UserStatusForm {
+  status: UserStatus;
+}
+
 // ============================================================================
 // Union Types
 // ============================================================================
@@ -539,6 +546,13 @@ export interface UpdateUserPrimaryByIdOptions {
 export interface UpdateUserRoleByIdAndRoleOptions {
   id: string;
   role: UserRole;
+  headers?: Record<string, string>;
+  signal?: AbortSignal;
+}
+
+export interface UpdateUserStatusByIdOptions {
+  id: string;
+  body: UserStatusForm;
   headers?: Record<string, string>;
   signal?: AbortSignal;
 }
@@ -1063,6 +1077,39 @@ export class ApiClient {
       url,
       {
         method: 'PUT'
+      },
+      'application/json',
+      params.headers || {},
+      params.signal
+    );
+
+    if (response.status === 200) {
+      return await Util.mustParse<User>(response, 'User');
+    }
+
+    if (response.status === 401) {
+      throw new UnauthorizedErrorResponse(response);
+    }
+
+    if (response.status === 404) {
+      throw new VoidResponse(response);
+    }
+
+    if (response.status === 422) {
+      throw new ValidationErrorsResponse(response);
+    }
+
+    throw new ApiException(response, `Request failed with status ${response.status}`);
+  }
+
+  async updateUserStatusById(params: UpdateUserStatusByIdOptions): Promise<User> {
+    const url = `${this.baseUrl}/users/${encodeURIComponent(params.id)}/status`;
+
+    const response = await this.request(
+      url,
+      {
+        method: 'PUT',
+        body: JSON.stringify(params.body)
       },
       'application/json',
       params.headers || {},
