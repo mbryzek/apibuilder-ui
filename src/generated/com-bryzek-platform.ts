@@ -99,7 +99,8 @@ export enum TimeZone {
 
 export enum UserRole {
   Admin = 'admin',
-  User = 'user'
+  User = 'user',
+  Requester = 'requester'
 }
 
 export enum UserStatus {
