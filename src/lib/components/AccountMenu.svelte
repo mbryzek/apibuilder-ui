@@ -77,13 +77,15 @@
         </svg>
         Your Profile
       </a>
-      <!-- A POST form, never a link: GET /logout deliberately logs nobody out. -->
+      <!-- A POST form, never a link: GET /logout deliberately logs nobody out. Choosing it does not
+           close the menu, because unmounting the form inside its own click cancels the submit;
+           the navigation the submit causes closes it. -->
       <form method="POST" action="/logout">
         <button
           type="submit"
           role="menuitem"
           class="hover:bg-ab-light-gray flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-gray-700 transition-colors"
-          onclick={choose}
+          onclick={() => onChoose?.()}
         >
           <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
             <path
