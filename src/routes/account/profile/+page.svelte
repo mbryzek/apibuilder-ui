@@ -50,6 +50,11 @@
           </div>
         {/snippet}
       </PendingForm>
+
+      <!-- Per-person pages are reached from the profile, never from the account menu. -->
+      <div class="mt-10 border-t border-gray-200 pt-6">
+        <a href="/tokens" class="text-sm">API tokens</a>
+      </div>
     {/if}
   </div>
 </div>

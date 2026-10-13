@@ -1,6 +1,7 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { buildOrgLinks } from '$lib/utils/org-nav';
+  import AccountMenu from '$lib/components/AccountMenu.svelte';
 
   interface Props {
     orgKey: string;
@@ -11,6 +12,7 @@
   let { orgKey, isMember, isAdmin }: Props = $props();
 
   const currentPath = $derived($page.url.pathname);
+  const session = $derived($page.data.session);
 
   function isActive(path: string): boolean {
     return currentPath === path;
@@ -72,6 +74,13 @@
           </li>
         {/each}
       </ul>
+    {/if}
+
+    <!-- The account menu is the last row of the sidebar; on a phone it is in the header's slide-out menu. -->
+    {#if session}
+      <div class="mt-6 border-t border-gray-200 pt-4">
+        <AccountMenu {session} placement="up" tone="light" />
+      </div>
     {/if}
   </div>
 </nav>

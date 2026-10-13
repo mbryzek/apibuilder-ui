@@ -165,12 +165,12 @@ test.describe('Logout', () => {
     // Clearing the cookie is not logging out: the cookie is minted with a one-year maxAge, so any
     // copy of its value keeps authenticating until the platform is told to revoke it. Both halves
     // are asserted — the browser forgets the session AND the id itself stops working.
-    const { email, sessionId } = await signupAndLogin(page);
+    const { sessionId } = await signupAndLogin(page);
     expect(await sessionIsValid(sessionId)).toBe(true);
 
     await loadUrl(page, '/');
-    await page.getByRole('button', { name: email }).click();
-    await page.locator('form[action="/logout"] button').first().click();
+    await page.locator('button[aria-label="Account menu"]:visible').click();
+    await page.getByRole('menu', { name: 'Account' }).getByRole('menuitem', { name: 'Log out' }).click();
 
     await page.waitForURL('**/logged-out');
     await expect(page.getByRole('heading', { name: 'You are now logged out' })).toBeVisible();
