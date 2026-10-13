@@ -8,7 +8,7 @@ import { config } from '$lib/config';
 /**
  * `GET /logout` must not log anyone out. SvelteKit's origin check only guards POST form actions, so
  * a state-changing GET here is reachable from any third-party page (`<img src="…/logout">`). The
- * only logout entry points in the app are the POST forms in `Header.svelte`.
+ * only logout entry points in the app are the POST form in `AccountMenu.svelte`.
  */
 export const load: PageServerLoad = async () => {
   throw redirect(303, '/');
