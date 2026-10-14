@@ -1,7 +1,17 @@
+import adapter from '@sveltejs/adapter-cloudflare';
 import { sveltekit } from '@sveltejs/kit/vite';
+import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
+import { csp } from './src/csp.ts';
 
 export default defineConfig({
-  plugins: [tailwindcss(), sveltekit()]
+  plugins: [
+    tailwindcss(),
+    sveltekit({
+      preprocess: vitePreprocess(),
+      adapter: adapter({ routes: { include: ['/*'], exclude: ['<all>'] } }),
+      csp
+    })
+  ]
 });

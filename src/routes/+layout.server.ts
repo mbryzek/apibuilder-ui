@@ -1,5 +1,5 @@
 import type { LayoutServerLoad } from './$types';
-import { takeFlash } from '$lib/server/flash';
+import { takeFlash } from '#lib/server/flash.ts';
 
 /**
  * Expose only the user to the client. `locals.session.id` is the credential we send as the
@@ -8,7 +8,7 @@ import { takeFlash } from '$lib/server/flash';
  * any script running on the page.
  *
  * The flash is read (and cleared) here rather than from the URL in `+layout.svelte`: only the
- * server can say whether a message was one it actually sent. See `$lib/server/flash`.
+ * server can say whether a message was one it actually sent. See `#lib/server/flash.ts`.
  */
 export const load: LayoutServerLoad = async ({ locals, cookies }) => {
   return {

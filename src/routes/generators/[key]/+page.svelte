@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Generator } from '$generated/com-bryzek-apibuilder-generator';
+  import type { Generator } from '#generated/com-bryzek-apibuilder-generator.ts';
 
   interface Props {
     data: {

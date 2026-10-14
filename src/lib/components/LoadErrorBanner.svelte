@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { invalidateAll } from '$app/navigation';
-  import type { LoadError } from '$lib/api/load-error';
+  import { refreshAll } from '$app/navigation';
+  import type { LoadError } from '#lib/api/load-error.ts';
   import Banner from './Banner.svelte';
 
   interface Props {
@@ -14,7 +14,7 @@
   async function retry(): Promise<void> {
     retrying = true;
     try {
-      await invalidateAll();
+      await refreshAll();
     } finally {
       retrying = false;
     }

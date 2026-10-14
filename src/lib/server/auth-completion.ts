@@ -1,7 +1,7 @@
 import { fail, type ActionFailure, type Cookies } from '@sveltejs/kit';
-import { isTenantSession, isUserInactive, type SessionState } from '$generated/com-bryzek-platform';
-import { isApiError, type ApiError, type ApiResponse } from '$lib/api/error-handler';
-import { actionFail } from '$lib/api/action-error';
+import { isTenantSession, isUserInactive, type SessionState } from '#generated/com-bryzek-platform.ts';
+import { isApiError, type ApiError, type ApiResponse } from '#lib/api/error-handler.ts';
+import { actionFail } from '#lib/api/action-error.ts';
 import { redirectWithFlash } from './flash';
 import { setSessionCookie } from './session';
 

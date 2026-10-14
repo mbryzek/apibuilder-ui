@@ -1,11 +1,11 @@
 <script lang="ts">
-  import PendingForm from '$lib/components/PendingForm.svelte';
-  import type { Organization, Subscription } from '$generated/com-bryzek-apibuilder';
-  import { Publication } from '$generated/com-bryzek-apibuilder';
-  import type { ApiErrorItem } from '$lib/api/error-handler';
-  import type { LoadError } from '$lib/api/load-error';
-  import LoadErrorBanner from '$lib/components/LoadErrorBanner.svelte';
-  import FormErrors from '$lib/components/FormErrors.svelte';
+  import PendingForm from '#lib/components/PendingForm.svelte';
+  import type { Organization, Subscription } from '#generated/com-bryzek-apibuilder.ts';
+  import { Publication } from '#generated/com-bryzek-apibuilder.ts';
+  import type { ApiErrorItem } from '#lib/api/error-handler.ts';
+  import type { LoadError } from '#lib/api/load-error.ts';
+  import LoadErrorBanner from '#lib/components/LoadErrorBanner.svelte';
+  import FormErrors from '#lib/components/FormErrors.svelte';
 
   interface Props {
     data: {

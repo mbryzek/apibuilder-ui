@@ -1,7 +1,7 @@
 import { vi } from 'vitest';
 
 /**
- * `$lib/api/clients` is mocked by every test that exercises a route module, and a mock that
+ * `#lib/api/clients.ts` is mocked by every test that exercises a route module, and a mock that
  * declares only the factories its own subject happens to call today goes stale in silence: the
  * subject starts calling a sibling factory and gets `undefined` rather than the fake.
  *
@@ -9,7 +9,7 @@ import { vi } from 'vitest';
  * client CONSTRUCTION rather than on each operation call, so what a test asserts the session id
  * reached is the options the factory was called with — see `session-lifecycle.test.ts`.
  *
- * `getSessionHeaders` is deliberately not replaced — it is a pure function over `$lib/config`,
+ * `getSessionHeaders` is deliberately not replaced — it is a pure function over `#lib/config.ts`,
  * and the header it builds is part of what the session tests pin.
  */
 export async function mockApiClients(
@@ -26,7 +26,7 @@ export async function mockApiClients(
 }
 
 /**
- * `$lib/server/auth` mocked for a test that is exercising what an action DOES, not who it lets in.
+ * `#lib/server/auth.ts` mocked for a test that is exercising what an action DOES, not who it lets in.
  *
  * Same reason as the client mock above: a hand-written object listing the guards a module happens
  * to import today breaks the moment it imports another one, with an error about the mock rather

@@ -1,9 +1,9 @@
 import type { LayoutServerLoad } from './$types';
-import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
-import { handleApiCall } from '$lib/api/error-handler';
-import { dataOr, dataOrThrow, loadErrorFrom } from '$lib/api/load-error';
-import { assertSafePathParams } from '$lib/server/path-params';
-import type { Version, Watch } from '$generated/com-bryzek-apibuilder';
+import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.ts';
+import { handleApiCall } from '#lib/api/error-handler.ts';
+import { dataOr, dataOrThrow, loadErrorFrom } from '#lib/api/load-error.ts';
+import { assertSafePathParams } from '#lib/server/path-params.ts';
+import type { Version, Watch } from '#generated/com-bryzek-apibuilder.ts';
 
 export const load: LayoutServerLoad = async ({ params, locals }) => {
   // getVersionByVersion interpolates orgKey/appKey/version into the upstream path unencoded.

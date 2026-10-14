@@ -1,14 +1,14 @@
 import { fail } from '@sveltejs/kit';
-import { handleApiCall, isApiError } from '$lib/api/error-handler';
-import { actionFail } from '$lib/api/action-error';
-import { adminClient, type AuthorizedClient } from '$lib/server/auth';
-import { requiredString } from '$lib/server/form';
-import { findScopedById, outOfScope, type FetchPage } from '$lib/server/scoped-id';
+import { handleApiCall, isApiError } from '#lib/api/error-handler.ts';
+import { actionFail } from '#lib/api/action-error.ts';
+import { adminClient, type AuthorizedClient } from '#lib/server/auth.ts';
+import { requiredString } from '#lib/server/form.ts';
+import { findScopedById, outOfScope, type FetchPage } from '#lib/server/scoped-id.ts';
 
 /**
  * An org-admin form action that acts on ONE row named by a hidden `guid` field.
  *
- * Every such action is the confused-deputy guard from `$lib/server/scoped-id` plus one API call:
+ * Every such action is the confused-deputy guard from `#lib/server/scoped-id.ts` plus one API call:
  * authorize `params.orgKey`, read the guid, resolve it within that org's listing, act on the row
  * that came back. Written once so the scope lookup is not something a new action can forget —
  * an action built on this cannot reach `act` with an id the org listing did not return.

@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { session } from '$lib/test-support/fixtures';
-import { invokeAction } from '$lib/test-support/invoke-action';
-import { mockApiClients, mockServerAuth } from '$lib/test-support/mocks';
-import { MembershipRole } from '$generated/com-bryzek-apibuilder';
+import { session } from '#lib/test-support/fixtures.ts';
+import { invokeAction } from '#lib/test-support/invoke-action.ts';
+import { mockApiClients, mockServerAuth } from '#lib/test-support/mocks.ts';
+import { MembershipRole } from '#generated/com-bryzek-apibuilder.ts';
 
 /**
  * Promoting and demoting a colleague must leave them IN the organization (ISS-4833).
@@ -29,9 +29,9 @@ const client = {
   getOrganizationByKey: vi.fn()
 };
 
-vi.mock('$lib/api/clients', async (importOriginal) => mockApiClients(client, importOriginal));
+vi.mock('#lib/api/clients.ts', async (importOriginal) => mockApiClients(client, importOriginal));
 
-vi.mock('$lib/server/auth', async (importOriginal) => mockServerAuth(SESSION, client, importOriginal));
+vi.mock('#lib/server/auth.ts', async (importOriginal) => mockServerAuth(SESSION, client, importOriginal));
 
 const { actions } = await import('./[orgKey]/members/+page.server');
 

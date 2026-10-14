@@ -1,12 +1,12 @@
 <script lang="ts">
-  import type { PublicSession } from '$lib/session';
+  import type { PublicSession } from '#lib/session.ts';
   import type { Snippet } from 'svelte';
-  import { page } from '$app/stores';
-  import AppSidebar from '$lib/components/AppSidebar.svelte';
-  import LoadErrorBanner from '$lib/components/LoadErrorBanner.svelte';
-  import type { Organization } from '$generated/com-bryzek-apibuilder';
-  import type { Service } from '$generated/com-bryzek-apibuilder-spec';
-  import type { LoadError } from '$lib/api/load-error';
+  import { page } from '$app/state';
+  import AppSidebar from '#lib/components/AppSidebar.svelte';
+  import LoadErrorBanner from '#lib/components/LoadErrorBanner.svelte';
+  import type { Organization } from '#generated/com-bryzek-apibuilder.ts';
+  import type { Service } from '#generated/com-bryzek-apibuilder-spec.ts';
+  import type { LoadError } from '#lib/api/load-error.ts';
 
   interface Props {
     data: {
@@ -26,8 +26,8 @@
 
   const version = $derived(data.version);
   const service = $derived(data.service);
-  const orgKey = $derived($page.params.orgKey ?? '');
-  const appKey = $derived($page.params.appKey ?? '');
+  const orgKey = $derived(page.params.orgKey ?? '');
+  const appKey = $derived(page.params.appKey ?? '');
 </script>
 
 <svelte:head>
@@ -43,6 +43,7 @@
 
 <div class="flex gap-10">
   <AppSidebar {orgKey} {appKey} version={version.version} appName={service.name} isMember={data.isMember} isAdmin={data.isAdmin} />
+
   <div class="min-w-0 flex-1">
     {#if service.description}
       <p class="text-ab-gray mb-4">{service.description}</p>

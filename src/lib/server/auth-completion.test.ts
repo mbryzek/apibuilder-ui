@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { Cookies } from '@sveltejs/kit';
 import { completeSession } from './auth-completion';
-import type { SessionState } from '$generated/com-bryzek-platform';
-import type { ApiResponse } from '$lib/api/error-handler';
-import { ok, failed } from '$lib/test-support/api-responses';
-import { caught } from '$lib/test-support/throws';
+import type { SessionState } from '#generated/com-bryzek-platform.ts';
+import type { ApiResponse } from '#lib/api/error-handler.ts';
+import { ok, failed } from '#lib/test-support/api-responses.ts';
+import { caught } from '#lib/test-support/throws.ts';
 
 function cookies(): Cookies {
   return { set: vi.fn(), get: vi.fn(), delete: vi.fn(), getAll: vi.fn(), serialize: vi.fn() } as unknown as Cookies;

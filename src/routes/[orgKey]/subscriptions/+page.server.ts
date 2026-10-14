@@ -1,13 +1,13 @@
 import type { PageServerLoad, Actions } from './$types';
 import { fail } from '@sveltejs/kit';
-import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
-import { handleApiCall, isApiError } from '$lib/api/error-handler';
-import { actionFail } from '$lib/api/action-error';
-import { dataOr, loadErrorFrom } from '$lib/api/load-error';
-import { requireAuth, memberClient } from '$lib/server/auth';
-import { requiredEnum } from '$lib/server/form';
-import type { Subscription } from '$generated/com-bryzek-apibuilder';
-import { Publication } from '$generated/com-bryzek-apibuilder';
+import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.ts';
+import { handleApiCall, isApiError } from '#lib/api/error-handler.ts';
+import { actionFail } from '#lib/api/action-error.ts';
+import { dataOr, loadErrorFrom } from '#lib/api/load-error.ts';
+import { requireAuth, memberClient } from '#lib/server/auth.ts';
+import { requiredEnum } from '#lib/server/form.ts';
+import type { Subscription } from '#generated/com-bryzek-apibuilder.ts';
+import { Publication } from '#generated/com-bryzek-apibuilder.ts';
 
 export const load: PageServerLoad = async (event) => {
   const session = requireAuth(event);

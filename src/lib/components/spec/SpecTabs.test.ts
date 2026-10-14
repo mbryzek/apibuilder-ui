@@ -3,8 +3,8 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mount, unmount, flushSync, tick, type ComponentProps } from 'svelte';
 import SpecTabs from './SpecTabs.svelte';
-import { operation, service } from '$lib/test-support/fixtures';
-import type { Enum, Model, Resource } from '$generated/com-bryzek-apibuilder-spec';
+import { operation, service } from '#lib/test-support/fixtures.ts';
+import type { Enum, Model, Resource } from '#generated/com-bryzek-apibuilder-spec.ts';
 
 function model(name: string): Model {
   return { name, plural: `${name}s`, fields: [], attributes: {} };

@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import LoadErrorBanner from '$lib/components/LoadErrorBanner.svelte';
-  import OrgSidebar from '$lib/components/OrgSidebar.svelte';
-  import type { LoadError } from '$lib/api/load-error';
-  import type { Organization } from '$generated/com-bryzek-apibuilder';
+  import { page } from '$app/state';
+  import LoadErrorBanner from '#lib/components/LoadErrorBanner.svelte';
+  import OrgSidebar from '#lib/components/OrgSidebar.svelte';
+  import type { LoadError } from '#lib/api/load-error.ts';
+  import type { Organization } from '#generated/com-bryzek-apibuilder.ts';
   import type { Snippet } from 'svelte';
 
   interface Props {
@@ -19,7 +19,7 @@
   let { data, children }: Props = $props();
 
   // Version routes have their own AppSidebar; skip OrgSidebar for them
-  const isAppVersionRoute = $derived($page.route.id?.includes('/[version]') ?? false);
+  const isAppVersionRoute = $derived(page.route.id?.includes('/[version]') ?? false);
 </script>
 
 <div class="page-container">

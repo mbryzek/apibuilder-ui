@@ -1,11 +1,11 @@
 import type { PageServerLoad, Actions } from './$types';
 import { fail } from '@sveltejs/kit';
-import { platformClient } from '$lib/api/clients';
-import { handleApiCall } from '$lib/api/error-handler';
-import { config } from '$lib/config';
-import { completeSession } from '$lib/server/auth-completion';
-import { requiredSecret } from '$lib/server/form';
-import type { SessionState } from '$generated/com-bryzek-platform';
+import { platformClient } from '#lib/api/clients.ts';
+import { handleApiCall } from '#lib/api/error-handler.ts';
+import { config } from '#lib/config.ts';
+import { completeSession } from '#lib/server/auth-completion.ts';
+import { requiredSecret } from '#lib/server/form.ts';
+import type { SessionState } from '#generated/com-bryzek-platform.ts';
 
 // The token stays out of the page payload: the action reads it from `params`, and nothing on the
 // page renders it. Returning it would serialize a single-use credential into the hydration payload

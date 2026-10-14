@@ -1,12 +1,12 @@
 import type { PageServerLoad, Actions } from './$types';
-import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
-import { handleApiCall, isApiError } from '$lib/api/error-handler';
-import { actionFail, actionFailMissing } from '$lib/api/action-error';
-import { dataOr, loadErrorFrom } from '$lib/api/load-error';
-import { requireAuth, requireAuthForAction } from '$lib/server/auth';
-import { assertSafePathParams } from '$lib/server/path-params';
-import type { Membership, MembershipRequest, Organization } from '$generated/com-bryzek-apibuilder';
-import { MembershipRole } from '$generated/com-bryzek-apibuilder';
+import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.ts';
+import { handleApiCall, isApiError } from '#lib/api/error-handler.ts';
+import { actionFail, actionFailMissing } from '#lib/api/action-error.ts';
+import { dataOr, loadErrorFrom } from '#lib/api/load-error.ts';
+import { requireAuth, requireAuthForAction } from '#lib/server/auth.ts';
+import { assertSafePathParams } from '#lib/server/path-params.ts';
+import type { Membership, MembershipRequest, Organization } from '#generated/com-bryzek-apibuilder.ts';
+import { MembershipRole } from '#generated/com-bryzek-apibuilder.ts';
 
 export const load: PageServerLoad = async (event) => {
   const session = requireAuth(event);

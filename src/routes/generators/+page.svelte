@@ -1,11 +1,11 @@
 <script lang="ts">
   import { onDestroy } from 'svelte';
   import { goto } from '$app/navigation';
-  import LoadErrorBanner from '$lib/components/LoadErrorBanner.svelte';
-  import Pagination from '$lib/components/Pagination.svelte';
-  import { listUrl } from '$lib/pagination';
-  import type { LoadError } from '$lib/api/load-error';
-  import type { Generator } from '$generated/com-bryzek-apibuilder-generator';
+  import LoadErrorBanner from '#lib/components/LoadErrorBanner.svelte';
+  import Pagination from '#lib/components/Pagination.svelte';
+  import { listUrl } from '#lib/pagination.ts';
+  import type { LoadError } from '#lib/api/load-error.ts';
+  import type { Generator } from '#generated/com-bryzek-apibuilder-generator.ts';
 
   interface Props {
     data: {
@@ -30,7 +30,7 @@
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
       // Fire-and-forget: the timer fires after the user stopped typing, with nothing awaiting it.
-      void goto(listUrl('/generators', { q: query }), { keepFocus: true });
+      void goto(listUrl('/generators', { q: query }), { reset: false });
     }, 250);
   }
 

@@ -3,11 +3,11 @@
  * Direct access to generated API clients
  */
 
-import { ApiClient as ApiBuilderClient } from '$generated/com-bryzek-apibuilder';
-import { ApiClient as GeneratorClient } from '$generated/com-bryzek-apibuilder-generator';
-import { ApiClient as PlatformClient } from '$generated/com-bryzek-platform';
-import { sessionHeaders, type ApiClientOptions } from '$generated/generated-util';
-import { config } from '$lib/config';
+import { ApiClient as ApiBuilderClient } from '#generated/com-bryzek-apibuilder.ts';
+import { ApiClient as GeneratorClient } from '#generated/com-bryzek-apibuilder-generator.ts';
+import { ApiClient as PlatformClient } from '#generated/com-bryzek-platform.ts';
+import { sessionHeaders, type ApiClientOptions } from '#generated/generated-util.ts';
+import { config } from '#lib/config.ts';
 
 export { ApiBuilderClient, GeneratorClient, PlatformClient };
 

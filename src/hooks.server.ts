@@ -1,10 +1,10 @@
-import { type Handle } from '@sveltejs/kit';
-import { clients, getSessionHeaders } from '$lib/api/clients';
-import { handleApiCall, isApiError } from '$lib/api/error-handler';
-import { isUnavailable } from '$lib/api/api-message';
-import { SESSION_COOKIE, config } from '$lib/config';
-import { clearSessionCookie } from '$lib/server/session';
-import type { TenantSession } from '$generated/com-bryzek-platform';
+import type { Handle } from '@sveltejs/kit/hooks';
+import { clients, getSessionHeaders } from '#lib/api/clients.ts';
+import { handleApiCall, isApiError } from '#lib/api/error-handler.ts';
+import { isUnavailable } from '#lib/api/api-message.ts';
+import { SESSION_COOKIE, config } from '#lib/config.ts';
+import { clearSessionCookie } from '#lib/server/session.ts';
+import type { TenantSession } from '#generated/com-bryzek-platform.ts';
 
 export const handle: Handle = async ({ event, resolve }) => {
   const sessionId = event.cookies.get(SESSION_COOKIE) || undefined;
@@ -52,7 +52,7 @@ export const handle: Handle = async ({ event, resolve }) => {
     res.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
   }
 
-  // The page policy is NOT set here -- it comes from `kit.csp` in svelte.config.js, because only
+  // The page policy is NOT set here -- it comes from `sveltekit({ csp })` (src/csp.ts), because only
   // SvelteKit can nonce the hydration bootstrap it injects. Setting Content-Security-Policy
   // unconditionally here would overwrite that nonced header and take the whole app down, which is
   // the trap the previous hand-built version worked around by allowing 'unsafe-inline'.

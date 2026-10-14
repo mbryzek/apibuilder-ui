@@ -1,10 +1,10 @@
 import type { PageServerLoad, Actions } from './$types';
-import { getSessionHeaders, platformClient } from '$lib/api/clients';
-import { handleApiCall, isApiError } from '$lib/api/error-handler';
-import { actionFail } from '$lib/api/action-error';
-import { requireAuthLoad, requireAuthForAction } from '$lib/server/auth';
-import { optionalString } from '$lib/server/form';
-import type { CreatedToken, TokenForm } from '$generated/com-bryzek-platform';
+import { getSessionHeaders, platformClient } from '#lib/api/clients.ts';
+import { handleApiCall, isApiError } from '#lib/api/error-handler.ts';
+import { actionFail } from '#lib/api/action-error.ts';
+import { requireAuthLoad, requireAuthForAction } from '#lib/server/auth.ts';
+import { optionalString } from '#lib/server/form.ts';
+import type { CreatedToken, TokenForm } from '#generated/com-bryzek-platform.ts';
 
 export const load: PageServerLoad = requireAuthLoad;
 

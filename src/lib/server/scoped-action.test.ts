@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { session } from '$lib/test-support/fixtures';
-import { actionEvent } from '$lib/test-support/invoke-action';
+import { session } from '#lib/test-support/fixtures.ts';
+import { actionEvent } from '#lib/test-support/invoke-action.ts';
 
 /**
  * `adminGuidAction` is the confused-deputy guard every guid-scoped admin action is built on, so
@@ -12,7 +12,7 @@ const SESSION = session({ user: { id: 'admin-1' } });
 const client = { marker: 'client' };
 const adminClient = vi.fn();
 
-vi.mock('$lib/server/auth', async (importOriginal) => ({
+vi.mock('#lib/server/auth.ts', async (importOriginal) => ({
   ...(await importOriginal<Record<string, unknown>>()),
   adminClient: (...args: unknown[]) => adminClient(...args)
 }));

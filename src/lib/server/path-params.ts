@@ -18,7 +18,7 @@ import { error } from '@sveltejs/kit';
  * What this guard closes is an open redirect: several actions reflect `params.orgKey` into
  * `redirect(303, `/${params.orgKey}/...`)`,
  * and SvelteKit sets `Location` verbatim, so an `orgKey` of `/evil.com` yields a scheme-relative
- * `//evil.com/...` that browsers resolve to another host. `$lib/server/auth`'s
+ * `//evil.com/...` that browsers resolve to another host. `#lib/server/auth.ts`'s
  * `requireMemberForAction`/`requireAdminForAction` call `assertSafeSegment` for exactly this
  * reason, so an action that authorizes through one of them is covered. An action that only needs
  * a session, and a load that redirects without calling upstream at all, are not — those call

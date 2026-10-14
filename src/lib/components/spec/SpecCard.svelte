@@ -7,7 +7,7 @@
    * every `TypeLink` navigate to, and an optional description above its body. Only the body
    * differs, so only the body is the caller's.
    *
-   * `id` is separate from `name` because a scheme's anchor is prefixed (`$lib/utils/auth-schemes`
+   * `id` is separate from `name` because a scheme's anchor is prefixed (`#lib/utils/auth-schemes.ts`
    * explains why) while every other anchor is the type name itself.
    */
 

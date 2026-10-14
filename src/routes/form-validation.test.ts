@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { invokeAction } from '$lib/test-support/invoke-action';
-import { mockServerAuth } from '$lib/test-support/mocks';
+import { invokeAction } from '#lib/test-support/invoke-action.ts';
+import { mockServerAuth } from '#lib/test-support/mocks.ts';
 
 /**
  * What the actions do with a field that was not filled in.
  *
- * These assert the wiring rather than `$lib/server/form`, which has its own unit tests: the rule
+ * These assert the wiring rather than `#lib/server/form.ts`, which has its own unit tests: the rule
  * being checked is that an action reads its fields through those helpers, so a submission the
  * form itself cannot produce — an absent field, a field of spaces, an enum value outside the enum
  * — is refused here instead of being forwarded to the API as though somebody had typed it.
@@ -23,17 +23,17 @@ const client = {
   createTenantSessionLogins: vi.fn()
 };
 
-vi.mock('$lib/api/clients', () => ({
+vi.mock('#lib/api/clients.ts', () => ({
   apiBuilderClient: () => client,
   platformClient: () => client,
   clients: () => ({ platform: client, apiBuilder: client }),
   getSessionHeaders: () => ({})
 }));
 
-vi.mock('$lib/server/auth', async (importOriginal) => mockServerAuth(SESSION, client, importOriginal));
+vi.mock('#lib/server/auth.ts', async (importOriginal) => mockServerAuth(SESSION, client, importOriginal));
 
 /** The login action's success path sets a cookie and redirects; the calls are what matter here. */
-vi.mock('$lib/server/auth-completion', () => ({
+vi.mock('#lib/server/auth-completion.ts', () => ({
   completeSession: () => ({ completed: true })
 }));
 

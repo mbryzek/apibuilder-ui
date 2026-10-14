@@ -1,21 +1,22 @@
 import { describe, expect, it, vi } from 'vitest';
-import svelteConfig from '../svelte.config.js';
-import { mockApiClients } from '$lib/test-support/mocks';
+
+import { csp } from './csp.ts';
+import { mockApiClients } from '#lib/test-support/mocks.ts';
 
 /**
- * The page Content-Security-Policy, declared in `kit.csp` (ISS-494).
+ * The page Content-Security-Policy, declared in `src/csp.ts` and handed to `sveltekit({ csp })` (ISS-494).
  *
  * It belongs there rather than in a hand-built header: SvelteKit's hydration bootstrap is an
  * inline script, so a hand-built header has to allow `script-src 'unsafe-inline'` — one directive
- * that negates the whole policy. `kit.csp` nonces that script instead, which is what makes a
+ * that negates the whole policy. SvelteKit's `csp` option nonces that script instead, which is what makes a
  * policy without `unsafe-inline` possible at all.
  *
  * These assert the directives that are easy to get backwards, in both directions.
  */
 
-const directives = svelteConfig.kit?.csp?.directives ?? {};
+const directives = csp.directives ?? {};
 
-describe('page CSP (kit.csp)', () => {
+describe('page CSP (sveltekit csp)', () => {
   it('does not allow inline script', () => {
     // The whole point of the issue. `script-src` must also exist and be non-empty: SvelteKit only
     // adds its nonce to a directive that is already declared (csp.js `script_needs_csp`), so
@@ -35,7 +36,7 @@ describe('page CSP (kit.csp)', () => {
   it('is rendered with a per-request nonce, not a build-time hash', () => {
     // 'auto' means nonce for SSR pages and hash for prerendered ones. Nothing prerenders today, so
     // this is the nonce path; 'hash' would silently stop protecting dynamically rendered pages.
-    expect(svelteConfig.kit?.csp?.mode).toBe('auto');
+    expect(csp.mode).toBe('auto');
   });
 
   it('keeps every directive the hand-built header carried', () => {
@@ -61,7 +62,7 @@ describe('page CSP (kit.csp)', () => {
   });
 });
 
-vi.mock('$lib/api/clients', async (importOriginal) => mockApiClients({}, importOriginal));
+vi.mock('#lib/api/clients.ts', async (importOriginal) => mockApiClients({}, importOriginal));
 
 const { handle } = await import('./hooks.server');
 

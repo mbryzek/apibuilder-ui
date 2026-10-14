@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { buildOrgLinks } from '$lib/utils/org-nav';
-  import AccountMenu from '$lib/components/AccountMenu.svelte';
+  import { page } from '$app/state';
+  import { buildOrgLinks } from '#lib/utils/org-nav.ts';
+  import AccountMenu from '#lib/components/AccountMenu.svelte';
 
   interface Props {
     orgKey: string;
@@ -11,8 +11,8 @@
 
   let { orgKey, isMember, isAdmin }: Props = $props();
 
-  const currentPath = $derived($page.url.pathname);
-  const session = $derived($page.data.session);
+  const currentPath = $derived(page.url.pathname);
+  const session = $derived(page.data.session);
 
   function isActive(path: string): boolean {
     return currentPath === path;
@@ -28,7 +28,7 @@
   <div class="mb-4 md:hidden">
     <button type="button" class="text-ab-blue flex items-center gap-2 text-sm font-medium" onclick={() => (mobileOpen = !mobileOpen)}>
       <svg class="h-4 w-4 transition-transform {mobileOpen ? 'rotate-90' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
       </svg>
       Organization Menu
     </button>
@@ -41,10 +41,8 @@
               class="block py-1.5 text-sm font-medium transition-colors {isActive(link.href)
                 ? 'text-ab-blue font-semibold'
                 : 'text-ab-gray hover:text-ab-dark-blue'}"
-              onclick={() => (mobileOpen = false)}
+              onclick={() => (mobileOpen = false)}>{link.label}</a
             >
-              {link.label}
-            </a>
           </li>
         {/each}
       </ul>
@@ -78,9 +76,7 @@
 
     <!-- The account menu is the last row of the sidebar; on a phone it is in the header's slide-out menu. -->
     {#if session}
-      <div class="mt-6 border-t border-gray-200 pt-4">
-        <AccountMenu {session} placement="up" tone="light" />
-      </div>
+      <div class="mt-6 border-t border-gray-200 pt-4"><AccountMenu {session} placement="up" tone="light" /></div>
     {/if}
   </div>
 </nav>

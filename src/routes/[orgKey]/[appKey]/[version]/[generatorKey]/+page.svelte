@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import type { Code } from '$generated/com-bryzek-apibuilder';
+  import { page } from '$app/state';
+  import type { Code } from '#generated/com-bryzek-apibuilder.ts';
 
   interface Props {
     data: {
@@ -17,9 +17,9 @@
   let selectedFileIndex = $state(0);
   const selectedFile = $derived(files.length > 0 ? files[selectedFileIndex] : null);
 
-  const orgKey = $derived($page.params.orgKey);
-  const appKey = $derived($page.params.appKey);
-  const versionName = $derived($page.params.version);
+  const orgKey = $derived(page.params.orgKey);
+  const appKey = $derived(page.params.appKey);
+  const versionName = $derived(page.params.version);
 </script>
 
 <svelte:head>
@@ -54,9 +54,8 @@
                 ? 'bg-ab-blue text-white'
                 : 'hover:bg-ab-light-gray text-ab-dark-gray'}"
               onclick={() => (selectedFileIndex = i)}
+              ><span class="block truncate">{file.dir ? `${file.dir}/` : ''}{file.name}</span></button
             >
-              <span class="block truncate">{file.dir ? `${file.dir}/` : ''}{file.name}</span>
-            </button>
           {/each}
         </div>
       </div>

@@ -1,13 +1,13 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
-import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
-import { handleApiCall, isApiError } from '$lib/api/error-handler';
-import { actionFail } from '$lib/api/action-error';
-import { requireAuthLoad } from '$lib/server/auth';
-import { optionalString, requiredEnum, requiredString } from '$lib/server/form';
-import { redirectWithFlash } from '$lib/server/flash';
-import type { Organization, OrganizationForm } from '$generated/com-bryzek-apibuilder';
-import { Visibility } from '$generated/com-bryzek-apibuilder';
+import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.ts';
+import { handleApiCall, isApiError } from '#lib/api/error-handler.ts';
+import { actionFail } from '#lib/api/action-error.ts';
+import { requireAuthLoad } from '#lib/server/auth.ts';
+import { optionalString, requiredEnum, requiredString } from '#lib/server/form.ts';
+import { redirectWithFlash } from '#lib/server/flash.ts';
+import type { Organization, OrganizationForm } from '#generated/com-bryzek-apibuilder.ts';
+import { Visibility } from '#generated/com-bryzek-apibuilder.ts';
 
 export const load: PageServerLoad = requireAuthLoad;
 

@@ -1,10 +1,10 @@
 <script lang="ts">
-  import type { PublicSession } from '$lib/session';
+  import type { PublicSession } from '#lib/session.ts';
   import '../app.css';
-  import Header from '$lib/components/Header.svelte';
-  import Footer from '$lib/components/Footer.svelte';
-  import Toast from '$lib/components/Toast.svelte';
-  import type { Flash } from '$lib/flash';
+  import Header from '#lib/components/Header.svelte';
+  import Footer from '#lib/components/Footer.svelte';
+  import Toast from '#lib/components/Toast.svelte';
+  import type { Flash } from '#lib/flash.ts';
   import type { Snippet } from 'svelte';
   import { afterNavigate } from '$app/navigation';
 
@@ -37,7 +37,9 @@
   // component has mounted, initial hydration included, which is the moment handlers are attached
   // and the router is live. The attribute stays set across client-side navigations: the app
   // hydrates once per document, and a soft navigation happens because it already had.
-  afterNavigate(() => {
+  afterNavigate(({ shallow, type }) => {
+    if (shallow && type === 'goto') return;
+
     document.body.dataset['hydrated'] = 'true';
   });
 </script>

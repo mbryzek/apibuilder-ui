@@ -1,9 +1,9 @@
 <script lang="ts">
-  import type { PublicSession } from '$lib/session';
-  import type { Organization, Application } from '$generated/com-bryzek-apibuilder';
-  import LoadErrorBanner from '$lib/components/LoadErrorBanner.svelte';
-  import Pagination from '$lib/components/Pagination.svelte';
-  import type { LoadError } from '$lib/api/load-error';
+  import type { PublicSession } from '#lib/session.ts';
+  import type { Organization, Application } from '#generated/com-bryzek-apibuilder.ts';
+  import LoadErrorBanner from '#lib/components/LoadErrorBanner.svelte';
+  import Pagination from '#lib/components/Pagination.svelte';
+  import type { LoadError } from '#lib/api/load-error.ts';
 
   interface Props {
     data: {

@@ -1,12 +1,12 @@
 import { redirect, error } from '@sveltejs/kit';
 import type { RequestEvent } from '@sveltejs/kit';
-import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
-import { handleApiCall } from '$lib/api/error-handler';
-import { throwIfUnavailable } from '$lib/api/load-error';
-import { UNAVAILABLE } from '$lib/api/api-message';
-import { assertSafeSegment } from '$lib/server/path-params';
-import type { Membership } from '$generated/com-bryzek-apibuilder';
-import { MembershipRole } from '$generated/com-bryzek-apibuilder';
+import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.ts';
+import { handleApiCall } from '#lib/api/error-handler.ts';
+import { throwIfUnavailable } from '#lib/api/load-error.ts';
+import { UNAVAILABLE } from '#lib/api/api-message.ts';
+import { assertSafeSegment } from '#lib/server/path-params.ts';
+import type { Membership } from '#generated/com-bryzek-apibuilder.ts';
+import { MembershipRole } from '#generated/com-bryzek-apibuilder.ts';
 
 /**
  * Stop before sending someone to sign in when we never learned whether they already are.

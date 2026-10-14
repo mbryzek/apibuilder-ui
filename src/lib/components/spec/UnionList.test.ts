@@ -3,8 +3,8 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mount, unmount, flushSync } from 'svelte';
 import UnionList from './UnionList.svelte';
-import { service } from '$lib/test-support/fixtures';
-import type { Union, Variant } from '$generated/com-bryzek-apibuilder-spec';
+import { service } from '#lib/test-support/fixtures.ts';
+import type { Union, Variant } from '#generated/com-bryzek-apibuilder-spec.ts';
 
 function union(name: string, variants: Variant[]): Union {
   return { name, plural: `${name}s`, variants, attributes: {} };

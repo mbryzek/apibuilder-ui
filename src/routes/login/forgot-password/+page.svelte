@@ -1,7 +1,7 @@
 <script lang="ts">
-  import PendingForm from '$lib/components/PendingForm.svelte';
-  import FormField from '$lib/components/FormField.svelte';
-  import FormErrors from '$lib/components/FormErrors.svelte';
+  import PendingForm from '#lib/components/PendingForm.svelte';
+  import FormField from '#lib/components/FormField.svelte';
+  import FormErrors from '#lib/components/FormErrors.svelte';
 
   interface Props {
     form: { success?: boolean; errors?: { message: string }[] } | null;

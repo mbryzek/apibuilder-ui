@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Interface, Service } from '$generated/com-bryzek-apibuilder-spec';
+  import type { Interface, Service } from '#generated/com-bryzek-apibuilder-spec.ts';
   import PropertiesTable from './PropertiesTable.svelte';
   import SpecCard from './SpecCard.svelte';
   import SpecList from './SpecList.svelte';

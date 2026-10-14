@@ -2,8 +2,8 @@
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mount, unmount, flushSync } from 'svelte';
-import PendingFormPair from '$lib/test-support/PendingFormPair.svelte';
-import { submitFunctions } from '$lib/test-support/app-forms';
+import PendingFormPair from '#lib/test-support/PendingFormPair.svelte';
+import { submitFunctions } from '#lib/test-support/app-forms.ts';
 
 let target: HTMLElement;
 let component: Record<string, unknown> | undefined;
@@ -74,7 +74,7 @@ describe('PendingForm', () => {
 
     let disabledDuringUpdate: boolean | undefined;
     await settled({
-      // `update()` runs applyAction + invalidateAll — round-trips during which the old markup is
+      // `update()` runs applyAction + refreshAll — round-trips during which the old markup is
       // still mounted showing the control the user just pressed. On /tokens/create pressing it
       // again mints a second API token, so the flag has to survive this whole callback.
       update: async () => {

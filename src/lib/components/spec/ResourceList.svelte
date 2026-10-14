@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Resource, Service } from '$generated/com-bryzek-apibuilder-spec';
+  import type { Resource, Service } from '#generated/com-bryzek-apibuilder-spec.ts';
   import OperationDetail from './OperationDetail.svelte';
   import SpecList from './SpecList.svelte';
 

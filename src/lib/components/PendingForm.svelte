@@ -28,7 +28,7 @@
     return async ({ update }) => {
       onSettled?.();
       // Cleared AFTER the page has updated, not before. `update()` runs `applyAction` and
-      // `invalidateAll` — further round-trips, during which the old markup is still mounted. A
+      // `refreshAll` — further round-trips, during which the old markup is still mounted. A
       // flag cleared first re-enables the submit button over that window, and the control the
       // user sees there is still the one they just pressed: on /tokens/create that is "Create
       // Token", so a second click mints a second real API token.

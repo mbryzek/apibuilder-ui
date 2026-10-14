@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { assertSafePathParams, assertSafeSegment } from './path-params';
-import { caught } from '$lib/test-support/throws';
+import { caught } from '#lib/test-support/throws.ts';
 
 describe('assertSafeSegment', () => {
   it('accepts the key shapes the registry actually serves', () => {

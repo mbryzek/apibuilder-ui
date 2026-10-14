@@ -1,15 +1,15 @@
 import type { PageServerLoad, Actions } from './$types';
 import { fail } from '@sveltejs/kit';
-import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
-import { handleApiCall, isApiError, isApiSuccess, type ApiResponse } from '$lib/api/error-handler';
-import { actionFail, actionFailMissing } from '$lib/api/action-error';
-import { dataOr, loadErrorFrom } from '$lib/api/load-error';
-import { requireAuth, adminClient } from '$lib/server/auth';
-import { requiredEnum, requiredString } from '$lib/server/form';
-import { PAGE_FETCH_LIMIT, PAGE_LIMIT, parseOffset, toPage } from '$lib/pagination';
-import { adminGuidAction, type AdminActionEvent, type OrgScope } from '$lib/server/scoped-action';
-import type { Membership, User, MembershipRequest, Organization } from '$generated/com-bryzek-apibuilder';
-import { MembershipRole } from '$generated/com-bryzek-apibuilder';
+import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.ts';
+import { handleApiCall, isApiError, isApiSuccess, type ApiResponse } from '#lib/api/error-handler.ts';
+import { actionFail, actionFailMissing } from '#lib/api/action-error.ts';
+import { dataOr, loadErrorFrom } from '#lib/api/load-error.ts';
+import { requireAuth, adminClient } from '#lib/server/auth.ts';
+import { requiredEnum, requiredString } from '#lib/server/form.ts';
+import { PAGE_FETCH_LIMIT, PAGE_LIMIT, parseOffset, toPage } from '#lib/pagination.ts';
+import { adminGuidAction, type AdminActionEvent, type OrgScope } from '#lib/server/scoped-action.ts';
+import type { Membership, User, MembershipRequest, Organization } from '#generated/com-bryzek-apibuilder.ts';
+import { MembershipRole } from '#generated/com-bryzek-apibuilder.ts';
 
 export const load: PageServerLoad = async (event) => {
   const session = requireAuth(event);
@@ -55,7 +55,7 @@ export const load: PageServerLoad = async (event) => {
  *
  * Every guid action below authorizes `params.orgKey` and then acts on an id that arrived
  * separately in the form body, so the id has to be resolved against the org that was authorized
- * rather than trusted. See `$lib/server/scoped-id` and `$lib/server/scoped-action`.
+ * rather than trusted. See `#lib/server/scoped-id.ts` and `#lib/server/scoped-action.ts`.
  */
 const membershipsInOrg: OrgScope<Membership> = (client, orgKey) => (limit, offset) =>
   handleApiCall<Membership[]>(() => client.getMemberships({ orgKey, limit, offset }));

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { dataOr, dataOrThrow, loadErrorFrom, throwIfUnavailable } from './load-error';
-import { failed, ok } from '$lib/test-support/api-responses';
-import { caught } from '$lib/test-support/throws';
+import { failed, ok } from '#lib/test-support/api-responses.ts';
+import { caught } from '#lib/test-support/throws.ts';
 
 describe('dataOr', () => {
   it('returns the payload of a successful call', () => {

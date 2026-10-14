@@ -1,4 +1,4 @@
-import type { Service } from '$generated/com-bryzek-apibuilder-spec';
+import type { Service } from '#generated/com-bryzek-apibuilder-spec.ts';
 
 const PRIMITIVES = new Set([
   'boolean',

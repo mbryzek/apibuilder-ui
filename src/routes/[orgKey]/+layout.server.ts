@@ -1,9 +1,9 @@
 import type { LayoutServerLoad } from './$types';
-import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
-import { handleApiCall } from '$lib/api/error-handler';
-import { dataOr, dataOrThrow, loadErrorFrom, type LoadError } from '$lib/api/load-error';
-import type { Organization, Membership } from '$generated/com-bryzek-apibuilder';
-import { MembershipRole } from '$generated/com-bryzek-apibuilder';
+import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.ts';
+import { handleApiCall } from '#lib/api/error-handler.ts';
+import { dataOr, dataOrThrow, loadErrorFrom, type LoadError } from '#lib/api/load-error.ts';
+import type { Organization, Membership } from '#generated/com-bryzek-apibuilder.ts';
+import { MembershipRole } from '#generated/com-bryzek-apibuilder.ts';
 
 export const load: LayoutServerLoad = async ({ params, locals }) => {
   const headers = getSessionHeaders(locals.session?.id);

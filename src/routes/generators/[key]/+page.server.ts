@@ -1,8 +1,8 @@
 import type { PageServerLoad } from './$types';
-import { generatorClient, getSessionHeaders } from '$lib/api/clients';
-import { handleApiCall } from '$lib/api/error-handler';
-import { dataOrThrow } from '$lib/api/load-error';
-import type { Generator } from '$generated/com-bryzek-apibuilder-generator';
+import { generatorClient, getSessionHeaders } from '#lib/api/clients.ts';
+import { handleApiCall } from '#lib/api/error-handler.ts';
+import { dataOrThrow } from '#lib/api/load-error.ts';
+import type { Generator } from '#generated/com-bryzek-apibuilder-generator.ts';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
   const headers = getSessionHeaders(locals.session?.id);

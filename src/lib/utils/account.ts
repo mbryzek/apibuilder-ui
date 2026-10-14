@@ -1,4 +1,4 @@
-import type { User } from '$generated/com-bryzek-platform';
+import type { User } from '#generated/com-bryzek-platform.ts';
 
 /** The name the account menu shows: the person's name, falling back to their email. */
 export function displayName(user: User): string {

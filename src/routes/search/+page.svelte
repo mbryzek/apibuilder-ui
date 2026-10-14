@@ -1,11 +1,11 @@
 <script lang="ts">
   import { onDestroy } from 'svelte';
   import { goto } from '$app/navigation';
-  import LoadErrorBanner from '$lib/components/LoadErrorBanner.svelte';
-  import Pagination from '$lib/components/Pagination.svelte';
-  import { listUrl } from '$lib/pagination';
-  import type { LoadError } from '$lib/api/load-error';
-  import type { Item } from '$generated/com-bryzek-apibuilder';
+  import LoadErrorBanner from '#lib/components/LoadErrorBanner.svelte';
+  import Pagination from '#lib/components/Pagination.svelte';
+  import { listUrl } from '#lib/pagination.ts';
+  import type { LoadError } from '#lib/api/load-error.ts';
+  import type { Item } from '#generated/com-bryzek-apibuilder.ts';
 
   interface Props {
     data: {
@@ -29,7 +29,7 @@
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
       // Fire-and-forget: the timer fires after the user stopped typing, with nothing awaiting it.
-      void goto(listUrl('/search', { q: query }), { keepFocus: true });
+      void goto(listUrl('/search', { q: query }), { reset: false });
     }, 250);
   }
 
@@ -41,7 +41,7 @@
     event.preventDefault();
     const input = (event.currentTarget as HTMLFormElement).querySelector('input[name="q"]') as HTMLInputElement;
     clearTimeout(debounceTimer);
-    await goto(listUrl('/search', { q: input.value }), { keepFocus: true });
+    await goto(listUrl('/search', { q: input.value }), { reset: false });
   }
 
   onDestroy(() => {

@@ -1,9 +1,9 @@
 <script lang="ts">
-  import type { Operation, Service } from '$generated/com-bryzek-apibuilder-spec';
+  import type { Operation, Service } from '#generated/com-bryzek-apibuilder-spec.ts';
   import TypeLink from './TypeLink.svelte';
   import PropertiesTable from './PropertiesTable.svelte';
   import ResponsesTable from './ResponsesTable.svelte';
-  import { operationAuthBadge, operationContentTypeBadge, type AuthBadge } from '$lib/utils/operation-badges';
+  import { operationAuthBadge, operationContentTypeBadge, type AuthBadge } from '#lib/utils/operation-badges.ts';
 
   interface Props {
     operation: Operation;

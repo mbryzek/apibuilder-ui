@@ -1,11 +1,11 @@
 import type { PageServerLoad, Actions } from './$types';
 import { error, redirect } from '@sveltejs/kit';
-import { platformClient, getSessionHeaders } from '$lib/api/clients';
-import { handleApiCall, isApiError } from '$lib/api/error-handler';
-import { actionFail } from '$lib/api/action-error';
-import { requireAuth, requireAuthForAction } from '$lib/server/auth';
-import { findScopedById, outOfScope } from '$lib/server/scoped-id';
-import type { Token } from '$generated/com-bryzek-platform';
+import { platformClient, getSessionHeaders } from '#lib/api/clients.ts';
+import { handleApiCall, isApiError } from '#lib/api/error-handler.ts';
+import { actionFail } from '#lib/api/action-error.ts';
+import { requireAuth, requireAuthForAction } from '#lib/server/auth.ts';
+import { findScopedById, outOfScope } from '#lib/server/scoped-id.ts';
+import type { Token } from '#generated/com-bryzek-platform.ts';
 
 /**
  * The token's own page: what it is, and the button that revokes it.
@@ -38,7 +38,7 @@ export const actions: Actions = {
     const headers = getSessionHeaders(session.id);
     const client = platformClient({ headers });
 
-    // See `$lib/server/scoped-id`: the guid is a selector among the caller's own tokens, never an
+    // See `#lib/server/scoped-id.ts`: the guid is a selector among the caller's own tokens, never an
     // id trusted straight from the URL.
     const token = await findScopedById<Token>(params.guid, (limit, offset) =>
       handleApiCall<Token[]>(() => client.getTokensUsersByUserId({ userId: session.user.id, limit, offset }))

@@ -1,9 +1,9 @@
 import type { PageServerLoad } from './$types';
-import { generatorClient, getSessionHeaders } from '$lib/api/clients';
-import { handleApiCall } from '$lib/api/error-handler';
-import { dataOr, loadErrorFrom } from '$lib/api/load-error';
-import type { Generator } from '$generated/com-bryzek-apibuilder-generator';
-import { PAGE_FETCH_LIMIT, parseOffset, toPage } from '$lib/pagination';
+import { generatorClient, getSessionHeaders } from '#lib/api/clients.ts';
+import { handleApiCall } from '#lib/api/error-handler.ts';
+import { dataOr, loadErrorFrom } from '#lib/api/load-error.ts';
+import type { Generator } from '#generated/com-bryzek-apibuilder-generator.ts';
+import { PAGE_FETCH_LIMIT, parseOffset, toPage } from '#lib/pagination.ts';
 
 /**
  * The filter is a server round-trip, not a pass over `generators` in the page.

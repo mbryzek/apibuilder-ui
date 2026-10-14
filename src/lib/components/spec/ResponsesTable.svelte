@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Response, Service } from '$generated/com-bryzek-apibuilder-spec';
+  import type { Response, Service } from '#generated/com-bryzek-apibuilder-spec.ts';
   import SpecTable from './SpecTable.svelte';
   import TypeLink from './TypeLink.svelte';
 

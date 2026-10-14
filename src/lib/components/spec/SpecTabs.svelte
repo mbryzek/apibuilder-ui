@@ -1,13 +1,13 @@
 <script lang="ts">
   import { onMount, tick } from 'svelte';
-  import type { Service } from '$generated/com-bryzek-apibuilder-spec';
+  import type { Service } from '#generated/com-bryzek-apibuilder-spec.ts';
   import ResourceList from './ResourceList.svelte';
   import ModelList from './ModelList.svelte';
   import EnumList from './EnumList.svelte';
   import UnionList from './UnionList.svelte';
   import InterfaceList from './InterfaceList.svelte';
   import AuthSchemeList from './AuthSchemeList.svelte';
-  import { authSchemes, isAuthSchemeAnchor } from '$lib/utils/auth-schemes';
+  import { authSchemes, isAuthSchemeAnchor } from '#lib/utils/auth-schemes.ts';
 
   interface Props {
     service: Service;

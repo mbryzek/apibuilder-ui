@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { page } from '$app/stores';
+  import { page } from '$app/state';
   import type { Snippet } from 'svelte';
 
   interface Props {
@@ -36,16 +36,15 @@
         class="text-ab-blue mb-2 w-full py-2 text-left font-semibold md:hidden"
         onclick={() => (mobileNavOpen = !mobileNavOpen)}
         aria-expanded={mobileNavOpen}
-        aria-controls="doc-nav-list"
+        aria-controls="doc-nav-list">{mobileNavOpen ? 'Hide' : 'Show'} Navigation</button
       >
-        {mobileNavOpen ? 'Hide' : 'Show'} Navigation
-      </button>
+
       <ul id="doc-nav-list" class="{mobileNavOpen ? 'block' : 'hidden'} space-y-1 md:block">
         {#each navItems as item}
           <li>
             <a
               href={item.href}
-              class="block rounded px-3 py-2 text-sm transition-colors {$page.url.pathname === item.href
+              class="block rounded px-3 py-2 text-sm transition-colors {page.url.pathname === item.href
                 ? 'bg-ab-blue font-semibold text-white'
                 : 'text-ab-dark-blue hover:bg-ab-light-gray'}"
             >
