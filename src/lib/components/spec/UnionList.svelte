@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Union, Service, Variant, VariantType, VariantLiteral } from '$generated/com-bryzek-apibuilder-spec';
+  import type { Union, Service, Variant, VariantType, VariantLiteral } from '#generated/com-bryzek-apibuilder-spec.ts';
   import TypeLink from './TypeLink.svelte';
   import SpecCard from './SpecCard.svelte';
   import SpecList from './SpecList.svelte';

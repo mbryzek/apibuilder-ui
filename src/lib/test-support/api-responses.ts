@@ -1,4 +1,4 @@
-import type { ApiError, ApiResponse, ApiResponseError } from '#lib/api/error-handler.js';
+import type { ApiError, ApiResponse, ApiResponseError } from '#lib/api/error-handler.ts';
 
 /** A call that succeeded, carrying `data`. */
 export function ok<T>(data: T): ApiResponse<T> {

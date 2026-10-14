@@ -1,10 +1,10 @@
 <script lang="ts">
-  import type { PublicSession } from '#lib/session.js';
+  import type { PublicSession } from '#lib/session.ts';
   import '../app.css';
   import Header from '#lib/components/Header.svelte';
   import Footer from '#lib/components/Footer.svelte';
   import Toast from '#lib/components/Toast.svelte';
-  import type { Flash } from '#lib/flash.js';
+  import type { Flash } from '#lib/flash.ts';
   import type { Snippet } from 'svelte';
   import { afterNavigate } from '$app/navigation';
 

@@ -1,12 +1,12 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect } from '@sveltejs/kit';
-import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.js';
-import { handleApiCall, isApiError } from '#lib/api/error-handler.js';
-import { actionFail } from '#lib/api/action-error.js';
-import { requireAuthForAction, memberClient } from '#lib/server/auth.js';
-import { assertSafePathParams } from '#lib/server/path-params.js';
-import { redirectWithFlash } from '#lib/server/flash.js';
-import type { Watch } from '$generated/com-bryzek-apibuilder';
+import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.ts';
+import { handleApiCall, isApiError } from '#lib/api/error-handler.ts';
+import { actionFail } from '#lib/api/action-error.ts';
+import { requireAuthForAction, memberClient } from '#lib/server/auth.ts';
+import { assertSafePathParams } from '#lib/server/path-params.ts';
+import { redirectWithFlash } from '#lib/server/flash.ts';
+import type { Watch } from '#generated/com-bryzek-apibuilder.ts';
 
 export const load: PageServerLoad = async () => {
   // Data already loaded by layout
@@ -44,7 +44,7 @@ export const actions: Actions = {
    * The watch to delete is resolved from the caller's own watches for *this* application rather
    * than taken from a `watch_guid` form field, so there is no id to forge. This was the last
    * mutation in the app that passed a raw guid from the request body straight to a delete, and
-   * nothing tied that guid to the session submitting it — `#lib/server/scoped-id.js` explains the
+   * nothing tied that guid to the session submitting it — `#lib/server/scoped-id.ts` explains the
    * shape, and watches are conspicuously absent from the list of resources it records the
    * platform as re-resolving under the caller's own authorization. `[orgKey]/subscriptions`
    * dropped its `subscription_id` field for exactly this reason; this is the same fix.

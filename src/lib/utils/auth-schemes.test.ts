@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import type { AuthScheme, Operation, Resource, Service } from '$generated/com-bryzek-apibuilder-spec';
-import { Method } from '$generated/com-bryzek-apibuilder-spec';
+import type { AuthScheme, Operation, Resource, Service } from '#generated/com-bryzek-apibuilder-spec.ts';
+import { Method } from '#generated/com-bryzek-apibuilder-spec.ts';
 import { authSchemeAnchorId, authSchemes, declaresAuthScheme, isAuthSchemeAnchor, operationsProtectedBy } from './auth-schemes';
-import { operation, service } from '#lib/test-support/fixtures.js';
+import { operation, service } from '#lib/test-support/fixtures.ts';
 
 function resource(type: string, operations: Operation[]): Resource {
   return { type, plural: `${type}s`, operations, attributes: {} };

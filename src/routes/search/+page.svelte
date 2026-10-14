@@ -3,9 +3,9 @@
   import { goto } from '$app/navigation';
   import LoadErrorBanner from '#lib/components/LoadErrorBanner.svelte';
   import Pagination from '#lib/components/Pagination.svelte';
-  import { listUrl } from '#lib/pagination.js';
-  import type { LoadError } from '#lib/api/load-error.js';
-  import type { Item } from '$generated/com-bryzek-apibuilder';
+  import { listUrl } from '#lib/pagination.ts';
+  import type { LoadError } from '#lib/api/load-error.ts';
+  import type { Item } from '#generated/com-bryzek-apibuilder.ts';
 
   interface Props {
     data: {

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Enum } from '$generated/com-bryzek-apibuilder-spec';
+  import type { Enum } from '#generated/com-bryzek-apibuilder-spec.ts';
   import SpecCard from './SpecCard.svelte';
   import SpecList from './SpecList.svelte';
   import SpecTable from './SpecTable.svelte';

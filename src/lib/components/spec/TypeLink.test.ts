@@ -3,8 +3,8 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mount, unmount, flushSync } from 'svelte';
 import TypeLink from './TypeLink.svelte';
-import { service } from '#lib/test-support/fixtures.js';
-import type { Service } from '$generated/com-bryzek-apibuilder-spec';
+import { service } from '#lib/test-support/fixtures.ts';
+import type { Service } from '#generated/com-bryzek-apibuilder-spec.ts';
 
 const model = (name: string) => ({ name, plural: `${name}s`, fields: [], attributes: {} });
 

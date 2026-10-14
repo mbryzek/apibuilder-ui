@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 // @migration-task svelte.config was removed; switch to `import { loadConfig } from '@sveltejs/load-config'` to read your config
 import svelteConfig from '../svelte.config.js';
-import { mockApiClients } from '#lib/test-support/mocks.js';
+import { mockApiClients } from '#lib/test-support/mocks.ts';
 
 /**
  * The page Content-Security-Policy, declared in `kit.csp` (ISS-494).
@@ -63,7 +63,7 @@ describe('page CSP (kit.csp)', () => {
   });
 });
 
-vi.mock('#lib/api/clients.js', async (importOriginal) => mockApiClients({}, importOriginal));
+vi.mock('#lib/api/clients.ts', async (importOriginal) => mockApiClients({}, importOriginal));
 
 const { handle } = await import('./hooks.server');
 

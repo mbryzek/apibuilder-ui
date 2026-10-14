@@ -1,11 +1,11 @@
 import type { Actions } from './$types';
 import { fail } from '@sveltejs/kit';
-import { platformClient } from '#lib/api/clients.js';
-import { handleApiCall, isApiError } from '#lib/api/error-handler.js';
-import { actionFail } from '#lib/api/action-error.js';
-import { isUnavailable } from '#lib/api/api-message.js';
-import { config } from '#lib/config.js';
-import { requiredString } from '#lib/server/form.js';
+import { platformClient } from '#lib/api/clients.ts';
+import { handleApiCall, isApiError } from '#lib/api/error-handler.ts';
+import { actionFail } from '#lib/api/action-error.ts';
+import { isUnavailable } from '#lib/api/api-message.ts';
+import { config } from '#lib/config.ts';
+import { requiredString } from '#lib/server/form.ts';
 
 export const actions: Actions = {
   default: async ({ request }) => {

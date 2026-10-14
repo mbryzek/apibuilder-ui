@@ -1,10 +1,10 @@
 import type { PageServerLoad } from './$types';
-import { platformClient, getSessionHeaders } from '#lib/api/clients.js';
-import { handleApiCall } from '#lib/api/error-handler.js';
-import { dataOr, loadErrorFrom } from '#lib/api/load-error.js';
-import { requireAuth } from '#lib/server/auth.js';
-import type { Token } from '$generated/com-bryzek-platform';
-import { PAGE_FETCH_LIMIT, parseOffset, toPage } from '#lib/pagination.js';
+import { platformClient, getSessionHeaders } from '#lib/api/clients.ts';
+import { handleApiCall } from '#lib/api/error-handler.ts';
+import { dataOr, loadErrorFrom } from '#lib/api/load-error.ts';
+import { requireAuth } from '#lib/server/auth.ts';
+import type { Token } from '#generated/com-bryzek-platform.ts';
+import { PAGE_FETCH_LIMIT, parseOffset, toPage } from '#lib/pagination.ts';
 
 export const load: PageServerLoad = async (event) => {
   const session = requireAuth(event);

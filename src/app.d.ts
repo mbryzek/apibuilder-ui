@@ -1,4 +1,4 @@
-import type { PublicSession, Session } from '#lib/session.js';
+import type { PublicSession, Session } from '#lib/session.ts';
 
 declare global {
   namespace App {

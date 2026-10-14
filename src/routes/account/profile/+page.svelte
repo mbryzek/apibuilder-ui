@@ -2,9 +2,9 @@
   import PendingForm from '#lib/components/PendingForm.svelte';
   import FormField from '#lib/components/FormField.svelte';
   import LoadErrorBanner from '#lib/components/LoadErrorBanner.svelte';
-  import type { ApiErrorItem } from '#lib/api/error-handler.js';
-  import type { LoadError } from '#lib/api/load-error.js';
-  import type { User } from '$generated/com-bryzek-apibuilder';
+  import type { ApiErrorItem } from '#lib/api/error-handler.ts';
+  import type { LoadError } from '#lib/api/load-error.ts';
+  import type { User } from '#generated/com-bryzek-apibuilder.ts';
   import FormErrors from '#lib/components/FormErrors.svelte';
 
   interface Props {

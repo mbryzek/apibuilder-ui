@@ -1,4 +1,4 @@
-import type { User } from '$generated/com-bryzek-platform';
+import type { User } from '#generated/com-bryzek-platform.ts';
 
 /**
  * The server-side session. `id` is the credential sent as the `session_id` header on every API

@@ -1,10 +1,10 @@
 import type { RequestHandler } from './$types';
-import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.js';
-import { handleApiCall } from '#lib/api/error-handler.js';
-import { dataOrThrow } from '#lib/api/load-error.js';
-import { attachmentHeader } from '#lib/server/download.js';
-import { assertSafePathParams } from '#lib/server/path-params.js';
-import type { Version } from '$generated/com-bryzek-apibuilder';
+import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.ts';
+import { handleApiCall } from '#lib/api/error-handler.ts';
+import { dataOrThrow } from '#lib/api/load-error.ts';
+import { attachmentHeader } from '#lib/server/download.ts';
+import { assertSafePathParams } from '#lib/server/path-params.ts';
+import type { Version } from '#generated/com-bryzek-apibuilder.ts';
 
 export const GET: RequestHandler = async ({ params, locals }) => {
   assertSafePathParams(params);

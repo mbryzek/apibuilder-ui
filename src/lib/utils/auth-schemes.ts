@@ -1,4 +1,4 @@
-import type { AuthScheme, Service } from '$generated/com-bryzek-apibuilder-spec';
+import type { AuthScheme, Service } from '#generated/com-bryzek-apibuilder-spec.ts';
 
 /**
  * The reserved `operation.auth` value. It marks an operation explicitly public and, per the spec,

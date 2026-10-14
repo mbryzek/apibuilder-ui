@@ -1,6 +1,6 @@
 import type { PageServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
-import { assertSafePathParams } from '#lib/server/path-params.js';
+import { assertSafePathParams } from '#lib/server/path-params.ts';
 
 export const load: PageServerLoad = async ({ params }) => {
   // Both params are reflected into the Location header, which SvelteKit sets verbatim. Nothing

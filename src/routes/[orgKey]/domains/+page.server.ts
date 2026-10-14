@@ -1,10 +1,10 @@
 import type { PageServerLoad, Actions } from './$types';
 import { fail } from '@sveltejs/kit';
-import { handleApiCall, isApiError } from '#lib/api/error-handler.js';
-import { actionFail } from '#lib/api/action-error.js';
-import { requireAuthLoad, adminClient } from '#lib/server/auth.js';
-import { requiredString } from '#lib/server/form.js';
-import type { Domain } from '$generated/com-bryzek-apibuilder';
+import { handleApiCall, isApiError } from '#lib/api/error-handler.ts';
+import { actionFail } from '#lib/api/action-error.ts';
+import { requireAuthLoad, adminClient } from '#lib/server/auth.ts';
+import { requiredString } from '#lib/server/form.ts';
+import type { Domain } from '#generated/com-bryzek-apibuilder.ts';
 
 export const load: PageServerLoad = requireAuthLoad;
 

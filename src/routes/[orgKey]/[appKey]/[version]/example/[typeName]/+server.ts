@@ -1,8 +1,8 @@
 import type { RequestHandler } from './$types';
 import { error } from '@sveltejs/kit';
-import { getSessionHeaders } from '#lib/api/clients.js';
-import { assertSafePathParams } from '#lib/server/path-params.js';
-import { config } from '#lib/config.js';
+import { getSessionHeaders } from '#lib/api/clients.ts';
+import { assertSafePathParams } from '#lib/server/path-params.ts';
+import { config } from '#lib/config.ts';
 
 // TODO: No generated client method for getExample — inline fetch until API spec is updated
 export const GET: RequestHandler = async ({ params, locals, url }) => {

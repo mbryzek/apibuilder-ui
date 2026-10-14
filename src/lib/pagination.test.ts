@@ -2,9 +2,9 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { parameterBounds as apibuilderBounds } from '$generated/com-bryzek-apibuilder';
-import { parameterBounds as generatorBounds } from '$generated/com-bryzek-apibuilder-generator';
-import { parameterBounds as platformBounds } from '$generated/com-bryzek-platform';
+import { parameterBounds as apibuilderBounds } from '#generated/com-bryzek-apibuilder.ts';
+import { parameterBounds as generatorBounds } from '#generated/com-bryzek-apibuilder-generator.ts';
+import { parameterBounds as platformBounds } from '#generated/com-bryzek-platform.ts';
 import { PAGE_FETCH_LIMIT, PAGE_LIMIT, listUrl, parseOffset, toPage } from './pagination';
 
 function offsetOf(query: string): number {

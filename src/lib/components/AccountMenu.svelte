@@ -1,7 +1,7 @@
 <script lang="ts">
-  import type { PublicSession } from '#lib/session.js';
+  import type { PublicSession } from '#lib/session.ts';
   import { afterNavigate } from '$app/navigation';
-  import { displayName, initials } from '#lib/utils/account.js';
+  import { displayName, initials } from '#lib/utils/account.ts';
 
   /**
    * The account menu: the one place the signed-in person reaches their profile and logs out

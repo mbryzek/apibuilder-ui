@@ -1,10 +1,10 @@
 import type { Handle } from '@sveltejs/kit/hooks';
-import { clients, getSessionHeaders } from '#lib/api/clients.js';
-import { handleApiCall, isApiError } from '#lib/api/error-handler.js';
-import { isUnavailable } from '#lib/api/api-message.js';
-import { SESSION_COOKIE, config } from '#lib/config.js';
-import { clearSessionCookie } from '#lib/server/session.js';
-import type { TenantSession } from '$generated/com-bryzek-platform';
+import { clients, getSessionHeaders } from '#lib/api/clients.ts';
+import { handleApiCall, isApiError } from '#lib/api/error-handler.ts';
+import { isUnavailable } from '#lib/api/api-message.ts';
+import { SESSION_COOKIE, config } from '#lib/config.ts';
+import { clearSessionCookie } from '#lib/server/session.ts';
+import type { TenantSession } from '#generated/com-bryzek-platform.ts';
 
 export const handle: Handle = async ({ event, resolve }) => {
   const sessionId = event.cookies.get(SESSION_COOKIE) || undefined;

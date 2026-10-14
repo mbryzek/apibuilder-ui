@@ -2,8 +2,8 @@
   import { page } from '$app/state';
   import LoadErrorBanner from '#lib/components/LoadErrorBanner.svelte';
   import OrgSidebar from '#lib/components/OrgSidebar.svelte';
-  import type { LoadError } from '#lib/api/load-error.js';
-  import type { Organization } from '$generated/com-bryzek-apibuilder';
+  import type { LoadError } from '#lib/api/load-error.ts';
+  import type { Organization } from '#generated/com-bryzek-apibuilder.ts';
   import type { Snippet } from 'svelte';
 
   interface Props {

@@ -1,9 +1,9 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect } from '@sveltejs/kit';
-import { clearSessionCookie } from '#lib/server/session.js';
-import { platformClient, getSessionHeaders } from '#lib/api/clients.js';
-import { handleApiCall } from '#lib/api/error-handler.js';
-import { config } from '#lib/config.js';
+import { clearSessionCookie } from '#lib/server/session.ts';
+import { platformClient, getSessionHeaders } from '#lib/api/clients.ts';
+import { handleApiCall } from '#lib/api/error-handler.ts';
+import { config } from '#lib/config.ts';
 
 /**
  * `GET /logout` must not log anyone out. SvelteKit's origin check only guards POST form actions, so

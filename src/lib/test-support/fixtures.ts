@@ -1,5 +1,5 @@
-import type { Operation, Service } from '$generated/com-bryzek-apibuilder-spec';
-import { Method } from '$generated/com-bryzek-apibuilder-spec';
+import type { Operation, Service } from '#generated/com-bryzek-apibuilder-spec.ts';
+import { Method } from '#generated/com-bryzek-apibuilder-spec.ts';
 
 /**
  * A signed-in session, as `App.Locals` carries it.

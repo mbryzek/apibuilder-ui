@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { User } from '$generated/com-bryzek-platform';
+import type { User } from '#generated/com-bryzek-platform.ts';
 import { displayName, initials } from './account';
 
 function user(person: { name?: string; email?: string }): User {

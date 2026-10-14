@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page } from '$app/state';
-  import { buildOrgLinks } from '#lib/utils/org-nav.js';
+  import { buildOrgLinks } from '#lib/utils/org-nav.ts';
   import AccountMenu from '#lib/components/AccountMenu.svelte';
 
   interface Props {

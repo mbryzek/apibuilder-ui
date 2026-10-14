@@ -1,4 +1,4 @@
-import type { Operation, Service } from '$generated/com-bryzek-apibuilder-spec';
+import type { Operation, Service } from '#generated/com-bryzek-apibuilder-spec.ts';
 import { authSchemeAnchorId, declaresAuthScheme, PUBLIC_AUTH } from './auth-schemes';
 
 /**

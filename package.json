@@ -49,10 +49,11 @@
     "svelte": "^5.57.1",
     "svelte-check": "^4.7.5",
     "svelte-eslint-parser": "^1.7.1",
-    "svelte-vitals": "0.55.1",
+    "svelte-vitals": "0.55.2",
     "typescript": "~6.0.3",
     "vite": "^8.0.16",
-    "vitest": "^4.1.11"
+    "vitest": "^4.1.11",
+    "wrangler": "^4.118.0"
   },
   "dependencies": {
     "@sveltejs/adapter-cloudflare": "^8.0.0",
@@ -65,6 +66,7 @@
   },
   "imports": {
     "#lib": "./src/lib/index.js",
-    "#lib/*": "./src/lib/*"
+    "#lib//index.ts*": "./src/lib/*",
+    "#generated/*": "./src/generated/*"
   }
 }

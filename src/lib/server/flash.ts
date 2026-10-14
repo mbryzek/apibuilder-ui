@@ -1,6 +1,6 @@
 import { redirect, type Cookies } from '@sveltejs/kit';
-import { config } from '#lib/config.js';
-import { FLASH_TYPES, type Flash, type FlashType } from '#lib/flash.js';
+import { config } from '#lib/config.ts';
+import { FLASH_TYPES, type Flash, type FlashType } from '#lib/flash.ts';
 
 export type { Flash, FlashType };
 

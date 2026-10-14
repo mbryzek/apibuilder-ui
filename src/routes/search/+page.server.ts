@@ -1,9 +1,9 @@
 import type { PageServerLoad } from './$types';
-import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.js';
-import { handleApiCall } from '#lib/api/error-handler.js';
-import { dataOr, loadErrorFrom, type LoadError } from '#lib/api/load-error.js';
-import type { Item } from '$generated/com-bryzek-apibuilder';
-import { PAGE_FETCH_LIMIT, PAGE_LIMIT, parseOffset, toPage } from '#lib/pagination.js';
+import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.ts';
+import { handleApiCall } from '#lib/api/error-handler.ts';
+import { dataOr, loadErrorFrom, type LoadError } from '#lib/api/load-error.ts';
+import type { Item } from '#generated/com-bryzek-apibuilder.ts';
+import { PAGE_FETCH_LIMIT, PAGE_LIMIT, parseOffset, toPage } from '#lib/pagination.ts';
 
 export const load: PageServerLoad = async ({ url, locals }) => {
   const headers = getSessionHeaders(locals.session?.id);

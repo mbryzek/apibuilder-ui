@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Cookies } from '@sveltejs/kit';
-import { session } from '#lib/test-support/fixtures.js';
-import { mockApiClients } from '#lib/test-support/mocks.js';
-import { caughtAsync } from '#lib/test-support/throws.js';
+import { session } from '#lib/test-support/fixtures.ts';
+import { mockApiClients } from '#lib/test-support/mocks.ts';
+import { caughtAsync } from '#lib/test-support/throws.ts';
 
 /**
  * Executed coverage for the two routes that mint and destroy a session (ISS-493).
@@ -16,7 +16,7 @@ import { caughtAsync } from '#lib/test-support/throws.js';
  * server.
  *
  * The API client is the only thing stubbed: the real `handleApiCall`, the real `getSessionHeaders`
- * and the real cookie policy in `#lib/server/session.js` all execute here, because each of them is
+ * and the real cookie policy in `#lib/server/session.ts` all execute here, because each of them is
  * part of the behavior being pinned.
  */
 
@@ -28,17 +28,17 @@ const config = {
   isProduction: false
 };
 
-vi.mock('#lib/config', () => ({ SESSION_COOKIE: 'session_id', config }));
+vi.mock('#lib/config.ts', () => ({ SESSION_COOKIE: 'session_id', config }));
 
 const platform = {
   deleteTenantSession: vi.fn(),
   getTenantSession: vi.fn()
 };
 
-vi.mock('#lib/api/clients.js', async (importOriginal) => mockApiClients(platform, importOriginal));
+vi.mock('#lib/api/clients.ts', async (importOriginal) => mockApiClients(platform, importOriginal));
 
 // The session id rides on client construction now, so it is the factory call that carries it.
-const { clients: clientsFactory, platformClient } = await import('#lib/api/clients.js');
+const { clients: clientsFactory, platformClient } = await import('#lib/api/clients.ts');
 
 const { load: logoutLoad, actions: logoutActions } = await import('./logout/+page.server');
 const { load: devLoginLoad } = await import('./login/dev/+page.server');

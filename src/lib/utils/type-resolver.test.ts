@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import type { Service } from '$generated/com-bryzek-apibuilder-spec';
+import type { Service } from '#generated/com-bryzek-apibuilder-spec.ts';
 import { resolveType, type TypeWrapper } from './type-resolver';
-import { service } from '#lib/test-support/fixtures.js';
+import { service } from '#lib/test-support/fixtures.ts';
 
 /**
  * The property under test is that `innerType` is what a table cell SHOWS and `href`/`anchor` is

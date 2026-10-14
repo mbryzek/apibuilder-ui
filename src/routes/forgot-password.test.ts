@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { invokeAction } from '#lib/test-support/invoke-action.js';
-import { mockApiClients } from '#lib/test-support/mocks.js';
+import { invokeAction } from '#lib/test-support/invoke-action.ts';
+import { mockApiClients } from '#lib/test-support/mocks.ts';
 
 /**
  * What forgot-password says when the reset was not sent.
@@ -15,7 +15,7 @@ const client = {
   createTenantSessionPasswordAndResets: vi.fn()
 };
 
-vi.mock('#lib/api/clients.js', async (importOriginal) => mockApiClients(client, importOriginal));
+vi.mock('#lib/api/clients.ts', async (importOriginal) => mockApiClients(client, importOriginal));
 
 const { actions } = await import('./login/forgot-password/+page.server');
 

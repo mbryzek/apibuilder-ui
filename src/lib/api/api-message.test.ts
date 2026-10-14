@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { humanizedErrors, isUnavailable, messageFor } from './api-message';
-import { failed } from '#lib/test-support/api-responses.js';
+import { failed } from '#lib/test-support/api-responses.ts';
 
 describe('isUnavailable', () => {
   it('is true for the failures that are not an answer', () => {

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { actionFail, actionFailMissing } from './action-error';
 import type { ApiError } from './error-handler';
-import { failed } from '#lib/test-support/api-responses.js';
+import { failed } from '#lib/test-support/api-responses.ts';
 
 /** SvelteKit's `ActionFailure`, as a page's `form` prop sees it. */
 function result(failure: { status: number; data: unknown }): { status: number; data: { errors: ApiError[] } } {

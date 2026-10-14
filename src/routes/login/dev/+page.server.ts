@@ -1,11 +1,11 @@
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
-import { clients, getSessionHeaders } from '#lib/api/clients.js';
-import { handleApiCall } from '#lib/api/error-handler.js';
-import { config } from '#lib/config.js';
-import { redirectWithFlash } from '#lib/server/flash.js';
-import { setSessionCookie } from '#lib/server/session.js';
-import type { TenantSession } from '$generated/com-bryzek-platform';
+import { clients, getSessionHeaders } from '#lib/api/clients.ts';
+import { handleApiCall } from '#lib/api/error-handler.ts';
+import { config } from '#lib/config.ts';
+import { redirectWithFlash } from '#lib/server/flash.ts';
+import { setSessionCookie } from '#lib/server/session.ts';
+import type { TenantSession } from '#generated/com-bryzek-platform.ts';
 
 export const load: PageServerLoad = async ({ cookies }) => {
   // This route hands the backend the literal session id 'dev' and mints a real session cookie from

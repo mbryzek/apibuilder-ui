@@ -1,8 +1,8 @@
 <script lang="ts">
   import PendingForm from '#lib/components/PendingForm.svelte';
   import FormField from '#lib/components/FormField.svelte';
-  import type { ApiErrorItem } from '#lib/api/error-handler.js';
-  import type { CreatedToken } from '$generated/com-bryzek-platform';
+  import type { ApiErrorItem } from '#lib/api/error-handler.ts';
+  import type { CreatedToken } from '#generated/com-bryzek-platform.ts';
   import FormErrors from '#lib/components/FormErrors.svelte';
 
   interface Props {

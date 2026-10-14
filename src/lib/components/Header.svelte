@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { PublicSession } from '#lib/session.js';
+  import type { PublicSession } from '#lib/session.ts';
   import { page } from '$app/state';
   import AccountMenu from '#lib/components/AccountMenu.svelte';
   /**

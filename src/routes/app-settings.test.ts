@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { session } from '#lib/test-support/fixtures.js';
-import { invokeAction } from '#lib/test-support/invoke-action.js';
-import { mockApiClients } from '#lib/test-support/mocks.js';
-import { caughtAsync } from '#lib/test-support/throws.js';
+import { session } from '#lib/test-support/fixtures.ts';
+import { invokeAction } from '#lib/test-support/invoke-action.ts';
+import { mockApiClients } from '#lib/test-support/mocks.ts';
+import { caughtAsync } from '#lib/test-support/throws.ts';
 
 /**
  * What the application Settings page edits.
@@ -32,7 +32,7 @@ const client = {
   updateApplicationByAppKey: vi.fn()
 };
 
-vi.mock('#lib/api/clients.js', async (importOriginal) => mockApiClients(client, importOriginal));
+vi.mock('#lib/api/clients.ts', async (importOriginal) => mockApiClients(client, importOriginal));
 
 const { load, actions } = await import('./[orgKey]/[appKey]/[version]/settings/+page.server');
 

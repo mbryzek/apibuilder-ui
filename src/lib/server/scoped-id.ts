@@ -1,6 +1,6 @@
 import { fail } from '@sveltejs/kit';
-import { isApiSuccess, type ApiResponse } from '#lib/api/error-handler.js';
-import { throwIfUnavailable } from '#lib/api/load-error.js';
+import { isApiSuccess, type ApiResponse } from '#lib/api/error-handler.ts';
+import { throwIfUnavailable } from '#lib/api/load-error.ts';
 
 /**
  * Resolve an id against a collection the caller has already been authorized for.

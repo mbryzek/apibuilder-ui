@@ -1,9 +1,9 @@
 <script lang="ts">
-  import type { PublicSession } from '#lib/session.js';
+  import type { PublicSession } from '#lib/session.ts';
   import PendingForm from '#lib/components/PendingForm.svelte';
   import { page } from '$app/state';
-  import type { Service } from '$generated/com-bryzek-apibuilder-spec';
-  import type { LoadError } from '#lib/api/load-error.js';
+  import type { Service } from '#generated/com-bryzek-apibuilder-spec.ts';
+  import type { LoadError } from '#lib/api/load-error.ts';
   import SpecTabs from '#lib/components/spec/SpecTabs.svelte';
   import FormErrors from '#lib/components/FormErrors.svelte';
   import Banner from '#lib/components/Banner.svelte';

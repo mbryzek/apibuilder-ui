@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { Field, Parameter } from '$generated/com-bryzek-apibuilder-spec';
-import { ParameterLocation } from '$generated/com-bryzek-apibuilder-spec';
+import type { Field, Parameter } from '#generated/com-bryzek-apibuilder-spec.ts';
+import { ParameterLocation } from '#generated/com-bryzek-apibuilder-spec.ts';
 import { anyPropertyDetails, propertyDetails, type PropertyRow } from './spec-properties';
 
 function field(over: Partial<Field> = {}): Field {

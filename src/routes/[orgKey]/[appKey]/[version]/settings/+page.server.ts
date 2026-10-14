@@ -1,14 +1,14 @@
 import type { PageServerLoad, Actions } from './$types';
 import { fail } from '@sveltejs/kit';
-import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.js';
-import { handleApiCall, isApiError } from '#lib/api/error-handler.js';
-import { actionFail, actionFailMissing } from '#lib/api/action-error.js';
-import { loadErrorFrom } from '#lib/api/load-error.js';
-import { requireAuth, adminClient } from '#lib/server/auth.js';
-import { requiredEnum } from '#lib/server/form.js';
-import { redirectWithFlash } from '#lib/server/flash.js';
-import type { Application } from '$generated/com-bryzek-apibuilder';
-import { Visibility } from '$generated/com-bryzek-apibuilder';
+import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.ts';
+import { handleApiCall, isApiError } from '#lib/api/error-handler.ts';
+import { actionFail, actionFailMissing } from '#lib/api/action-error.ts';
+import { loadErrorFrom } from '#lib/api/load-error.ts';
+import { requireAuth, adminClient } from '#lib/server/auth.ts';
+import { requiredEnum } from '#lib/server/form.ts';
+import { redirectWithFlash } from '#lib/server/flash.ts';
+import type { Application } from '#generated/com-bryzek-apibuilder.ts';
+import { Visibility } from '#generated/com-bryzek-apibuilder.ts';
 
 /**
  * The application itself, not the org and not the spec.

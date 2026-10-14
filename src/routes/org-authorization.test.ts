@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { session } from '#lib/test-support/fixtures.js';
-import { invokeAction } from '#lib/test-support/invoke-action.js';
-import { mockApiClients } from '#lib/test-support/mocks.js';
-import { caught, caughtAsync } from '#lib/test-support/throws.js';
+import { session } from '#lib/test-support/fixtures.ts';
+import { invokeAction } from '#lib/test-support/invoke-action.ts';
+import { mockApiClients } from '#lib/test-support/mocks.ts';
+import { caught, caughtAsync } from '#lib/test-support/throws.ts';
 
 /**
  * The org-scoped writes, and who is allowed to make them.
@@ -36,14 +36,14 @@ const client = {
   createMembershipRequest: vi.fn()
 };
 
-vi.mock('#lib/api/clients.js', async (importOriginal) => mockApiClients(client, importOriginal));
+vi.mock('#lib/api/clients.ts', async (importOriginal) => mockApiClients(client, importOriginal));
 
 const { actions: uploadActions } = await import('./[orgKey]/upload/+page.server');
 const { actions: versionActions } = await import('./[orgKey]/[appKey]/[version]/+page.server');
 const { actions: joinActions } = await import('./[orgKey]/memberships/request/+page.server');
 const { load: appRedirectLoad } = await import('./[orgKey]/[appKey]/+page.server');
-const { requireMemberForAction, requireAdminForAction, adminClient, memberClient, requireAuthLoad } = await import('#lib/server/auth.js');
-const { apiBuilderClient } = await import('#lib/api/clients.js');
+const { requireMemberForAction, requireAdminForAction, adminClient, memberClient, requireAuthLoad } = await import('#lib/server/auth.ts');
+const { apiBuilderClient } = await import('#lib/api/clients.ts');
 
 /** Invoke an action the way SvelteKit would, with only the fields these actions read. */
 function invokeUpload(form: Record<string, string | File>, orgKey = 'victim-org') {

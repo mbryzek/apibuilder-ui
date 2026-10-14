@@ -1,8 +1,8 @@
 import type { PageServerLoad } from './$types';
-import { platformClient, getSessionHeaders } from '#lib/api/clients.js';
-import { handleApiCall, isApiSuccess } from '#lib/api/error-handler.js';
-import { messageFor } from '#lib/api/api-message.js';
-import { redirectWithFlash } from '#lib/server/flash.js';
+import { platformClient, getSessionHeaders } from '#lib/api/clients.ts';
+import { handleApiCall, isApiSuccess } from '#lib/api/error-handler.ts';
+import { messageFor } from '#lib/api/api-message.ts';
+import { redirectWithFlash } from '#lib/server/flash.ts';
 
 /**
  * Where the "Verify your email" link the platform mails lands.

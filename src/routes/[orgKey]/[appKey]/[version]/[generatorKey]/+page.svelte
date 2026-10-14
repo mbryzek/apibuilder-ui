@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page } from '$app/state';
-  import type { Code } from '$generated/com-bryzek-apibuilder';
+  import type { Code } from '#generated/com-bryzek-apibuilder.ts';
 
   interface Props {
     data: {

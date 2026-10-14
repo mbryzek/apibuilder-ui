@@ -1,9 +1,9 @@
 import type { PageServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
-import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.js';
-import { handleApiCall } from '#lib/api/error-handler.js';
-import { dataOr, loadErrorFrom } from '#lib/api/load-error.js';
-import type { Organization, Membership } from '$generated/com-bryzek-apibuilder';
+import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.ts';
+import { handleApiCall } from '#lib/api/error-handler.ts';
+import { dataOr, loadErrorFrom } from '#lib/api/load-error.ts';
+import type { Organization, Membership } from '#generated/com-bryzek-apibuilder.ts';
 
 export const load: PageServerLoad = async ({ locals }) => {
   if (locals.session) {

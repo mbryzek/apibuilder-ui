@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
-import { parameterBounds as apibuilderBounds } from '$generated/com-bryzek-apibuilder';
-import { parameterBounds as platformBounds } from '$generated/com-bryzek-platform';
+import { parameterBounds as apibuilderBounds } from '#generated/com-bryzek-apibuilder.ts';
+import { parameterBounds as platformBounds } from '#generated/com-bryzek-platform.ts';
 import { findScopedById, outOfScope, SCAN_LIMIT } from './scoped-id';
-import type { ApiResponse } from '#lib/api/error-handler.js';
-import { failed, ok } from '#lib/test-support/api-responses.js';
-import { caughtAsync } from '#lib/test-support/throws.js';
+import type { ApiResponse } from '#lib/api/error-handler.ts';
+import { failed, ok } from '#lib/test-support/api-responses.ts';
+import { caughtAsync } from '#lib/test-support/throws.ts';
 
 interface Row {
   id: string;

@@ -1,8 +1,8 @@
 <script lang="ts">
-  import type { PublicSession } from '#lib/session.js';
+  import type { PublicSession } from '#lib/session.ts';
   import LoadErrorBanner from '#lib/components/LoadErrorBanner.svelte';
-  import type { LoadError } from '#lib/api/load-error.js';
-  import type { Organization } from '$generated/com-bryzek-apibuilder';
+  import type { LoadError } from '#lib/api/load-error.ts';
+  import type { Organization } from '#generated/com-bryzek-apibuilder.ts';
 
   interface Props {
     data: {

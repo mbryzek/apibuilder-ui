@@ -3,7 +3,7 @@
  *
  * It lives outside `#lib/server` because `+layout.svelte` needs the type, and everything under
  * `#lib/server` is server-only — importing it from a component is an error SvelteKit raises at
- * build time. The mechanism that produces and consumes a flash stays in `#lib/server/flash.js`.
+ * build time. The mechanism that produces and consumes a flash stays in `#lib/server/flash.ts`.
  */
 export type FlashType = 'success' | 'error' | 'info';
 

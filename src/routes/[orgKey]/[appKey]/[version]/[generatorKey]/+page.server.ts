@@ -1,9 +1,9 @@
 import type { PageServerLoad } from './$types';
-import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.js';
-import { handleApiCall } from '#lib/api/error-handler.js';
-import { dataOrThrow } from '#lib/api/load-error.js';
-import { assertSafePathParams } from '#lib/server/path-params.js';
-import type { Code } from '$generated/com-bryzek-apibuilder';
+import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.ts';
+import { handleApiCall } from '#lib/api/error-handler.ts';
+import { dataOrThrow } from '#lib/api/load-error.ts';
+import { assertSafePathParams } from '#lib/server/path-params.ts';
+import type { Code } from '#generated/com-bryzek-apibuilder.ts';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
   // getCode interpolates all four params into the upstream path unencoded.

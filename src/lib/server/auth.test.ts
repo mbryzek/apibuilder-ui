@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { requireAuth, requireAuthForAction } from './auth';
 import type { RequestEvent } from '@sveltejs/kit';
-import { caught } from '#lib/test-support/throws.js';
-import { session as sessionFixture } from '#lib/test-support/fixtures.js';
+import { caught } from '#lib/test-support/throws.ts';
+import { session as sessionFixture } from '#lib/test-support/fixtures.ts';
 
 function event(locals: App.Locals, pathname = '/tokens'): RequestEvent {
   return { locals, url: new URL(`http://localhost${pathname}`) } as RequestEvent;

@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { AuthScheme, Service } from '$generated/com-bryzek-apibuilder-spec';
-  import { authSchemeAnchorId, operationsProtectedBy } from '#lib/utils/auth-schemes.js';
+  import type { AuthScheme, Service } from '#generated/com-bryzek-apibuilder-spec.ts';
+  import { authSchemeAnchorId, operationsProtectedBy } from '#lib/utils/auth-schemes.ts';
   import SpecCard from './SpecCard.svelte';
   import SpecList from './SpecList.svelte';
 
