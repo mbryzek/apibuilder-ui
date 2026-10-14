@@ -895,7 +895,7 @@ curl https://api.apibuilder.io/organizations
 
 ### Create a Token
 
-Generate a token from your [API tokens page](https://www.apibuilder.org/tokens). Tokens grant access to your private organizations, applications, and generated code.
+Generate a token from your [API tokens page](https://apibuilder.org/tokens). Tokens grant access to your private organizations, applications, and generated code.
 
 ### Verify Your Token
 
