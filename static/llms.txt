@@ -13,19 +13,19 @@ API Builder is an API-first development platform. You define your API in a simpl
 
 ## Documentation
 
-- [Full Documentation (Markdown)](https://www.apibuilder.org/doc.md): Complete API Builder documentation in a single markdown file
-- [Getting Started](https://www.apibuilder.org/doc/start): Quick start guide
-- [api.json Format](https://www.apibuilder.org/doc/apiJson): Complete specification reference
-- [Types](https://www.apibuilder.org/doc/types): Primitive type system
-- [Code Generators](https://www.apibuilder.org/doc/generators): Available generators (TypeScript, Scala, Elm, PostgreSQL)
-- [Interfaces](https://www.apibuilder.org/doc/interfaces): Shared fields across models
-- [Play Union Types](https://www.apibuilder.org/doc/playUnionTypes): Union type serialization
-- [Play Routes File](https://www.apibuilder.org/doc/playRoutesFile): Play Framework routes generation
-- [API Tokens](https://www.apibuilder.org/doc/apiTokens): Authentication for the REST API
-- [Attributes](https://www.apibuilder.org/doc/attributes): Customize code generation behavior
-- [Examples](https://www.apibuilder.org/doc/examples): Real-world API specifications
-- [Why API Builder?](https://www.apibuilder.org/doc/why): Design philosophy and benefits
-- [History](https://www.apibuilder.org/doc/history): Origin story and requirements
+- [Full Documentation (Markdown)](https://apibuilder.org/doc.md): Complete API Builder documentation in a single markdown file
+- [Getting Started](https://apibuilder.org/doc/start): Quick start guide
+- [api.json Format](https://apibuilder.org/doc/apiJson): Complete specification reference
+- [Types](https://apibuilder.org/doc/types): Primitive type system
+- [Code Generators](https://apibuilder.org/doc/generators): Available generators (TypeScript, Scala, Elm, PostgreSQL)
+- [Interfaces](https://apibuilder.org/doc/interfaces): Shared fields across models
+- [Play Union Types](https://apibuilder.org/doc/playUnionTypes): Union type serialization
+- [Play Routes File](https://apibuilder.org/doc/playRoutesFile): Play Framework routes generation
+- [API Tokens](https://apibuilder.org/doc/apiTokens): Authentication for the REST API
+- [Attributes](https://apibuilder.org/doc/attributes): Customize code generation behavior
+- [Examples](https://apibuilder.org/doc/examples): Real-world API specifications
+- [Why API Builder?](https://apibuilder.org/doc/why): Design philosophy and benefits
+- [History](https://apibuilder.org/doc/history): Origin story and requirements
 
 ## AI Agent Skill
 

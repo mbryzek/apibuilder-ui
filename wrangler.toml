@@ -1,4 +1,4 @@
-# Cloudflare Worker configuration — apibuilder-ui, host www.apibuilder.org.
+# Cloudflare Worker configuration — apibuilder-ui, canonical host apibuilder.org (the apex).
 name = "apibuilder-ui"
 compatibility_date = "2026-02-08"
 compatibility_flags = ["nodejs_compat"]
@@ -8,12 +8,11 @@ compatibility_flags = ["nodejs_compat"]
 # top of this file and has to keep `main` pointing at that instead).
 main = ".svelte-kit/cloudflare/_worker.js"
 
-# The Worker keeps its `*.workers.dev` URL as well as this route. That is wrangler's default, and
-# it is stated rather than relied on: the cutover from the Pages project is staged through that
-# URL — the Worker has to answer there before www.apibuilder.org moves — so a default that flipped
-# would take the staging step with it. It is a TOP-LEVEL key and has to stay above the first
-# `[table]` below: after one, TOML reads it as a field of that table, and wrangler warns about an
-# unexpected field and ignores it rather than failing.
+# The Worker keeps its `*.workers.dev` URL as well as its hosts. That is wrangler's default, and
+# it is stated rather than relied on, so a staging check can reach the Worker without a host. It
+# is a TOP-LEVEL key and has to stay above the first `[table]` below: after one, TOML reads it as a
+# field of that table, and wrangler warns about an unexpected field and ignores it rather than
+# failing.
 workers_dev = true
 
 # Persist Workers Logs. Cloudflare retains nothing a Worker writes unless this block asks it to,
@@ -31,10 +30,17 @@ head_sampling_rate = 1
 directory = ".svelte-kit/cloudflare"
 binding = "ASSETS"
 
-# Fixed, single-host route. www.apibuilder.org is served by the Pages project until its custom
-# domain is released; this route is what serves the host afterwards, and it needs the hostname to
-# keep a PROXIED DNS record in the zone. Nothing else on this zone claims the host and no wildcard
-# route covers it, so there is no precedence question to answer once Pages has let go of it.
+# apibuilder.org, the apex, is the canonical host: a Custom Domain, so Cloudflare creates and
+# owns its DNS record and certificate. Cloudflare refuses a Custom Domain over a hostname that
+# already has a DNS record (code 100117), so the apex carries no hand-made record.
+[[routes]]
+pattern = "apibuilder.org"
+custom_domain = true
+
+# www.apibuilder.org stays on this Worker through a zone route, which keeps its PROXIED DNS record
+# in the zone. The account's Bulk Redirect list 301s www to the apex at the edge, ahead of this
+# route; the app itself redirects no host. Nothing else on this zone claims www and no wildcard
+# route covers it.
 [[routes]]
 pattern = "www.apibuilder.org/*"
 zone_name = "apibuilder.org"
