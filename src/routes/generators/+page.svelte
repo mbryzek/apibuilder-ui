@@ -30,7 +30,7 @@
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
       // Fire-and-forget: the timer fires after the user stopped typing, with nothing awaiting it.
-      void goto(listUrl('/generators', { q: query }), { keepFocus: true });
+      void goto(listUrl('/generators', { q: query }), { reset: false });
     }, 250);
   }
 

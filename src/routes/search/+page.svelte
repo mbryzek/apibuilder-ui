@@ -29,7 +29,7 @@
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
       // Fire-and-forget: the timer fires after the user stopped typing, with nothing awaiting it.
-      void goto(listUrl('/search', { q: query }), { keepFocus: true });
+      void goto(listUrl('/search', { q: query }), { reset: false });
     }, 250);
   }
 
@@ -41,7 +41,7 @@
     event.preventDefault();
     const input = (event.currentTarget as HTMLFormElement).querySelector('input[name="q"]') as HTMLInputElement;
     clearTimeout(debounceTimer);
-    await goto(listUrl('/search', { q: input.value }), { keepFocus: true });
+    await goto(listUrl('/search', { q: input.value }), { reset: false });
   }
 
   onDestroy(() => {

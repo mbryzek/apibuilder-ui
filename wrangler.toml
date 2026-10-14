@@ -5,7 +5,7 @@ compatibility_flags = ["nodejs_compat"]
 
 # @sveltejs/adapter-cloudflare writes its generated Worker here. Nothing in this repo wraps it,
 # so `main` names the adapter's own output directly (trips composes an entry point of its own on
-# top of this file and has to keep `main` pointing at that instead — see its svelte.config.js).
+# top of this file and has to keep `main` pointing at that instead).
 main = ".svelte-kit/cloudflare/_worker.js"
 
 # The Worker keeps its `*.workers.dev` URL as well as this route. That is wrangler's default, and

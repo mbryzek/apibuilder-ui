@@ -2,18 +2,16 @@ import { fileURLToPath } from 'node:url';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { defineConfig } from 'vitest/config';
 
-// Unit tests run against plain modules — no SvelteKit dev server, so the aliases
-// svelte.config.js declares are restated here.
+// Unit tests run against plain modules — no SvelteKit dev server. `#lib/*` and `#generated/*`
+// are package.json subpath imports, which Vite resolves on its own.
 export default defineConfig({
   // Components are compiled by the svelte plugin alone, without the sveltekit() one: a test mounts
   // a component directly, so there is no router and no server to build. `$app/forms` has no
   // meaning outside a running app, so it is aliased to a double that records what each component
   // hands `enhance` — see src/lib/test-support/app-forms.ts.
-  plugins: [svelte()],
+  plugins: [svelte({ configFile: false })],
   resolve: {
     alias: {
-      $lib: fileURLToPath(new URL('./src/lib', import.meta.url)),
-      $generated: fileURLToPath(new URL('./src/generated', import.meta.url)),
       '$app/forms': fileURLToPath(new URL('./src/lib/test-support/app-forms.ts', import.meta.url))
     },
     // Svelte ships a server build and a client build; mounting needs the client one.

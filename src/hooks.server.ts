@@ -52,7 +52,7 @@ export const handle: Handle = async ({ event, resolve }) => {
     res.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
   }
 
-  // The page policy is NOT set here -- it comes from `kit.csp` in svelte.config.js, because only
+  // The page policy is NOT set here -- it comes from `sveltekit({ csp })` (src/csp.ts), because only
   // SvelteKit can nonce the hydration bootstrap it injects. Setting Content-Security-Policy
   // unconditionally here would overwrite that nonced header and take the whole app down, which is
   // the trap the previous hand-built version worked around by allowing 'unsafe-inline'.

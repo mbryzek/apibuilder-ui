@@ -55,7 +55,7 @@ export const load: PageServerLoad = async (event) => {
  *
  * Every guid action below authorizes `params.orgKey` and then acts on an id that arrived
  * separately in the form body, so the id has to be resolved against the org that was authorized
- * rather than trusted. See `#lib/server/scoped-id.ts` and `$lib/server/scoped-action`.
+ * rather than trusted. See `#lib/server/scoped-id.ts` and `#lib/server/scoped-action.ts`.
  */
 const membershipsInOrg: OrgScope<Membership> = (client, orgKey) => (limit, offset) =>
   handleApiCall<Membership[]>(() => client.getMemberships({ orgKey, limit, offset }));
