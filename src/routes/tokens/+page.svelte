@@ -1,7 +1,7 @@
 <script lang="ts">
-  import LoadErrorBanner from '$lib/components/LoadErrorBanner.svelte';
-  import Pagination from '$lib/components/Pagination.svelte';
-  import type { LoadError } from '$lib/api/load-error';
+  import LoadErrorBanner from '#lib/components/LoadErrorBanner.svelte';
+  import Pagination from '#lib/components/Pagination.svelte';
+  import type { LoadError } from '#lib/api/load-error.js';
   import type { Token } from '$generated/com-bryzek-platform';
 
   interface Props {

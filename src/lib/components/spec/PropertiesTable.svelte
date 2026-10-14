@@ -4,12 +4,12 @@
    *
    * These were two tables that had drifted into two spellings of one thing — the same name cell,
    * the same type cell, and a details cell whose parts were ordered and punctuated differently in
-   * each. They are one table now, and `$lib/utils/spec-properties` decides what the details cell
+   * each. They are one table now, and `#lib/utils/spec-properties.js` decides what the details cell
    * says so that the decision is testable and made once.
    */
 
   import type { Service } from '$generated/com-bryzek-apibuilder-spec';
-  import { anyPropertyDetails, propertyDetails, type PropertyRow } from '$lib/utils/spec-properties';
+  import { anyPropertyDetails, propertyDetails, type PropertyRow } from '#lib/utils/spec-properties.js';
   import SpecTable from './SpecTable.svelte';
   import TypeLink from './TypeLink.svelte';
 

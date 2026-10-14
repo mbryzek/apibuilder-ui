@@ -2,9 +2,9 @@ import { describe, expect, it, vi } from 'vitest';
 import { parameterBounds as apibuilderBounds } from '$generated/com-bryzek-apibuilder';
 import { parameterBounds as platformBounds } from '$generated/com-bryzek-platform';
 import { findScopedById, outOfScope, SCAN_LIMIT } from './scoped-id';
-import type { ApiResponse } from '$lib/api/error-handler';
-import { failed, ok } from '$lib/test-support/api-responses';
-import { caughtAsync } from '$lib/test-support/throws';
+import type { ApiResponse } from '#lib/api/error-handler.js';
+import { failed, ok } from '#lib/test-support/api-responses.js';
+import { caughtAsync } from '#lib/test-support/throws.js';
 
 interface Row {
   id: string;

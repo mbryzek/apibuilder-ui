@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { session } from '$lib/test-support/fixtures';
-import { invokeAction } from '$lib/test-support/invoke-action';
-import { mockApiClients, mockServerAuth } from '$lib/test-support/mocks';
+import { session } from '#lib/test-support/fixtures.js';
+import { invokeAction } from '#lib/test-support/invoke-action.js';
+import { mockApiClients, mockServerAuth } from '#lib/test-support/mocks.js';
 
 /**
  * The actions that authorized one object and then acted on another (ISS-491).
  *
- * These assert the wiring, not the helper — `$lib/server/scoped-id` has its own unit tests. The
+ * These assert the wiring, not the helper — `#lib/server/scoped-id.js` has its own unit tests. The
  * bug was never that the scoped lookup was wrong, it was that the actions did not do one: each
  * checked `requireAdminForAction(locals, params.orgKey)` and then passed a guid straight from the
  * form body to the mutation. Every "does not touch" case below passes the id of a row belonging
@@ -32,9 +32,9 @@ const client = {
   deleteWatchById: vi.fn()
 };
 
-vi.mock('$lib/api/clients', async (importOriginal) => mockApiClients(client, importOriginal));
+vi.mock('#lib/api/clients.js', async (importOriginal) => mockApiClients(client, importOriginal));
 
-vi.mock('$lib/server/auth', async (importOriginal) => mockServerAuth(SESSION, client, importOriginal));
+vi.mock('#lib/server/auth.js', async (importOriginal) => mockServerAuth(SESSION, client, importOriginal));
 
 const { actions: membershipRequestActions } = await import('./[orgKey]/membership-requests/+page.server');
 const { actions: memberActions } = await import('./[orgKey]/members/+page.server');
@@ -195,7 +195,7 @@ describe('token delete', () => {
     client.deleteTokenById.mockResolvedValue(undefined);
 
     // The id handed to the mutation is the one the scoped listing returned, never the value from
-    // the URL — see `$lib/server/scoped-id`.
+    // the URL — see `#lib/server/scoped-id.js`.
     await expect(invoke(tokenActions['delete'], { params: { guid: 'own-token' } })).rejects.toMatchObject({ status: 303 });
     expect(client.deleteTokenById).toHaveBeenCalledWith('own-token');
   });

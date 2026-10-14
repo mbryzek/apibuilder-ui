@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { session } from '$lib/test-support/fixtures';
-import { mockApiClients } from '$lib/test-support/mocks';
-import { caughtAsync } from '$lib/test-support/throws';
+import { session } from '#lib/test-support/fixtures.js';
+import { mockApiClients } from '#lib/test-support/mocks.js';
+import { caughtAsync } from '#lib/test-support/throws.js';
 
 /**
  * The two org membership guards share one gate, so each case runs against both: a member
@@ -13,7 +13,7 @@ const LOCALS: App.Locals = { session: SESSION };
 
 const client = { getMemberships: vi.fn() };
 
-vi.mock('$lib/api/clients', async (importOriginal) => mockApiClients(client, importOriginal));
+vi.mock('#lib/api/clients.js', async (importOriginal) => mockApiClients(client, importOriginal));
 
 const { requireMemberForAction, requireAdminForAction } = await import('./auth');
 

@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { rateLimitBypassHeaders } from '$generated/generated-util';
-import type * as ConfigModule from '$lib/config';
+import type * as ConfigModule from '#lib/config.js';
 
 // config.isProduction is read per call, so flipping it here exercises both sides of the
 // generated helper the wrappers in clients.ts bind it to.
 const env = vi.hoisted(() => ({ isProduction: false }));
 
-vi.mock('$lib/config', async (importOriginal) => {
+vi.mock('#lib/config.js', async (importOriginal) => {
   const actual = await importOriginal<typeof ConfigModule>();
   return {
     ...actual,

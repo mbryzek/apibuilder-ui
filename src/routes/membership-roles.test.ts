@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { session } from '$lib/test-support/fixtures';
-import { invokeAction } from '$lib/test-support/invoke-action';
-import { mockApiClients, mockServerAuth } from '$lib/test-support/mocks';
+import { session } from '#lib/test-support/fixtures.js';
+import { invokeAction } from '#lib/test-support/invoke-action.js';
+import { mockApiClients, mockServerAuth } from '#lib/test-support/mocks.js';
 import { MembershipRole } from '$generated/com-bryzek-apibuilder';
 
 /**
@@ -29,9 +29,9 @@ const client = {
   getOrganizationByKey: vi.fn()
 };
 
-vi.mock('$lib/api/clients', async (importOriginal) => mockApiClients(client, importOriginal));
+vi.mock('#lib/api/clients.js', async (importOriginal) => mockApiClients(client, importOriginal));
 
-vi.mock('$lib/server/auth', async (importOriginal) => mockServerAuth(SESSION, client, importOriginal));
+vi.mock('#lib/server/auth.js', async (importOriginal) => mockServerAuth(SESSION, client, importOriginal));
 
 const { actions } = await import('./[orgKey]/members/+page.server');
 

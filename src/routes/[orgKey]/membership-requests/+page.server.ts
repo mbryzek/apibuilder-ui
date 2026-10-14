@@ -1,11 +1,11 @@
 import type { PageServerLoad, Actions } from './$types';
 import { error } from '@sveltejs/kit';
-import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
-import { handleApiCall } from '$lib/api/error-handler';
-import { dataOr, loadErrorFrom } from '$lib/api/load-error';
-import { requireAuth } from '$lib/server/auth';
-import { adminGuidAction, type OrgScope } from '$lib/server/scoped-action';
-import { PAGE_FETCH_LIMIT, parseOffset, toPage } from '$lib/pagination';
+import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.js';
+import { handleApiCall } from '#lib/api/error-handler.js';
+import { dataOr, loadErrorFrom } from '#lib/api/load-error.js';
+import { requireAuth } from '#lib/server/auth.js';
+import { adminGuidAction, type OrgScope } from '#lib/server/scoped-action.js';
+import { PAGE_FETCH_LIMIT, parseOffset, toPage } from '#lib/pagination.js';
 import type { MembershipRequest } from '$generated/com-bryzek-apibuilder';
 
 export const load: PageServerLoad = async (event) => {
@@ -39,7 +39,7 @@ export const load: PageServerLoad = async (event) => {
  *
  * Accepting a request is the act that grants access to an organization, so the id has to come
  * from the org the caller was just checked to administer rather than straight from the form
- * body — where it names whatever org the submitter likes. See `$lib/server/scoped-action`.
+ * body — where it names whatever org the submitter likes. See `#lib/server/scoped-action.js`.
  */
 const requestsInOrg: OrgScope<MembershipRequest> = (client, orgKey) => (limit, offset) =>
   handleApiCall<MembershipRequest[]>(() => client.getMembershipRequests({ orgKey, limit, offset }));

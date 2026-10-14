@@ -1,11 +1,11 @@
 import type { PageServerLoad, Actions } from './$types';
 import { fail } from '@sveltejs/kit';
-import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
-import { handleApiCall, isApiError } from '$lib/api/error-handler';
-import { actionFail } from '$lib/api/action-error';
-import { dataOr, loadErrorFrom } from '$lib/api/load-error';
-import { requireAuth, memberClient } from '$lib/server/auth';
-import { requiredEnum } from '$lib/server/form';
+import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.js';
+import { handleApiCall, isApiError } from '#lib/api/error-handler.js';
+import { actionFail } from '#lib/api/action-error.js';
+import { dataOr, loadErrorFrom } from '#lib/api/load-error.js';
+import { requireAuth, memberClient } from '#lib/server/auth.js';
+import { requiredEnum } from '#lib/server/form.js';
 import type { Subscription } from '$generated/com-bryzek-apibuilder';
 import { Publication } from '$generated/com-bryzek-apibuilder';
 

@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { buildOrgLinks } from '$lib/utils/org-nav';
-  import AccountMenu from '$lib/components/AccountMenu.svelte';
+  import { page } from '$app/state';
+  import { buildOrgLinks } from '#lib/utils/org-nav.js';
+  import AccountMenu from '#lib/components/AccountMenu.svelte';
 
   interface Props {
     orgKey: string;
@@ -14,8 +14,8 @@
 
   let { orgKey, appKey, version, appName, isMember, isAdmin }: Props = $props();
 
-  const currentPath = $derived($page.url.pathname);
-  const session = $derived($page.data.session);
+  const currentPath = $derived(page.url.pathname);
+  const session = $derived(page.data.session);
 
   function isActive(path: string): boolean {
     return currentPath === path;
@@ -55,7 +55,7 @@
       stroke="currentColor"
       viewBox="0 0 24 24"
     >
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
     </svg>
     Application Menu
   </button>
@@ -65,10 +65,8 @@
       <a
         href={versionBase}
         class="text-ab-dark-blue hover:text-ab-blue mb-2 block text-sm font-bold transition-colors"
-        onclick={() => (mobileOpen = false)}
+        onclick={() => (mobileOpen = false)}>{appName}</a
       >
-        {appName}
-      </a>
 
       <!-- Nav links -->
       <ul class="space-y-1">
@@ -80,10 +78,8 @@
                 ? 'text-ab-blue font-semibold'
                 : 'text-ab-gray hover:text-ab-dark-blue'}"
               data-sveltekit-preload-data={link.preloadOff ? 'off' : undefined}
-              onclick={() => (mobileOpen = false)}
+              onclick={() => (mobileOpen = false)}>{link.label}</a
             >
-              {link.label}
-            </a>
           </li>
         {/each}
       </ul>
@@ -100,10 +96,8 @@
                   class="block py-1.5 text-sm font-medium transition-colors {isActive(link.href)
                     ? 'text-ab-blue font-semibold'
                     : 'text-ab-gray hover:text-ab-dark-blue'}"
-                  onclick={() => (mobileOpen = false)}
+                  onclick={() => (mobileOpen = false)}>{link.label}</a
                 >
-                  {link.label}
-                </a>
               </li>
             {/each}
           </ul>
@@ -154,7 +148,7 @@
             stroke="currentColor"
             viewBox="0 0 24 24"
           >
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
           </svg>
           {orgKey}
         </button>
@@ -179,9 +173,7 @@
 
     <!-- The account menu is the last row of the sidebar; on a phone it is in the header's slide-out menu. -->
     {#if session}
-      <div class="mt-6 border-t border-gray-200 pt-4">
-        <AccountMenu {session} placement="up" tone="light" />
-      </div>
+      <div class="mt-6 border-t border-gray-200 pt-4"><AccountMenu {session} placement="up" tone="light" /></div>
     {/if}
   </div>
 </nav>

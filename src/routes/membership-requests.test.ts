@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { session } from '$lib/test-support/fixtures';
-import { mockApiClients } from '$lib/test-support/mocks';
-import { PAGE_FETCH_LIMIT, PAGE_LIMIT } from '$lib/pagination';
+import { session } from '#lib/test-support/fixtures.js';
+import { mockApiClients } from '#lib/test-support/mocks.js';
+import { PAGE_FETCH_LIMIT, PAGE_LIMIT } from '#lib/pagination.js';
 
 /**
  * Every pending request has to be reachable, because accepting one is only possible from here.
@@ -16,7 +16,7 @@ const client = {
   getMembershipRequests: vi.fn()
 };
 
-vi.mock('$lib/api/clients', async (importOriginal) => mockApiClients(client, importOriginal));
+vi.mock('#lib/api/clients.js', async (importOriginal) => mockApiClients(client, importOriginal));
 
 const { load } = await import('./[orgKey]/membership-requests/+page.server');
 

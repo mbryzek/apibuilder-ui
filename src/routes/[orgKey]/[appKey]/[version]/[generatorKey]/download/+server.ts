@@ -1,11 +1,11 @@
 import type { RequestHandler } from './$types';
 import { error } from '@sveltejs/kit';
-import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
-import { handleApiCall } from '$lib/api/error-handler';
-import { dataOrThrow } from '$lib/api/load-error';
+import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.js';
+import { handleApiCall } from '#lib/api/error-handler.js';
+import { dataOrThrow } from '#lib/api/load-error.js';
 import type { Code } from '$generated/com-bryzek-apibuilder';
-import { attachmentHeader } from '$lib/server/download';
-import { assertSafePathParams } from '$lib/server/path-params';
+import { attachmentHeader } from '#lib/server/download.js';
+import { assertSafePathParams } from '#lib/server/path-params.js';
 
 export const GET: RequestHandler = async ({ params, locals }) => {
   assertSafePathParams(params);

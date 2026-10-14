@@ -1,12 +1,12 @@
 import type { PageServerLoad, Actions } from './$types';
 import { fail } from '@sveltejs/kit';
-import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
-import { handleApiCall, isApiError } from '$lib/api/error-handler';
-import { actionFail, actionFailMissing } from '$lib/api/action-error';
-import { loadErrorFrom } from '$lib/api/load-error';
-import { requireAuth, adminClient } from '$lib/server/auth';
-import { requiredEnum } from '$lib/server/form';
-import { redirectWithFlash } from '$lib/server/flash';
+import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.js';
+import { handleApiCall, isApiError } from '#lib/api/error-handler.js';
+import { actionFail, actionFailMissing } from '#lib/api/action-error.js';
+import { loadErrorFrom } from '#lib/api/load-error.js';
+import { requireAuth, adminClient } from '#lib/server/auth.js';
+import { requiredEnum } from '#lib/server/form.js';
+import { redirectWithFlash } from '#lib/server/flash.js';
 import type { Application } from '$generated/com-bryzek-apibuilder';
 import { Visibility } from '$generated/com-bryzek-apibuilder';
 

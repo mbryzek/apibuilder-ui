@@ -1,11 +1,11 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
-import { clients, getSessionHeaders } from '$lib/api/clients';
-import { handleApiCall, isApiError } from '$lib/api/error-handler';
-import { actionFail } from '$lib/api/action-error';
-import { config } from '$lib/config';
-import { completeSession } from '$lib/server/auth-completion';
-import { optionalString, requiredSecret, requiredString } from '$lib/server/form';
+import { clients, getSessionHeaders } from '#lib/api/clients.js';
+import { handleApiCall, isApiError } from '#lib/api/error-handler.js';
+import { actionFail } from '#lib/api/action-error.js';
+import { config } from '#lib/config.js';
+import { completeSession } from '#lib/server/auth-completion.js';
+import { optionalString, requiredSecret, requiredString } from '#lib/server/form.js';
 import type { SessionState } from '$generated/com-bryzek-platform';
 
 export const load: PageServerLoad = async ({ locals }) => {

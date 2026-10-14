@@ -1,9 +1,9 @@
 <script lang="ts">
-  import PendingForm from '$lib/components/PendingForm.svelte';
-  import FormField from '$lib/components/FormField.svelte';
+  import PendingForm from '#lib/components/PendingForm.svelte';
+  import FormField from '#lib/components/FormField.svelte';
   import { Visibility } from '$generated/com-bryzek-apibuilder';
-  import type { ApiErrorItem } from '$lib/api/error-handler';
-  import FormErrors from '$lib/components/FormErrors.svelte';
+  import type { ApiErrorItem } from '#lib/api/error-handler.js';
+  import FormErrors from '#lib/components/FormErrors.svelte';
 
   interface Props {
     form: { errors?: ApiErrorItem[] } | null;

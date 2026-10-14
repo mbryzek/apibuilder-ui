@@ -1,10 +1,10 @@
 import type { PageServerLoad, Actions } from './$types';
-import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
-import { handleApiCall, isApiError } from '$lib/api/error-handler';
-import { actionFail, actionFailMissing } from '$lib/api/action-error';
-import { dataOr, loadErrorFrom } from '$lib/api/load-error';
-import { requireAuth, requireAuthForAction } from '$lib/server/auth';
-import { assertSafePathParams } from '$lib/server/path-params';
+import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.js';
+import { handleApiCall, isApiError } from '#lib/api/error-handler.js';
+import { actionFail, actionFailMissing } from '#lib/api/action-error.js';
+import { dataOr, loadErrorFrom } from '#lib/api/load-error.js';
+import { requireAuth, requireAuthForAction } from '#lib/server/auth.js';
+import { assertSafePathParams } from '#lib/server/path-params.js';
 import type { Membership, MembershipRequest, Organization } from '$generated/com-bryzek-apibuilder';
 import { MembershipRole } from '$generated/com-bryzek-apibuilder';
 

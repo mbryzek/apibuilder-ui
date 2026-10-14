@@ -1,8 +1,8 @@
 <script lang="ts">
-  import PendingForm from '$lib/components/PendingForm.svelte';
-  import FormField from '$lib/components/FormField.svelte';
-  import type { ApiErrorItem } from '$lib/api/error-handler';
-  import FormErrors from '$lib/components/FormErrors.svelte';
+  import PendingForm from '#lib/components/PendingForm.svelte';
+  import FormField from '#lib/components/FormField.svelte';
+  import type { ApiErrorItem } from '#lib/api/error-handler.js';
+  import FormErrors from '#lib/components/FormErrors.svelte';
 
   interface Props {
     form: { errors?: ApiErrorItem[]; email?: string; name?: string } | null;

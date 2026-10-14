@@ -1,8 +1,8 @@
 import type { PageServerLoad } from './$types';
-import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
-import { handleApiCall } from '$lib/api/error-handler';
-import { dataOrThrow } from '$lib/api/load-error';
-import { assertSafePathParams } from '$lib/server/path-params';
+import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.js';
+import { handleApiCall } from '#lib/api/error-handler.js';
+import { dataOrThrow } from '#lib/api/load-error.js';
+import { assertSafePathParams } from '#lib/server/path-params.js';
 import type { Code } from '$generated/com-bryzek-apibuilder';
 
 export const load: PageServerLoad = async ({ params, locals }) => {

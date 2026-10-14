@@ -1,8 +1,8 @@
 import type { PageServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
-import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
-import { handleApiCall } from '$lib/api/error-handler';
-import { dataOr, loadErrorFrom } from '$lib/api/load-error';
+import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.js';
+import { handleApiCall } from '#lib/api/error-handler.js';
+import { dataOr, loadErrorFrom } from '#lib/api/load-error.js';
 import type { Organization, Membership } from '$generated/com-bryzek-apibuilder';
 
 export const load: PageServerLoad = async ({ locals }) => {

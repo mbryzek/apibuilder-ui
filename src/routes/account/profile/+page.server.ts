@@ -1,12 +1,12 @@
 import type { PageServerLoad, Actions } from './$types';
 import { fail } from '@sveltejs/kit';
-import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
-import { handleApiCall, isApiError } from '$lib/api/error-handler';
-import { actionFail } from '$lib/api/action-error';
-import { dataOr, loadErrorFrom } from '$lib/api/load-error';
-import { requireAuth, requireAuthForAction } from '$lib/server/auth';
-import { optionalString, requiredString } from '$lib/server/form';
-import { redirectWithFlash } from '$lib/server/flash';
+import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.js';
+import { handleApiCall, isApiError } from '#lib/api/error-handler.js';
+import { actionFail } from '#lib/api/action-error.js';
+import { dataOr, loadErrorFrom } from '#lib/api/load-error.js';
+import { requireAuth, requireAuthForAction } from '#lib/server/auth.js';
+import { optionalString, requiredString } from '#lib/server/form.js';
+import { redirectWithFlash } from '#lib/server/flash.js';
 import type { User, UserForm } from '$generated/com-bryzek-apibuilder';
 
 export const load: PageServerLoad = async (event) => {

@@ -3,7 +3,7 @@
   import TypeLink from './TypeLink.svelte';
   import PropertiesTable from './PropertiesTable.svelte';
   import ResponsesTable from './ResponsesTable.svelte';
-  import { operationAuthBadge, operationContentTypeBadge, type AuthBadge } from '$lib/utils/operation-badges';
+  import { operationAuthBadge, operationContentTypeBadge, type AuthBadge } from '#lib/utils/operation-badges.js';
 
   interface Props {
     operation: Operation;

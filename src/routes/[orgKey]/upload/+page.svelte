@@ -1,9 +1,9 @@
 <script lang="ts">
-  import PendingForm from '$lib/components/PendingForm.svelte';
-  import FormField from '$lib/components/FormField.svelte';
+  import PendingForm from '#lib/components/PendingForm.svelte';
+  import FormField from '#lib/components/FormField.svelte';
   import type { Organization } from '$generated/com-bryzek-apibuilder';
   import { OriginalType } from '$generated/com-bryzek-apibuilder';
-  import FormErrors from '$lib/components/FormErrors.svelte';
+  import FormErrors from '#lib/components/FormErrors.svelte';
 
   interface Props {
     data: {

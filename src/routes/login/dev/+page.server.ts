@@ -1,10 +1,10 @@
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
-import { clients, getSessionHeaders } from '$lib/api/clients';
-import { handleApiCall } from '$lib/api/error-handler';
-import { config } from '$lib/config';
-import { redirectWithFlash } from '$lib/server/flash';
-import { setSessionCookie } from '$lib/server/session';
+import { clients, getSessionHeaders } from '#lib/api/clients.js';
+import { handleApiCall } from '#lib/api/error-handler.js';
+import { config } from '#lib/config.js';
+import { redirectWithFlash } from '#lib/server/flash.js';
+import { setSessionCookie } from '#lib/server/session.js';
 import type { TenantSession } from '$generated/com-bryzek-platform';
 
 export const load: PageServerLoad = async ({ cookies }) => {

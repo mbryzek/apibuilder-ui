@@ -1,7 +1,7 @@
 <script lang="ts">
-  import type { PublicSession } from '$lib/session';
+  import type { PublicSession } from '#lib/session.js';
   import { afterNavigate } from '$app/navigation';
-  import { displayName, initials } from '$lib/utils/account';
+  import { displayName, initials } from '#lib/utils/account.js';
 
   /**
    * The account menu: the one place the signed-in person reaches their profile and logs out
@@ -25,7 +25,9 @@
 
   const name = $derived(displayName(session.user));
 
-  afterNavigate(() => {
+  afterNavigate(({ shallow, type }) => {
+    if (shallow && type === 'goto') return;
+
     open = false;
   });
 
@@ -73,7 +75,7 @@
             stroke-linejoin="round"
             stroke-width="2"
             d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-          />
+          ></path>
         </svg>
         Your Profile
       </a>
@@ -93,7 +95,7 @@
               stroke-linejoin="round"
               stroke-width="2"
               d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-            />
+            ></path>
           </svg>
           Log out
         </button>
@@ -126,7 +128,7 @@
       stroke="currentColor"
       aria-hidden="true"
     >
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
     </svg>
   </button>
 </div>

@@ -1,10 +1,10 @@
 <script lang="ts">
   import { onDestroy } from 'svelte';
   import { goto } from '$app/navigation';
-  import LoadErrorBanner from '$lib/components/LoadErrorBanner.svelte';
-  import Pagination from '$lib/components/Pagination.svelte';
-  import { listUrl } from '$lib/pagination';
-  import type { LoadError } from '$lib/api/load-error';
+  import LoadErrorBanner from '#lib/components/LoadErrorBanner.svelte';
+  import Pagination from '#lib/components/Pagination.svelte';
+  import { listUrl } from '#lib/pagination.js';
+  import type { LoadError } from '#lib/api/load-error.js';
   import type { Item } from '$generated/com-bryzek-apibuilder';
 
   interface Props {

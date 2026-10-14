@@ -1,7 +1,7 @@
 <script lang="ts">
-  import type { PublicSession } from '$lib/session';
-  import { page } from '$app/stores';
-  import AccountMenu from '$lib/components/AccountMenu.svelte';
+  import type { PublicSession } from '#lib/session.js';
+  import { page } from '$app/state';
+  import AccountMenu from '#lib/components/AccountMenu.svelte';
   /**
    * App Header Component
    * Main navigation header with API Builder branding
@@ -18,7 +18,7 @@
   // Every page under an organization renders OrgSidebar or AppSidebar, and the account menu is the
   // last row of that sidebar there. An error page renders inside the root layout alone, so it has
   // no sidebar and the menu stays in the header.
-  const hasSidebar = $derived(($page.route.id?.startsWith('/[orgKey]') ?? false) && !$page.error);
+  const hasSidebar = $derived((page.route.id?.startsWith('/[orgKey]') ?? false) && !page.error);
 
   function closeMobileMenu() {
     mobileMenuOpen = false;
@@ -51,17 +51,19 @@
       <!-- Desktop Navigation -->
       <div class="hidden items-center space-x-6 md:flex">
         <!-- Center nav -->
-        <a href="/doc" class="text-sm font-medium text-white/80 transition-colors hover:text-white"> Docs </a>
+
+        <a href="/doc" class="text-sm font-medium text-white/80 transition-colors hover:text-white">Docs</a>
+
         <a
           href="https://github.com/apicollective/apibuilder"
           target="_blank"
           rel="noopener noreferrer"
-          class="text-sm font-medium text-white/80 transition-colors hover:text-white"
+          class="text-sm font-medium text-white/80 transition-colors hover:text-white">GitHub</a
         >
-          GitHub
-        </a>
-        <a href="/doc/start" class="text-sm font-medium text-white/80 transition-colors hover:text-white"> For AI Agents </a>
-        <a href="/generators" class="text-sm font-medium text-white/80 transition-colors hover:text-white"> Generators </a>
+
+        <a href="/doc/start" class="text-sm font-medium text-white/80 transition-colors hover:text-white">For AI Agents</a>
+
+        <a href="/generators" class="text-sm font-medium text-white/80 transition-colors hover:text-white">Generators</a>
 
         {#if session}
           <!-- Search form -->

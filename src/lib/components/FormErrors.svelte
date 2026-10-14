@@ -7,7 +7,7 @@
    * copies of this box used to render as an empty red rectangle.
    */
 
-  import type { ApiErrorItem } from '$lib/api/error-handler';
+  import type { ApiErrorItem } from '#lib/api/error-handler.js';
   import Banner from './Banner.svelte';
 
   interface Props {

@@ -1,7 +1,7 @@
 /**
  * Reduce a caller-supplied redirect target to a same-origin path, or `/`.
  *
- * It lives in `$lib/server` rather than beside the login action because SvelteKit rejects any
+ * It lives in `#lib/server` rather than beside the login action because SvelteKit rejects any
  * export from a `+page.server.ts` that is not one of its own hooks, so a private helper there
  * cannot be tested directly. It is a boundary, and boundaries live with the other boundaries.
  *

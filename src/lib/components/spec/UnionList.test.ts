@@ -3,7 +3,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mount, unmount, flushSync } from 'svelte';
 import UnionList from './UnionList.svelte';
-import { service } from '$lib/test-support/fixtures';
+import { service } from '#lib/test-support/fixtures.js';
 import type { Union, Variant } from '$generated/com-bryzek-apibuilder-spec';
 
 function union(name: string, variants: Variant[]): Union {

@@ -1,9 +1,9 @@
-import { type Handle } from '@sveltejs/kit';
-import { clients, getSessionHeaders } from '$lib/api/clients';
-import { handleApiCall, isApiError } from '$lib/api/error-handler';
-import { isUnavailable } from '$lib/api/api-message';
-import { SESSION_COOKIE, config } from '$lib/config';
-import { clearSessionCookie } from '$lib/server/session';
+import type { Handle } from '@sveltejs/kit/hooks';
+import { clients, getSessionHeaders } from '#lib/api/clients.js';
+import { handleApiCall, isApiError } from '#lib/api/error-handler.js';
+import { isUnavailable } from '#lib/api/api-message.js';
+import { SESSION_COOKIE, config } from '#lib/config.js';
+import { clearSessionCookie } from '#lib/server/session.js';
 import type { TenantSession } from '$generated/com-bryzek-platform';
 
 export const handle: Handle = async ({ event, resolve }) => {

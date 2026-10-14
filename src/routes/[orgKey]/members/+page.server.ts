@@ -1,13 +1,13 @@
 import type { PageServerLoad, Actions } from './$types';
 import { fail } from '@sveltejs/kit';
-import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
-import { handleApiCall, isApiError, isApiSuccess, type ApiResponse } from '$lib/api/error-handler';
-import { actionFail, actionFailMissing } from '$lib/api/action-error';
-import { dataOr, loadErrorFrom } from '$lib/api/load-error';
-import { requireAuth, adminClient } from '$lib/server/auth';
-import { requiredEnum, requiredString } from '$lib/server/form';
-import { PAGE_FETCH_LIMIT, PAGE_LIMIT, parseOffset, toPage } from '$lib/pagination';
-import { adminGuidAction, type AdminActionEvent, type OrgScope } from '$lib/server/scoped-action';
+import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.js';
+import { handleApiCall, isApiError, isApiSuccess, type ApiResponse } from '#lib/api/error-handler.js';
+import { actionFail, actionFailMissing } from '#lib/api/action-error.js';
+import { dataOr, loadErrorFrom } from '#lib/api/load-error.js';
+import { requireAuth, adminClient } from '#lib/server/auth.js';
+import { requiredEnum, requiredString } from '#lib/server/form.js';
+import { PAGE_FETCH_LIMIT, PAGE_LIMIT, parseOffset, toPage } from '#lib/pagination.js';
+import { adminGuidAction, type AdminActionEvent, type OrgScope } from '#lib/server/scoped-action.js';
 import type { Membership, User, MembershipRequest, Organization } from '$generated/com-bryzek-apibuilder';
 import { MembershipRole } from '$generated/com-bryzek-apibuilder';
 
@@ -55,7 +55,7 @@ export const load: PageServerLoad = async (event) => {
  *
  * Every guid action below authorizes `params.orgKey` and then acts on an id that arrived
  * separately in the form body, so the id has to be resolved against the org that was authorized
- * rather than trusted. See `$lib/server/scoped-id` and `$lib/server/scoped-action`.
+ * rather than trusted. See `#lib/server/scoped-id` and `$lib/server/scoped-action`.
  */
 const membershipsInOrg: OrgScope<Membership> = (client, orgKey) => (limit, offset) =>
   handleApiCall<Membership[]>(() => client.getMemberships({ orgKey, limit, offset }));

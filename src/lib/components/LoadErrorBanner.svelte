@@ -1,6 +1,6 @@
 <script lang="ts">
   import { invalidateAll } from '$app/navigation';
-  import type { LoadError } from '$lib/api/load-error';
+  import type { LoadError } from '#lib/api/load-error.js';
   import Banner from './Banner.svelte';
 
   interface Props {

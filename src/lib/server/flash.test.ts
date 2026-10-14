@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { Cookies } from '@sveltejs/kit';
-import { caught } from '$lib/test-support/throws';
+import { caught } from '#lib/test-support/throws.js';
 import { FLASH_COOKIE, redirectWithFlash, setFlash, takeFlash } from './flash';
 
-vi.mock('$lib/config', () => ({ SESSION_COOKIE: 'session_id', config: { isProduction: false } }));
+vi.mock('#lib/config', () => ({ SESSION_COOKIE: 'session_id', config: { isProduction: false } }));
 
 interface Jar {
   cookies: Cookies;

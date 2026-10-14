@@ -7,7 +7,7 @@
   import UnionList from './UnionList.svelte';
   import InterfaceList from './InterfaceList.svelte';
   import AuthSchemeList from './AuthSchemeList.svelte';
-  import { authSchemes, isAuthSchemeAnchor } from '$lib/utils/auth-schemes';
+  import { authSchemes, isAuthSchemeAnchor } from '#lib/utils/auth-schemes.js';
 
   interface Props {
     service: Service;

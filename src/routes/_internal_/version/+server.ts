@@ -1,4 +1,4 @@
-import { PUBLIC_VERSION, PUBLIC_RELEASED_AT } from '$env/static/public';
+import { PUBLIC_VERSION, PUBLIC_RELEASED_AT } from '$app/env/public';
 import type { RequestHandler } from './$types';
 
 // PUBLIC_VERSION / PUBLIC_RELEASED_AT are exported into the build environment

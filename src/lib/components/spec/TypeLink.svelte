@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Service } from '$generated/com-bryzek-apibuilder-spec';
-  import { resolveType } from '$lib/utils/type-resolver';
+  import { resolveType } from '#lib/utils/type-resolver.js';
 
   interface Props {
     typeStr: string;

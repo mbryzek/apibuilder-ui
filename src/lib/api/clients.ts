@@ -7,7 +7,7 @@ import { ApiClient as ApiBuilderClient } from '$generated/com-bryzek-apibuilder'
 import { ApiClient as GeneratorClient } from '$generated/com-bryzek-apibuilder-generator';
 import { ApiClient as PlatformClient } from '$generated/com-bryzek-platform';
 import { sessionHeaders, type ApiClientOptions } from '$generated/generated-util';
-import { config } from '$lib/config';
+import { config } from '#lib/config.js';
 
 export { ApiBuilderClient, GeneratorClient, PlatformClient };
 

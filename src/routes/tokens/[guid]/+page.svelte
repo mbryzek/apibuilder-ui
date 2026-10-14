@@ -1,9 +1,9 @@
 <script lang="ts">
-  import PendingForm from '$lib/components/PendingForm.svelte';
-  import type { ApiErrorItem } from '$lib/api/error-handler';
+  import PendingForm from '#lib/components/PendingForm.svelte';
+  import type { ApiErrorItem } from '#lib/api/error-handler.js';
   import type { Token } from '$generated/com-bryzek-platform';
-  import FormErrors from '$lib/components/FormErrors.svelte';
-  import Banner from '$lib/components/Banner.svelte';
+  import FormErrors from '#lib/components/FormErrors.svelte';
+  import Banner from '#lib/components/Banner.svelte';
 
   interface Props {
     data: { token: Token };

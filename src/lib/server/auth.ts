@@ -1,10 +1,10 @@
 import { redirect, error } from '@sveltejs/kit';
 import type { RequestEvent } from '@sveltejs/kit';
-import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
-import { handleApiCall } from '$lib/api/error-handler';
-import { throwIfUnavailable } from '$lib/api/load-error';
-import { UNAVAILABLE } from '$lib/api/api-message';
-import { assertSafeSegment } from '$lib/server/path-params';
+import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.js';
+import { handleApiCall } from '#lib/api/error-handler.js';
+import { throwIfUnavailable } from '#lib/api/load-error.js';
+import { UNAVAILABLE } from '#lib/api/api-message.js';
+import { assertSafeSegment } from '#lib/server/path-params.js';
 import type { Membership } from '$generated/com-bryzek-apibuilder';
 import { MembershipRole } from '$generated/com-bryzek-apibuilder';
 

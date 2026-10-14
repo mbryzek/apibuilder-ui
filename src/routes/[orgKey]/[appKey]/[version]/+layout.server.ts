@@ -1,8 +1,8 @@
 import type { LayoutServerLoad } from './$types';
-import { apiBuilderClient, getSessionHeaders } from '$lib/api/clients';
-import { handleApiCall } from '$lib/api/error-handler';
-import { dataOr, dataOrThrow, loadErrorFrom } from '$lib/api/load-error';
-import { assertSafePathParams } from '$lib/server/path-params';
+import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.js';
+import { handleApiCall } from '#lib/api/error-handler.js';
+import { dataOr, dataOrThrow, loadErrorFrom } from '#lib/api/load-error.js';
+import { assertSafePathParams } from '#lib/server/path-params.js';
 import type { Version, Watch } from '$generated/com-bryzek-apibuilder';
 
 export const load: LayoutServerLoad = async ({ params, locals }) => {

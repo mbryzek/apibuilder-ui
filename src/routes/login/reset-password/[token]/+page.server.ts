@@ -1,10 +1,10 @@
 import type { PageServerLoad, Actions } from './$types';
 import { fail } from '@sveltejs/kit';
-import { platformClient } from '$lib/api/clients';
-import { handleApiCall } from '$lib/api/error-handler';
-import { config } from '$lib/config';
-import { completeSession } from '$lib/server/auth-completion';
-import { requiredSecret } from '$lib/server/form';
+import { platformClient } from '#lib/api/clients.js';
+import { handleApiCall } from '#lib/api/error-handler.js';
+import { config } from '#lib/config.js';
+import { completeSession } from '#lib/server/auth-completion.js';
+import { requiredSecret } from '#lib/server/form.js';
 import type { SessionState } from '$generated/com-bryzek-platform';
 
 // The token stays out of the page payload: the action reads it from `params`, and nothing on the

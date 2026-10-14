@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Operation } from '$generated/com-bryzek-apibuilder-spec';
 import { operationAuthBadge, operationContentTypeBadge } from './operation-badges';
-import { operation, service } from '$lib/test-support/fixtures';
+import { operation, service } from '#lib/test-support/fixtures.js';
 
 const svc = service({ auth_schemes: [{ type: 'hackathon_admin', attributes: {} }] });
 

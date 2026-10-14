@@ -35,7 +35,7 @@ CI runs on every pull request (ISS-2172). `ci/build.sh` is the whole of it — t
 repo exactly when that file exists at a pull request's head sha, and the `ci` commit status it
 posts is what the merge lane reads, so a red one parks the PR. It runs `npm ci`, then `npm run
 check`, then `npm run build`. The build is deliberately a separate step: SvelteKit's
-"`$lib/server` imported into browser code" guard is a vite build plugin, so `svelte-check` cannot
+"`#lib/server` imported into browser code" guard is a vite build plugin, so `svelte-check` cannot
 give that verdict.
 
 `npm run check` is therefore both what CI runs and what a developer runs by hand before pushing.

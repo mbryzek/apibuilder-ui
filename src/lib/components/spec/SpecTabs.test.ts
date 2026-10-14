@@ -3,7 +3,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mount, unmount, flushSync, tick, type ComponentProps } from 'svelte';
 import SpecTabs from './SpecTabs.svelte';
-import { operation, service } from '$lib/test-support/fixtures';
+import { operation, service } from '#lib/test-support/fixtures.js';
 import type { Enum, Model, Resource } from '$generated/com-bryzek-apibuilder-spec';
 
 function model(name: string): Model {

@@ -1,5 +1,5 @@
 import type { Cookies } from '@sveltejs/kit';
-import { SESSION_COOKIE, config } from '$lib/config';
+import { SESSION_COOKIE, config } from '#lib/config.js';
 
 /**
  * Single source of truth for the session cookie policy.
