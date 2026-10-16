@@ -167,6 +167,8 @@ export interface MobilePhoneForm {
   number: string;
   optin_to_sms?: boolean;
   allowed_to_share?: boolean;
+  /** Store the number without asking for consent: no opt-in request and no opt-in confirmation is texted, and the number's consent stays pending. For a product that keeps a number and texts nothing. Ignored when optin_to_sms or allowed_to_share is true. */
+  record_only?: boolean;
 }
 
 export interface PasswordChangeForm {
