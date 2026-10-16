@@ -4,8 +4,8 @@ import { join } from 'node:path';
 
 /**
  * Every tokenized link the platform mails an apibuilder user is built from a path the PLATFORM
- * owns — `EmailVerificationProcessor` and `PasswordResetProcessor` each hardcode one and resolve
- * the host from `tenants.domain` — so a route in this repo at any other spelling is a dead end
+ * owns — `EmailVerificationProcessor`, `UserActivationProcessor` and `PasswordResetProcessor` each
+ * build one from `core.email.EmailedLink` and resolve the host from `tenants.domain` — so a route in this repo at any other spelling is a dead end
  * for whoever clicks the link, and there is nothing on the platform side that could notice: the
  * mail is sent, the task completes, and the 404 happens in a browser nobody is watching.
  *
@@ -21,6 +21,11 @@ const EMAILED_LINK_ROUTES = [
     dir: join('email', 'verifications', '[token]'),
     mailedPath: '/email/verifications/<token>',
     mailedBy: 'EmailVerificationProcessor'
+  },
+  {
+    dir: join('welcome', '[token]'),
+    mailedPath: '/welcome/<token>',
+    mailedBy: 'UserActivationProcessor'
   },
   {
     dir: join('login', 'password', 'reset', '[token]'),
