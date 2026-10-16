@@ -656,6 +656,17 @@ All doc pages are public and use a dedicated layout with doc sidebar navigation.
 
 ---
 
+### 14a. Account Activation
+
+**Route:** `GET /welcome/:token` (view), `POST /welcome/:token` (submit)
+**Auth:** Public
+
+- Landing page of the welcome email an invited user is sent
+- Set password form; on success signs the user in and redirects to `/`
+- A spent or expired token shows "This link is no longer valid" with links to reset the password or sign in
+
+---
+
 ### 15. Health Check
 
 **Route:** `GET /_internal_/healthcheck`

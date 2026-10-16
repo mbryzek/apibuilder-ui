@@ -339,6 +339,42 @@ export interface User {
   rallyd?: RallydRating[];
 }
 
+/**
+ * A pending invitation for a user to set their initial password. Returned unauthenticated to whoever holds the activation token, so it carries only what the welcome page renders.
+ */
+export interface UserActivation {
+  user: UserReference;
+  /** What to call the invitee - nickname when set, otherwise full name. Absent when the person record has neither. */
+  name?: string;
+  /** The address the invitation was sent to, so the page can show which account is being activated. */
+  email?: Email;
+  expires_at: ISODateTimeString;
+}
+
+/**
+ * Body for POST /activations/:token/password. Sets the user's initial password and consumes the activation.
+ */
+export interface UserActivationPasswordForm {
+  password: string;
+}
+
+/**
+ * A change of a user's email address that the new address has not confirmed yet.
+ */
+export interface UserEmailChange {
+  id: string;
+  /** The new address, which the verification link was sent to. */
+  email: string;
+  created_at: ISODateTimeString;
+}
+
+/**
+ * Body for POST /users/:id/email/change.
+ */
+export interface UserEmailChangeForm {
+  email: string;
+}
+
 export interface UserForm {
   person: PersonForm;
   rallyd?: RallydRatingForm[];
@@ -632,6 +668,35 @@ export interface CreateUserPasswordAndSuggestionsOptions {
 }
 
 export interface CreateUserEmailAndVerificationsByIdOptions {
+  headers?: Record<string, string>;
+  signal?: AbortSignal;
+}
+
+export interface CreateUserEmailAndChangeByIdOptions {
+  id: string;
+  body: UserEmailChangeForm;
+  headers?: Record<string, string>;
+  signal?: AbortSignal;
+}
+
+export interface GetUserEmailAndChangeByIdOptions {
+  headers?: Record<string, string>;
+  signal?: AbortSignal;
+}
+
+export interface DeleteUserEmailAndChangeByIdOptions {
+  headers?: Record<string, string>;
+  signal?: AbortSignal;
+}
+
+export interface GetUserActivationByTokenOptions {
+  headers?: Record<string, string>;
+  signal?: AbortSignal;
+}
+
+export interface CreateUserActivationPasswordByTokenOptions {
+  token: string;
+  body: UserActivationPasswordForm;
   headers?: Record<string, string>;
   signal?: AbortSignal;
 }
@@ -1414,6 +1479,148 @@ export class ApiClient {
 
     if (response.status === 401) {
       throw new UnauthorizedErrorResponse(response);
+    }
+
+    if (response.status === 404) {
+      throw new VoidResponse(response);
+    }
+
+    if (response.status === 422) {
+      throw new ValidationErrorsResponse(response);
+    }
+
+    throw new ApiException(response, `Request failed with status ${response.status}`);
+  }
+
+  async createUserEmailAndChangeById(params: CreateUserEmailAndChangeByIdOptions): Promise<UserEmailChange> {
+    const url = `${this.baseUrl}/users/${encodeURIComponent(params.id)}/email/change`;
+
+    const response = await this.request(
+      url,
+      {
+        method: 'POST',
+        body: JSON.stringify(params.body)
+      },
+      'application/json',
+      params.headers || {},
+      params.signal
+    );
+
+    if (response.status === 201) {
+      return await Util.mustParse<UserEmailChange>(response, 'UserEmailChange');
+    }
+
+    if (response.status === 401) {
+      throw new UnauthorizedErrorResponse(response);
+    }
+
+    if (response.status === 404) {
+      throw new VoidResponse(response);
+    }
+
+    if (response.status === 422) {
+      throw new ValidationErrorsResponse(response);
+    }
+
+    throw new ApiException(response, `Request failed with status ${response.status}`);
+  }
+
+  async getUserEmailAndChangeById(id: string, options?: GetUserEmailAndChangeByIdOptions): Promise<UserEmailChange> {
+    const url = `${this.baseUrl}/users/${encodeURIComponent(id)}/email/change`;
+
+    const response = await this.request(
+      url,
+      {
+        method: 'GET'
+      },
+      'application/json',
+      options?.headers || {},
+      options?.signal
+    );
+
+    if (response.status === 200) {
+      return await Util.mustParse<UserEmailChange>(response, 'UserEmailChange');
+    }
+
+    if (response.status === 401) {
+      throw new UnauthorizedErrorResponse(response);
+    }
+
+    if (response.status === 404) {
+      throw new VoidResponse(response);
+    }
+
+    throw new ApiException(response, `Request failed with status ${response.status}`);
+  }
+
+  async deleteUserEmailAndChangeById(id: string, options?: DeleteUserEmailAndChangeByIdOptions): Promise<void> {
+    const url = `${this.baseUrl}/users/${encodeURIComponent(id)}/email/change`;
+
+    const response = await this.request(
+      url,
+      {
+        method: 'DELETE'
+      },
+      'application/json',
+      options?.headers || {},
+      options?.signal
+    );
+
+    if (response.status === 204) {
+      return;
+    }
+
+    if (response.status === 401) {
+      throw new UnauthorizedErrorResponse(response);
+    }
+
+    if (response.status === 404) {
+      throw new VoidResponse(response);
+    }
+
+    throw new ApiException(response, `Request failed with status ${response.status}`);
+  }
+
+  async getUserActivationByToken(token: string, options?: GetUserActivationByTokenOptions): Promise<UserActivation> {
+    const url = `${this.baseUrl}/activations/${encodeURIComponent(token)}`;
+
+    const response = await this.request(
+      url,
+      {
+        method: 'GET'
+      },
+      'application/json',
+      options?.headers || {},
+      options?.signal
+    );
+
+    if (response.status === 200) {
+      return await Util.mustParse<UserActivation>(response, 'UserActivation');
+    }
+
+    if (response.status === 404) {
+      throw new VoidResponse(response);
+    }
+
+    throw new ApiException(response, `Request failed with status ${response.status}`);
+  }
+
+  async createUserActivationPasswordByToken(params: CreateUserActivationPasswordByTokenOptions): Promise<SessionState> {
+    const url = `${this.baseUrl}/activations/${encodeURIComponent(params.token)}/password`;
+
+    const response = await this.request(
+      url,
+      {
+        method: 'POST',
+        body: JSON.stringify(params.body)
+      },
+      'application/json',
+      params.headers || {},
+      params.signal
+    );
+
+    if (response.status === 201) {
+      return await Util.mustParse<SessionState>(response, 'SessionState');
     }
 
     if (response.status === 404) {
