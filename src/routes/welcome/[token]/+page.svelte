@@ -21,6 +21,9 @@
   // The activation can die between the load and the submit, so the dead-link state is reachable from either side.
   let linkInvalid = $derived(data.outcome.kind === 'invalid' || form?.linkInvalid === true);
 
+  let name = $derived(data.outcome.kind === 'ready' ? data.outcome.name : undefined);
+  let email = $derived(data.outcome.kind === 'ready' ? data.outcome.email : undefined);
+
   let heading = $derived(
     linkInvalid ? 'This link is no longer valid' : data.outcome.kind === 'ready' ? 'Set your password' : 'We could not open your invitation'
   );
@@ -44,13 +47,15 @@
         <a href="/login" class="btn-secondary block w-full text-center">Sign In</a>
       </div>
     {:else if data.outcome.kind === 'unavailable'}
-      <p class="text-ab-gray mb-6 text-center">Something went wrong on our end. Your invitation is still good. Try again in a few minutes.</p>
+      <p class="text-ab-gray mb-6 text-center">
+        Something went wrong on our end. Your invitation is still good. Try again in a few minutes.
+      </p>
       <a href={data.retryUrl} class="btn-primary block w-full text-center" data-sveltekit-reload>Try Again</a>
     {:else}
       <p class="text-ab-gray mb-6 text-center">
-        {#if data.outcome.name}Welcome, {data.outcome.name}.
-        {/if}Choose a password to finish setting up{#if data.outcome.email}
-          <span class="font-medium">{data.outcome.email}</span>{/if}.
+        {#if name}Welcome, {name}.
+        {/if}Choose a password to finish setting up{#if email}
+          <span class="font-medium">{email}</span>{/if}.
       </p>
 
       <FormErrors errors={form?.errors} />
