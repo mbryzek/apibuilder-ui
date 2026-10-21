@@ -32,6 +32,8 @@ export enum FileType {
   M4a = 'm4a',
   Amr = 'amr',
   Ogg = 'ogg',
+  Webm = 'webm',
+  Wav = 'wav',
   Vcf = 'vcf',
   Bin = 'bin'
 }
