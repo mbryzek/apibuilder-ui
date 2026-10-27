@@ -31,7 +31,7 @@
           <FormField label="Password" name="password" type="password" autocomplete="new-password" />
 
           <button type="submit" disabled={pending} class="btn-primary w-full">
-            {pending ? 'Creating account...' : 'Create account'}
+            {pending ? 'Creating account…' : 'Create account'}
           </button>
         </div>
       {/snippet}

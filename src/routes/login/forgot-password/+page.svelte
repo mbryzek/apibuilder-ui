@@ -35,7 +35,7 @@
             <FormField label="Email" name="email" inputmode="email" autocomplete="email" />
 
             <button type="submit" disabled={pending} class="btn-primary w-full">
-              {pending ? 'Sending...' : 'Send Reset Link'}
+              {pending ? 'Sending…' : 'Send Reset Link'}
             </button>
           </div>
         {/snippet}

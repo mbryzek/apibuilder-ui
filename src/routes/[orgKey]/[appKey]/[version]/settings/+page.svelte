@@ -58,7 +58,7 @@
               </select>
             </div>
             <button type="submit" class="btn-primary" disabled={pending}>
-              {pending ? 'Updating...' : 'Update Visibility'}
+              {pending ? 'Updating…' : 'Update Visibility'}
             </button>
           {/snippet}
         </PendingForm>
@@ -76,16 +76,14 @@
         <p class="mb-4 text-sm font-medium text-red-700">
           Are you sure you want to delete <strong>{service.name}</strong>? This action cannot be undone.
         </p>
-        <div class="flex gap-3">
-          <PendingForm action="?/deleteApp">
-            {#snippet children(pending)}
-              <button type="submit" class="btn-danger" disabled={pending}>
-                {pending ? 'Deleting...' : 'Yes, Delete Application'}
-              </button>
-            {/snippet}
-          </PendingForm>
-          <button class="btn-secondary" onclick={() => (showDeleteConfirm = false)}> Cancel </button>
-        </div>
+        <PendingForm action="?/deleteApp" class="flex gap-3">
+          {#snippet children(pending)}
+            <button type="submit" class="btn-danger" disabled={pending}>
+              {pending ? 'Deleting…' : 'Yes, Delete Application'}
+            </button>
+            <button type="button" class="btn-secondary" disabled={pending} onclick={() => (showDeleteConfirm = false)}> Cancel </button>
+          {/snippet}
+        </PendingForm>
       {/if}
     </div>
   {:else}

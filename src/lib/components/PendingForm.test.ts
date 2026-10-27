@@ -33,11 +33,11 @@ describe('PendingForm', () => {
     component = undefined;
   });
 
-  it('leaves a sibling form enabled while one form is in flight', () => {
+  it('leaves a sibling form enabled while one form is in flight', async () => {
     render();
 
     const [submitFirst] = submitFunctions;
-    submitFirst!();
+    await submitFirst!();
     flushSync();
 
     expect(button('first').disabled).toBe(true);
@@ -50,7 +50,7 @@ describe('PendingForm', () => {
     render({ onSettled: () => order.push('settled') });
 
     const [submitFirst] = submitFunctions;
-    const settled = submitFirst!();
+    const settled = await submitFirst!();
     flushSync();
     expect(button('first').disabled).toBe(true);
 
@@ -69,7 +69,7 @@ describe('PendingForm', () => {
     render();
 
     const [submitFirst] = submitFunctions;
-    const settled = submitFirst!();
+    const settled = await submitFirst!();
     flushSync();
 
     let disabledDuringUpdate: boolean | undefined;

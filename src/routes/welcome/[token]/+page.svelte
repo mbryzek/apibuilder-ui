@@ -68,7 +68,7 @@
             <FormField label="Confirm Password" name="confirm_password" type="password" autocomplete="new-password" />
 
             <button type="submit" disabled={pending} class="btn-primary w-full">
-              {pending ? 'Setting password...' : 'Set Password'}
+              {pending ? 'Setting password…' : 'Set Password'}
             </button>
           </div>
         {/snippet}

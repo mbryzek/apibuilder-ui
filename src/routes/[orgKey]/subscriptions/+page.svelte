@@ -74,7 +74,11 @@
             {#snippet children(pending)}
               <input type="hidden" name="publication" value={publication} />
               <button type="submit" class="{isSubscribed ? 'btn-secondary' : 'btn-primary'} px-4 py-2 text-sm" disabled={pending}>
-                {isSubscribed ? 'Unsubscribe' : 'Subscribe'}
+                {#if pending}
+                  {isSubscribed ? 'Unsubscribing…' : 'Subscribing…'}
+                {:else}
+                  {isSubscribed ? 'Unsubscribe' : 'Subscribe'}
+                {/if}
               </button>
             {/snippet}
           </PendingForm>

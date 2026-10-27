@@ -29,6 +29,6 @@
     disabled={retrying}
     class="mt-2 text-sm font-semibold underline hover:no-underline disabled:cursor-not-allowed disabled:opacity-60"
   >
-    {retrying ? 'Retrying...' : 'Try again'}
+    {retrying ? 'Retrying…' : 'Try again'}
   </button>
 </Banner>
