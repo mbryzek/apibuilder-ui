@@ -51,6 +51,7 @@
     "svelte-eslint-parser": "^1.7.1",
     "svelte-vitals": "0.55.2",
     "typescript": "~6.0.3",
+    "ui": "github:mbryzek/ui",
     "vite": "^8.0.16",
     "vitest": "^4.1.12",
     "wrangler": "^4.118.0"

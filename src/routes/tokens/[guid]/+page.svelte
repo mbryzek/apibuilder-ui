@@ -59,16 +59,14 @@
     {#if confirmDelete}
       <Banner class="">
         <p class="mb-3 text-sm">Are you sure you want to delete this token? This cannot be undone.</p>
-        <div class="flex gap-3">
-          <PendingForm action="?/delete">
-            {#snippet children(pending)}
-              <button type="submit" class="btn-danger" disabled={pending}>
-                {pending ? 'Deleting...' : 'Yes, Delete'}
-              </button>
-            {/snippet}
-          </PendingForm>
-          <button type="button" class="btn-secondary" onclick={() => (confirmDelete = false)}>Cancel</button>
-        </div>
+        <PendingForm action="?/delete" class="flex gap-3">
+          {#snippet children(pending)}
+            <button type="submit" class="btn-danger" disabled={pending}>
+              {pending ? 'Deleting…' : 'Yes, Delete'}
+            </button>
+            <button type="button" class="btn-secondary" disabled={pending} onclick={() => (confirmDelete = false)}>Cancel</button>
+          {/snippet}
+        </PendingForm>
       </Banner>
     {:else}
       <button type="button" class="btn-danger" onclick={() => (confirmDelete = true)}>Delete Token</button>

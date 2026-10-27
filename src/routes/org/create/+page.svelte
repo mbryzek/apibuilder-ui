@@ -47,7 +47,7 @@
 
           <div class="flex gap-4 pt-4">
             <button type="submit" disabled={pending} class="btn-primary">
-              {pending ? 'Creating...' : 'Create Organization'}
+              {pending ? 'Creating…' : 'Create Organization'}
             </button>
             <a href="/" class="btn-secondary inline-flex items-center"> Cancel </a>
           </div>

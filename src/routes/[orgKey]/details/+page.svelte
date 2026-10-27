@@ -47,7 +47,7 @@
           </div>
           <div>
             <button type="submit" class="btn-primary" disabled={pending}>
-              {pending ? 'Saving...' : 'Save Changes'}
+              {pending ? 'Saving…' : 'Save Changes'}
             </button>
           </div>
         </div>
@@ -61,16 +61,14 @@
       {#if showDeleteConfirm}
         <Banner class="">
           <p class="mb-3 text-sm">Are you sure you want to delete <strong>{org.name}</strong>?</p>
-          <div class="flex gap-3">
-            <PendingForm action="?/delete">
-              {#snippet children(pending)}
-                <button type="submit" class="btn-danger" disabled={pending}>
-                  {pending ? 'Deleting...' : 'Yes, delete'}
-                </button>
-              {/snippet}
-            </PendingForm>
-            <button type="button" class="btn-secondary" onclick={() => (showDeleteConfirm = false)}>Cancel</button>
-          </div>
+          <PendingForm action="?/delete" class="flex gap-3">
+            {#snippet children(pending)}
+              <button type="submit" class="btn-danger" disabled={pending}>
+                {pending ? 'Deleting…' : 'Yes, delete'}
+              </button>
+              <button type="button" class="btn-secondary" disabled={pending} onclick={() => (showDeleteConfirm = false)}>Cancel</button>
+            {/snippet}
+          </PendingForm>
         </Banner>
       {:else}
         <button type="button" class="btn-danger" onclick={() => (showDeleteConfirm = true)}>Delete Organization</button>
