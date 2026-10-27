@@ -52,7 +52,7 @@
     "svelte-vitals": "0.55.2",
     "typescript": "~6.0.3",
     "vite": "^8.0.16",
-    "vitest": "^4.1.11",
+    "vitest": "^4.1.12",
     "wrangler": "^4.118.0"
   },
   "dependencies": {
@@ -61,8 +61,8 @@
     "tailwindcss": "^4.3.3"
   },
   "overrides": {
-    "undici@7.29.0": "7.29.1",
-    "sharp@0.35.4": "0.35.5"
+    "sharp@0.35.4": "0.35.5",
+    "undici@7.29.1": "7.30.1"
   },
   "imports": {
     "#lib/*": "./src/lib/*",
