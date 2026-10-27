@@ -1,5 +1,6 @@
 <script lang="ts">
   import PendingForm from '#lib/components/PendingForm.svelte';
+  import { Submission } from 'ui/submission.svelte.ts';
   import type { Organization, MembershipRequest } from '#generated/com-bryzek-apibuilder.ts';
   import type { ApiErrorItem } from '#lib/api/error-handler.ts';
   import type { LoadError } from '#lib/api/load-error.ts';
@@ -23,6 +24,9 @@
 
   const org = $derived(data.org);
   const requests = $derived(data.requests);
+  // Accept and Decline answer the same request: one Submission keyed by request, so clicking
+  // either disables both on that request and leaves every other request clickable.
+  const answers = new Submission<'accept' | 'decline'>();
 </script>
 
 <svelte:head>
@@ -48,16 +52,20 @@
             <div class="text-ab-gray text-sm">Requested role: <span class="font-medium">{req.role}</span></div>
           </div>
           <div class="flex gap-2">
-            <PendingForm action="?/accept">
+            <PendingForm action="?/accept" submission={answers} key={req.id} act="accept">
               {#snippet children(pending)}
                 <input type="hidden" name="guid" value={req.id} />
-                <button type="submit" class="btn-primary px-4 py-2 text-sm" disabled={pending}>Accept</button>
+                <button type="submit" class="btn-primary px-4 py-2 text-sm" disabled={pending}>
+                  {answers.act(req.id) === 'accept' ? 'Accepting…' : 'Accept'}
+                </button>
               {/snippet}
             </PendingForm>
-            <PendingForm action="?/decline">
+            <PendingForm action="?/decline" submission={answers} key={req.id} act="decline">
               {#snippet children(pending)}
                 <input type="hidden" name="guid" value={req.id} />
-                <button type="submit" class="btn-secondary px-4 py-2 text-sm" disabled={pending}>Decline</button>
+                <button type="submit" class="btn-secondary px-4 py-2 text-sm" disabled={pending}>
+                  {answers.act(req.id) === 'decline' ? 'Declining…' : 'Decline'}
+                </button>
               {/snippet}
             </PendingForm>
           </div>

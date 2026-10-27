@@ -45,7 +45,7 @@
     <PendingForm>
       {#snippet children(pending)}
         <button type="submit" class="btn-primary" disabled={pending}>
-          {pending ? 'Requesting...' : 'Request Membership'}
+          {pending ? 'Requesting…' : 'Request Membership'}
         </button>
       {/snippet}
     </PendingForm>

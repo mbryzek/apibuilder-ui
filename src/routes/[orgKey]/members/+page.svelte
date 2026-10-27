@@ -1,5 +1,6 @@
 <script lang="ts">
   import PendingForm from '#lib/components/PendingForm.svelte';
+  import { Submission } from 'ui/submission.svelte.ts';
   import type { Organization, Membership } from '#generated/com-bryzek-apibuilder.ts';
   import { MembershipRole } from '#generated/com-bryzek-apibuilder.ts';
   import type { ApiErrorItem } from '#lib/api/error-handler.ts';
@@ -28,6 +29,9 @@
   const org = $derived(data.org);
   const memberships = $derived(data.memberships);
   let confirmRemoveId = $state<string | null>(null);
+  // A member's role change and removal answer the same membership: one Submission keyed by
+  // membership, so either request disables every action on that row and no other row.
+  const rowActions = new Submission<'role' | 'remove'>();
 </script>
 
 <svelte:head>
@@ -66,7 +70,7 @@
             <option value="admin">Admin</option>
           </select>
           <button type="submit" class="btn-primary" disabled={pending}>
-            {pending ? 'Adding...' : 'Add'}
+            {pending ? 'Adding…' : 'Add'}
           </button>
         {/snippet}
       </PendingForm>
@@ -102,41 +106,53 @@
                 <td class="py-3 text-right">
                   <div class="flex justify-end gap-2">
                     {#if membership.role === MembershipRole.Admin}
-                      <PendingForm action="?/revokeAdmin">
+                      <PendingForm action="?/revokeAdmin" submission={rowActions} key={membership.id} act="role">
                         {#snippet children(pending)}
                           <input type="hidden" name="guid" value={membership.id} />
                           <button type="submit" class="text-ab-blue hover:text-ab-dark-blue text-sm" disabled={pending}>
-                            Revoke Admin
+                            {rowActions.act(membership.id) === 'role' ? 'Revoking…' : 'Revoke Admin'}
                           </button>
                         {/snippet}
                       </PendingForm>
                     {:else}
-                      <PendingForm action="?/makeAdmin">
+                      <PendingForm action="?/makeAdmin" submission={rowActions} key={membership.id} act="role">
                         {#snippet children(pending)}
                           <input type="hidden" name="guid" value={membership.id} />
                           <button type="submit" class="text-ab-blue hover:text-ab-dark-blue text-sm" disabled={pending}>
-                            Make Admin
+                            {rowActions.act(membership.id) === 'role' ? 'Making admin…' : 'Make Admin'}
                           </button>
                         {/snippet}
                       </PendingForm>
                     {/if}
 
                     {#if confirmRemoveId === membership.id}
-                      <PendingForm action="?/removeMember" onSettled={() => (confirmRemoveId = null)}>
+                      <PendingForm
+                        action="?/removeMember"
+                        submission={rowActions}
+                        key={membership.id}
+                        act="remove"
+                        onSettled={() => (confirmRemoveId = null)}
+                      >
                         {#snippet children(pending)}
                           <input type="hidden" name="guid" value={membership.id} />
                           <button type="submit" class="text-sm font-semibold text-red-600 hover:text-red-800" disabled={pending}>
-                            Confirm Remove
+                            {rowActions.act(membership.id) === 'remove' ? 'Removing…' : 'Confirm Remove'}
                           </button>
                         {/snippet}
                       </PendingForm>
-                      <button type="button" class="text-ab-gray hover:text-ab-dark-blue text-sm" onclick={() => (confirmRemoveId = null)}>
+                      <button
+                        type="button"
+                        class="text-ab-gray hover:text-ab-dark-blue text-sm"
+                        disabled={rowActions.pending(membership.id)}
+                        onclick={() => (confirmRemoveId = null)}
+                      >
                         Cancel
                       </button>
                     {:else}
                       <button
                         type="button"
                         class="text-sm text-red-600 hover:text-red-800"
+                        disabled={rowActions.pending(membership.id)}
                         onclick={() => (confirmRemoveId = membership.id)}
                       >
                         Remove

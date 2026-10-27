@@ -79,7 +79,9 @@
               ? 'text-ab-blue'
               : 'text-ab-gray hover:text-ab-blue'}"
           >
-            {#if data.isWatching}
+            {#if pending}
+              <span class="text-sm">{data.isWatching ? 'Unwatching…' : 'Watching…'}</span>
+            {:else if data.isWatching}
               <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path
                   stroke-linecap="round"
@@ -125,17 +127,14 @@
     <p class="mb-3 text-sm font-medium">
       Are you sure you want to delete version <strong>{version.version}</strong>? This action cannot be undone.
     </p>
-    <div class="flex gap-3">
-      <PendingForm action="{versionBase}?/deleteVersion">
-        {#snippet children(pending)}
-          <button type="submit" class="btn-danger" disabled={pending}>
-            {pending ? 'Deleting...' : 'Yes, Delete Version'}
-          </button>
-        {/snippet}
-      </PendingForm>
-
-      <button class="btn-secondary" onclick={() => (showDeleteConfirm = false)}>Cancel</button>
-    </div>
+    <PendingForm action="{versionBase}?/deleteVersion" class="flex gap-3">
+      {#snippet children(pending)}
+        <button type="submit" class="btn-danger" disabled={pending}>
+          {pending ? 'Deleting…' : 'Yes, Delete Version'}
+        </button>
+        <button type="button" class="btn-secondary" disabled={pending} onclick={() => (showDeleteConfirm = false)}>Cancel</button>
+      {/snippet}
+    </PendingForm>
   </Banner>
 {/if}
 

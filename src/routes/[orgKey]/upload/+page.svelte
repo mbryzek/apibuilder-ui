@@ -83,7 +83,7 @@
 
         <div class="flex gap-3 pt-2">
           <button type="submit" class="btn-primary" disabled={pending}>
-            {pending ? 'Uploading...' : 'Upload'}
+            {pending ? 'Uploading…' : 'Upload'}
           </button>
           <a href="/{org.key}" class="btn-secondary inline-block text-center">Cancel</a>
         </div>

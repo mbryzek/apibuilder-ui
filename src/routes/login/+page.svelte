@@ -34,7 +34,7 @@
           <FormField label="Password" name="password" type="password" autocomplete="current-password" />
 
           <button type="submit" disabled={pending} class="btn-primary w-full">
-            {pending ? 'Signing in...' : 'Sign in'}
+            {pending ? 'Signing in…' : 'Sign in'}
           </button>
         </div>
       {/snippet}

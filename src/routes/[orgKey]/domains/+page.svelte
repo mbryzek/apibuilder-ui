@@ -1,5 +1,6 @@
 <script lang="ts">
   import PendingForm from '#lib/components/PendingForm.svelte';
+  import { Submission } from 'ui/submission.svelte.ts';
   import type { Organization } from '#generated/com-bryzek-apibuilder.ts';
   import type { ApiErrorItem } from '#lib/api/error-handler.ts';
   import FormErrors from '#lib/components/FormErrors.svelte';
@@ -17,6 +18,9 @@
   const org = $derived(data.org);
   const domains = $derived(org.domains);
   let confirmRemoveName = $state<string | null>(null);
+  // Held by the page and keyed by domain, not by the confirmation's own form: `onSettled` closes the
+  // confirmation before `update()`, and the row's Remove must stay disabled until the answer lands.
+  const removals = new Submission();
 </script>
 
 <svelte:head>
@@ -38,7 +42,7 @@
         {#snippet children(pending)}
           <input type="text" name="name" placeholder="example.com" class="input-field flex-1 rounded-lg border px-3 py-2" />
           <button type="submit" class="btn-primary" disabled={pending}>
-            {pending ? 'Adding...' : 'Add Domain'}
+            {pending ? 'Adding…' : 'Add Domain'}
           </button>
         {/snippet}
       </PendingForm>
@@ -54,22 +58,36 @@
           <span class="text-ab-dark-blue font-medium">{domain.name}</span>
           {#if data.isAdmin}
             {#if confirmRemoveName === domain.name}
-              <div class="flex gap-2">
-                <PendingForm action="?/removeDomain" onSettled={() => (confirmRemoveName = null)}>
-                  {#snippet children(pending)}
-                    <input type="hidden" name="name" value={domain.name} />
-                    <button type="submit" class="text-sm font-semibold text-red-600 hover:text-red-800" disabled={pending}>
-                      Confirm
-                    </button>
-                  {/snippet}
-                </PendingForm>
-                <button type="button" class="text-ab-gray hover:text-ab-dark-blue text-sm" onclick={() => (confirmRemoveName = null)}>
-                  Cancel
-                </button>
-              </div>
+              <PendingForm
+                action="?/removeDomain"
+                class="flex gap-2"
+                submission={removals}
+                key={domain.name}
+                onSettled={() => (confirmRemoveName = null)}
+              >
+                {#snippet children(pending)}
+                  <input type="hidden" name="name" value={domain.name} />
+                  <button type="submit" class="text-sm font-semibold text-red-600 hover:text-red-800" disabled={pending}>
+                    {pending ? 'Removing…' : 'Confirm'}
+                  </button>
+                  <button
+                    type="button"
+                    class="text-ab-gray hover:text-ab-dark-blue text-sm"
+                    disabled={pending}
+                    onclick={() => (confirmRemoveName = null)}
+                  >
+                    Cancel
+                  </button>
+                {/snippet}
+              </PendingForm>
             {:else}
-              <button type="button" class="text-sm text-red-600 hover:text-red-800" onclick={() => (confirmRemoveName = domain.name)}>
-                Remove
+              <button
+                type="button"
+                class="text-sm text-red-600 hover:text-red-800"
+                disabled={removals.pending(domain.name)}
+                onclick={() => (confirmRemoveName = domain.name)}
+              >
+                {removals.pending(domain.name) ? 'Removing…' : 'Remove'}
               </button>
             {/if}
           {/if}

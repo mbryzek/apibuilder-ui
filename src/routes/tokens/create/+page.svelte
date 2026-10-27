@@ -105,7 +105,7 @@
             />
           </div>
           <button type="submit" class="btn-primary" disabled={pending}>
-            {pending ? 'Creating...' : 'Create Token'}
+            {pending ? 'Creating…' : 'Create Token'}
           </button>
         {/snippet}
       </PendingForm>
