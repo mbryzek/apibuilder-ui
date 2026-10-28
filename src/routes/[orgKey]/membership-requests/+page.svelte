@@ -1,6 +1,6 @@
 <script lang="ts">
   import PendingForm from '#lib/components/PendingForm.svelte';
-  import { Submission } from 'ui/submission.svelte.ts';
+  import { Submission } from 'ui/submission.ts';
   import type { Organization, MembershipRequest } from '#generated/com-bryzek-apibuilder.ts';
   import type { ApiErrorItem } from '#lib/api/error-handler.ts';
   import type { LoadError } from '#lib/api/load-error.ts';

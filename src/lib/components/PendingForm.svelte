@@ -2,12 +2,12 @@
   import { enhance } from '$app/forms';
   import type { Snippet } from 'svelte';
   import type { HTMLFormAttributes } from 'svelte/elements';
-  import { Submission, type SubmissionOptions } from 'ui/submission.svelte.ts';
+  import { Submission, type SubmissionOptions } from 'ui/submission.ts';
 
   /**
    * A POST form whose request shows at once: the snippet receives whether this form's request is on
    * its way, from the click until the server's answer has been applied, so the clicked button names
-   * its verb and is disabled. The flag is ui's `Submission` (`ui/submission.svelte.ts`).
+   * its verb and is disabled. The flag is ui's `Submission` (`ui/submission.ts`).
    *
    * Each form keeps its own `Submission` unless it is handed one. Forms that answer the same thing
    * (Accept and Decline on one request) share one, keyed by the item and named by `act`: the snippet's
