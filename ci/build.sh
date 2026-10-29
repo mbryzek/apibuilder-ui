@@ -19,12 +19,8 @@
 # green nothing measured. One exit status, no exceptions.
 #
 # This repo's build needs nothing from the machine beyond disk — no Docker, no
-# registry credential, no session database — so there is no `# ci-needs:` line.
-# `dev ci preflight` reads that directive out of this file at the sha being
-# built, so adding a dependency here means adding it there in the same commit.
-# No `heap:` either: an npm build fits in the least any runner in the fleet
-# hands out, and every gigabyte declared narrows the set of machines that can
-# build this repo.
+# registry credential, no session database. Nothing here declares what the build
+# needs: every runner is provisioned to build every repository (ISS-32381).
 #
 # TEST HEALTH'S CONTRACT (design DES-18577, "Every repository with CI"). The two lines below are
 # its declarations; `scripts/ci-test.mjs`, which `npm run test:unit` runs, is the rest — see the

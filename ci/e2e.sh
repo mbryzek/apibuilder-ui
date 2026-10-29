@@ -16,20 +16,6 @@
 # `X-Bypass-Rate-Limit` header all gate on Play's runtime mode and a distribution is always
 # `Mode.Prod`. ISS-2192 made the mode a startup parameter and `dev e2e run` stands the resulting
 # container up; this suite also creates its own users, which is what README.md meant by "a platform API it is allowed to create users in" — a throwaway session database per build is exactly that.
-#
-# `# ci-needs:` IS READ BY THE PREFLIGHT at the sha being built, so a dependency added here has to
-# be added there in the same commit. This build needs all three: `docker` for the backend
-# container, `registry` for the DigitalOcean credential that pulls its image, and `database` for
-# the session database that backs it — none of which `ci/build.sh` beside it needs.
-#
-# `heap:4G` IS MEMORY PER SLOT, NOT AN SBT HEAP. There is no JVM in this repo's own build; the
-# number is the scheduler's admission test (Agent::Heap), and what it is admitting is the four
-# processes this build runs at once — the emulated platform JVM, Chromium, vite and Postgres. It
-# is `Agent::Heap::MIN_GB`, the least any runner in this fleet hands a build, so it excludes no
-# machine; what it buys is the difference between "measured, and it fits anywhere" and an
-# omission, which is indistinguishable from nobody having looked.
-#
-# ci-needs: docker, registry, database, heap:4G
 set -euo pipefail
 
 # `--frontend apibuilder` names the TENANT ID this repo serves (a key of platform's
