@@ -97,6 +97,11 @@ export enum TimeZone {
   Utc = 'utc'
 }
 
+export enum UiTheme {
+  Light = 'light',
+  Dark = 'dark'
+}
+
 export enum UserRole {
   Admin = 'admin',
   User = 'user',
@@ -295,6 +300,8 @@ export interface TenantSession {
   enabled_features: EnabledFeature[];
   /** True when an admin set this user's password and required them to choose their own. Clients gate the session on this until the user sets a new password - regardless of how the session was obtained (password, login link, sms code). Never true for an impersonated session. */
   password_change_required: boolean;
+  /** The color theme the session user sees, on the session so a client paints its first frame in it without a second request. A client reads an absent theme as light. */
+  theme?: UiTheme;
 }
 
 export interface TenantSummary {
@@ -309,6 +316,17 @@ export interface User {
   status: UserStatus;
   role: UserRole;
   rallyd?: RallydRating[];
+}
+
+/**
+ * A user an admin of tenant idempotent adds to idempotent or to a child tenant of idempotent, from the console's Users page. It is active from the start and has no password: the user signs in with the email sign-in link.
+ */
+export interface UserCreateForm {
+  tenant_id: string;
+  /** Full name */
+  name: string;
+  email: string;
+  role: UserRole;
 }
 
 /**
@@ -521,6 +539,12 @@ export interface CreateTenantSessionLoginAndPhoneAndVerificationsOptions {
 }
 
 export interface DeleteTenantSessionOptions {
+  headers?: Record<string, string>;
+  signal?: AbortSignal;
+}
+
+export interface CreateUserOptions {
+  body: UserCreateForm;
   headers?: Record<string, string>;
   signal?: AbortSignal;
 }
@@ -931,6 +955,35 @@ export class ApiClient {
 
     if (response.status === 401) {
       throw new UnauthorizedErrorResponse(response);
+    }
+
+    throw new ApiException(response, `Request failed with status ${response.status}`);
+  }
+
+  async createUser(params: CreateUserOptions): Promise<User> {
+    const url = `${this.baseUrl}/users`;
+
+    const response = await this.request(
+      url,
+      {
+        method: 'POST',
+        body: JSON.stringify(params.body)
+      },
+      'application/json',
+      params.headers || {},
+      params.signal
+    );
+
+    if (response.status === 201) {
+      return await Util.mustParse<User>(response, 'User');
+    }
+
+    if (response.status === 401) {
+      throw new UnauthorizedErrorResponse(response);
+    }
+
+    if (response.status === 422) {
+      throw new ValidationErrorsResponse(response);
     }
 
     throw new ApiException(response, `Request failed with status ${response.status}`);
