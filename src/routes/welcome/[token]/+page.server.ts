@@ -3,7 +3,7 @@ import { fail } from '@sveltejs/kit';
 import { platformClient, getSessionHeaders } from '#lib/api/clients.ts';
 import { handleApiCall, isApiError } from '#lib/api/error-handler.ts';
 import { completeSession } from '#lib/server/auth-completion.ts';
-import { requiredSecret } from '#lib/server/form.ts';
+import { requiredPasswordPair } from '#lib/server/form.ts';
 import type { SessionState, UserActivation } from '#generated/com-bryzek-platform.ts';
 import { activationOutcome } from './activationOutcome';
 
@@ -38,15 +38,9 @@ export const load: PageServerLoad = async ({ params, url }) => {
 export const actions: Actions = {
   default: async ({ request, params, cookies }) => {
     const formData = await request.formData();
-    const password = requiredSecret(formData, 'password');
-    const confirmPassword = requiredSecret(formData, 'confirm_password');
-
-    if (!password) {
-      return fail(400, { errors: [{ message: 'Password is required' }] });
-    }
-
-    if (password !== confirmPassword) {
-      return fail(400, { errors: [{ message: 'Passwords do not match' }] });
+    const password = requiredPasswordPair(formData);
+    if (typeof password !== 'string') {
+      return password;
     }
 
     const response = await handleApiCall<SessionState>(() =>
