@@ -16,6 +16,11 @@
  *
  * Hence resolve rather than pattern-match: parse against an opaque base and keep only the parts
  * that cannot name another origin. Anything that fails to parse, or resolves elsewhere, becomes `/`.
+ *
+ * Resolving normalizes the path, and normalizing can MAKE a protocol-relative one: dot segments
+ * collapse, so `/.//evil.com` and `/%2e//evil.com` resolve on this origin to the pathname
+ * `//evil.com`, which names another host the moment it is read back as a location. A resolved
+ * pathname starting with `//` becomes `/` too.
  */
 const BASE = 'http://localhost';
 
@@ -26,7 +31,7 @@ export function safeRedirectPath(path: string | null | undefined): string {
 
   try {
     const resolved = new URL(path, BASE);
-    if (resolved.origin !== BASE) {
+    if (resolved.origin !== BASE || resolved.pathname.startsWith('//')) {
       return '/';
     }
     return resolved.pathname + resolved.search + resolved.hash;
