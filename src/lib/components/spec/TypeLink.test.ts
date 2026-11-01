@@ -12,7 +12,7 @@ const svc = service({
   models: [model('user')],
   imports: [
     service({
-      namespace: 'io.flow.common.v0.models',
+      namespace: 'io.flow.common.v0',
       organization: { key: 'flow' },
       application: { key: 'common' },
       version: '0.1.0'
