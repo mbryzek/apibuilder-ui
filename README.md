@@ -19,7 +19,8 @@ in the CI tooling reads it. Neither is hand-maintained guesswork — `src/node-v
 if the declared range admits a version the dependency tree rejects, or if `.nvmrc` falls outside it
 (ISS-2433).
 
-`.env` points the app at a platform API on `http://localhost:9300`; `.env.production` points the
+A development server talks to a platform API on `http://localhost:9300` (the default in
+`src/lib/config-values.ts`); `.env.production` points the
 built artifact at `https://api.idempotent.io`. Copy `.env.example` if you need to override either.
 
 ## Checks
