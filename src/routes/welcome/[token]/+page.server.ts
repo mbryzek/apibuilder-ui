@@ -1,11 +1,12 @@
 import type { Actions, PageServerLoad } from './$types';
 import { fail } from '@sveltejs/kit';
+import { linkOutcome } from 'ui/emailedLink/outcome.ts';
+import { passwordRefusal } from 'ui/emailedLink/password.ts';
 import { platformClient, getSessionHeaders } from '#lib/api/clients.ts';
 import { handleApiCall, isApiError } from '#lib/api/error-handler.ts';
 import { completeSession } from '#lib/server/auth-completion.ts';
-import { requiredPasswordPair } from '#lib/server/form.ts';
+import { requiredSecret } from '#lib/server/form.ts';
 import type { SessionState, UserActivation } from '#generated/com-bryzek-platform.ts';
-import { activationOutcome } from './activationOutcome';
 
 /**
  * Where the "Set your password" link in the welcome email lands: an invited user choosing their
@@ -22,14 +23,19 @@ import { activationOutcome } from './activationOutcome';
  * THE GET DOES NOT SPEND THE TOKEN. Only `POST /activations/:token/password` consumes the
  * activation, so a link scanner following the URL renders the form and changes nothing. The token
  * stays out of the page payload: the action reads it from `params`.
+ *
+ * Which failure means the link is dead is `ui/emailedLink/outcome.ts`: only a 404, so an outage
+ * never tells somebody holding a live invitation that it is dead.
  */
 export const load: PageServerLoad = async ({ params, url }) => {
   const response = await handleApiCall<UserActivation>(() =>
     platformClient({ headers: getSessionHeaders() }).getUserActivationByToken(params.token)
   );
 
+  const outcome = linkOutcome(response);
+
   return {
-    outcome: activationOutcome(response),
+    outcome: outcome.kind === 'ready' ? { kind: outcome.kind, ...greeting(outcome.data) } : outcome,
     // The same URL, for the retry link on a transient failure, so it works with no JavaScript.
     retryUrl: url.pathname
   };
@@ -38,9 +44,10 @@ export const load: PageServerLoad = async ({ params, url }) => {
 export const actions: Actions = {
   default: async ({ request, params, cookies }) => {
     const formData = await request.formData();
-    const password = requiredPasswordPair(formData);
-    if (typeof password !== 'string') {
-      return password;
+    const password = requiredSecret(formData, 'password') ?? '';
+    const refusal = passwordRefusal(password, { confirmation: requiredSecret(formData, 'confirm_password') ?? '' });
+    if (refusal) {
+      return fail(400, { errors: [refusal] });
     }
 
     const response = await handleApiCall<SessionState>(() =>
@@ -60,3 +67,16 @@ export const actions: Actions = {
     return completeSession(cookies, response, '/', 'Welcome to API Builder');
   }
 };
+
+/**
+ * Who the page greets: only the name and address, so the rest of the activation stays out of the
+ * page payload. Both are optional on the wire, and each is omitted rather than set to `undefined`
+ * because `exactOptionalPropertyTypes` distinguishes them.
+ */
+function greeting(activation: UserActivation): { name?: string; email?: string } {
+  const { name, email } = activation;
+  return {
+    ...(name === undefined ? {} : { name: name }),
+    ...(email === undefined ? {} : { email: email.address })
+  };
+}

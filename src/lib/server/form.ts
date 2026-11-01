@@ -19,11 +19,9 @@
  * action's own — "Email and password are required", "Domain name is required", "Invalid request"
  * on a hidden id the person filling in the form never sees — and flattening those into one
  * message would lose more than the duplication is worth. Each caller keeps its own `fail(...)`.
- * The one exception is `requiredPasswordPair`: setting a new password with a confirmation field is
- * one concept with one wording wherever it appears, and two copies of it on the auth path drift.
+ * Choosing a new password is the exception, and it is not here: its rule and wording are
+ * `passwordRefusal` in `ui/emailedLink/password.ts`, shared by every app.
  */
-
-import { fail, type ActionFailure } from '@sveltejs/kit';
 
 /**
  * The submitted value, trimmed, or `null` when the field is absent, not a string, or blank.
@@ -73,32 +71,6 @@ export function requiredEnum<T extends string>(formData: FormData, name: string,
 export function requiredSecret(formData: FormData, name: string): string | null {
   const value = formData.get(name);
   return typeof value === 'string' && value ? value : null;
-}
-
-/** The refusal `requiredPasswordPair` answers with, in the body shape every action here uses. */
-export type PasswordPairFailure = ActionFailure<{ errors: { message: string }[] }>;
-
-/**
- * A new password and its confirmation, read from `password` and `confirm_password`: the password
- * when both were submitted and match, otherwise the 400 the action returns as it stands.
- *
- * Both fields are read with `requiredSecret`, so neither is trimmed (see there). Every form that
- * sets a password with a confirmation field calls this, so a rule added to one (a minimum length,
- * a changed message) reaches all of them.
- */
-export function requiredPasswordPair(formData: FormData): string | PasswordPairFailure {
-  const password = requiredSecret(formData, 'password');
-  const confirmPassword = requiredSecret(formData, 'confirm_password');
-
-  if (!password) {
-    return fail(400, { errors: [{ message: 'Password is required' }] });
-  }
-
-  if (password !== confirmPassword) {
-    return fail(400, { errors: [{ message: 'Passwords do not match' }] });
-  }
-
-  return password;
 }
 
 /** The trimmed text of a field, or `''` for one that is absent or is a file rather than text. */

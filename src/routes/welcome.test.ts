@@ -10,33 +10,98 @@ import { caughtAsync } from '#lib/test-support/throws.ts';
  */
 
 const client = {
+  getUserActivationByToken: vi.fn(),
   createUserActivationPasswordByToken: vi.fn()
 };
 
 vi.mock('#lib/api/clients.ts', async (importOriginal) => mockApiClients(client, importOriginal));
 
-const { actions } = await import('./welcome/[token]/+page.server');
+const { actions, load } = await import('./welcome/[token]/+page.server');
 
 const cookies = { get: () => undefined, set: vi.fn(), delete: () => {} };
 
 function submit(form: Record<string, string>) {
-  return invokeAction<{ status?: number; data?: { errors?: { message: string }[]; linkInvalid?: boolean } }>(actions['default'], {
-    form,
-    params: { token: 'tok-1' },
-    cookies
-  });
+  return invokeAction<{ status?: number; data?: { errors?: { field?: string; message: string }[]; linkInvalid?: boolean } }>(
+    actions['default'],
+    {
+      form,
+      params: { token: 'tok-1' },
+      cookies
+    }
+  );
 }
 
 beforeEach(() => {
   vi.clearAllMocks();
 });
 
+function visit(token: string) {
+  return (load as (event: unknown) => Promise<unknown>)({ params: { token }, url: new URL(`https://app.apibuilder.io/welcome/${token}`) });
+}
+
+describe('the welcome page', () => {
+  it('greets the invitee by name and address, and carries nothing else of the activation', async () => {
+    client.getUserActivationByToken.mockResolvedValue({
+      user: { id: 'usr-1' },
+      expires_at: '2026-10-01T00:00:00Z',
+      name: 'Casey',
+      email: { id: 'eml-1', address: 'casey@example.com' }
+    });
+
+    expect(await visit('tok-1')).toEqual({
+      outcome: { kind: 'ready', name: 'Casey', email: 'casey@example.com' },
+      retryUrl: '/welcome/tok-1'
+    });
+    expect(client.getUserActivationByToken).toHaveBeenCalledWith('tok-1');
+  });
+
+  it('greets nobody when the person record carries neither field', async () => {
+    client.getUserActivationByToken.mockResolvedValue({ user: { id: 'usr-1' }, expires_at: '2026-10-01T00:00:00Z' });
+
+    expect(await visit('tok-1')).toMatchObject({ outcome: { kind: 'ready' } });
+  });
+
+  it('reports a token the platform does not hold as a dead link', async () => {
+    client.getUserActivationByToken.mockRejectedValue(Object.assign(new Error('Not Found'), { status: 404, response: { status: 404 } }));
+
+    expect(await visit('probe-no-such-token')).toMatchObject({ outcome: { kind: 'invalid' } });
+  });
+
+  it.each([500, 503])('does not call a %i a dead link', async (status) => {
+    client.getUserActivationByToken.mockRejectedValue(Object.assign(new Error('boom'), { status, response: { status } }));
+
+    expect(await visit('tok-1')).toMatchObject({ outcome: { kind: 'unavailable' } });
+  });
+
+  it('does not call an outage a dead link', async () => {
+    client.getUserActivationByToken.mockRejectedValue(new Error('fetch failed'));
+
+    expect(await visit('tok-1')).toMatchObject({ outcome: { kind: 'unavailable' } });
+  });
+});
+
 describe('the welcome action', () => {
+  it('refuses an empty password without spending the token', async () => {
+    const result = await submit({ password: '', confirm_password: '' });
+
+    expect(result.status).toBe(400);
+    expect(result.data?.errors).toEqual([{ field: 'password', message: 'Choose a password' }]);
+    expect(client.createUserActivationPasswordByToken).not.toHaveBeenCalled();
+  });
+
+  it.each(['b', 'a ', ''])('refuses a confirmation of %j that differs, without spending the token', async (confirm_password) => {
+    const result = await submit({ password: 'a', confirm_password });
+
+    expect(result.status).toBe(400);
+    expect(result.data?.errors).toEqual([{ field: 'password', message: 'Passwords do not match' }]);
+    expect(client.createUserActivationPasswordByToken).not.toHaveBeenCalled();
+  });
+
   it('refuses mismatched passwords without spending the token', async () => {
     const result = await submit({ password: 'a', confirm_password: 'b' });
 
     expect(result.status).toBe(400);
-    expect(result.data?.errors).toEqual([{ message: 'Passwords do not match' }]);
+    expect(result.data?.errors).toEqual([{ field: 'password', message: 'Passwords do not match' }]);
     expect(client.createUserActivationPasswordByToken).not.toHaveBeenCalled();
   });
 

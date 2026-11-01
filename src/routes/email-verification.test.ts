@@ -20,7 +20,12 @@ vi.mock('#lib/api/clients.ts', async (importOriginal) => mockApiClients(client, 
 const { load } = await import('./email/verifications/[token]/+page.server');
 
 function visit(token: string) {
-  return (load as (event: unknown) => Promise<unknown>)({ params: { token }, locals: {}, cookies: {} });
+  return (load as (event: unknown) => Promise<unknown>)({
+    params: { token },
+    locals: {},
+    cookies: {},
+    url: new URL(`https://app.apibuilder.io/email/verifications/${token}`)
+  });
 }
 
 beforeEach(() => {
@@ -30,7 +35,7 @@ beforeEach(() => {
 
 describe('the emailed verification link', () => {
   it('renders the success at the link rather than redirecting', async () => {
-    expect(await visit('good-token')).toEqual({ verified: true });
+    expect(await visit('good-token')).toEqual({ outcome: 'verified', retryUrl: '/email/verifications/good-token' });
     expect(client.updateEmailVerificationByToken).toHaveBeenCalledWith('good-token');
   });
 
@@ -39,18 +44,18 @@ describe('the emailed verification link', () => {
       Object.assign(new Error('Not Found'), { status: 404, response: { status: 404 } })
     );
 
-    expect(await visit('probe-no-such-token')).toEqual({
-      verified: false,
-      message: 'That verification link is no longer valid. Please request a new one.'
-    });
+    expect(await visit('probe-no-such-token')).toMatchObject({ outcome: 'invalid' });
   });
 
-  it('does not call an outage a dead link', async () => {
+  it('does not call an outage a dead link, and offers the same link again', async () => {
     client.updateEmailVerificationByToken.mockRejectedValue(new Error('fetch failed'));
 
-    const result = (await visit('good-token')) as { verified: boolean; message: string };
+    expect(await visit('good-token')).toEqual({ outcome: 'unavailable', retryUrl: '/email/verifications/good-token' });
+  });
 
-    expect(result.verified).toBe(false);
-    expect(result.message).not.toMatch(/no longer valid/);
+  it.each([500, 502, 503])('does not call a %i a dead link', async (status) => {
+    client.updateEmailVerificationByToken.mockRejectedValue(Object.assign(new Error('boom'), { status, response: { status } }));
+
+    expect(await visit('good-token')).toMatchObject({ outcome: 'unavailable' });
   });
 });
