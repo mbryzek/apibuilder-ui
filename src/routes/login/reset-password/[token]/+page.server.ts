@@ -1,9 +1,11 @@
 import type { PageServerLoad, Actions } from './$types';
+import { fail } from '@sveltejs/kit';
+import { passwordRefusal } from 'ui/emailedLink/password.ts';
 import { platformClient } from '#lib/api/clients.ts';
 import { handleApiCall } from '#lib/api/error-handler.ts';
 import { config } from '#lib/config.ts';
 import { completeSession } from '#lib/server/auth-completion.ts';
-import { requiredPasswordPair } from '#lib/server/form.ts';
+import { requiredSecret } from '#lib/server/form.ts';
 import type { SessionState } from '#generated/com-bryzek-platform.ts';
 
 // The token stays out of the page payload: the action reads it from `params`, and nothing on the
@@ -16,9 +18,10 @@ export const load: PageServerLoad = async () => {
 export const actions: Actions = {
   default: async ({ request, params, cookies }) => {
     const formData = await request.formData();
-    const password = requiredPasswordPair(formData);
-    if (typeof password !== 'string') {
-      return password;
+    const password = requiredSecret(formData, 'password') ?? '';
+    const refusal = passwordRefusal(password, { confirmation: requiredSecret(formData, 'confirm_password') ?? '' });
+    if (refusal) {
+      return fail(400, { errors: [refusal] });
     }
 
     const response = await handleApiCall<SessionState>(() =>

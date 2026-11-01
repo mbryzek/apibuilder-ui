@@ -1,7 +1,7 @@
 import type { PageServerLoad } from './$types';
+import { verificationOutcome } from 'ui/emailedLink/outcome.ts';
 import { platformClient, getSessionHeaders } from '#lib/api/clients.ts';
-import { handleApiCall, isApiSuccess } from '#lib/api/error-handler.ts';
-import { messageFor } from '#lib/api/api-message.ts';
+import { handleApiCall } from '#lib/api/error-handler.ts';
 
 /**
  * Where the "Verify your email" link the platform mails lands.
@@ -21,24 +21,14 @@ import { messageFor } from '#lib/api/api-message.ts';
  * The token in the path is the whole proof, so this route is public and the call carries whatever
  * session happens to exist rather than requiring one.
  *
- * A link that did not verify anything has two quite different explanations, and only one of them
- * means the link is dead: `messageFor` says "we could not reach the server" for an outage, and
- * only a 404 — an answer from the platform saying it does not hold this token — means the token
- * itself is the problem. Telling somebody holding a good link that it is dead makes them stop
- * clicking the one route they have.
+ * Which failure means the link is dead is `ui/emailedLink/outcome.ts`: only a 404.
  */
-const INVALID_TOKEN = 'That verification link is no longer valid. Please request a new one.';
-
-type VerificationOutcome = { verified: true } | { verified: false; message: string };
-
-export const load: PageServerLoad = async ({ params, locals }): Promise<VerificationOutcome> => {
+export const load: PageServerLoad = async ({ params, locals, url }) => {
   const headers = getSessionHeaders(locals.session?.id);
 
-  const response = await handleApiCall<void>(() => platformClient({ headers }).updateEmailVerificationByToken(params.token));
-
-  if (isApiSuccess(response)) {
-    return { verified: true };
-  }
-
-  return { verified: false, message: response.status === 404 ? INVALID_TOKEN : messageFor(response) };
+  return {
+    outcome: verificationOutcome(await handleApiCall<void>(() => platformClient({ headers }).updateEmailVerificationByToken(params.token))),
+    // The same URL, for the retry link on a transient failure, so it works with no JavaScript.
+    retryUrl: url.pathname
+  };
 };

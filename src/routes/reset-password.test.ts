@@ -20,7 +20,7 @@ const { actions } = await import('./login/reset-password/[token]/+page.server');
 const cookies = { get: () => undefined, set: vi.fn(), delete: () => {} };
 
 function submit(form: Record<string, string>) {
-  return invokeAction<{ status?: number; data?: { errors?: { message: string }[] } }>(actions['default'], {
+  return invokeAction<{ status?: number; data?: { errors?: { field?: string; message: string }[] } }>(actions['default'], {
     form,
     params: { token: 'tok-1' },
     cookies
@@ -36,7 +36,7 @@ describe('the reset-password action', () => {
     const result = await submit({ password: '', confirm_password: '' });
 
     expect(result.status).toBe(400);
-    expect(result.data?.errors).toEqual([{ message: 'Password is required' }]);
+    expect(result.data?.errors).toEqual([{ field: 'password', message: 'Choose a password' }]);
     expect(client.createTenantSessionPasswordAndChanges).not.toHaveBeenCalled();
   });
 
@@ -44,7 +44,7 @@ describe('the reset-password action', () => {
     const result = await submit({ password: 'a', confirm_password: 'b' });
 
     expect(result.status).toBe(400);
-    expect(result.data?.errors).toEqual([{ message: 'Passwords do not match' }]);
+    expect(result.data?.errors).toEqual([{ field: 'password', message: 'Passwords do not match' }]);
     expect(client.createTenantSessionPasswordAndChanges).not.toHaveBeenCalled();
   });
 
