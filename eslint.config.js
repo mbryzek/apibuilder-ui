@@ -28,7 +28,8 @@ export default [
       parserOptions: {
         ecmaVersion: 'latest',
         sourceType: 'module',
-        project: './tsconfig.json'
+        project: './tsconfig.json',
+        extraFileExtensions: ['.svelte']
       },
       globals: {
         ...globals.browser,
@@ -70,7 +71,8 @@ export default [
       parserOptions: {
         ecmaVersion: 'latest',
         sourceType: 'module',
-        project: './tsconfig.playwright.json'
+        project: './tsconfig.playwright.json',
+        extraFileExtensions: ['.svelte']
       },
       globals: {
         ...globals.browser,
@@ -96,7 +98,8 @@ export default [
       parserOptions: {
         ecmaVersion: 'latest',
         sourceType: 'module',
-        project: './tsconfig.json'
+        project: './tsconfig.json',
+        extraFileExtensions: ['.svelte']
       },
       globals: {
         ...globals.browser,
