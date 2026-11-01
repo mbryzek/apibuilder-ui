@@ -86,6 +86,24 @@ function importHref(imp: Service, name: string): string {
   return `/${imp.organization.key}/${imp.application.key}/${imp.version}#${encodeURIComponent(name)}`;
 }
 
+const KIND_SEGMENTS = new Set(['enums', 'interfaces', 'models', 'unions']);
+
+/**
+ * Split a qualified type into the namespace of the service declaring it and its short name.
+ *
+ * apibuilder qualifies a type as `<service namespace>.<kind>.<name>` — `io.flow.common.v0.models.price`
+ * — where the service namespace (`io.flow.common.v0`) is what an import carries, so the kind segment
+ * has to come off before the namespace can match one. Anything without that shape is not qualified.
+ */
+function parseQualifiedName(inner: string): { namespace: string; name: string } | null {
+  const parts = inner.split('.');
+  if (parts.length < 3) return null;
+  const name = parts[parts.length - 1]!;
+  const kind = parts[parts.length - 2]!;
+  if (!KIND_SEGMENTS.has(kind)) return null;
+  return { namespace: parts.slice(0, -2).join('.'), name };
+}
+
 /** Where a bare type name — no containers left on it — is displayed and links to. */
 function resolveBareType(inner: string, service: Service): Target {
   const nowhere: Target = { anchor: null, href: null, innerType: inner };
@@ -94,20 +112,20 @@ function resolveBareType(inner: string, service: Service): Target {
     return nowhere;
   }
 
-  // A namespace-qualified type names its import directly.
-  if (inner.includes('.')) {
-    const parts = inner.split('.');
-    const shortName = parts[parts.length - 1]!;
-    const namespace = parts.slice(0, -1).join('.');
-
-    const matchingImport = service.imports.find((imp) => imp.namespace === namespace);
+  // A namespace-qualified type names its service directly.
+  const qualified = parseQualifiedName(inner);
+  if (qualified) {
+    if (qualified.namespace === service.namespace && findLocalType(qualified.name, service)) {
+      return { anchor: qualified.name, href: null, innerType: qualified.name };
+    }
+    const matchingImport = service.imports.find((imp) => imp.namespace === qualified.namespace);
     if (!matchingImport) {
       // No import to link to, so the qualified string is all there is to show.
       return nowhere;
     }
     // Display the short name — every other resolution path displays a bare name, and the
     // namespace is already carried by the href.
-    return { anchor: null, href: importHref(matchingImport, shortName), innerType: shortName };
+    return { anchor: null, href: importHref(matchingImport, qualified.name), innerType: qualified.name };
   }
 
   if (findLocalType(inner, service)) {
