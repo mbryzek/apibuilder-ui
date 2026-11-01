@@ -1,3 +1,7 @@
+<script lang="ts">
+  import SectionHeading from '#lib/components/doc/SectionHeading.svelte';
+</script>
+
 <svelte:head>
   <title>History - API Builder</title>
 </svelte:head>
@@ -12,10 +16,7 @@
 
   <!-- Origin -->
   <div class="card mb-6">
-    <h2 class="text-ab-blue mb-3 flex items-center gap-2 text-lg font-semibold">
-      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs text-white">1</span>
-      The Problem
-    </h2>
+    <SectionHeading badge="1">The Problem</SectionHeading>
     <p class="text-ab-dark-blue mb-3">
       At Gilt, developers were constantly building new APIs and spending significant time writing client libraries and learning the
       intricacies of services owned by other teams. The integration cost was growing faster than the team.
@@ -28,10 +29,7 @@
 
   <!-- Evaluation -->
   <div class="card mb-6">
-    <h2 class="text-ab-blue mb-3 flex items-center gap-2 text-lg font-semibold">
-      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs text-white">2</span>
-      What We Evaluated
-    </h2>
+    <SectionHeading badge="2">What We Evaluated</SectionHeading>
     <p class="text-ab-dark-blue mb-3">
       The team explored protobufs, thrift, avro, swagger, apiary, RAML, and others — hand-writing interfaces for systems actively being
       built. None fully met the requirements.
@@ -40,10 +38,7 @@
 
   <!-- Requirements -->
   <div class="card mb-6">
-    <h2 class="text-ab-blue mb-3 flex items-center gap-2 text-lg font-semibold">
-      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs text-white">3</span>
-      Key Requirements
-    </h2>
+    <SectionHeading badge="3">Key Requirements</SectionHeading>
     <ul class="text-ab-dark-blue ml-2 space-y-4">
       <li>
         <strong>Clients developers love</strong> — Generated clients so good that developers stop writing their own. Zero runtime dependencies.

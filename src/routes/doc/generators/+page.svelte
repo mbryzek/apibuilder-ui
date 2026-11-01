@@ -1,3 +1,8 @@
+<script lang="ts">
+  import CodeBlock from '#lib/components/doc/CodeBlock.svelte';
+  import SectionHeading from '#lib/components/doc/SectionHeading.svelte';
+</script>
+
 <svelte:head>
   <title>Code Generators - API Builder</title>
 </svelte:head>
@@ -30,10 +35,7 @@
 
   <!-- TypeScript -->
   <div class="card mb-6">
-    <h3 class="text-ab-blue mb-3 flex items-center gap-2 text-lg font-semibold">
-      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-white">T</span>
-      TypeScript
-    </h3>
+    <SectionHeading badge="T" level={3}>TypeScript</SectionHeading>
     <div class="overflow-x-auto">
       <table class="text-ab-dark-blue w-full text-sm">
         <thead>
@@ -56,10 +58,7 @@
 
   <!-- Scala -->
   <div class="card mb-6">
-    <h3 class="text-ab-blue mb-3 flex items-center gap-2 text-lg font-semibold">
-      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-white">S</span>
-      Scala (Play Framework)
-    </h3>
+    <SectionHeading badge="S" level={3}>Scala (Play Framework)</SectionHeading>
     <div class="overflow-x-auto">
       <table class="text-ab-dark-blue w-full text-sm">
         <thead>
@@ -107,10 +106,7 @@
 
   <!-- Elm -->
   <div class="card mb-6">
-    <h3 class="text-ab-blue mb-3 flex items-center gap-2 text-lg font-semibold">
-      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-white">E</span>
-      Elm
-    </h3>
+    <SectionHeading badge="E" level={3}>Elm</SectionHeading>
     <div class="overflow-x-auto">
       <table class="text-ab-dark-blue w-full text-sm">
         <thead>
@@ -133,10 +129,7 @@
 
   <!-- PostgreSQL -->
   <div class="card mb-6">
-    <h3 class="text-ab-blue mb-3 flex items-center gap-2 text-lg font-semibold">
-      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-white">&#9881;</span>
-      PostgreSQL
-    </h3>
+    <SectionHeading badge="&#9881;" level={3}>PostgreSQL</SectionHeading>
     <div class="overflow-x-auto">
       <table class="text-ab-dark-blue w-full text-sm">
         <thead>
@@ -169,8 +162,8 @@
       Reference generators by their key in your <code class="rounded bg-gray-100 px-1.5 py-0.5">.api/config</code> file, mapping each to the output
       directory where generated files should be written:
     </p>
-    <pre class="overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm"><code
-        >{@html `myorg:
+    <CodeBlock
+      code={`myorg:
   - generators:
       typescript: ./src/generated
     applications:
@@ -183,8 +176,8 @@
       bryzek_play_controller: generated/app/apibuilder
       bryzek_play_routes: conf
     applications:
-      my-api:`}</code
-      ></pre>
+      my-api:`}
+    />
   </div>
 
   <!-- Scala-specific docs -->

@@ -1,3 +1,7 @@
+<script lang="ts">
+  import SectionHeading from '#lib/components/doc/SectionHeading.svelte';
+</script>
+
 <svelte:head>
   <title>Types - API Builder</title>
 </svelte:head>
@@ -12,10 +16,7 @@
 
   <!-- Text & Identity -->
   <div class="card mb-6">
-    <h2 class="text-ab-blue mb-4 flex items-center gap-2 text-lg font-semibold">
-      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs text-white">A</span>
-      Text &amp; Identity
-    </h2>
+    <SectionHeading badge="A">Text &amp; Identity</SectionHeading>
     <div class="ml-2 space-y-4">
       <div id="string">
         <h3 class="text-ab-dark-blue font-semibold">string</h3>
@@ -32,10 +33,7 @@
 
   <!-- Numbers -->
   <div class="card mb-6">
-    <h2 class="text-ab-blue mb-4 flex items-center gap-2 text-lg font-semibold">
-      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs text-white">#</span>
-      Numbers
-    </h2>
+    <SectionHeading badge="#">Numbers</SectionHeading>
     <div class="ml-2 space-y-4">
       <div id="integer">
         <h3 class="text-ab-dark-blue font-semibold">integer</h3>
@@ -64,10 +62,7 @@
 
   <!-- Date & Time -->
   <div class="card mb-6">
-    <h2 class="text-ab-blue mb-4 flex items-center gap-2 text-lg font-semibold">
-      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs text-white">⏱</span>
-      Date &amp; Time
-    </h2>
+    <SectionHeading badge="⏱">Date &amp; Time</SectionHeading>
     <div class="ml-2 space-y-4">
       <div id="date-iso8601">
         <h3 class="text-ab-dark-blue font-semibold">date-iso8601</h3>
@@ -93,10 +88,7 @@
 
   <!-- Boolean -->
   <div class="card mb-6">
-    <h2 class="text-ab-blue mb-4 flex items-center gap-2 text-lg font-semibold">
-      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs text-white">✓</span>
-      Boolean
-    </h2>
+    <SectionHeading badge="✓">Boolean</SectionHeading>
     <div class="ml-2">
       <div id="boolean">
         <h3 class="text-ab-dark-blue font-semibold">boolean</h3>
@@ -108,34 +100,28 @@
 
   <!-- JSON & Dynamic -->
   <div class="card mb-6">
-    <h2 class="text-ab-blue mb-4 flex items-center gap-2 text-lg font-semibold">
-      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs text-white">&#123;&#125;</span>
-      JSON &amp; Dynamic
-    </h2>
+    <SectionHeading badge="&#123;&#125;">JSON &amp; Dynamic</SectionHeading>
     <div class="ml-2 space-y-4">
       <div id="json-value">
         <h3 class="text-ab-dark-blue font-semibold">json-value</h3>
         <p class="text-ab-dark-blue mb-1 text-sm">
           Any valid JSON value. Maps to <em>JsValue</em> in Play/Scala, parsed <em>Object</em> in Ruby.
         </p>
-        <code class="text-ab-gray text-sm">{@html `{}, [], "text", 10, null, true`}</code>
+        <code class="text-ab-gray text-sm">{'{}, [], "text", 10, null, true'}</code>
       </div>
       <div id="object">
         <h3 class="text-ab-dark-blue font-semibold">object</h3>
         <p class="text-ab-dark-blue mb-1 text-sm">
           JSON object specifically. Maps to <em>JsObject</em> in Play/Scala, <em>Hash</em> in Ruby.
         </p>
-        <code class="text-ab-gray text-sm">{@html `{}`}</code>
+        <code class="text-ab-gray text-sm">{'{}'}</code>
       </div>
     </div>
   </div>
 
   <!-- Binary -->
   <div class="card mb-6">
-    <h2 class="text-ab-blue mb-4 flex items-center gap-2 text-lg font-semibold">
-      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs text-white">⬡</span>
-      Binary
-    </h2>
+    <SectionHeading badge="⬡">Binary</SectionHeading>
     <div class="ml-2">
       <div id="bytes">
         <h3 class="text-ab-dark-blue font-semibold">bytes</h3>
@@ -150,10 +136,7 @@
 
   <!-- Special -->
   <div class="card mb-6">
-    <h2 class="text-ab-blue mb-4 flex items-center gap-2 text-lg font-semibold">
-      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs text-white">◈</span>
-      Special
-    </h2>
+    <SectionHeading badge="◈">Special</SectionHeading>
     <div class="ml-2">
       <div id="unit">
         <h3 class="text-ab-dark-blue font-semibold">unit</h3>

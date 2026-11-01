@@ -1,3 +1,7 @@
+<script lang="ts">
+  import SectionHeading from '#lib/components/doc/SectionHeading.svelte';
+</script>
+
 <svelte:head>
   <title>Attributes - API Builder</title>
 </svelte:head>
@@ -12,10 +16,7 @@
 
   <!-- How They Work -->
   <div class="mb-10">
-    <h2 class="text-ab-blue mb-4 flex items-center gap-2 text-lg font-bold">
-      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs text-white">⚙</span>
-      How Attributes Work
-    </h2>
+    <SectionHeading badge="⚙">How Attributes Work</SectionHeading>
     <div class="card">
       <ul class="text-ab-dark-blue space-y-4">
         <li>
@@ -34,10 +35,7 @@
 
   <!-- Setting Attributes -->
   <div class="mb-10">
-    <h2 class="text-ab-blue mb-4 flex items-center gap-2 text-lg font-bold">
-      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs text-white">✦</span>
-      Setting Attribute Values
-    </h2>
+    <SectionHeading badge="✦">Setting Attribute Values</SectionHeading>
     <div class="card">
       <p class="text-ab-dark-blue mb-3">To configure attributes for your organization:</p>
       <ol class="text-ab-dark-blue list-inside list-decimal space-y-2">

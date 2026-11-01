@@ -1,3 +1,8 @@
+<script lang="ts">
+  import CodeBlock from '#lib/components/doc/CodeBlock.svelte';
+  import StepBadge from '#lib/components/doc/StepBadge.svelte';
+</script>
+
 <svelte:head>
   <title>api.json format - API Builder</title>
 </svelte:head>
@@ -16,10 +21,10 @@
     <div class="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2 lg:grid-cols-4">
       <div>
         <h3 class="text-ab-blue mb-1 flex items-center gap-1 font-semibold">
-          <span class="bg-ab-blue inline-flex h-5 w-5 items-center justify-center rounded-full text-xs font-bold text-white">&#9670;</span>
+          <StepBadge>&#9670;</StepBadge>
           Core Structure
         </h3>
-        <ul class="ml-6 space-y-0.5">
+        <ul class="ml-8 space-y-0.5">
           <li><a href="#name" class="text-ab-blue hover:text-ab-dark-blue underline">name</a></li>
           <li><a href="#info" class="text-ab-blue hover:text-ab-dark-blue underline">info</a></li>
           <li><a href="#contact" class="text-ab-blue hover:text-ab-dark-blue underline">contact</a></li>
@@ -31,10 +36,10 @@
       </div>
       <div>
         <h3 class="text-ab-blue mb-1 flex items-center gap-1 font-semibold">
-          <span class="bg-ab-blue inline-flex h-5 w-5 items-center justify-center rounded-full text-xs font-bold text-white">T</span>
+          <StepBadge>T</StepBadge>
           Types
         </h3>
-        <ul class="ml-6 space-y-0.5">
+        <ul class="ml-8 space-y-0.5">
           <li><a href="#enum" class="text-ab-blue hover:text-ab-dark-blue underline">Enum</a></li>
           <li><a href="#enumValue" class="text-ab-blue hover:text-ab-dark-blue underline">EnumValue</a></li>
           <li><a href="#model" class="text-ab-blue hover:text-ab-dark-blue underline">Model</a></li>
@@ -46,10 +51,10 @@
       </div>
       <div>
         <h3 class="text-ab-blue mb-1 flex items-center gap-1 font-semibold">
-          <span class="bg-ab-blue inline-flex h-5 w-5 items-center justify-center rounded-full text-xs font-bold text-white">&#9889;</span>
+          <StepBadge>&#9889;</StepBadge>
           API
         </h3>
-        <ul class="ml-6 space-y-0.5">
+        <ul class="ml-8 space-y-0.5">
           <li><a href="#resource" class="text-ab-blue hover:text-ab-dark-blue underline">Resource</a></li>
           <li><a href="#operation" class="text-ab-blue hover:text-ab-dark-blue underline">Operation</a></li>
           <li><a href="#body" class="text-ab-blue hover:text-ab-dark-blue underline">Body</a></li>
@@ -59,10 +64,10 @@
       </div>
       <div>
         <h3 class="text-ab-blue mb-1 flex items-center gap-1 font-semibold">
-          <span class="bg-ab-blue inline-flex h-5 w-5 items-center justify-center rounded-full text-xs font-bold text-white">&#9881;</span>
+          <StepBadge>&#9881;</StepBadge>
           Metadata
         </h3>
-        <ul class="ml-6 space-y-0.5">
+        <ul class="ml-8 space-y-0.5">
           <li><a href="#import" class="text-ab-blue hover:text-ab-dark-blue underline">Import</a></li>
           <li><a href="#auth_scheme" class="text-ab-blue hover:text-ab-dark-blue underline">AuthScheme</a></li>
           <li><a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a></li>
@@ -76,7 +81,7 @@
   <!-- CORE STRUCTURE -->
   <!-- ================================================================== -->
   <h2 class="text-ab-dark-blue mt-12 mb-6 flex items-center gap-2 text-xl font-bold">
-    <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-white">&#9670;</span>
+    <StepBadge>&#9670;</StepBadge>
     Core Structure
   </h2>
 
@@ -90,8 +95,8 @@
       >:
     </p>
 
-    <div class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
-      {@html `<pre><code>{
+    <CodeBlock class="mb-4"
+      >{@html `{
   "name": <em>string</em>,
   "info": <em>JSON Object of <a href="#info" class="text-ab-blue hover:text-ab-dark-blue underline">Info</a> (optional)</em>,
   "namespace": <em>string (optional)</em>,
@@ -106,8 +111,8 @@
   "auth_schemes": <em>JSON Array of <a href="#auth_scheme" class="text-ab-blue hover:text-ab-dark-blue underline">AuthScheme</a> (optional)</em>,
   "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>,
   "annotations": <em>JSON Object of <a href="#annotation" class="text-ab-blue hover:text-ab-dark-blue underline">Annotation</a> (optional)</em>
-}</code></pre>`}
-    </div>
+}`}</CodeBlock
+    >
 
     <p class="text-ab-dark-blue mb-2">where:</p>
     <ul class="text-ab-dark-blue mb-4 list-disc space-y-2 pl-6">
@@ -171,12 +176,12 @@
     <h3 class="text-ab-blue mb-3 text-lg font-semibold">Info declaration</h3>
     <p class="text-ab-dark-blue mb-4">The info node is represented as a JSON object of the form:</p>
 
-    <div class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
-      {@html `<pre><code>{
+    <CodeBlock class="mb-4"
+      >{@html `{
   "contact": <em>JSON Object of <a href="#contact" class="text-ab-blue hover:text-ab-dark-blue underline">Contact</a> (optional)</em>,
   "license": <em>JSON Object of <a href="#license" class="text-ab-blue hover:text-ab-dark-blue underline">License</a> (optional)</em>
-}</code></pre>`}
-    </div>
+}`}</CodeBlock
+    >
 
     <p class="text-ab-dark-blue mb-2">where:</p>
     <ul class="text-ab-dark-blue mb-4 list-disc space-y-2 pl-6">
@@ -196,13 +201,13 @@
     <h3 class="text-ab-blue mb-3 text-lg font-semibold">Contact declaration</h3>
     <p class="text-ab-dark-blue mb-4">The contact node is represented as a JSON object of the form:</p>
 
-    <div class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
-      {@html `<pre><code>{
+    <CodeBlock class="mb-4"
+      >{@html `{
   "name": <em>string (optional)</em>,
   "url": <em>string (optional)</em>,
   "email": <em>string (optional)</em>
-}</code></pre>`}
-    </div>
+}`}</CodeBlock
+    >
 
     <p class="text-ab-dark-blue mb-2">where:</p>
     <ul class="text-ab-dark-blue mb-4 list-disc space-y-2 pl-6">
@@ -217,12 +222,12 @@
     <h3 class="text-ab-blue mb-3 text-lg font-semibold">License declaration</h3>
     <p class="text-ab-dark-blue mb-4">The license node is represented as a JSON object of the form:</p>
 
-    <div class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
-      {@html `<pre><code>{
+    <CodeBlock class="mb-4"
+      >{@html `{
   "name": <em>string</em>,
   "url": <em>string (optional)</em>
-}</code></pre>`}
-    </div>
+}`}</CodeBlock
+    >
 
     <p class="text-ab-dark-blue mb-2">where:</p>
     <ul class="text-ab-dark-blue mb-4 list-disc space-y-2 pl-6">
@@ -235,7 +240,7 @@
   <!-- TYPES -->
   <!-- ================================================================== -->
   <h2 class="text-ab-dark-blue mt-12 mb-6 flex items-center gap-2 text-xl font-bold">
-    <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-white">T</span>
+    <StepBadge>T</StepBadge>
     Types
   </h2>
 
@@ -244,16 +249,16 @@
     <h3 class="text-ab-blue mb-3 text-lg font-semibold">Enum declaration</h3>
     <p class="text-ab-dark-blue mb-4">An enum is represented as a JSON object of the form:</p>
 
-    <div class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
-      {@html `<pre><code>{
+    <CodeBlock class="mb-4"
+      >{@html `{
   "name": {
     "plural": <em>string (optional)</em>,
     "description": <em>string (optional)</em>,
     "values": <em>JSON Array of <a href="#enumValue" class="text-ab-blue hover:text-ab-dark-blue underline">EnumValue</a></em>,
     "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>
   }
-}</code></pre>`}
-    </div>
+}`}</CodeBlock
+    >
 
     <p class="text-ab-dark-blue mb-2">where:</p>
     <ul class="text-ab-dark-blue mb-4 list-disc space-y-2 pl-6">
@@ -283,14 +288,14 @@
     <h3 class="text-ab-blue mb-3 text-lg font-semibold">EnumValue declaration</h3>
     <p class="text-ab-dark-blue mb-4">An EnumValue is represented as a JSON object of the form:</p>
 
-    <div class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
-      {@html `<pre><code>{
+    <CodeBlock class="mb-4"
+      >{@html `{
   "name": <em>string</em>,
   "value": <em>string (optional)</em>,
   "description": <em>string (optional)</em>,
   "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>
-}</code></pre>`}
-    </div>
+}`}</CodeBlock
+    >
 
     <p class="text-ab-dark-blue mb-2">where:</p>
     <ul class="text-ab-dark-blue mb-4 list-disc space-y-2 pl-6">
@@ -312,8 +317,8 @@
     <h3 class="text-ab-blue mb-3 text-lg font-semibold">Model declaration</h3>
     <p class="text-ab-dark-blue mb-4">A model is represented as a JSON object of the form:</p>
 
-    <div class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
-      {@html `<pre><code>{
+    <CodeBlock class="mb-4"
+      >{@html `{
   "name": {
     "description": <em>string (optional)</em>,
     "plural": <em>string (optional)</em>,
@@ -321,8 +326,8 @@
     "fields": <em>JSON Array of <a href="#field" class="text-ab-blue hover:text-ab-dark-blue underline">Field</a></em>,
     "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>
   }
-}</code></pre>`}
-    </div>
+}`}</CodeBlock
+    >
 
     <p class="text-ab-dark-blue mb-2">where:</p>
     <ul class="text-ab-dark-blue mb-4 list-disc space-y-2 pl-6">
@@ -355,8 +360,8 @@
     <h3 class="text-ab-blue mb-3 text-lg font-semibold">Field declaration</h3>
     <p class="text-ab-dark-blue mb-4">A field is represented as a JSON object of the form:</p>
 
-    <div class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
-      {@html `<pre><code>{
+    <CodeBlock class="mb-4"
+      >{@html `{
   "name": <em>string</em>,
   "type": <em>string</em>,
   "description": <em>string (optional)</em>,
@@ -367,8 +372,8 @@
   "maximum": <em>long (optional)</em>,
   "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>,
   "annotations": <em>JSON Array of type string where each value indicates the name of a declared annotation (optional)</em>
-}</code></pre>`}
-    </div>
+}`}</CodeBlock
+    >
 
     <p class="text-ab-dark-blue mb-2">where:</p>
     <ul class="text-ab-dark-blue mb-4 list-disc space-y-2 pl-6">
@@ -423,16 +428,16 @@
     <h3 class="text-ab-blue mb-3 text-lg font-semibold">Interface declaration</h3>
     <p class="text-ab-dark-blue mb-4">An interface is represented as a JSON object of the form:</p>
 
-    <div class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
-      {@html `<pre><code>{
+    <CodeBlock class="mb-4"
+      >{@html `{
   "name": {
     "description": <em>string (optional)</em>,
     "plural": <em>string (optional)</em>,
     "fields": <em>JSON Array of <a href="#field" class="text-ab-blue hover:text-ab-dark-blue underline">Field</a> (optional)</em>,
     "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>
   }
-}</code></pre>`}
-    </div>
+}`}</CodeBlock
+    >
 
     <p class="text-ab-dark-blue mb-2">where:</p>
     <ul class="text-ab-dark-blue mb-4 list-disc space-y-2 pl-6">
@@ -469,8 +474,8 @@
     <h3 class="text-ab-blue mb-3 text-lg font-semibold">Union declaration</h3>
     <p class="text-ab-dark-blue mb-4">A union is represented as a JSON object of the form:</p>
 
-    <div class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
-      {@html `<pre><code>{
+    <CodeBlock class="mb-4"
+      >{@html `{
   "name": {
     "plural": <em>string (optional)</em>,
     "fields": <em>JSON Array of <a href="#field" class="text-ab-blue hover:text-ab-dark-blue underline">Field</a> (optional)</em>,
@@ -480,8 +485,8 @@
     "types": <em>JSON Array of <a href="#unionType" class="text-ab-blue hover:text-ab-dark-blue underline">UnionType</a></em>,
     "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>
   }
-}</code></pre>`}
-    </div>
+}`}</CodeBlock
+    >
 
     <p class="text-ab-dark-blue mb-2">where:</p>
     <ul class="text-ab-dark-blue mb-4 list-disc space-y-2 pl-6">
@@ -529,8 +534,8 @@
       A UnionType is represented as a JSON object of the form. Exactly one of <em>type</em> or <em>literal</em> must be specified:
     </p>
 
-    <div class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
-      {@html `<pre><code>{
+    <CodeBlock class="mb-4"
+      >{@html `{
   "type": <em>string (required if no literal)</em>,
   "literal": <em>string (required if no type)</em>,
   "description": <em>string (optional)</em>,
@@ -538,8 +543,8 @@
   "default": <em>boolean (optional)</em>,
   "discriminator_value": <em>string (optional)</em>,
   "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>
-}</code></pre>`}
-    </div>
+}`}</CodeBlock
+    >
 
     <p class="text-ab-dark-blue mb-2">where:</p>
     <ul class="text-ab-dark-blue mb-4 list-disc space-y-2 pl-6">
@@ -584,8 +589,9 @@
     <p class="text-ab-dark-blue mb-2">
       A union that accepts the literal string <code class="rounded bg-gray-100 px-1">"latest"</code> or an ISO date-time string:
     </p>
-    <div class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
-      {@html `<pre><code>"unions": {
+    <CodeBlock
+      class="mb-4"
+      code={`"unions": {
   "version_number": {
     "discriminator": "value",
     "types": [
@@ -593,15 +599,15 @@
       { "type": "date-time-iso8601" }
     ]
   }
-}</code></pre>`}
-    </div>
+}`}
+    />
   </div>
 
   <!-- ================================================================== -->
   <!-- API -->
   <!-- ================================================================== -->
   <h2 class="text-ab-dark-blue mt-12 mb-6 flex items-center gap-2 text-xl font-bold">
-    <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-white">&#9889;</span>
+    <StepBadge>&#9889;</StepBadge>
     API
   </h2>
 
@@ -610,8 +616,8 @@
     <h3 class="text-ab-blue mb-3 text-lg font-semibold">Resource declaration</h3>
     <p class="text-ab-dark-blue mb-4">A resource is represented as a JSON object of the form:</p>
 
-    <div class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
-      {@html `<pre><code>{
+    <CodeBlock class="mb-4"
+      >{@html `{
   "typeName": {
     "path": <em>string (optional)</em>,
     "description": <em>string (optional)</em>,
@@ -619,8 +625,8 @@
     "auth": <em>string (optional)</em>,
     "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>
   }
-}</code></pre>`}
-    </div>
+}`}</CodeBlock
+    >
 
     <p class="text-ab-dark-blue mb-2">where:</p>
     <ul class="text-ab-dark-blue mb-4 list-disc space-y-2 pl-6">
@@ -658,8 +664,8 @@
     <h3 class="text-ab-blue mb-3 text-lg font-semibold">Operation declaration</h3>
     <p class="text-ab-dark-blue mb-4">An operation is represented as a JSON object of the form:</p>
 
-    <div class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
-      {@html `<pre><code>{
+    <CodeBlock class="mb-4"
+      >{@html `{
   "method": <em>string</em>,
   "path": <em>string (optional)</em>,
   "description": <em>string (optional)</em>,
@@ -669,8 +675,8 @@
   "responses": <em>JSON Object of <a href="#response" class="text-ab-blue hover:text-ab-dark-blue underline">Response</a> (optional)</em>,
   "auth": <em>string (optional)</em>,
   "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>
-}</code></pre>`}
-    </div>
+}`}</CodeBlock
+    >
 
     <p class="text-ab-dark-blue mb-2">where:</p>
     <ul class="text-ab-dark-blue mb-4 list-disc space-y-2 pl-6">
@@ -725,13 +731,13 @@
     <h3 class="text-ab-blue mb-3 text-lg font-semibold">Body declaration</h3>
     <p class="text-ab-dark-blue mb-4">A body is represented as a JSON object of the form:</p>
 
-    <div class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
-      {@html `<pre><code>{
+    <CodeBlock class="mb-4"
+      >{@html `{
   "type": <em>string</em>,
   "description": <em>string (optional)</em>,
   "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>
-}</code></pre>`}
-    </div>
+}`}</CodeBlock
+    >
 
     <p class="text-ab-dark-blue mb-2">where:</p>
     <ul class="text-ab-dark-blue mb-4 list-disc space-y-2 pl-6">
@@ -762,8 +768,8 @@
     <h3 class="text-ab-blue mb-3 text-lg font-semibold">Parameter declaration</h3>
     <p class="text-ab-dark-blue mb-4">A parameter is represented as a JSON object of the form:</p>
 
-    <div class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
-      {@html `<pre><code>{
+    <CodeBlock class="mb-4"
+      >{@html `{
   "name": <em>string</em>,
   "type": <em>string</em>,
   "location": <em>string (optional)</em>,
@@ -774,8 +780,8 @@
   "minimum": <em>long (optional)</em>,
   "maximum": <em>long (optional)</em>,
   "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>
-}</code></pre>`}
-    </div>
+}`}</CodeBlock
+    >
 
     <p class="text-ab-dark-blue mb-2">where:</p>
     <ul class="text-ab-dark-blue mb-4 list-disc space-y-2 pl-6">
@@ -828,15 +834,15 @@
     <h3 class="text-ab-blue mb-3 text-lg font-semibold">Response declaration</h3>
     <p class="text-ab-dark-blue mb-4">A response is represented as a JSON object of the form:</p>
 
-    <div class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
-      {@html `<pre><code>{
+    <CodeBlock class="mb-4"
+      >{@html `{
   "http_status_code": {
     "type": <em>type</em>,
     "description": <em>string (optional)</em>,
     "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>
   }
-}</code></pre>`}
-    </div>
+}`}</CodeBlock
+    >
 
     <p class="text-ab-dark-blue mb-2">where:</p>
     <ul class="text-ab-dark-blue mb-4 list-disc space-y-2 pl-6">
@@ -878,7 +884,7 @@
   <!-- METADATA -->
   <!-- ================================================================== -->
   <h2 class="text-ab-dark-blue mt-12 mb-6 flex items-center gap-2 text-xl font-bold">
-    <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-white">&#9881;</span>
+    <StepBadge>&#9881;</StepBadge>
     Metadata
   </h2>
 
@@ -887,11 +893,11 @@
     <h3 class="text-ab-blue mb-3 text-lg font-semibold">Import declaration</h3>
     <p class="text-ab-dark-blue mb-4">An import is represented as a JSON object of the form:</p>
 
-    <div class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
-      {@html `<pre><code>{
+    <CodeBlock class="mb-4"
+      >{@html `{
   "uri": <em>string</em>
-}</code></pre>`}
-    </div>
+}`}</CodeBlock
+    >
 
     <p class="text-ab-dark-blue mb-2">where:</p>
     <ul class="text-ab-dark-blue mb-4 list-disc space-y-2 pl-6">
@@ -912,13 +918,13 @@
     <h3 class="text-ab-blue mb-3 text-lg font-semibold">AuthScheme declaration</h3>
     <p class="text-ab-dark-blue mb-4">An auth_scheme is represented as a JSON object of the form:</p>
 
-    <div class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
-      {@html `<pre><code>{
+    <CodeBlock class="mb-4"
+      >{@html `{
   "type": <em>string</em>,
   "description": <em>string (optional)</em>,
   "attributes": <em>JSON Array of <a href="#attribute" class="text-ab-blue hover:text-ab-dark-blue underline">Attribute</a> (optional)</em>
-}</code></pre>`}
-    </div>
+}`}</CodeBlock
+    >
 
     <p class="text-ab-dark-blue mb-2">where:</p>
     <ul class="text-ab-dark-blue mb-4 list-disc space-y-2 pl-6">
@@ -943,12 +949,12 @@
     <h3 class="text-ab-blue mb-3 text-lg font-semibold">Attribute declaration</h3>
     <p class="text-ab-dark-blue mb-4">An attribute is represented as a JSON object in the following form:</p>
 
-    <div class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
-      {@html `<pre><code>{
+    <CodeBlock class="mb-4"
+      >{@html `{
   "name": <em>string</em>,
   "value": <em>JSON Object</em>
-}</code></pre>`}
-    </div>
+}`}</CodeBlock
+    >
 
     <p class="text-ab-dark-blue mb-2">where:</p>
     <ul class="text-ab-dark-blue mb-4 list-disc space-y-2 pl-6">
@@ -957,14 +963,15 @@
     </ul>
 
     <p class="text-ab-dark-blue mb-2">Example attribute:</p>
-    <div class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
-      {@html `<pre><code>{
+    <CodeBlock
+      class="mb-4"
+      code={`{
   "name": "my_regex_validation",
   "value": {
     "regex": "[a-z]"
   }
-}</code></pre>`}
-    </div>
+}`}
+    />
   </div>
 
   <!-- Annotation -->
@@ -982,13 +989,14 @@
       declaration.
     </p>
 
-    <div class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
-      {@html `<pre><code>"annotations": {
+    <CodeBlock
+      class="mb-4"
+      code={`"annotations": {
   "personal_data": {
     "description": "Identifies a field that contains Personal Data, as defined by GDPR."
   }
-}</code></pre>`}
-    </div>
+}`}
+    />
 
     <p class="text-ab-dark-blue mb-2">where:</p>
     <ul class="text-ab-dark-blue mb-4 list-disc space-y-2 pl-6">

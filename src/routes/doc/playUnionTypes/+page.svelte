@@ -1,3 +1,8 @@
+<script lang="ts">
+  import CodeBlock from '#lib/components/doc/CodeBlock.svelte';
+  import SectionHeading from '#lib/components/doc/SectionHeading.svelte';
+</script>
+
 <svelte:head>
   <title>Play Union Types - API Builder</title>
 </svelte:head>
@@ -21,10 +26,7 @@
   <p class="text-ab-dark-blue mb-6">Over the wire, union types in the Play clients are represented based on the types of their members.</p>
 
   <div class="card mb-6">
-    <h2 class="text-ab-blue mb-3 flex items-center gap-2 text-lg font-semibold">
-      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-white">D</span>
-      Model unions (with a discriminator)
-    </h2>
+    <SectionHeading badge="D">Model unions (with a discriminator)</SectionHeading>
 
     <p class="text-ab-dark-blue mb-4">
       When all members are models or other unions, the union type is serialized as a JSON object with the discriminator field injected. For
@@ -33,24 +35,26 @@
 
     <p class="text-ab-dark-blue mb-2">Example serializations:</p>
 
-    <pre class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">{@html `<code>{
+    <CodeBlock
+      class="mb-4"
+      code={`{
   "type": "registered_user",
   "guid": "f30dc64e-1793-4d59-aa47-71f000e06851",
   "email": "registered@test.apibuilder.io"
-}</code>`}</pre>
+}`}
+    />
 
-    <pre class="overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">{@html `<code>{
+    <CodeBlock
+      code={`{
   "type": "guest_user",
   "guid": "f30dc64e-1793-4d59-aa47-71f000e06851",
   "email": "guest@test.apibuilder.io"
-}</code>`}</pre>
+}`}
+    />
   </div>
 
   <div class="card mb-6">
-    <h2 class="text-ab-blue mb-3 flex items-center gap-2 text-lg font-semibold">
-      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-white">S</span>
-      String-serializable unions (literals, enums, and primitives)
-    </h2>
+    <SectionHeading badge="S">String-serializable unions (literals, enums, and primitives)</SectionHeading>
 
     <p class="text-ab-dark-blue mb-4">
       When all members are enums, string-serializable primitives (<code class="rounded bg-gray-100 px-1">string</code>,
@@ -62,7 +66,9 @@
 
     <p class="text-ab-dark-blue mb-2">Example spec:</p>
 
-    <pre class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">{@html `<code>"unions": {
+    <CodeBlock
+      class="mb-4"
+      code={`"unions": {
   "version_number": {
     "discriminator": "value",
     "types": [
@@ -70,33 +76,32 @@
       { "type": "date-time-iso8601" }
     ]
   }
-}</code>`}</pre>
+}`}
+    />
 
     <p class="text-ab-dark-blue mb-2">Example serializations:</p>
 
-    <pre class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">{@html `<code>"latest"</code>`}</pre>
+    <CodeBlock class="mb-4" code={`"latest"`} />
 
-    <pre
-      class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">{@html `<code>"2026-03-30T12:00:00.000Z"</code>`}</pre>
+    <CodeBlock class="mb-4" code={`"2026-03-30T12:00:00.000Z"`} />
 
     <p class="text-ab-dark-blue mb-4">
       In Scala, this generates a sealed trait with case objects for literals and wrapper case classes for primitives:
     </p>
 
-    <pre class="overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">{@html `<code>sealed trait VersionNumber
+    <CodeBlock
+      code={`sealed trait VersionNumber
 case object Latest extends VersionNumber
 case class VersionNumberDateTimeIso8601(value: DateTime) extends VersionNumber
 
 object VersionNumber {
   def apply(value: String): VersionNumber = ...  // parses "latest", "LATEST", or ISO datetime
-}</code>`}</pre>
+}`}
+    />
   </div>
 
   <div class="card mb-6">
-    <h2 class="text-ab-blue mb-3 flex items-center gap-2 text-lg font-semibold">
-      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-white">&#x2699;</span>
-      Example Applications
-    </h2>
+    <SectionHeading badge="&#x2699;">Example Applications</SectionHeading>
 
     <p class="text-ab-dark-blue mb-3">Working examples demonstrating union types:</p>
 

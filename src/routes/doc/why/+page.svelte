@@ -1,3 +1,7 @@
+<script lang="ts">
+  import SectionHeading from '#lib/components/doc/SectionHeading.svelte';
+</script>
+
 <svelte:head>
   <title>Why API Builder? - API Builder</title>
 </svelte:head>
@@ -12,10 +16,7 @@
 
   <!-- Compiler-Verified Correctness -->
   <div class="mb-10">
-    <h2 class="text-ab-blue mb-4 flex items-center gap-2 text-lg font-bold">
-      <span class="bg-ab-blue inline-flex h-8 w-8 items-center justify-center rounded-full text-sm text-white">&#10022;</span>
-      Compiler-Verified Correctness
-    </h2>
+    <SectionHeading badge="&#10022;">Compiler-Verified Correctness</SectionHeading>
     <ul class="text-ab-dark-blue ml-10 space-y-5">
       <li>
         <span class="font-semibold">Generated code is trusted</span> — The agent doesn't write SDK code. It uses generated clients and server
@@ -34,10 +35,7 @@
 
   <!-- Explicit Data Shapes -->
   <div class="mb-10">
-    <h2 class="text-ab-blue mb-4 flex items-center gap-2 text-lg font-bold">
-      <span class="bg-ab-blue inline-flex h-8 w-8 items-center justify-center rounded-full text-sm text-white">&#9889;</span>
-      Explicit Data Shapes
-    </h2>
+    <SectionHeading badge="&#9889;">Explicit Data Shapes</SectionHeading>
     <ul class="text-ab-dark-blue ml-10 space-y-5">
       <li>
         <span class="font-semibold">Every field and type defined upfront</span> — Every resource, field, type, and relationship is declared in
@@ -56,10 +54,7 @@
 
   <!-- Zero-Friction Workflow -->
   <div class="mb-10">
-    <h2 class="text-ab-blue mb-4 flex items-center gap-2 text-lg font-bold">
-      <span class="bg-ab-blue inline-flex h-8 w-8 items-center justify-center rounded-full text-sm text-white">&#9881;</span>
-      Zero-Friction Workflow
-    </h2>
+    <SectionHeading badge="&#9881;">Zero-Friction Workflow</SectionHeading>
     <ul class="text-ab-dark-blue ml-10 space-y-5">
       <li>
         <span class="font-semibold">Instant setup</span> —
@@ -79,10 +74,7 @@
 
   <!-- Simple, Parseable Format -->
   <div class="mb-10">
-    <h2 class="text-ab-blue mb-4 flex items-center gap-2 text-lg font-bold">
-      <span class="bg-ab-blue inline-flex h-8 w-8 items-center justify-center rounded-full text-sm text-white">&#9670;</span>
-      Simple, Parseable Format
-    </h2>
+    <SectionHeading badge="&#9670;">Simple, Parseable Format</SectionHeading>
     <ul class="text-ab-dark-blue ml-10 space-y-5">
       <li>
         <span class="font-semibold">Flat JSON, no ambiguity</span> — The

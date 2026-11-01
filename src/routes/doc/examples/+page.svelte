@@ -1,3 +1,7 @@
+<script lang="ts">
+  import SectionHeading from '#lib/components/doc/SectionHeading.svelte';
+</script>
+
 <svelte:head>
   <title>Examples - API Builder</title>
 </svelte:head>
@@ -12,10 +16,7 @@
 
   <!-- API Builder's Own Services -->
   <div class="mb-10">
-    <h2 class="text-ab-blue mb-4 flex items-center gap-2 text-lg font-bold">
-      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs text-white">✦</span>
-      API Builder Services
-    </h2>
+    <SectionHeading badge="✦">API Builder Services</SectionHeading>
 
     <div class="card mb-4">
       <h3 class="text-ab-dark-blue mb-2 font-semibold">apibuilder-api</h3>
@@ -64,10 +65,7 @@
 
   <!-- Generated Code Examples -->
   <div class="mb-10">
-    <h2 class="text-ab-blue mb-4 flex items-center gap-2 text-lg font-bold">
-      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs text-white">⚡</span>
-      Generated Code Examples
-    </h2>
+    <SectionHeading badge="⚡">Generated Code Examples</SectionHeading>
     <div class="card">
       <p class="text-ab-dark-blue mb-3">Working examples showing generated output across multiple languages and frameworks:</p>
       <ul class="text-ab-dark-blue space-y-2">
