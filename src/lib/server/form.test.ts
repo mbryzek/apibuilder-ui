@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { optionalString, requiredEnum, requiredSecret, requiredString } from './form';
+import { optionalString, requiredEnum, requiredPasswordPair, requiredSecret, requiredString } from './form';
 
 enum Visibility {
   User = 'user',
@@ -73,5 +73,26 @@ describe('requiredSecret', () => {
   it('is null for an absent or empty field', () => {
     expect(requiredSecret(form({}), 'password')).toBeNull();
     expect(requiredSecret(form({ password: '' }), 'password')).toBeNull();
+  });
+});
+
+describe('requiredPasswordPair', () => {
+  it('returns the password when the confirmation matches it, untrimmed', () => {
+    expect(requiredPasswordPair(form({ password: ' pw ', confirm_password: ' pw ' }))).toBe(' pw ');
+  });
+
+  it('refuses an absent or empty password with 400 before comparing', () => {
+    for (const fields of [{}, { password: '', confirm_password: '' }, { confirm_password: 'pw' }]) {
+      expect(requiredPasswordPair(form(fields))).toMatchObject({ status: 400, data: { errors: [{ message: 'Password is required' }] } });
+    }
+  });
+
+  it('refuses a confirmation that differs, including only by surrounding spaces', () => {
+    for (const confirm_password of ['other', 'pw ', '']) {
+      expect(requiredPasswordPair(form({ password: 'pw', confirm_password }))).toMatchObject({
+        status: 400,
+        data: { errors: [{ message: 'Passwords do not match' }] }
+      });
+    }
   });
 });
