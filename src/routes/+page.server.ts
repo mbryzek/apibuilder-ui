@@ -30,11 +30,5 @@ export const load: PageServerLoad = async ({ locals }) => {
     return { myOrgs, loadError };
   }
 
-  const publicOrgsResponse = await handleApiCall<Organization[]>(() => apiBuilderClient().getOrganizations({ limit: 25, offset: 0 }));
-
-  return {
-    myOrgs: [] as Organization[],
-    publicOrgs: dataOr(publicOrgsResponse, []),
-    loadError: loadErrorFrom(publicOrgsResponse)
-  };
+  return { myOrgs: [] as Organization[], loadError: null };
 };
