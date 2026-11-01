@@ -26,12 +26,16 @@ function loadOrg(locals: App.Locals) {
   return orgLayoutLoad({ params: { orgKey: 'public-org' }, locals } as unknown as Parameters<typeof orgLayoutLoad>[0]);
 }
 
-function loadHistory(locals: App.Locals) {
+function loadHistory(
+  locals: App.Locals,
+  parent: () => Promise<unknown> = async () => ({ version: { version: '2026-01-01' } }),
+  orgKey = 'public-org'
+) {
   return historyLoad({
-    params: { orgKey: 'public-org', appKey: 'app', version: 'latest' },
+    params: { orgKey, appKey: 'app', version: 'latest' },
     locals,
     url: new URL('https://apibuilder.test/public-org/app/latest/history'),
-    parent: async () => ({ version: { version: '2026-01-01' } })
+    parent
   } as unknown as Parameters<typeof historyLoad>[0]);
 }
 
@@ -92,5 +96,32 @@ describe('the history page', () => {
 
     expect(data.changes).toEqual([]);
     expect(data.loadError).toBeNull();
+  });
+
+  it('asks for the changes while the parent layout is still loading', async () => {
+    client.getChanges.mockResolvedValue([]);
+    const parent = Promise.withResolvers<unknown>();
+
+    const loading = loadHistory({ session: session() }, () => parent.promise);
+
+    expect(client.getChanges).toHaveBeenCalledTimes(1);
+    parent.resolve({ version: { version: '2026-01-01' } });
+    const data = (await loading) as { versionName: string };
+    expect(data.versionName).toBe('2026-01-01');
+  });
+
+  it('surfaces the error of a parent layout that fails', async () => {
+    client.getChanges.mockResolvedValue([]);
+
+    const thrown = await caughtAsync(() => loadHistory({ session: session() }, () => Promise.reject(refusedWith(404))));
+
+    expect(thrown.status).toBe(404);
+  });
+
+  it('refuses a malformed key without asking for the changes', async () => {
+    const thrown = await caughtAsync(() => loadHistory({ session: session() }, undefined, '/evil.com'));
+
+    expect(thrown.status).toBe(400);
+    expect(client.getChanges).not.toHaveBeenCalled();
   });
 });
