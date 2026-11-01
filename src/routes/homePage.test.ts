@@ -1,9 +1,9 @@
 // @vitest-environment happy-dom
 
 /**
- * The home page, for the two audiences it has. A signed-out visitor has no credential to read
- * anything with, so the load makes no API call, and a failure it never risks cannot put a banner
- * under the hero. A signed-in member's memberships read keeps reporting its failure.
+ * The home page, for the two audiences it has. A signed-out visitor reads the public organizations
+ * once, with no credential; a failure shows the banner, and an empty list renders no section. A
+ * signed-in member's memberships read keeps reporting its failure.
  */
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 import { mount, unmount, flushSync } from 'svelte';
@@ -21,6 +21,10 @@ vi.mock('#lib/api/clients.ts', (importOriginal) => mockApiClients(client, import
 const { load } = await import('./+page.server');
 const { apiBuilderClient } = await import('#lib/api/clients.ts');
 
+function organization(key: string): Record<string, unknown> {
+  return { guid: `guid-${key}`, key, name: `${key} name`, namespace: `io.${key}`, visibility: 'public' };
+}
+
 function unauthorized(): never {
   throw Object.assign(new Error('User is not logged in'), { response: { status: 401 } });
 }
@@ -36,13 +40,24 @@ describe('home page load', () => {
     client.getMemberships.mockImplementation(unauthorized);
   });
 
-  it('makes no API call and returns no loadError with no session', async () => {
+  it('reads the public organizations once with no session and no credential', async () => {
+    const orgs = [organization('acme')];
+    client.getOrganizations.mockResolvedValue(orgs);
+
     const data = await invokeLoad({});
 
-    expect(apiBuilderClient).not.toHaveBeenCalled();
-    expect(client.getOrganizations).not.toHaveBeenCalled();
+    expect(client.getOrganizations).toHaveBeenCalledTimes(1);
+    expect(client.getOrganizations).toHaveBeenCalledWith({ limit: 25, offset: 0 });
+    expect(apiBuilderClient).toHaveBeenCalledWith();
     expect(client.getMemberships).not.toHaveBeenCalled();
-    expect(data).toMatchObject({ loadError: null });
+    expect(data).toMatchObject({ myOrgs: [], publicOrgs: orgs, loadError: null });
+  });
+
+  it('reports a failed public organizations read with no session', async () => {
+    const data = await invokeLoad({});
+
+    expect(client.getOrganizations).toHaveBeenCalledTimes(1);
+    expect(data).toMatchObject({ publicOrgs: [], loadError: { status: 401 } });
   });
 
   it('reads the memberships of a signed-in member and reports a failure', async () => {
@@ -73,11 +88,27 @@ describe('home page', () => {
     component = undefined;
   });
 
-  it('shows a signed-out visitor the hero with no banner and no public organizations section', () => {
-    render({ myOrgs: [], loadError: null });
+  it('shows a signed-out visitor no public organizations section when there are none', () => {
+    render({ myOrgs: [], publicOrgs: [], loadError: null });
 
     expect(target.querySelector('h1')?.textContent).toBe('API Builder');
     expect(target.querySelector('[role="alert"]')).toBeNull();
+    expect(target.textContent).not.toMatch(/public organizations/i);
+  });
+
+  it('lists the public organizations for a signed-out visitor, each linked to its page', () => {
+    render({ myOrgs: [], publicOrgs: [organization('acme'), organization('globex')], loadError: null });
+
+    expect(target.querySelector('h2:not(.text-center)')?.textContent).toBe('Public Organizations');
+    const links = [...target.querySelectorAll('a[href="/acme"], a[href="/globex"]')];
+    expect(links.map((a) => a.querySelector('h3')?.textContent)).toEqual(['acme name', 'globex name']);
+    expect(target.querySelector('[role="alert"]')).toBeNull();
+  });
+
+  it('shows a signed-out visitor the banner and no section when the read failed', () => {
+    render({ myOrgs: [], publicOrgs: [], loadError: { status: 500, message: 'The server had a problem.' } });
+
+    expect(target.querySelector('[role="alert"]')?.textContent).toContain('The server had a problem.');
     expect(target.textContent).not.toMatch(/public organizations/i);
   });
 
