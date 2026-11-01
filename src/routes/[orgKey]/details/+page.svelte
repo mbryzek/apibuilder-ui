@@ -12,7 +12,7 @@
       org: Organization;
       isAdmin: boolean;
     };
-    form: { errors?: ApiErrorItem[] } | null;
+    form: { errors?: ApiErrorItem[]; name?: string; namespace?: string; key?: string; visibility?: Visibility | null } | null;
   }
 
   let { data, form: formResult }: Props = $props();
@@ -34,14 +34,14 @@
     <PendingForm action="?/update">
       {#snippet children(pending)}
         <div class="max-w-lg space-y-4">
-          <FormField label="Name" name="name" value={org.name} />
-          <FormField label="Key" name="key" value={org.key} />
-          <FormField label="Namespace" name="namespace" value={org.namespace} />
+          <FormField label="Name" name="name" value={formResult?.name ?? org.name} />
+          <FormField label="Key" name="key" value={formResult?.key ?? org.key} />
+          <FormField label="Namespace" name="namespace" value={formResult?.namespace ?? org.namespace} />
           <div>
             <label for="visibility" class="text-ab-dark-blue mb-1 block text-sm font-medium">Visibility</label>
             <select id="visibility" name="visibility" class="input-field w-full rounded-lg border px-3 py-2">
               {#each Object.values(Visibility) as v}
-                <option value={v} selected={org.visibility === v}>{v}</option>
+                <option value={v} selected={(formResult?.visibility ?? org.visibility) === v}>{v}</option>
               {/each}
             </select>
           </div>
