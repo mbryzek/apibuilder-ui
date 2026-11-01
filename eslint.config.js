@@ -22,7 +22,7 @@ export default [
     files: ['**/*.ts'],
     // `playwright/` is type-checked by tsconfig.playwright.json, not tsconfig.json — linting it
     // under this block's `project` would fail with "file not included in project".
-    ignores: ['**/*.svelte.ts', 'playwright/**/*.ts'],
+    ignores: ['**/*.svelte.ts', '**/*.svelte.test.ts', 'playwright/**/*.ts'],
     languageOptions: {
       parser: tsparser,
       parserOptions: {
@@ -92,7 +92,7 @@ export default [
 
   // Svelte TypeScript files (.svelte.ts) - Svelte runes
   {
-    files: ['**/*.svelte.ts'],
+    files: ['**/*.svelte.ts', '**/*.svelte.test.ts'],
     languageOptions: {
       parser: tsparser,
       parserOptions: {
