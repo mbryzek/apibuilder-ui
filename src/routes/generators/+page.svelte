@@ -1,9 +1,8 @@
 <script lang="ts">
-  import { onDestroy } from 'svelte';
-  import { goto } from '$app/navigation';
   import LoadErrorBanner from '#lib/components/LoadErrorBanner.svelte';
   import Pagination from '#lib/components/Pagination.svelte';
   import { listUrl } from '#lib/pagination.ts';
+  import { QueryInput } from '#lib/query-input.svelte.ts';
   import type { LoadError } from '#lib/api/load-error.ts';
   import type { Generator } from '#generated/com-bryzek-apibuilder-generator.ts';
 
@@ -24,23 +23,7 @@
   // a narrower filter restarts at page one instead of landing past the end of the smaller set.
   const paginationBaseUrl = $derived(listUrl('/generators', { q: data.q }));
 
-  let debounceTimer: ReturnType<typeof setTimeout> | undefined;
-
-  function filter(query: string) {
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => {
-      // Fire-and-forget: the timer fires after the user stopped typing, with nothing awaiting it.
-      void goto(listUrl('/generators', { q: query }), { reset: false });
-    }, 250);
-  }
-
-  function handleInput(event: Event) {
-    filter((event.target as HTMLInputElement).value);
-  }
-
-  onDestroy(() => {
-    clearTimeout(debounceTimer);
-  });
+  const query = new QueryInput('/generators', () => data.q);
 </script>
 
 <svelte:head>
@@ -56,8 +39,8 @@
     <input
       type="text"
       name="q"
-      value={data.q}
-      oninput={handleInput}
+      value={query.text}
+      oninput={(e) => query.input(e.currentTarget.value)}
       placeholder="Filter generators..."
       class="input-field w-full rounded-lg border px-3 py-2 text-sm sm:w-80"
     />

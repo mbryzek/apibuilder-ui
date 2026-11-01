@@ -1,9 +1,8 @@
 <script lang="ts">
-  import { onDestroy } from 'svelte';
-  import { goto } from '$app/navigation';
   import LoadErrorBanner from '#lib/components/LoadErrorBanner.svelte';
   import Pagination from '#lib/components/Pagination.svelte';
   import { listUrl } from '#lib/pagination.ts';
+  import { QueryInput } from '#lib/query-input.svelte.ts';
   import type { LoadError } from '#lib/api/load-error.ts';
   import type { Item } from '#generated/com-bryzek-apibuilder.ts';
 
@@ -23,30 +22,12 @@
   const items = $derived(data.items);
   const paginationBaseUrl = $derived(listUrl('/search', { q: data.q }));
 
-  let debounceTimer: ReturnType<typeof setTimeout> | undefined;
-
-  function search(query: string) {
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => {
-      // Fire-and-forget: the timer fires after the user stopped typing, with nothing awaiting it.
-      void goto(listUrl('/search', { q: query }), { reset: false });
-    }, 250);
-  }
-
-  function handleInput(event: Event) {
-    search((event.target as HTMLInputElement).value);
-  }
+  const query = new QueryInput('/search', () => data.q);
 
   async function handleSubmit(event: SubmitEvent): Promise<void> {
     event.preventDefault();
-    const input = (event.currentTarget as HTMLFormElement).querySelector('input[name="q"]') as HTMLInputElement;
-    clearTimeout(debounceTimer);
-    await goto(listUrl('/search', { q: input.value }), { reset: false });
+    await query.submit();
   }
-
-  onDestroy(() => {
-    clearTimeout(debounceTimer);
-  });
 
   function itemUrl(item: Item): string {
     return `/${item.organization_key}/${item.application_key}`;
@@ -62,7 +43,14 @@
 
   <form onsubmit={handleSubmit} class="mb-6">
     <div class="flex gap-3">
-      <input type="text" name="q" value={data.q} oninput={handleInput} placeholder="Search APIs..." class="input-field flex-1" />
+      <input
+        type="text"
+        name="q"
+        value={query.text}
+        oninput={(e) => query.input(e.currentTarget.value)}
+        placeholder="Search APIs..."
+        class="input-field flex-1"
+      />
       <button type="submit" class="btn-primary">Search</button>
     </div>
   </form>
