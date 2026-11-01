@@ -7,6 +7,7 @@
   interface Props {
     data: {
       session?: PublicSession;
+      publicOrgs?: Organization[];
       myOrgs: Organization[];
       loadError: LoadError | null;
     };
@@ -16,6 +17,7 @@
 
   const session = $derived(data.session);
   const myOrgs = $derived(data.myOrgs);
+  const publicOrgs = $derived(data.publicOrgs ?? []);
 </script>
 
 <svelte:head>
@@ -101,5 +103,21 @@
         </div>
       </div>
     </div>
+
+    {#if data.loadError}
+      <LoadErrorBanner error={data.loadError} />
+    {:else if publicOrgs.length > 0}
+      <div>
+        <h2 class="text-ab-dark-blue mb-6 text-xl font-bold">Public Organizations</h2>
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {#each publicOrgs as org (org.key)}
+            <a href="/{org.key}" class="card transition-shadow hover:shadow-[0_0_17px_-4px_rgba(0,0,0,0.2)]">
+              <h3 class="text-ab-dark-blue font-semibold">{org.name}</h3>
+              <p class="text-ab-gray mt-1 text-sm">{org.namespace}</p>
+            </a>
+          {/each}
+        </div>
+      </div>
+    {/if}
   {/if}
 </div>

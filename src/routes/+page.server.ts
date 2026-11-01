@@ -30,5 +30,13 @@ export const load: PageServerLoad = async ({ locals }) => {
     return { myOrgs, loadError };
   }
 
-  return { myOrgs: [] as Organization[], loadError: null };
+  // A signed-out visitor reads the public organizations with no credential: the platform answers
+  // that read for an anonymous caller with only the organizations whose visibility is public.
+  const publicOrgsResponse = await handleApiCall<Organization[]>(() => apiBuilderClient().getOrganizations({ limit: 25, offset: 0 }));
+
+  return {
+    myOrgs: [] as Organization[],
+    publicOrgs: dataOr(publicOrgsResponse, []),
+    loadError: loadErrorFrom(publicOrgsResponse)
+  };
 };
