@@ -6,7 +6,7 @@ vi.stubGlobal('fetch', upstream);
 const { handle } = await import('./hooks.server.ts');
 const { config } = await import('#lib/config.ts');
 
-function run(getClientAddress: () => string) {
+function run(getClientAddress: () => string, call = () => fetch(`${config.apiBaseUrl}/session`, { headers: { session_id: 'sess-1' } })) {
   const url = new URL('https://app.example/_internal_/version');
   const event = {
     url,
@@ -17,7 +17,7 @@ function run(getClientAddress: () => string) {
     getClientAddress
   };
   const resolve = async () => {
-    await fetch(`${config.apiBaseUrl}/session`, { headers: { session_id: 'sess-1' } });
+    await call();
     return new Response('ok');
   };
   return handle({ event, resolve } as unknown as Parameters<typeof handle>[0]);
@@ -33,6 +33,16 @@ describe('handle', () => {
   it("stamps a backend call made during a render with the browser's address", async () => {
     await run(() => '203.0.113.7');
     expect(sentHeaders()).toEqual({ session_id: 'sess-1', 'X-Worker-Client-IP': '203.0.113.7' });
+  });
+
+  it('stamps a Request, the form a client built with event.fetch reaches the global in', async () => {
+    await run(
+      () => '203.0.113.7',
+      () => fetch(new Request(`${config.apiBaseUrl}/session`, { headers: { session_id: 'sess-1' } }))
+    );
+    const headers = upstream.mock.lastCall?.[1]?.headers as Headers;
+    expect(headers.get('session_id')).toBe('sess-1');
+    expect(headers.get('X-Worker-Client-IP')).toBe('203.0.113.7');
   });
 
   it('still renders where the adapter cannot name the address', async () => {
