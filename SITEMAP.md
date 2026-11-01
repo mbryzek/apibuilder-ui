@@ -60,6 +60,7 @@
 | "Add organization" link           | Top-right, logged-in users only → `/org/create` |
 | Your Organizations table          | List of user's orgs, each linked to `/:orgKey`  |
 | Pending Membership Requests table | Shows pending requests for current user         |
+| Public Organizations              | Signed out: public orgs, omitted when none      |
 
 ---
 
