@@ -7,7 +7,6 @@
   interface Props {
     data: {
       session?: PublicSession;
-      publicOrgs?: Organization[];
       myOrgs: Organization[];
       loadError: LoadError | null;
     };
@@ -16,7 +15,6 @@
   let { data }: Props = $props();
 
   const session = $derived(data.session);
-  const publicOrgs = $derived(data.publicOrgs ?? []);
   const myOrgs = $derived(data.myOrgs);
 </script>
 
@@ -103,30 +101,5 @@
         </div>
       </div>
     </div>
-
-    {#if data.loadError}
-      <LoadErrorBanner error={data.loadError} />
-    {:else if publicOrgs.length > 0}
-      <div>
-        <h2 class="text-ab-dark-blue mb-6 text-xl font-bold">Public Organizations</h2>
-        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {#each publicOrgs as org (org.key)}
-            <a href="/{org.key}" class="card transition-shadow hover:shadow-[0_0_17px_-4px_rgba(0,0,0,0.2)]">
-              <h3 class="text-ab-dark-blue font-semibold">{org.name}</h3>
-              <p class="text-ab-gray mt-1 text-sm">{org.namespace}</p>
-              <span class="mt-2 inline-block rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">
-                {org.visibility}
-              </span>
-            </a>
-          {/each}
-        </div>
-      </div>
-    {:else}
-      <div class="text-ab-gray py-8 text-center">
-        <p>
-          No public organizations yet. <a href="/doc/start" class="text-ab-dark-blue underline">Get your agent started</a> in 30 seconds.
-        </p>
-      </div>
-    {/if}
   {/if}
 </div>
