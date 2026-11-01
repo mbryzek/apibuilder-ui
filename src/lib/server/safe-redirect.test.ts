@@ -16,6 +16,10 @@ describe('safeRedirectPath', () => {
     ['/\\evil.com', 'backslash host separator'],
     ['/\\/evil.com', 'backslash then slash'],
     ['\\/evil.com', 'backslash first'],
+    ['/.//evil.com', 'dot segment collapsing to //'],
+    ['/..//evil.com', 'parent segment collapsing to //'],
+    ['/a/..//evil.com', 'parent of a segment collapsing to //'],
+    ['/%2e//evil.com', 'encoded dot segment collapsing to //'],
     ['https://evil.com', 'absolute url'],
     ['evil.com', 'bare host'],
     ['', 'empty'],
@@ -25,6 +29,7 @@ describe('safeRedirectPath', () => {
     const result = safeRedirectPath(payload);
 
     expect(result.startsWith('/')).toBe(true);
+    expect(result.startsWith('//')).toBe(false);
     expect(new URL(result, 'http://localhost').origin).toBe('http://localhost');
   });
 
