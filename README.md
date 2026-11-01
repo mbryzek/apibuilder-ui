@@ -58,7 +58,9 @@ survived both gates.
 ## Tests
 
 **Unit tests (`npm run test:unit`)** are plain vitest over `src/**/*.test.ts` and
-`playwright/**/*.test.ts`, no browser and no server. Route logic is testable here directly: a
+`playwright/**/*.test.ts`, no browser and no server. The script runs `svelte-kit sync` first:
+`tsconfig.json` extends `$app/tsconfig`, which only the sync generates, and `.npmrc`'s
+`ignore-scripts=true` means `npm ci` never runs `prepare`. Route logic is testable here directly: a
 `+page.server.ts` exports plain functions, so a load or an action can be invoked with a hand-built
 event and the API client mocked. That is how
 `src/routes/session-lifecycle.test.ts` and `src/routes/confused-deputy.test.ts` pin authorization

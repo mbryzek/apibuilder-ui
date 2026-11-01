@@ -132,7 +132,7 @@ ci_report covered "test health helper suite"
 # running the unit suite twice would double the suite's wall clock for no additional
 # verdict.
 #
-# ITS VITEST IS TEST HEALTH'S RUNNER. `npm run test:unit` is `node scripts/ci-test.mjs vitest`,
+# ITS VITEST IS TEST HEALTH'S RUNNER. `npm run test:unit` runs `node scripts/ci-test.mjs vitest`,
 # which reads the lists `CI_TEST_LISTS` names and prints the `ci-lists:` line, leaves out every
 # quarantined and slow spec (with `CI_SLOW_SPECS=1`, runs the slow ones alone), writes each spec's
 # JUnit report under `ci-test-reports/vitest/`, and reruns every failed spec once, printing
