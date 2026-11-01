@@ -20,8 +20,8 @@
     "test:e2e:debug": "playwright test --debug",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:report": "playwright show-report",
-    "lint": "eslint src playwright --max-warnings 0",
-    "lint:fix": "eslint src playwright --fix",
+    "lint": "svelte-kit sync && eslint src playwright --max-warnings 0",
+    "lint:fix": "svelte-kit sync && eslint src playwright --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check:e2e": "tsc -p tsconfig.playwright.json"

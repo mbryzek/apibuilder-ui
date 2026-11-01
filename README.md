@@ -26,7 +26,7 @@ built artifact at `https://api.idempotent.io`. Copy `.env.example` if you need t
 
 ```bash
 npm run check          # the gate: svelte-check, tsc, eslint, prettier, unit tests
-npm run lint:fix       # eslint --fix over src/ and playwright/
+npm run lint:fix       # svelte-kit sync, then eslint --fix over src/ and playwright/
 npm run format         # prettier --write
 npm run build          # production build (adapter-cloudflare)
 ```
