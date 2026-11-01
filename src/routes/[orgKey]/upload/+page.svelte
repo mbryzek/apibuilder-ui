@@ -67,6 +67,9 @@
         <div>
           <label for="spec_type" class="mb-1 block text-sm font-medium text-gray-700">Format</label>
           <select id="spec_type" name="spec_type" class="input-field w-full" value={form?.specType ?? ''}>
+            <!-- The action sends no type for an empty value and the platform detects it. Without this
+                 option the empty default matched nothing and the select rendered blank. -->
+            <option value="">Auto-detect</option>
             {#each Object.values(OriginalType) as t}
               <option value={t}>{t}</option>
             {/each}

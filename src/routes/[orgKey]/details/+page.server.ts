@@ -19,13 +19,16 @@ export const actions: Actions = {
     const namespace = requiredString(formData, 'namespace');
     const key = optionalString(formData, 'key');
     const visibility = requiredEnum(formData, 'visibility', Object.values(Visibility));
+    // Travels back with every refusal, so a refused edit keeps what was typed rather than
+    // reverting to the saved organization.
+    const values = { name: name ?? '', namespace: namespace ?? '', key: key ?? '', visibility };
 
     if (!name || !namespace) {
-      return fail(400, { errors: [{ message: 'Name and namespace are required' }] });
+      return fail(400, { errors: [{ message: 'Name and namespace are required' }], ...values });
     }
 
     if (!visibility) {
-      return fail(400, { errors: [{ message: 'Visibility is required' }] });
+      return fail(400, { errors: [{ message: 'Visibility is required' }], ...values });
     }
 
     const form: OrganizationForm = { name, namespace, visibility };
@@ -34,7 +37,7 @@ export const actions: Actions = {
     const response = await handleApiCall<Organization>(() => client.updateOrganizationByKey({ key: params.orgKey, body: form }));
 
     if (isApiError(response)) {
-      return actionFail(response);
+      return actionFail(response, values);
     }
 
     redirectWithFlash(cookies, `/${response.data.key}/details`, 'Organization updated');
