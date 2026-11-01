@@ -1,0 +1,96 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { session } from '#lib/test-support/fixtures.ts';
+import { mockApiClients } from '#lib/test-support/mocks.ts';
+import { caughtAsync } from '#lib/test-support/throws.ts';
+
+/**
+ * What a visitor outside an organization gets from its pages. The API decides what is readable, so
+ * these pin the wiring around it: a signed-out load asks with no credential and asks nothing a
+ * signed-out caller cannot be answered, and a refusal stays a 404 that confirms nothing.
+ */
+
+const client = {
+  getOrganizationByKey: vi.fn(),
+  getMemberships: vi.fn(),
+  getChanges: vi.fn()
+};
+
+vi.mock('#lib/api/clients.ts', async (importOriginal) => mockApiClients(client, importOriginal));
+
+const { load: orgLayoutLoad } = await import('./[orgKey]/+layout.server');
+const { load: historyLoad } = await import('./[orgKey]/[appKey]/[version]/history/+page.server');
+
+const ORG = { id: 'org-1', key: 'public-org', name: 'Public', namespace: 'io.public', visibility: 'public', domains: [] };
+
+function loadOrg(locals: App.Locals) {
+  return orgLayoutLoad({ params: { orgKey: 'public-org' }, locals } as unknown as Parameters<typeof orgLayoutLoad>[0]);
+}
+
+function loadHistory(locals: App.Locals) {
+  return historyLoad({
+    params: { orgKey: 'public-org', appKey: 'app', version: 'latest' },
+    locals,
+    url: new URL('https://apibuilder.test/public-org/app/latest/history'),
+    parent: async () => ({ version: { version: '2026-01-01' } })
+  } as unknown as Parameters<typeof historyLoad>[0]);
+}
+
+function refusedWith(status: number) {
+  return Object.assign(new Error('refused'), { status, response: { status } });
+}
+
+beforeEach(() => {
+  vi.clearAllMocks();
+});
+
+describe('the organization layout, signed out', () => {
+  it('reads a public organization and asks nothing about memberships', async () => {
+    client.getOrganizationByKey.mockResolvedValue(ORG);
+
+    const data = (await loadOrg({})) as { org: unknown; isMember: boolean; isAdmin: boolean; membershipLoadError: unknown };
+
+    expect(data.org).toEqual(ORG);
+    expect(data.isMember).toBe(false);
+    expect(data.isAdmin).toBe(false);
+    expect(data.membershipLoadError).toBeNull();
+    expect(client.getMemberships).not.toHaveBeenCalled();
+  });
+
+  it.each([401, 404])('is a 404 when the API answers %i, so a private organization cannot be confirmed', async (status) => {
+    client.getOrganizationByKey.mockRejectedValue(refusedWith(status));
+
+    const thrown = await caughtAsync(() => loadOrg({}));
+
+    expect(thrown.status).toBe(404);
+  });
+});
+
+describe('the organization layout, signed in as a non-member', () => {
+  it('reads a public organization as not a member', async () => {
+    client.getOrganizationByKey.mockResolvedValue(ORG);
+    client.getMemberships.mockResolvedValue([]);
+
+    const data = (await loadOrg({ session: session() })) as { isMember: boolean };
+
+    expect(data.isMember).toBe(false);
+  });
+});
+
+describe('the history page', () => {
+  it('sends a signed-out visitor to sign in rather than calling getChanges', async () => {
+    const thrown = await caughtAsync(() => loadHistory({}));
+
+    expect(thrown.status).toBe(303);
+    expect(thrown.location).toContain('/login?redirect=');
+    expect(client.getChanges).not.toHaveBeenCalled();
+  });
+
+  it('reads the changes for a signed-in caller', async () => {
+    client.getChanges.mockResolvedValue([]);
+
+    const data = (await loadHistory({ session: session() })) as { changes: unknown[]; loadError: unknown };
+
+    expect(data.changes).toEqual([]);
+    expect(data.loadError).toBeNull();
+  });
+});
