@@ -31,8 +31,19 @@
   const versionBase = $derived(`/${orgKey}/${appKey}/${version.version}`);
   const exampleBaseUrl = $derived(`${versionBase}/example`);
 
-  let searchQuery = $state('');
-  let showDeleteConfirm = $state(false);
+  /**
+   * What the reader typed or opened belongs to ONE spec. SvelteKit reuses this page for a link to
+   * another spec on the same route (an imported type, the Imports tab), so plain state carried a
+   * filter onto the next spec and an open delete confirmation onto a version nobody chose to
+   * delete. Each is a writable derived of the spec's path: assignable, and back to its default
+   * whenever the path changes.
+   */
+  function resetOn<T>(key: string, initial: T): T {
+    void key;
+    return initial;
+  }
+  let searchQuery = $derived(resetOn(versionBase, ''));
+  let showDeleteConfirm = $derived(resetOn(versionBase, false));
 </script>
 
 <FormErrors errors={form?.errors} />
@@ -122,7 +133,7 @@
   </div>
 </div>
 
-{#if showDeleteConfirm}
+{#if data.isMember && showDeleteConfirm}
   <Banner>
     <p class="mb-3 text-sm font-medium">
       Are you sure you want to delete version <strong>{version.version}</strong>? This action cannot be undone.
@@ -138,4 +149,10 @@
   </Banner>
 {/if}
 
-<SpecTabs {service} {exampleBaseUrl} {searchQuery} />
+<!--
+  Keyed on the spec so a link to another one mounts a fresh SpecTabs: its tab choice resets and its
+  mount-time scroll to the URL's hash runs again. A client-side navigation fires no `hashchange`.
+-->
+{#key versionBase}
+  <SpecTabs {service} {exampleBaseUrl} {searchQuery} />
+{/key}
