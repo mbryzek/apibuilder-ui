@@ -49,9 +49,10 @@ interface CookieJar {
   deleted: string[];
 }
 
-function cookieJar(): CookieJar {
+function cookieJar(sent: Record<string, string> = {}): CookieJar {
   const jar: CookieJar = { cookies: {} as Cookies, set: {}, deleted: [] };
   jar.cookies = {
+    get: (name: string) => sent[name],
     set: (name: string, value: string, options: Record<string, unknown>) => {
       jar.set[name] = { value, options };
     },
@@ -109,6 +110,19 @@ describe('POST /logout', () => {
 
     const thrown = await caughtAsync(() => logout(jar, { session: SESSION }));
 
+    expect(jar.deleted).toEqual(['session_id']);
+    expect(thrown.location).toBe('/logged-out');
+  });
+
+  it('revokes the cookie session when the lookup got no answer', async () => {
+    // A rate limit or an outage leaves `locals.session` absent while the cookie is still a live
+    // session. Clearing only the browser's copy would leave it authenticating for its whole year.
+    const jar = cookieJar({ session_id: 'sess-unresolved' });
+
+    const thrown = await caughtAsync(() => logout(jar, { sessionUnavailable: true }));
+
+    expect(platformClient).toHaveBeenCalledWith({ headers: expect.objectContaining({ session_id: 'sess-unresolved' }) });
+    expect(platform.deleteTenantSession).toHaveBeenCalledWith('apibuilder');
     expect(jar.deleted).toEqual(['session_id']);
     expect(thrown.location).toBe('/logged-out');
   });
