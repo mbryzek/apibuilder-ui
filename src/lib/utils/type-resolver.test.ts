@@ -80,7 +80,7 @@ describe('resolveType', () => {
   });
 
   describe('namespace-qualified imported types', () => {
-    const svc = service({ imports: [importedService('io.flow.common.v0.models')] });
+    const svc = service({ imports: [importedService('io.flow.common.v0')] });
 
     it('displays the short name and links to the importing service', () => {
       expect(resolveType('io.flow.common.v0.models.price', svc)).toEqual({
@@ -110,6 +110,31 @@ describe('resolveType', () => {
       });
     });
 
+    it.each(['enums', 'unions', 'interfaces'])('strips the %s kind segment as well', (kind) => {
+      expect(resolveType(`io.flow.common.v0.${kind}.currency`, svc)).toMatchObject({
+        href: '/flow/common/0.1.0#currency',
+        innerType: 'currency'
+      });
+    });
+
+    it('matches the import by its SERVICE namespace, which carries no kind segment', () => {
+      // apibuilder writes `<service namespace>.models.<name>` and an import's namespace is the
+      // service's own (`io.flow.common.v0`). An import whose namespace ends in `.models` exists in
+      // no real spec; matching on it is what left every real imported type unlinked.
+      const kindSuffixed = service({ imports: [importedService('io.flow.common.v0.models')] });
+      expect(resolveType('io.flow.common.v0.models.price', kindSuffixed).href).toBeNull();
+    });
+
+    it("anchors a type qualified with the service's own namespace", () => {
+      const local = service({ models: [model('user')] });
+      expect(resolveType('io.test.v0.models.user', local)).toEqual({
+        anchor: 'user',
+        href: null,
+        wrappers: [],
+        innerType: 'user'
+      });
+    });
+
     it('keeps the qualified name when no import matches the namespace', () => {
       expect(resolveType('io.flow.unknown.v0.models.price', svc)).toEqual({
         anchor: null,
@@ -123,7 +148,7 @@ describe('resolveType', () => {
   describe('bare imported types', () => {
     it('links a bare name declared by an import', () => {
       const svc = service({
-        imports: [importedService('io.flow.common.v0.models', { models: [model('price')] })]
+        imports: [importedService('io.flow.common.v0', { models: [model('price')] })]
       });
 
       expect(resolveType('price', svc)).toEqual({
