@@ -5,8 +5,26 @@ import { isUnavailable } from '#lib/api/api-message.ts';
 import { SESSION_COOKIE, config } from '#lib/config.ts';
 import { clearSessionCookie } from '#lib/server/session.ts';
 import type { TenantSession } from '#generated/com-bryzek-platform.ts';
+import type { RequestEvent } from '@sveltejs/kit';
+import { installBackendRequestFetch, runWithBackendRequest } from 'ui/server/request-id.ts';
 
-export const handle: Handle = async ({ event, resolve }) => {
+// Every backend call made while rendering this request carries the browser's address, which the
+// platform's rate limiter keys on in place of Cloudflare's shared Worker egress address. See
+// ui/server/request-id. ISS-37007
+installBackendRequestFetch(config.apiBaseUrl);
+
+export const handle: Handle = (input) => runWithBackendRequest({ clientIp: clientAddress(input.event) }, () => handleRequest(input));
+
+/** The browser's address, or nothing where the adapter cannot say (a unit test's bare event). */
+function clientAddress(event: RequestEvent): string | undefined {
+  try {
+    return event.getClientAddress() || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+const handleRequest: Handle = async ({ event, resolve }) => {
   const sessionId = event.cookies.get(SESSION_COOKIE) || undefined;
 
   if (sessionId) {
