@@ -651,8 +651,11 @@ All doc pages are public and use a dedicated layout with doc sidebar navigation.
 **Route:** `GET /email/verifications/:token`
 **Auth:** Public
 
-- Confirms email verification token
-- Redirects to `/` with flash "Email confirmed" or warning
+- Landing page of the "Verify your email" link the platform mails; confirms the token and renders the outcome at the link (no redirect)
+- Three outcomes, decided by `ui/emailedLink/outcome.ts`:
+  - Verified: "Email verified" with a Continue to API Builder link to `/`
+  - Invalid (only a 404 from the platform): "This link is no longer valid" with a Continue to API Builder link to `/`
+  - Unavailable (any other failure): "We could not verify your email", saying the link is still good, with a Try Again link to the same URL
 
 ---
 
@@ -663,7 +666,8 @@ All doc pages are public and use a dedicated layout with doc sidebar navigation.
 
 - Landing page of the welcome email an invited user is sent
 - Set password form; on success signs the user in and redirects to `/`
-- A spent or expired token shows "This link is no longer valid" with links to reset the password or sign in
+- A spent or expired token (a 404 from the platform, on view or on submit) shows "This link is no longer valid" with links to reset the password or sign in
+- Any other failure reading the invitation shows "We could not open your invitation", saying the invitation is still good, with a Try Again link to the same URL (`ui/emailedLink/outcome.ts`)
 
 ---
 
