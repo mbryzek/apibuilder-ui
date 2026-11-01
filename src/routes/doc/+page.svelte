@@ -1,3 +1,8 @@
+<script lang="ts">
+  import CodeBlock from '#lib/components/doc/CodeBlock.svelte';
+  import SectionHeading from '#lib/components/doc/SectionHeading.svelte';
+</script>
+
 <svelte:head>
   <title>Documentation - API Builder</title>
 </svelte:head>
@@ -12,22 +17,16 @@
 
   <!-- Step 1: Install -->
   <div class="mb-10">
-    <h2 class="text-ab-blue mb-4 flex items-center gap-2 text-lg font-bold">
-      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs text-white">1</span>
-      Install
-    </h2>
+    <SectionHeading badge="1">Install</SectionHeading>
     <div class="card">
       <p class="text-ab-dark-blue mb-3">One command. Zero accounts. Instant access.</p>
-      <pre class="overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm"><code>api init</code></pre>
+      <CodeBlock code="api init" />
     </div>
   </div>
 
   <!-- Step 2: Define -->
   <div class="mb-10">
-    <h2 class="text-ab-blue mb-4 flex items-center gap-2 text-lg font-bold">
-      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs text-white">2</span>
-      Define
-    </h2>
+    <SectionHeading badge="2">Define</SectionHeading>
     <div class="card">
       <p class="text-ab-dark-blue mb-3">
         Write your API in <a href="/doc/apiJson" class="text-ab-blue hover:text-ab-dark-blue underline">api.json</a> — a flat JSON format
@@ -46,16 +45,13 @@
 
   <!-- Step 3: Generate -->
   <div class="mb-10">
-    <h2 class="text-ab-blue mb-4 flex items-center gap-2 text-lg font-bold">
-      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs text-white">3</span>
-      Generate
-    </h2>
+    <SectionHeading badge="3">Generate</SectionHeading>
     <div class="card">
       <p class="text-ab-dark-blue mb-3">
         Produce type-safe clients, server stubs, test mocks, and database schemas. Each generator outputs a single, self-contained file —
         drop it into the project and go.
       </p>
-      <pre class="overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm"><code>api</code></pre>
+      <CodeBlock code="api" />
       <p class="text-ab-dark-blue mt-3 text-sm">
         See <a href="/doc/generators" class="text-ab-blue hover:text-ab-dark-blue underline">all generators</a> — Scala, TypeScript, Java, Go,
         Elm, and more.
@@ -65,10 +61,7 @@
 
   <!-- Step 4: Verify -->
   <div class="mb-10">
-    <h2 class="text-ab-blue mb-4 flex items-center gap-2 text-lg font-bold">
-      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs text-white">4</span>
-      Verify
-    </h2>
+    <SectionHeading badge="4">Verify</SectionHeading>
     <div class="card">
       <p class="text-ab-dark-blue">
         Compile. If it builds, it's correct. The generated interfaces enforce the spec — your implementation either matches or the compiler

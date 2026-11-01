@@ -1,3 +1,7 @@
+<script lang="ts">
+  import CodeBlock from '#lib/components/doc/CodeBlock.svelte';
+</script>
+
 <svelte:head>
   <title>Release Notes - API Builder</title>
 </svelte:head>
@@ -94,7 +98,9 @@
           elsewhere — a powerful bit of syntactic sugar. This change is 100% backward compatible.
           <details class="mt-2 ml-4">
             <summary class="text-ab-blue hover:text-ab-dark-blue cursor-pointer text-sm">Example</summary>
-            <pre class="mt-2 overflow-x-auto rounded bg-gray-50 p-3 text-sm">{@html `<code>{
+            <CodeBlock
+              class="mt-2"
+              code={`{
   "unions": {
     "task_type": {
       "discriminator": "discriminator",
@@ -107,7 +113,8 @@
       ]
     }
   }
-}</code>`}</pre>
+}`}
+            />
           </details>
         </li>
       </ul>
@@ -602,8 +609,9 @@
                 Notifications on application update now send out a detailed diff of what has changed in a service. An example email:
               </p>
 
-              <pre class="mt-2 mb-2 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm"><code
-                  >Version 0.0.1 has been uploaded for the application Gilt/Referral
+              <CodeBlock
+                class="mt-2 mb-2"
+                code={`Version 0.0.1 has been uploaded for the application Gilt/Referral
 
 Breaking changes
 
@@ -615,8 +623,8 @@ Other changes
 
 enum activation_type value added: order_shipped
 model added: shipped_order
-model added: shipped_order_form</code
-                ></pre>
+model added: shipped_order_form`}
+              />
 
               <p class="ml-6">
                 You can enable the notification by selecting the "Subscriptions" link in the navigation bar after selecting your
@@ -803,18 +811,18 @@ model added: shipped_order_form</code
                 for more authentication methods.
               </p>
 
-              <pre
-                class="mt-2 mb-2 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">{@html `<code>class Client(apiUrl: String, apiToken: scala.Option[String] = None)</code>`}</pre>
+              <CodeBlock class="mt-2 mb-2" code={`class Client(apiUrl: String, apiToken: scala.Option[String] = None)`} />
 
               <p class="ml-6">is now</p>
 
-              <pre
-                class="mt-2 mb-2 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">{@html `<code>class Client(apiUrl: String, auth: scala.Option[io.apibuilder.api.v0.Authorization] = None)</code>`}</pre>
+              <CodeBlock
+                class="mt-2 mb-2"
+                code={`class Client(apiUrl: String, auth: scala.Option[io.apibuilder.api.v0.Authorization] = None)`}
+              />
 
               <p class="ml-6">In order to use a token, create an instance of basic authorization with:</p>
 
-              <pre
-                class="mt-2 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">{@html `<code>io.apibuilder.api.v0.Authorization.Basic("token")</code>`}</pre>
+              <CodeBlock class="mt-2" code={`io.apibuilder.api.v0.Authorization.Basic("token")`} />
             </li>
 
             <li>
@@ -835,13 +843,9 @@ model added: shipped_order_form</code
               </ul>
 
               <p class="mt-2 ml-6">For example:</p>
-              <pre class="mt-2 mb-2 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm"><code
-                  >package io.apibuilderspec</code
-                ></pre>
+              <CodeBlock class="mt-2 mb-2" code="package io.apibuilderspec" />
               <p class="ml-6">is now</p>
-              <pre class="mt-2 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm"><code
-                  >package io.apibuilder.spec.v0</code
-                ></pre>
+              <CodeBlock class="mt-2" code="package io.apibuilder.spec.v0" />
             </li>
 
             <li>
@@ -882,17 +886,22 @@ model added: shipped_order_form</code
                 <li>remaining parameters</li>
               </ol>
 
-              <pre
-                class="mt-2 mb-2 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">{@html `<code>def postByOrgKey(domain: io.apibuilder.api.v0.models.Domain,
+              <CodeBlock
+                class="mt-2 mb-2"
+                code={`def postByOrgKey(domain: io.apibuilder.api.v0.models.Domain,
   orgKey: String
-)</code>`}</pre>
+)`}
+              />
 
               <p class="ml-6">is now</p>
 
-              <pre class="mt-2 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">{@html `<code>def postByOrgKey(
+              <CodeBlock
+                class="mt-2"
+                code={`def postByOrgKey(
   orgKey: String,
   domain: io.apibuilder.models.Domain
-)</code>`}</pre>
+)`}
+              />
             </li>
 
             <li>
@@ -952,9 +961,7 @@ model added: shipped_order_form</code
                 automatically create a namespace for each major version by following the format:
               </p>
 
-              <pre class="mt-2 mb-2 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm"><code
-                  >[organization namespace].[formatted service name].[major version number]</code
-                ></pre>
+              <CodeBlock class="mt-2 mb-2" code={`[organization namespace].[formatted service name].[major version number]`} />
 
               <p class="ml-6">
                 The service name is converted to a namespace by converting to lower case, under score separated (converting from camel case
@@ -1084,14 +1091,15 @@ model added: shipped_order_form</code
                 fields. Example:
               </p>
 
-              <pre class="mt-2 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm"><code
-                  >domain = apibuilder::Models::Domain.new(:name => "apibuilder.io")
+              <CodeBlock
+                class="mt-2"
+                code={`domain = apibuilder::Models::Domain.new(:name => "apibuilder.io")
 puts domain.name
 => apibuilder.io
 
 puts domain.copy(:name => "bryzek.com").name
-=> bryzek.com</code
-                ></pre>
+=> bryzek.com`}
+              />
 
               <p class="mt-2 ml-6">
                 See <a href="https://github.com/apicollective/apibuilder/issues/212" class="text-ab-blue hover:text-ab-dark-blue"
@@ -1365,9 +1373,7 @@ puts domain.copy(:name => "bryzek.com").name
             <li>
               Simple command line validation of api.json files! To validate a file, you can now use a public REST endpoint:
 
-              <pre class="mt-2 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm"><code
-                  >curl -XPOST -d @./api.json http://api.apibuilder.me/validations</code
-                ></pre>
+              <CodeBlock class="mt-2" code={`curl -XPOST -d @./api.json http://api.apibuilder.me/validations`} />
             </li>
             <li>
               Organization metadata now part of settings - To access, visit https://app.apibuilder.io, click on your organization, click on
@@ -1525,7 +1531,9 @@ puts domain.copy(:name => "bryzek.com").name
                 Example:
               </p>
 
-              <pre class="mt-2 mb-2 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">{@html `<code>"resources": {
+              <CodeBlock
+                class="mt-2 mb-2"
+                code={`"resources": {
   "message": {
     "operations": [
       {
@@ -1534,7 +1542,8 @@ puts domain.copy(:name => "bryzek.com").name
       }
     ]
   }
-}</code>`}</pre>
+}`}
+              />
 
               <p class="ml-6">Bodies and query parameters are now fully supported in the play 2.3 client and the ruby client.</p>
             </li>
@@ -1579,8 +1588,10 @@ puts domain.copy(:name => "bryzek.com").name
                 Ruby client breaking change: Removed authorize method as signature only supported a single user. Preferred method is to
                 instantiate the client directly:
               </p>
-              <pre
-                class="mt-2 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">{@html `<code>Client.new(url, :authorization => Xyz::HttpClient::Authorization.basic(username, password=nil))</code>`}</pre>
+              <CodeBlock
+                class="mt-2"
+                code={`Client.new(url, :authorization => Xyz::HttpClient::Authorization.basic(username, password=nil))`}
+              />
             </li>
           </ul>
         </div>
@@ -1644,7 +1655,9 @@ puts domain.copy(:name => "bryzek.com").name
                 deserialize from JSON making the generated clients much simpler to use.
               </p>
 
-              <pre class="mt-2 mb-2 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">{@html `<code>{
+              <CodeBlock
+                class="mt-2 mb-2"
+                code={`{
   "models": {
     "event": {
       "fields": [
@@ -1652,7 +1665,8 @@ puts domain.copy(:name => "bryzek.com").name
       ]
     }
   }
-}</code>`}</pre>
+}`}
+              />
 
               <p class="ml-6">This allows the user to pass in key/value pairs using a map.</p>
             </li>
@@ -1662,7 +1676,9 @@ puts domain.copy(:name => "bryzek.com").name
                 Introduce support for enums. Enums are specified by appending an enum element in the definition of the field. For example:
               </p>
 
-              <pre class="mt-2 mb-2 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">{@html `<code>{
+              <CodeBlock
+                class="mt-2 mb-2"
+                code={`{
   "models": {
     "event": {
       "fields": [
@@ -1670,7 +1686,8 @@ puts domain.copy(:name => "bryzek.com").name
       ]
     }
   }
-}</code>`}</pre>
+}`}
+              />
 
               <p class="ml-6">There are a few constraints on enums:</p>
               <ul class="mt-1 ml-6 list-inside list-disc space-y-1">
