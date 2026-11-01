@@ -1,3 +1,8 @@
+<script lang="ts">
+  import CodeBlock from '#lib/components/doc/CodeBlock.svelte';
+  import SectionHeading from '#lib/components/doc/SectionHeading.svelte';
+</script>
+
 <svelte:head>
   <title>Authentication - API Builder</title>
 </svelte:head>
@@ -12,16 +17,14 @@
 
   <!-- Declare schemes -->
   <div class="card mb-6">
-    <h2 class="text-ab-blue mb-3 flex items-center gap-2 text-lg font-semibold">
-      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs text-white">1</span>
-      Declare Auth Schemes on the Service
-    </h2>
+    <SectionHeading badge="1">Declare Auth Schemes on the Service</SectionHeading>
     <p class="text-ab-dark-blue mb-3">
       Add an <strong>auth_schemes</strong> array at the top level of your api.json. Each entry declares a scheme <code>type</code> that operations
       can reference. Code generators look up the type and emit the corresponding runtime helper.
     </p>
-    <pre class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm"><code
-        >{@html `"auth_schemes": [
+    <CodeBlock
+      class="mb-4"
+      code={`"auth_schemes": [
   {
     "type": "hackathon_admin",
     "description": "Tenant admin for the hackathon tenant"
@@ -30,8 +33,8 @@
     "type": "session",
     "description": "Any logged-in user session"
   }
-]`}</code
-      ></pre>
+]`}
+    />
     <p class="text-ab-dark-blue text-sm">
       The reserved value <code>none</code> cannot be used as a scheme type &mdash; it is the explicit-public marker on operations.
     </p>
@@ -39,16 +42,13 @@
 
   <!-- Reference on operation -->
   <div class="card mb-6">
-    <h2 class="text-ab-blue mb-3 flex items-center gap-2 text-lg font-semibold">
-      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs text-white">2</span>
-      Reference a Scheme on an Operation
-    </h2>
+    <SectionHeading badge="2">Reference a Scheme on an Operation</SectionHeading>
     <p class="text-ab-dark-blue mb-3">
       Set <strong>auth</strong> on the operation to one of the declared scheme types. Code generators emit the matching runtime check; the service
       method receives the authenticated caller as its first argument.
     </p>
-    <pre class="overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm"><code
-        >{@html `"resources": {
+    <CodeBlock
+      code={`"resources": {
   "event": {
     "operations": [
       {
@@ -58,23 +58,21 @@
       }
     ]
   }
-}`}</code
-      ></pre>
+}`}
+    />
   </div>
 
   <!-- Resource-level default -->
   <div class="card mb-6">
-    <h2 class="text-ab-blue mb-3 flex items-center gap-2 text-lg font-semibold">
-      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs text-white">3</span>
-      Resource-Level Defaults &amp; Per-Operation Overrides
-    </h2>
+    <SectionHeading badge="3">Resource-Level Defaults &amp; Per-Operation Overrides</SectionHeading>
     <p class="text-ab-dark-blue mb-3">
       In your input api.json you can set a default <strong>auth</strong> at the resource level so every operation inherits it. API Builder materializes
       the inheritance for you &mdash; the emitted service spec carries the effective scheme on each operation directly. Generators never need
       to walk back to the resource to find the auth value.
     </p>
-    <pre class="mb-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm"><code
-        >{@html `"resources": {
+    <CodeBlock
+      class="mb-4"
+      code={`"resources": {
   "event": {
     "auth": "hackathon_admin",
     "operations": [
@@ -87,8 +85,8 @@
       }
     ]
   }
-}`}</code
-      ></pre>
+}`}
+    />
     <p class="text-ab-dark-blue text-sm">
       Use <code>"auth": "none"</code> to opt a single operation out of an otherwise-protected resource. The generated controller emits no auth
       check for that op.
@@ -97,21 +95,18 @@
 
   <!-- Generator output -->
   <div class="card mb-6">
-    <h2 class="text-ab-blue mb-3 flex items-center gap-2 text-lg font-semibold">
-      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs text-white">4</span>
-      What Generators Produce
-    </h2>
+    <SectionHeading badge="4">What Generators Produce</SectionHeading>
     <p class="text-ab-dark-blue mb-3">
       The Play controller generator wraps each protected operation in the runtime helper that matches the scheme type and passes the
       authenticated principal to your service method:
     </p>
-    <pre class="overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm"><code
-        >{@html `def getEvents(): Action[AnyContent] = Action.async { request =>
+    <CodeBlock
+      code={`def getEvents(): Action[AnyContent] = Action.async { request =>
   withHackathonAdmin(request) { auth =>
     service.getEvents(auth).map(toGetEventsResult)
   }
-}`}</code
-      ></pre>
+}`}
+    />
     <p class="text-ab-dark-blue mt-3 text-sm">
       Each generator decides how scheme types map to runtime helpers. If your generator does not recognize a scheme type, codegen fails
       &mdash; an unrecognized scheme is never silently dropped to public.
@@ -120,10 +115,7 @@
 
   <!-- Key Rules -->
   <div class="card mb-6">
-    <h2 class="text-ab-blue mb-3 flex items-center gap-2 text-lg font-semibold">
-      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs text-white">!</span>
-      Key Rules
-    </h2>
+    <SectionHeading badge="!">Key Rules</SectionHeading>
     <ul class="text-ab-dark-blue ml-2 space-y-2">
       <li>
         <strong>Declare before reference</strong> &mdash; every <code>operation.auth</code> value (other than <code>none</code>) must appear

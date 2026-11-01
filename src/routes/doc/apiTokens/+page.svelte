@@ -1,3 +1,8 @@
+<script lang="ts">
+  import CodeBlock from '#lib/components/doc/CodeBlock.svelte';
+  import SectionHeading from '#lib/components/doc/SectionHeading.svelte';
+</script>
+
 <svelte:head>
   <title>API Tokens - API Builder</title>
 </svelte:head>
@@ -12,14 +17,11 @@
 
   <!-- Public Access -->
   <div class="mb-10">
-    <h2 class="text-ab-blue mb-4 flex items-center gap-2 text-lg font-bold">
-      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs text-white">1</span>
-      Public Data (No Token Required)
-    </h2>
+    <SectionHeading badge="1">Public Data (No Token Required)</SectionHeading>
     <div class="card">
       <p class="text-ab-dark-blue mb-3">All public information is available without authentication:</p>
-      <pre class="overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm"><code
-          >{@html `curl https://api.apibuilder.io/organizations
+      <CodeBlock
+        code={`curl https://api.apibuilder.io/organizations
 
   [
     {
@@ -30,17 +32,14 @@
       "visibility": "public",
       ...
     }
-  ]`}</code
-        ></pre>
+  ]`}
+      />
     </div>
   </div>
 
   <!-- Create Token -->
   <div class="mb-10">
-    <h2 class="text-ab-blue mb-4 flex items-center gap-2 text-lg font-bold">
-      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs text-white">2</span>
-      Create a Token
-    </h2>
+    <SectionHeading badge="2">Create a Token</SectionHeading>
     <div class="card">
       <p class="text-ab-dark-blue">
         Generate a token from your <a href="/tokens" class="text-ab-blue hover:text-ab-dark-blue underline">API tokens page</a>. Tokens
@@ -51,15 +50,10 @@
 
   <!-- Verify Token -->
   <div class="mb-10">
-    <h2 class="text-ab-blue mb-4 flex items-center gap-2 text-lg font-bold">
-      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs text-white">3</span>
-      Verify Your Token
-    </h2>
+    <SectionHeading badge="3">Verify Your Token</SectionHeading>
     <div class="card">
       <p class="text-ab-dark-blue mb-3">Confirm your token works by fetching your organization:</p>
-      <pre class="mb-3 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm"><code
-          >{@html `curl -u API_TOKEN: https://api.apibuilder.io/&lt;your-org-key&gt;`}</code
-        ></pre>
+      <CodeBlock class="mb-3" code={`curl -u API_TOKEN: https://api.apibuilder.io/<your-org-key>`} />
       <p class="text-ab-dark-blue text-sm">You should see your private applications in the response.</p>
     </div>
   </div>

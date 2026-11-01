@@ -193,13 +193,13 @@ export default [
     }
   },
 
-  // The only files allowed to use {@html}: the documentation pages, whose every injection is a
-  // static template literal of hand-written code samples with no interpolation and no request
-  // data in it. Anything rendering a value - an organization name, an application key, a
-  // service description - must be rendered as data, so adding a file here is a decision to be
-  // argued for in review rather than a default.
+  // The only file allowed to use {@html}: the api.json reference, whose every injection is a static
+  // template literal of hand-written code samples, with field types and links as markup, no
+  // interpolation and no request data in it. Anything rendering a value - an organization name, an
+  // application key, a service description - must be rendered as data, so adding a file here is a
+  // decision to be argued for in review rather than a default.
   {
-    files: ['src/routes/doc/**/+page.svelte'],
+    files: ['src/routes/doc/apiJson/+page.svelte'],
     rules: {
       'svelte/no-at-html-tags': 'off'
     }

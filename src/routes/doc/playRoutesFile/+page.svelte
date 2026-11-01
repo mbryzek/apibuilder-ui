@@ -1,3 +1,8 @@
+<script lang="ts">
+  import CodeBlock from '#lib/components/doc/CodeBlock.svelte';
+  import SectionHeading from '#lib/components/doc/SectionHeading.svelte';
+</script>
+
 <svelte:head>
   <title>Play Routes File - API Builder</title>
 </svelte:head>
@@ -11,10 +16,7 @@
   </p>
 
   <div class="card mb-6">
-    <h2 class="text-ab-blue mb-3 flex items-center gap-2 text-lg font-semibold">
-      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-white">⏱</span>
-      Bindables for Date Times
-    </h2>
+    <SectionHeading badge="⏱">Bindables for Date Times</SectionHeading>
     <p class="text-ab-dark-blue">
       Generated clients include a <code class="rounded bg-gray-100 px-1">Bindables</code> object with implicits to automatically bind
       <code class="rounded bg-gray-100 px-1">date-iso8601</code>
@@ -24,10 +26,7 @@
   </div>
 
   <div class="card mb-6">
-    <h2 class="text-ab-blue mb-3 flex items-center gap-2 text-lg font-semibold">
-      <span class="bg-ab-blue inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-white">✦</span>
-      Enums as First Class in Routes
-    </h2>
+    <SectionHeading badge="✦">Enums as First Class in Routes</SectionHeading>
 
     <p class="text-ab-dark-blue mb-4">
       Enums are first-class objects in routes. When a path or parameter includes an enumeration, Play automatically validates the value and
@@ -37,25 +36,20 @@
     <ol class="text-ab-dark-blue list-inside list-decimal space-y-4">
       <li>
         <strong>Import play keys</strong> —
-        <pre class="mt-2 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm"><code
-            >import play.PlayImport.PlayKeys._</code
-          ></pre>
+        <CodeBlock class="mt-2" code="import play.PlayImport.PlayKeys._" />
       </li>
 
       <li>
         <strong>Enable plugin</strong> —
-        <pre class="mt-2 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm"><code>enablePlugins(PlayScala)</code
-          ></pre>
+        <CodeBlock class="mt-2" code={`enablePlugins(PlayScala)`} />
       </li>
 
       <li>
         <strong>Add bindables to build.sbt</strong> —
-        <pre
-          class="mt-2 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">{@html `<code>routesImport += "&lt;packageName&gt;.&lt;serviceName&gt;.v&lt;versionNumber&gt;.Bindables._"</code>`}</pre>
+        <CodeBlock class="mt-2" code={`routesImport += "<packageName>.<serviceName>.v<versionNumber>.Bindables._"`} />
 
         <p class="mt-2">For example:</p>
-        <pre
-          class="mt-2 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">{@html `<code>routesImport += "io.apibuilder.api.v0.Bindables._"</code>`}</pre>
+        <CodeBlock class="mt-2" code={`routesImport += "io.apibuilder.api.v0.Bindables._"`} />
       </li>
     </ol>
 
