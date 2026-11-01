@@ -6,7 +6,7 @@
   import FormErrors from '#lib/components/FormErrors.svelte';
 
   interface Props {
-    form: { errors?: ApiErrorItem[] } | null;
+    form: { errors?: ApiErrorItem[]; name?: string; namespace?: string; key?: string; visibility?: Visibility } | null;
   }
 
   let { form }: Props = $props();
@@ -25,13 +25,14 @@
     <PendingForm>
       {#snippet children(pending)}
         <div class="space-y-4">
-          <FormField label="Name" name="name" markRequired />
+          <FormField label="Name" name="name" value={form?.name ?? ''} markRequired />
 
-          <FormField label="Namespace" name="namespace" placeholder="e.g. com.example" markRequired />
+          <FormField label="Namespace" name="namespace" value={form?.namespace ?? ''} placeholder="e.g. com.example" markRequired />
 
           <FormField
             label="Key"
             name="key"
+            value={form?.key ?? ''}
             placeholder="Auto-generated from name if left blank"
             hint="Used in URLs. Auto-generated if left blank."
           />
@@ -40,7 +41,7 @@
             <label for="visibility" class="text-ab-dark-blue mb-1 block text-sm font-medium">Visibility</label>
             <select id="visibility" name="visibility" class="input-field w-full rounded-lg border px-3 py-2">
               {#each Object.values(Visibility) as v}
-                <option value={v} selected={v === Visibility.Organization}>{v}</option>
+                <option value={v} selected={v === (form?.visibility ?? Visibility.Organization)}>{v}</option>
               {/each}
             </select>
           </div>

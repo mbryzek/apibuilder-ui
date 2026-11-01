@@ -10,6 +10,7 @@
   interface Props {
     data: {
       org: Organization;
+      isMember: boolean;
       isAdmin: boolean;
       subscriptions: Subscription[];
       loadError: LoadError | null;
@@ -51,9 +52,15 @@
 
   <FormErrors errors={formResult?.errors} />
 
-  <!-- With no subscription list every row would read "Not subscribed", and subscribing
-       again would file a duplicate. Say so instead of guessing. -->
-  {#if data.loadError}
+  <!-- The toggle requires membership, so a non-member who opens this URL directly was offered
+       buttons the server refuses with a 403 page; gated as the upload page is. With no
+       subscription list every row would read "Not subscribed", and subscribing again would file
+       a duplicate, so a load error says so instead of guessing. -->
+  {#if !data.isMember}
+    <div class="card">
+      <p class="text-ab-gray text-sm">Only a member of this organization can subscribe to its notifications.</p>
+    </div>
+  {:else if data.loadError}
     <LoadErrorBanner error={data.loadError} />
   {:else}
     <div class="space-y-3">
