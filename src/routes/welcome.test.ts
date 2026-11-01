@@ -36,6 +36,7 @@ describe('the welcome action', () => {
     const result = await submit({ password: 'a', confirm_password: 'b' });
 
     expect(result.status).toBe(400);
+    expect(result.data?.errors).toEqual([{ message: 'Passwords do not match' }]);
     expect(client.createUserActivationPasswordByToken).not.toHaveBeenCalled();
   });
 
