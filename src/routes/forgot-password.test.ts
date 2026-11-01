@@ -56,7 +56,7 @@ describe('forgot-password does not report an outage as a sent email', () => {
 
   it('surfaces a 5xx the same way', async () => {
     client.createTenantSessionPasswordAndResets.mockRejectedValue(
-      Object.assign(new Error('Internal Server Error'), { status: 503, response: { status: 503 } })
+      Object.assign(new Error('Internal Server Error'), { status: 503, response: new Response(null, { status: 503 }) })
     );
 
     expect((await submit('someone@example.com')).success).toBeUndefined();

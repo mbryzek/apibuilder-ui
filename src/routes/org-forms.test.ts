@@ -38,7 +38,7 @@ function invoke(action: unknown, form: Record<string, string>, locals: App.Local
   return invokeAction(action, { form, locals, params: { orgKey: 'acme' }, cookies: { set: () => {} } });
 }
 
-const conflict = () => Object.assign(new Error('Conflict'), { status: 409, response: { status: 409 } });
+const conflict = () => Object.assign(new Error('Conflict'), { status: 409, response: new Response(null, { status: 409 }) });
 
 beforeEach(() => {
   vi.clearAllMocks();

@@ -1,10 +1,24 @@
 import type { Handle } from '@sveltejs/kit/hooks';
+import { waitUntil } from 'cloudflare:workers';
+import { createServerApiEventReporter } from 'ui/telemetry/api-event-reporter.ts';
 import { clients, getSessionHeaders } from '#lib/api/clients.ts';
-import { handleApiCall, isApiError } from '#lib/api/error-handler.ts';
+import { handleApiCall, isApiError, reportApiEventsFromServer, scrubEndpoint } from '#lib/api/error-handler.ts';
 import { isUnavailable } from '#lib/api/api-message.ts';
 import { SESSION_COOKIE, config } from '#lib/config.ts';
+import { captureServerEvent } from '#lib/server/posthog.ts';
 import { clearSessionCookie } from '#lib/server/session.ts';
 import type { TenantSession } from '#generated/com-bryzek-platform.ts';
+
+// Every API call this app makes runs here on the server, so this is where its failures are
+// reported: through the server half of PostHog, under the event names every app shares.
+reportApiEventsFromServer(
+  createServerApiEventReporter({
+    capture: captureServerEvent,
+    waitUntil,
+    scrub: scrubEndpoint,
+    distinctId: (event) => event.locals.session?.user?.id
+  })
+);
 
 export const handle: Handle = async ({ event, resolve }) => {
   const sessionId = event.cookies.get(SESSION_COOKIE) || undefined;

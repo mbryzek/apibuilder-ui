@@ -11,12 +11,17 @@ export default defineConfig({
   // hands `enhance` — see src/lib/test-support/app-forms.ts. `$app/navigation` likewise, to inert
   // stand-ins, so a spec can mount a whole page — see src/lib/test-support/app-navigation.ts.
   // `$app/state` to a `page` a spec sets — see src/lib/test-support/app-state.svelte.ts.
+  // `$app/env`, `$app/server` and `cloudflare:workers` likewise, for the API-failure telemetry in
+  // `#lib/api/error-handler.ts` and `hooks.server.ts`.
   plugins: [svelte({ configFile: false })],
   resolve: {
     alias: {
       '$app/forms': fileURLToPath(new URL('./src/lib/test-support/app-forms.ts', import.meta.url)),
       '$app/navigation': fileURLToPath(new URL('./src/lib/test-support/app-navigation.ts', import.meta.url)),
-      '$app/state': fileURLToPath(new URL('./src/lib/test-support/app-state.svelte.ts', import.meta.url))
+      '$app/state': fileURLToPath(new URL('./src/lib/test-support/app-state.svelte.ts', import.meta.url)),
+      '$app/env': fileURLToPath(new URL('./src/lib/test-support/app-env.ts', import.meta.url)),
+      '$app/server': fileURLToPath(new URL('./src/lib/test-support/app-server.ts', import.meta.url)),
+      'cloudflare:workers': fileURLToPath(new URL('./src/lib/test-support/cloudflare-workers.ts', import.meta.url))
     },
     // Svelte ships a server build and a client build; mounting needs the client one.
     conditions: ['browser']
