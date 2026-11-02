@@ -41,7 +41,7 @@ describe('the application sidebar, outside the organization', () => {
   it('links the history and not the settings', () => {
     component = mount(AppSidebar, {
       target,
-      props: { orgKey: 'public-org', appKey: 'app', version: 'latest', appName: 'App', isMember: false, isAdmin: false }
+      props: { orgKey: 'public-org', appKey: 'app', version: 'latest', appName: 'App', isMember: false, isAdmin: false, generators: [] }
     });
 
     expect(hrefs()).toContain('/public-org/app/latest/history');
