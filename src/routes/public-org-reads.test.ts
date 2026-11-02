@@ -12,13 +12,19 @@ import { caughtAsync } from '#lib/test-support/throws.ts';
 const client = {
   getOrganizationByKey: vi.fn(),
   getMemberships: vi.fn(),
-  getChanges: vi.fn()
+  getChanges: vi.fn(),
+  getCode: vi.fn(),
+  getItems: vi.fn()
 };
 
 vi.mock('#lib/api/clients.ts', async (importOriginal) => mockApiClients(client, importOriginal));
 
 const { load: orgLayoutLoad } = await import('./[orgKey]/+layout.server');
 const { load: historyLoad } = await import('./[orgKey]/[appKey]/[version]/history/+page.server');
+const { load: generatorLoad } = await import('./[orgKey]/[appKey]/[version]/[generatorKey]/+page.server');
+const { GET: generatorDownload } = await import('./[orgKey]/[appKey]/[version]/[generatorKey]/download/+server');
+const { load: searchLoad } = await import('./search/+page.server');
+const { load: siteHistoryLoad } = await import('./history/+page.server');
 
 const ORG = { id: 'org-1', key: 'public-org', name: 'Public', namespace: 'io.public', visibility: 'public', domains: [] };
 
@@ -81,12 +87,15 @@ describe('the organization layout, signed in as a non-member', () => {
 });
 
 describe('the history page', () => {
-  it('sends a signed-out visitor to sign in rather than calling getChanges', async () => {
-    const thrown = await caughtAsync(() => loadHistory({}));
+  it('reads the changes for a signed-out visitor, with no credential', async () => {
+    const change = { id: 'chg-1' };
+    client.getChanges.mockResolvedValue([change]);
 
-    expect(thrown.status).toBe(303);
-    expect(thrown.location).toContain('/login?redirect=');
-    expect(client.getChanges).not.toHaveBeenCalled();
+    const data = (await loadHistory({})) as { changes: unknown[]; loadError: unknown };
+
+    expect(data.changes).toEqual([change]);
+    expect(data.loadError).toBeNull();
+    expect(client.getChanges).toHaveBeenCalledWith({ orgKey: 'public-org', applicationKey: 'app', limit: expect.any(Number), offset: 0 });
   });
 
   it('reads the changes for a signed-in caller', async () => {
@@ -123,5 +132,62 @@ describe('the history page', () => {
 
     expect(thrown.status).toBe(400);
     expect(client.getChanges).not.toHaveBeenCalled();
+  });
+});
+
+describe('generated code, signed out', () => {
+  const params = { orgKey: 'public-org', appKey: 'app', version: 'latest', generatorKey: 'play' };
+  const CODE = { generator_key: 'play', files: [{ name: 'a.scala', contents: 'x' }] };
+
+  function loadGenerator() {
+    return generatorLoad({ params, locals: {} } as unknown as Parameters<typeof generatorLoad>[0]);
+  }
+
+  it('shows the code of a public application', async () => {
+    client.getCode.mockResolvedValue(CODE);
+
+    expect(await loadGenerator()).toEqual({ code: CODE, generatorKey: 'play' });
+  });
+
+  it('downloads the code of a public application', async () => {
+    client.getCode.mockResolvedValue(CODE);
+
+    const response = await generatorDownload({ params, locals: {} } as unknown as Parameters<typeof generatorDownload>[0]);
+
+    expect(await response.text()).toBe('x');
+  });
+
+  it.each([401, 404])('is a 404 when the API answers %i, so a private application cannot be confirmed', async (status) => {
+    client.getCode.mockRejectedValue(refusedWith(status));
+
+    const thrown = await caughtAsync(() => loadGenerator());
+
+    expect(thrown.status).toBe(404);
+  });
+});
+
+describe('search and the site history, signed out', () => {
+  it('searches with no credential', async () => {
+    const item = { id: 'app-1' };
+    client.getItems.mockResolvedValue([item]);
+
+    const data = (await searchLoad({
+      url: new URL('https://apibuilder.test/search?q=pets'),
+      locals: {}
+    } as unknown as Parameters<typeof searchLoad>[0])) as { items: unknown[]; loadError: unknown };
+
+    expect(data.items).toEqual([item]);
+    expect(data.loadError).toBeNull();
+  });
+
+  it('reads the site history with no credential', async () => {
+    client.getChanges.mockResolvedValue([]);
+
+    const data = (await siteHistoryLoad({
+      url: new URL('https://apibuilder.test/history'),
+      locals: {}
+    } as unknown as Parameters<typeof siteHistoryLoad>[0])) as { loadError: unknown };
+
+    expect(data.loadError).toBeNull();
   });
 });

@@ -25,9 +25,8 @@
 
   const navLinks = $derived.by(() => {
     const items: { href: string; label: string; preloadOff?: boolean }[] = [];
-    // Changes are a member's read: a public application's versions are open and its history is not.
+    items.push({ href: `${versionBase}/history`, label: 'History' });
     if (isMember) {
-      items.push({ href: `${versionBase}/history`, label: 'History' });
       items.push({ href: `${versionBase}/settings`, label: 'Settings' });
     }
     items.push({ href: `${versionBase}/original`, label: 'Original', preloadOff: true });
