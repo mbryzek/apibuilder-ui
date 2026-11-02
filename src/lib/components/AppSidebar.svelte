@@ -135,7 +135,9 @@
 
 <!-- Desktop sidebar -->
 <nav class="hidden w-56 shrink-0 md:block" aria-label="Application navigation">
-  <div class="sticky top-4">
+  <!-- Scrolls within the window: being sticky, a sidebar taller than the window would put its last
+       clients and the account menu out of reach until the end of a long spec. -->
+  <div class="sticky top-4 max-h-[calc(100vh-2rem)] overflow-y-auto">
     <!-- App name -->
     <a href={versionBase} class="text-ab-dark-blue hover:text-ab-blue mb-4 block truncate text-lg font-bold transition-colors">
       {appName}
@@ -162,9 +164,7 @@
     {#if clientLinks.length > 0}
       <div class="mt-6 border-t border-gray-200 pt-4">
         <span class="text-ab-gray mb-1 block px-3 text-xs font-medium uppercase">Clients</span>
-        <!-- Scrolls on its own: the sidebar is sticky, so a list taller than the window would put
-             its last rows and the account menu out of reach until the end of a long spec. -->
-        <ul class="max-h-72 space-y-1 overflow-y-auto">
+        <ul class="space-y-1">
           {#each clientLinks as link (link.href)}
             <li>
               <a
