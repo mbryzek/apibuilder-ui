@@ -5,6 +5,7 @@
   import AppSidebar from '#lib/components/AppSidebar.svelte';
   import LoadErrorBanner from '#lib/components/LoadErrorBanner.svelte';
   import type { Organization } from '#generated/com-bryzek-apibuilder.ts';
+  import type { Generator } from '#generated/com-bryzek-apibuilder-generator.ts';
   import type { Service } from '#generated/com-bryzek-apibuilder-spec.ts';
   import type { LoadError } from '#lib/api/load-error.ts';
 
@@ -17,6 +18,8 @@
       service: Service;
       isWatching: boolean;
       watchLoadError: LoadError | null;
+      generators: Generator[];
+      generatorsLoadError: LoadError | null;
       session?: PublicSession;
     };
     children: Snippet;
@@ -41,8 +44,20 @@
   <LoadErrorBanner error={data.watchLoadError} />
 {/if}
 
+{#if data.generatorsLoadError}
+  <LoadErrorBanner error={data.generatorsLoadError} />
+{/if}
+
 <div class="flex gap-10">
-  <AppSidebar {orgKey} {appKey} version={version.version} appName={service.name} isMember={data.isMember} isAdmin={data.isAdmin} />
+  <AppSidebar
+    {orgKey}
+    {appKey}
+    version={version.version}
+    appName={service.name}
+    isMember={data.isMember}
+    isAdmin={data.isAdmin}
+    generators={data.generators}
+  />
 
   <div class="min-w-0 flex-1">
     {#if service.description}
