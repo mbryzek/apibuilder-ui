@@ -1,18 +1,32 @@
 import type { PageServerLoad, Actions } from './$types';
 import { fail } from '@sveltejs/kit';
+import { emailedLinkFailure, linkOutcome } from 'ui/emailedLink/outcome.ts';
 import { passwordRefusal } from 'ui/emailedLink/password.ts';
 import { platformClient } from '#lib/api/clients.ts';
-import { handleApiCall } from '#lib/api/error-handler.ts';
+import { handleApiCall, isApiError } from '#lib/api/error-handler.ts';
 import { config } from '#lib/config.ts';
 import { completeSession } from '#lib/server/auth-completion.ts';
 import { requiredSecret } from '#lib/server/form.ts';
 import type { SessionState } from '#generated/com-bryzek-platform.ts';
 
-// The token stays out of the page payload: the action reads it from `params`, and nothing on the
-// page renders it. Returning it would serialize a single-use credential into the hydration payload
-// for no consumer.
-export const load: PageServerLoad = async () => {
-  return {};
+/**
+ * THE LINK IS READ, NOT SPENT, ON GET. `GET .../session/password/resets/:id` only says whether the
+ * platform still holds the id, so a link scanner following the URL changes nothing and somebody
+ * holding a dead link hears so before typing a password. Only the form post consumes the link.
+ *
+ * Which failure means the link is dead is `ui/emailedLink/outcome.ts`: only a 404, so an outage
+ * never tells somebody holding a live link that it is dead.
+ */
+function readResetLink(id: string) {
+  return handleApiCall(() => platformClient().getTenantSessionPasswordAndResetsById({ tenantId: config.tenantId, id }));
+}
+
+export const load: PageServerLoad = async ({ params, url }) => {
+  return {
+    outcome: linkOutcome(await readResetLink(params.token)),
+    // The same URL, for the retry link on a transient failure, so it works with no JavaScript.
+    retryUrl: url.pathname
+  };
 };
 
 export const actions: Actions = {
@@ -30,6 +44,17 @@ export const actions: Actions = {
         body: { id: params.token, password }
       })
     );
+
+    // The link was live when `load` read it and can be dead now: it is single use and it expires.
+    // The platform answers a dead id here with a 422 like any other refusal, so the read says which
+    // this is, and the page shows it as a dead link rather than as a password that was rejected.
+    if (
+      isApiError(response) &&
+      (emailedLinkFailure(response.status) === 'invalid' ||
+        (response.status === 422 && linkOutcome(await readResetLink(params.token)).kind === 'invalid'))
+    ) {
+      return fail(404, { errors: [], linkInvalid: true });
+    }
 
     return completeSession(cookies, response, '/', 'Password reset successfully!');
   }
