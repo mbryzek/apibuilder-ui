@@ -2,6 +2,7 @@ import type { LayoutServerLoad } from './$types';
 import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.ts';
 import { handleApiCall } from '#lib/api/error-handler.ts';
 import { dataOr, dataOrThrow, loadErrorFrom } from '#lib/api/load-error.ts';
+import { loadAllGenerators } from '#lib/server/generators.ts';
 import { assertSafePathParams } from '#lib/server/path-params.ts';
 import type { Version, Watch } from '#generated/com-bryzek-apibuilder.ts';
 
@@ -19,17 +20,20 @@ export const load: LayoutServerLoad = async ({ params, locals }) => {
 
   const version = dataOrThrow(versionResponse, 'Version not found');
 
-  const watchResponse = locals.session
-    ? await handleApiCall<Watch[]>(() =>
-        client.getWatches({
-          userId: locals.session!.user.id,
-          organizationKey: params.orgKey,
-          applicationKey: params.appKey,
-          limit: 100,
-          offset: 0
-        })
-      )
-    : null;
+  const [watchResponse, generatorsResponse] = await Promise.all([
+    locals.session
+      ? handleApiCall<Watch[]>(() =>
+          client.getWatches({
+            userId: locals.session!.user.id,
+            organizationKey: params.orgKey,
+            applicationKey: params.appKey,
+            limit: 100,
+            offset: 0
+          })
+        )
+      : null,
+    loadAllGenerators({ headers })
+  ]);
 
   const watchData = watchResponse ? dataOr(watchResponse, []) : [];
   const currentWatch = watchData.length > 0 ? watchData[0] : null;
@@ -40,6 +44,9 @@ export const load: LayoutServerLoad = async ({ params, locals }) => {
     isWatching: currentWatch !== null,
     // Without this the toggle renders "not watching" for a lookup that never
     // answered, and pressing it would file a second watch on the same application.
-    watchLoadError: loadErrorFrom(watchResponse)
+    watchLoadError: loadErrorFrom(watchResponse),
+    generators: dataOr(generatorsResponse, []),
+    // Without this the sidebar's missing Clients section reads as "no generators exist".
+    generatorsLoadError: loadErrorFrom(generatorsResponse)
   };
 };
