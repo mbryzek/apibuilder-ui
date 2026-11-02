@@ -31,11 +31,8 @@ export type { ApiCallOptions, ApiError, ApiResponse, ApiResponseError, ApiRespon
  */
 export type ApiErrorItem = ApiError;
 
-/**
- * This app's token routes the shared list does not cover: the password-reset page an apibuilder
- * reset mail links to, and the API path that page reads the link through.
- */
-export const scrubEndpoint = createScrubber([/(\/login\/reset-password\/)[^/?#]+/g, /(\/session\/password\/resets\/)[^/?#]+/g]);
+/** This app's token route the shared list does not cover: the password-reset page an apibuilder reset mail links to. */
+export const scrubEndpoint = createScrubber([/(\/login\/reset-password\/)[^/?#]+/g]);
 
 /** Says so if a browser-side call ever fails: nothing here reports one until a browser client is added. */
 function browserHasNoPostHog(event: string): void {
