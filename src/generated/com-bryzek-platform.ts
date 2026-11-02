@@ -573,6 +573,13 @@ export interface CreateTenantSessionPasswordAndResetsOptions {
   signal?: AbortSignal;
 }
 
+export interface GetTenantSessionPasswordAndResetsByIdOptions {
+  tenantId: string;
+  id: string;
+  headers?: Record<string, string>;
+  signal?: AbortSignal;
+}
+
 export interface CreateTenantSessionLoginAndLinkAndRequestsOptions {
   tenantId: string;
   body: LoginLinkRequestForm;
@@ -968,6 +975,30 @@ export class ApiClient {
 
     if (response.status === 422) {
       throw new ValidationErrorsResponse(response);
+    }
+
+    throw new ApiException(response, `Request failed with status ${response.status}`);
+  }
+
+  async getTenantSessionPasswordAndResetsById(params: GetTenantSessionPasswordAndResetsByIdOptions): Promise<void> {
+    const url = `${this.baseUrl}/tenant/${encodeURIComponent(params.tenantId)}/session/password/resets/${encodeURIComponent(params.id)}`;
+
+    const response = await this.request(
+      url,
+      {
+        method: 'GET'
+      },
+      'application/json',
+      params.headers || {},
+      params.signal
+    );
+
+    if (response.status === 204) {
+      return;
+    }
+
+    if (response.status === 404) {
+      throw new VoidResponse(response);
     }
 
     throw new ApiException(response, `Request failed with status ${response.status}`);
