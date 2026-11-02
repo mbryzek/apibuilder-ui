@@ -37,6 +37,7 @@ describe('scrubEndpoint', () => {
   it.each([
     ['/login/reset-password/tok-1', '/login/reset-password/[redacted]'],
     ['/login/password/reset/tok-1', '/login/password/reset/[redacted]'],
+    ['https://api.test/tenant/t-1/session/password/resets/pwr-1', 'https://api.test/tenant/t-1/session/password/resets/[redacted]'],
     ['/welcome/tok-1', '/welcome/[redacted]'],
     ['https://api.test/activations/tok-1', 'https://api.test/activations/[redacted]'],
     ['https://api.test/email/verifications/tok-1?x=1', 'https://api.test/email/verifications/[redacted]?x=1']
