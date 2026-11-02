@@ -2,6 +2,7 @@
   import { page } from '$app/state';
   import { buildOrgLinks } from '#lib/utils/org-nav.ts';
   import AccountMenu from '#lib/components/AccountMenu.svelte';
+  import type { Generator } from '#generated/com-bryzek-apibuilder-generator.ts';
 
   interface Props {
     orgKey: string;
@@ -10,9 +11,10 @@
     appName: string;
     isMember: boolean;
     isAdmin: boolean;
+    generators: Generator[];
   }
 
-  let { orgKey, appKey, version, appName, isMember, isAdmin }: Props = $props();
+  let { orgKey, appKey, version, appName, isMember, isAdmin, generators }: Props = $props();
 
   const currentPath = $derived(page.url.pathname);
   const session = $derived(page.data.session);
@@ -25,15 +27,16 @@
 
   const navLinks = $derived.by(() => {
     const items: { href: string; label: string; preloadOff?: boolean }[] = [];
-    // Changes are a member's read: a public application's versions are open and its history is not.
+    items.push({ href: `${versionBase}/history`, label: 'History' });
     if (isMember) {
-      items.push({ href: `${versionBase}/history`, label: 'History' });
       items.push({ href: `${versionBase}/settings`, label: 'Settings' });
     }
     items.push({ href: `${versionBase}/original`, label: 'Original', preloadOff: true });
     items.push({ href: `${versionBase}/service.json`, label: 'service.json', preloadOff: true });
     return items;
   });
+
+  const clientLinks = $derived(generators.map((g) => ({ href: `${versionBase}/${encodeURIComponent(g.key)}`, label: g.name })));
 
   const orgLinks = $derived(buildOrgLinks(orgKey, isMember, isAdmin));
 
@@ -78,12 +81,33 @@
               class="block py-1.5 text-sm font-medium transition-colors {isActive(link.href)
                 ? 'text-ab-blue font-semibold'
                 : 'text-ab-gray hover:text-ab-dark-blue'}"
-              data-sveltekit-preload-data={link.preloadOff ? 'off' : undefined}
+              data-sveltekit-preload-data={link.preloadOff ? 'false' : undefined}
               onclick={() => (mobileOpen = false)}>{link.label}</a
             >
           </li>
         {/each}
       </ul>
+
+      <!-- Clients. Preload stays off: opening one of these runs the generator. -->
+      {#if clientLinks.length > 0}
+        <div class="mt-3 border-t border-gray-200 pt-3">
+          <span class="text-ab-gray mb-1 block text-xs font-medium uppercase">Clients</span>
+          <ul class="space-y-1">
+            {#each clientLinks as link (link.href)}
+              <li>
+                <a
+                  href={link.href}
+                  class="block py-1.5 text-sm font-medium transition-colors {isActive(link.href)
+                    ? 'text-ab-blue font-semibold'
+                    : 'text-ab-gray hover:text-ab-dark-blue'}"
+                  data-sveltekit-preload-data="false"
+                  onclick={() => (mobileOpen = false)}>{link.label}</a
+                >
+              </li>
+            {/each}
+          </ul>
+        </div>
+      {/if}
 
       <!-- Org links -->
       {#if orgLinks.length > 0}
@@ -110,7 +134,9 @@
 
 <!-- Desktop sidebar -->
 <nav class="hidden w-56 shrink-0 md:block" aria-label="Application navigation">
-  <div class="sticky top-4">
+  <!-- Scrolls within the window: being sticky, a sidebar taller than the window would put its last
+       clients and the account menu out of reach until the end of a long spec. -->
+  <div class="sticky top-4 max-h-[calc(100vh-2rem)] overflow-y-auto">
     <!-- App name -->
     <a href={versionBase} class="text-ab-dark-blue hover:text-ab-blue mb-4 block truncate text-lg font-bold transition-colors">
       {appName}
@@ -125,13 +151,35 @@
             class="block rounded-md px-3 py-2 text-sm font-medium transition-colors {isActive(link.href)
               ? 'bg-ab-blue text-white'
               : 'text-ab-gray hover:text-ab-dark-blue hover:bg-ab-light-gray'}"
-            data-sveltekit-preload-data={link.preloadOff ? 'off' : undefined}
+            data-sveltekit-preload-data={link.preloadOff ? 'false' : undefined}
           >
             {link.label}
           </a>
         </li>
       {/each}
     </ul>
+
+    <!-- Clients. Preload stays off: opening one of these runs the generator. -->
+    {#if clientLinks.length > 0}
+      <div class="mt-6 border-t border-gray-200 pt-4">
+        <span class="text-ab-gray mb-1 block px-3 text-xs font-medium uppercase">Clients</span>
+        <ul class="space-y-1">
+          {#each clientLinks as link (link.href)}
+            <li>
+              <a
+                href={link.href}
+                class="block rounded-md px-3 py-2 text-sm font-medium transition-colors {isActive(link.href)
+                  ? 'bg-ab-blue text-white'
+                  : 'text-ab-gray hover:text-ab-dark-blue hover:bg-ab-light-gray'}"
+                data-sveltekit-preload-data="false"
+              >
+                {link.label}
+              </a>
+            </li>
+          {/each}
+        </ul>
+      </div>
+    {/if}
 
     <!-- Collapsible org section -->
     {#if orgLinks.length > 0}

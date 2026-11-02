@@ -65,17 +65,16 @@
 
         <a href="/generators" class="text-sm font-medium text-white/80 transition-colors hover:text-white">Generators</a>
 
-        {#if session}
-          <!-- Search form -->
-          <form action="/search" method="GET" class="flex items-center">
-            <input
-              type="text"
-              name="q"
-              placeholder="Search..."
-              class="w-40 rounded-md border-0 bg-white/10 px-3 py-1.5 text-sm text-white placeholder-white/50 transition-colors focus:bg-white/20 focus:ring-1 focus:ring-white/50 lg:w-56"
-            />
-          </form>
+        <form action="/search" method="GET" class="flex items-center">
+          <input
+            type="text"
+            name="q"
+            placeholder="Search..."
+            class="w-40 rounded-md border-0 bg-white/10 px-3 py-1.5 text-sm text-white placeholder-white/50 transition-colors focus:bg-white/20 focus:ring-1 focus:ring-white/50 lg:w-56"
+          />
+        </form>
 
+        {#if session}
           {#if !hasSidebar}
             <AccountMenu {session} placement="down" tone="dark" />
           {/if}
@@ -156,17 +155,16 @@
         Generators
       </a>
 
-      {#if session}
-        <!-- Mobile search -->
-        <form action="/search" method="GET" class="px-3 py-2">
-          <input
-            type="text"
-            name="q"
-            placeholder="Search..."
-            class="w-full rounded-md border-0 bg-white/10 px-3 py-1.5 text-sm text-white placeholder-white/50 focus:bg-white/20 focus:ring-1 focus:ring-white/50"
-          />
-        </form>
+      <form action="/search" method="GET" class="px-3 py-2">
+        <input
+          type="text"
+          name="q"
+          placeholder="Search..."
+          class="w-full rounded-md border-0 bg-white/10 px-3 py-1.5 text-sm text-white placeholder-white/50 focus:bg-white/20 focus:ring-1 focus:ring-white/50"
+        />
+      </form>
 
+      {#if session}
         <div class="border-t border-white/20 pt-2">
           <AccountMenu {session} placement="up" tone="dark" onChoose={closeMobileMenu} />
         </div>

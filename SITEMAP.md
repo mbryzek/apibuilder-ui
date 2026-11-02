@@ -120,6 +120,9 @@
 | "Reset Password" button | Submits new password |
 | "Go to login form" link | Back to login        |
 
+- A spent or expired link (a 404 from the platform on view, or a 422 from the submit whose re-read answers 404) shows "This link is no longer valid" and no password field, with links to request a new one or sign in
+- Any other failure reading the link shows "We could not open your reset link", saying the link is still good, with a Try Again link to the same URL (`ui/emailedLink/outcome.ts`)
+
 #### 2f. GitHub OAuth
 
 **Routes:** `GET /login/github/` (redirect to GitHub), `GET /login/github/callback` (callback)

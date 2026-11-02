@@ -5,7 +5,8 @@
  * reactive state, so a spec that changes `params` sees the page re-derive from them, as a client-side
  * navigation would make it.
  */
-export const page = $state<{ params: Record<string, string>; url: URL }>({
+export const page = $state<{ params: Record<string, string>; url: URL; data: Record<string, unknown> }>({
   params: {},
+  data: {},
   url: new URL('http://localhost/')
 });
