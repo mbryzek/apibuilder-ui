@@ -2,6 +2,7 @@
   import PendingForm from '#lib/components/PendingForm.svelte';
   import FormField from '#lib/components/FormField.svelte';
   import { Visibility } from '#generated/com-bryzek-apibuilder.ts';
+  import { OFFERED_VISIBILITIES } from '#lib/utils/visibility.ts';
   import type { ApiErrorItem } from '#lib/api/error-handler.ts';
   import FormErrors from '#lib/components/FormErrors.svelte';
 
@@ -40,7 +41,7 @@
           <div>
             <label for="visibility" class="text-ab-dark-blue mb-1 block text-sm font-medium">Visibility</label>
             <select id="visibility" name="visibility" class="input-field w-full rounded-lg border px-3 py-2">
-              {#each Object.values(Visibility) as v}
+              {#each OFFERED_VISIBILITIES as v}
                 <option value={v} selected={v === (form?.visibility ?? Visibility.Organization)}>{v}</option>
               {/each}
             </select>
