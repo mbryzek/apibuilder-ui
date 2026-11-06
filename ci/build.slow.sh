@@ -2,15 +2,16 @@
 #
 # What CI runs for apibuilder-ui.
 #
-# LANDING THIS FILE IS THE ENROLMENT (ISS-848). The fleet verifies a repo exactly
-# when `ci/build.sh` exists at a pull request's head sha — there is no registry to
-# keep in step with the repos that have one. A verify job checks the commit out
-# detached, runs this, and posts the result as the `ci` commit status the merge
-# lane reads.
+# LANDING THIS FILE IS THE ENROLMENT (ISS-848). The fleet builds a repo exactly
+# when `ci/build.slow.sh` exists on its default branch — there is no registry to
+# keep in step with the repos that have one. Each ready pull request is carried by
+# the repository's next build: its Prepare merges the members onto latest `main`,
+# every shard runs this script, and Land merges the members only once every shard
+# is green at one commit.
 #
-# That cuts both ways: **a broken script here parks every pull request in this
-# repo**, because the lane refuses anything whose `ci` is not green. Confirm a
-# change to it by hand before merging one:
+# That cuts both ways: **a broken script here fails every shard of every build in
+# this repo**, so nothing in it lands. Confirm a change to it by hand before
+# merging one:
 #
 #   dev ci verify --repo mbryzek/apibuilder-ui --sha <head sha> --pr <n> --no-post
 #
@@ -169,9 +170,9 @@ dev ci step sveltekit
 # `platform`, and the released image would not serve one. That is fixed — `ci/e2e.sh` beside this
 # file runs the browser suite against a real backend, and it runs today.
 #
-# What keeps it out of THIS file is the gate. This script produces the `ci` status the merge lane
-# refuses to merge without; `ci/e2e.sh` produces `e2e`, which the lane does not read. These suites
+# What keeps it out of THIS file is the gate. This script is what a build's shards run, and Land
+# merges nothing until every shard is green; `ci/e2e.sh` produces `e2e`, which Land does not read. These suites
 # had never run unattended before, so their flake rate is unmeasured, and an unmeasured flake
-# source inside `ci` parks pull requests that did nothing wrong. Moving them in here is a decision
+# source inside this script fails builds whose pull requests did nothing wrong. Moving them in here is a decision
 # earned by measured flake data (ISS-2180) — see "The browser suites are the second context" in
 # devops/docs/ci.md — and not something to do because the suite has looked fine.
