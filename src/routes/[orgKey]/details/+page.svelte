@@ -3,7 +3,8 @@
   import FormField from '#lib/components/FormField.svelte';
   import type { Organization } from '#generated/com-bryzek-apibuilder.ts';
   import type { ApiErrorItem } from '#lib/api/error-handler.ts';
-  import { Visibility } from '#generated/com-bryzek-apibuilder.ts';
+  import type { Visibility } from '#generated/com-bryzek-apibuilder.ts';
+  import { OFFERED_VISIBILITIES } from '#lib/utils/visibility.ts';
   import FormErrors from '#lib/components/FormErrors.svelte';
   import Banner from '#lib/components/Banner.svelte';
 
@@ -40,7 +41,7 @@
           <div>
             <label for="visibility" class="text-ab-dark-blue mb-1 block text-sm font-medium">Visibility</label>
             <select id="visibility" name="visibility" class="input-field w-full rounded-lg border px-3 py-2">
-              {#each Object.values(Visibility) as v}
+              {#each OFFERED_VISIBILITIES as v}
                 <option value={v} selected={(formResult?.visibility ?? org.visibility) === v}>{v}</option>
               {/each}
             </select>
