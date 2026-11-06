@@ -38,15 +38,13 @@ test.describe('Organization Creation', () => {
     expect(page.url()).toContain('/org/create');
   });
 
-  test('visibility select shows all enum values', async ({ page }) => {
+  test('visibility select offers organization and public, never the retired user', async ({ page }) => {
     await signupAndLogin(page);
 
     await loadUrl(page, '/org/create');
 
     const options = await page.locator('select[name="visibility"] option').allTextContents();
-    expect(options).toContain('user');
-    expect(options).toContain('organization');
-    expect(options).toContain('public');
+    expect(options).toEqual(['organization', 'public']);
   });
 });
 
