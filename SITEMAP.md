@@ -182,7 +182,7 @@
 | ----------------------- | ---------------------------------- |
 | Organization Name field | Text input                         |
 | Key field               | Optional, auto-generated from name |
-| Visibility select       | All visibility options             |
+| Visibility select       | organization, public               |
 | Namespace field         | Text input                         |
 | Submit button           | Creates org                        |
 | Cancel button           | Back                               |
@@ -336,7 +336,7 @@
 | ------------------------------ | ------------------------------------------------------- |
 | Example api.json links         | Shown for first version only                            |
 | Version field                  | Text, defaults to `0.0.1-dev` (new) or auto-incremented |
-| Visibility select              | All visibility options                                  |
+| Visibility select              | organization, public                                    |
 | File upload                    | Required, the API spec file                             |
 | Type select                    | Auto-detect, Avro IDL, api.json, service.json, Swagger  |
 | Submit button                  | Uploads and creates/updates version                     |

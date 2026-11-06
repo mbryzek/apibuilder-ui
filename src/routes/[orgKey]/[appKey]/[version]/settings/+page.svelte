@@ -2,7 +2,7 @@
   import PendingForm from '#lib/components/PendingForm.svelte';
   import type { Application } from '#generated/com-bryzek-apibuilder.ts';
   import type { Service } from '#generated/com-bryzek-apibuilder-spec.ts';
-  import { Visibility } from '#generated/com-bryzek-apibuilder.ts';
+  import { OFFERED_VISIBILITIES } from '#lib/utils/visibility.ts';
   import FormErrors from '#lib/components/FormErrors.svelte';
   import LoadErrorBanner from '#lib/components/LoadErrorBanner.svelte';
   import type { LoadError } from '#lib/api/load-error.ts';
@@ -52,7 +52,7 @@
           {#snippet children(pending)}
             <div>
               <select name="visibility" class="input-field w-full" value={application.visibility}>
-                {#each Object.values(Visibility) as v}
+                {#each OFFERED_VISIBILITIES as v}
                   <option value={v}>{v}</option>
                 {/each}
               </select>
