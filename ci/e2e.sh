@@ -3,8 +3,8 @@
 # What CI runs for apibuilder-ui's BROWSER suite (ISS-4028, following the playbook-admin pilot in
 # ISS-2193).
 #
-# THIS IS A SECOND, SEPARATE ENROLMENT FROM `ci/build.sh`, and the separation is the whole design.
-# `ci/build.sh` produces the `ci` status the merge lane gates on; this file produces the `e2e`
+# THIS IS A SECOND, SEPARATE ENROLMENT FROM `ci/build.slow.sh`, and the separation is the whole design.
+# `ci/build.slow.sh` produces the `ci` status the merge lane gates on; this file produces the `e2e`
 # status, which the lane does not read. So a red here parks nothing and merges nothing — it files
 # an issue. That is deliberate and it is the first step of a three-step rollout written down in
 # devops/docs/ci.md: post-merge on `main` only, then a non-gating `e2e` context on pull requests,

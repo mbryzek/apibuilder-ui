@@ -32,7 +32,7 @@ npm run format         # prettier --write
 npm run build          # production build (adapter-cloudflare)
 ```
 
-CI runs on every pull request (ISS-2172). `ci/build.sh` is the whole of it — the fleet verifies a
+CI runs on every pull request (ISS-2172). `ci/build.slow.sh` is the whole of it — the fleet verifies a
 repo exactly when that file exists at a pull request's head sha, and the `ci` commit status it
 posts is what the merge lane reads, so a red one parks the PR. It runs `npm ci`, then `npm run
 check`, then `npm run build`. The build is deliberately a separate step: SvelteKit's
@@ -88,7 +88,7 @@ option — it would create real users and real orgs on every run.
 it in `Mode.Test` against a throwaway session database, hands this suite the URLs, and removes both
 afterwards. That runs post-merge on `main` and posts an `e2e` commit status.
 
-**`e2e` does not gate a merge, and `ci` does.** The merge lane reads `ci` — `ci/build.sh`, which
+**`e2e` does not gate a merge, and `ci` does.** The merge lane reads `ci` — `ci/build.slow.sh`, which
 still deliberately omits `npm run test:e2e` — so a red browser suite files an issue rather than
 parking every pull request in this repo. `devops/docs/ci.md` carries the three-step rollout that is
 the first step of.

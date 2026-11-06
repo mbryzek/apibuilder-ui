@@ -3,7 +3,7 @@
  *
  * `tsconfig.json` extends `$app/tsconfig`, which `svelte-kit sync` generates under `node_modules`.
  * `.npmrc` sets `ignore-scripts=true`, so `npm ci` never runs `prepare`, and vitest refuses to start
- * with `Tsconfig not found` until something syncs. CI cannot catch losing the sync: `ci/build.sh`
+ * with `Tsconfig not found` until something syncs. CI cannot catch losing the sync: `ci/build.slow.sh`
  * reaches vitest through `npm run check`, which has already synced.
  */
 import { readFileSync } from 'node:fs';

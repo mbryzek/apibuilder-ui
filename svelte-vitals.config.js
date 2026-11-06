@@ -1,4 +1,4 @@
-// svelte-vitals (ci/build.sh gates on it, ISS-15600). This is an authenticated
+// svelte-vitals (ci/build.slow.sh gates on it, ISS-15600). This is an authenticated
 // app, so only the correctness, security and a11y rules apply; seo,
 // performance and architecture fire once per route on pages no crawler sees.
 // The config file has no category key, so every rule outside the gated
