@@ -5,7 +5,18 @@ import sveltePlugin from 'eslint-plugin-svelte';
 import svelteParser from 'svelte-eslint-parser';
 import globals from 'globals';
 import prettierConfig from 'eslint-config-prettier';
-import { typed as p10Typed, svelte as p10Svelte, tests as p10Tests, testFiles as p10TestFiles } from './eslint.p10.js';
+import { execFileSync } from 'node:child_process';
+import { pathToFileURL } from 'node:url';
+
+// The Power-of-Ten rule set, read from the devops release this machine runs (ISS-19732,
+// ISS-53964). The rules live once, in devops `templates/eslint/eslint.p10.js`, and
+// `dev ci template` prints that file's path in the release on PATH, so a rule change is one
+// devops release and no pull request here. `dev` on PATH is required to lint: without it
+// this throws rather than linting with no Power-of-Ten rules.
+const p10Path = execFileSync('dev', ['ci', 'template', 'eslint/eslint.p10.js'], {
+  encoding: 'utf8'
+}).trim();
+const { typed: p10Typed, svelte: p10Svelte, tests: p10Tests, testFiles: p10TestFiles } = await import(pathToFileURL(p10Path).href);
 
 /** @type {import('eslint').Linter.Config[]} */
 export default [

@@ -13,7 +13,7 @@
     "prepare": "svelte-kit sync || echo ''",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json && npm run check:e2e && npm run lint && npm run test:unit",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-    "test:unit": "svelte-kit sync && node scripts/ci-test.mjs vitest",
+    "test:unit": "svelte-kit sync && dev ci step ci-test vitest",
     "test:unit:watch": "svelte-kit sync && vitest",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
