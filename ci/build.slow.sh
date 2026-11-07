@@ -24,8 +24,8 @@
 # needs: every runner is provisioned to build every repository (ISS-32381).
 #
 # TEST HEALTH'S CONTRACT (design DES-18577, "Every repository with CI"). The two lines below are
-# its declarations; `scripts/ci-test.mjs`, which `npm run test:unit` runs, is the rest — see the
-# test step further down.
+# its declarations; devops' helper, which `npm run test:unit` runs as `dev ci step ci-test vitest`,
+# is the rest — see the test step further down.
 #
 # ci-test-reports: ci-test-reports/*/*.xml
 # ci-test-lists: required
@@ -81,38 +81,16 @@ fi
 # committed files; reported not-run without `.api/config.pkl`.
 dev ci step codegen
 
-# THE TEST HEALTH HELPER IS DEVOPS' BYTES (ISS-19888). `scripts/ci-test.mjs` is the one npm
-# implementation of the contract every npm repository runs, and `ci/test/ci-test-test.mjs` its
-# suite; both are copies of devops `templates/npm/`, so a copy that is missing or drifts from devops
-# `main` fails here, before anything is installed, with the line that syncs it. A package.json whose
-# scripts never run the helper fails too: the declarations above would be a claim nothing keeps.
-#
-# EACH TEMPLATE IS READ INTO A FILE, AND READ ONCE MORE WHEN THAT FAILS. Diffed straight off a
-# process substitution, a failed read compares the copy against nothing and reports all of it as
-# drift; a read that fails twice is the box instead, 75 with nothing measured.
-template_diff() {                # template_diff <devops path> <tracked copy>
-  local bytes read_rc=0 diff_rc=0
-  bytes=$(mktemp "${TMPDIR:-/tmp}/ci-template.XXXXXX")
-  dev repo cat devops "$1" >"$bytes" || dev repo cat devops "$1" >"$bytes" || read_rc=$?
-  [ "$read_rc" -ne 0 ] || diff -u "$bytes" "$2" || diff_rc=$?
-  rm -f "$bytes"
-  if [ "$read_rc" -ne 0 ]; then
-    echo "ci/build.sh: could not read devops $1 (dev repo cat exit $read_rc, twice) -- a read failure, not a drift in $2; nothing was measured" >&2
-    exit 75
-  fi
-  return "$diff_rc"
-}
-for template in ci-test.mjs:scripts/ci-test.mjs ci-test-test.mjs:ci/test/ci-test-test.mjs; do
-  if ! template_diff "templates/npm/${template%%:*}" "${template#*:}"; then
-    echo "ci/build.sh: sync it — dev repo cat devops templates/npm/${template%%:*} > ${template#*:}" >&2
-    exit 1
-  fi
-done
-if ! grep -q 'node scripts/ci-test.mjs ' package.json; then
-  echo "ci/build.sh: no package.json script runs scripts/ci-test.mjs — make test:unit \"node scripts/ci-test.mjs vitest\" (or \"... none\" with no tests)" >&2
+# THE TEST HEALTH HELPER IS DEVOPS', RUN FROM THE RELEASE (ISS-19888, ISS-53964). The one npm
+# implementation of the contract is devops `templates/npm/ci-test.mjs`, and `package.json` runs it
+# as `dev ci step ci-test <runner>`: no repository holds a copy, so a change to it is one devops
+# release. A package.json whose scripts never run the helper fails here, before anything is
+# installed: the declarations above would be a claim nothing keeps.
+if ! grep -q 'dev ci step ci-test ' package.json; then
+  echo "ci/build.slow.sh: no package.json script runs the test health helper — make test:unit \"dev ci step ci-test vitest\" (or \"... none\" with no tests)" >&2
   exit 1
 fi
-ci_report covered "test health helper matches devops"
+ci_report covered "test health helper is devops'"
 
 # `npm ci` rather than `npm install`: the lockfile is the contract, and a build
 # that silently resolved a different tree than the one committed is a green
@@ -123,9 +101,8 @@ npm ci
 
 # The helper's own suite, against the vitest and playwright `npm ci` just installed: it drives both
 # runners in private fixtures, so a helper that asks either the wrong question is red here rather
-# than wrong in every build's reports.
-node --test ci/test/ci-test-test.mjs
-ci_report covered "test health helper suite"
+# than wrong in every build's reports. It reports what it covered itself.
+dev ci step ci-test-suite
 
 # svelte-check + the Playwright tsconfig typecheck + eslint --max-warnings 0 +
 # vitest. `npm run check` is the whole gate in every SvelteKit repo
@@ -133,7 +110,7 @@ ci_report covered "test health helper suite"
 # running the unit suite twice would double the suite's wall clock for no additional
 # verdict.
 #
-# ITS VITEST IS TEST HEALTH'S RUNNER. `npm run test:unit` runs `node scripts/ci-test.mjs vitest`,
+# ITS VITEST IS TEST HEALTH'S RUNNER. `npm run test:unit` runs `dev ci step ci-test vitest`,
 # which reads the lists `CI_TEST_LISTS` names and prints the `ci-lists:` line, leaves out every
 # quarantined and slow spec (with `CI_SLOW_SPECS=1`, runs the slow ones alone), writes each spec's
 # JUnit report under `ci-test-reports/vitest/`, and reruns every failed spec once, printing
@@ -145,12 +122,12 @@ npm run check
 # ESLINT'S STYLE RULES REPORT, THEY DO NOT GATE (ISS-30176). `prefer-const`, `no-var`,
 # `svelte/prefer-const` and `max-lines-per-function` are in no gating set of `eslint.p10.js`, so
 # `npm run lint` gates only on correctness, the type-aware rules among them.
-# `scripts/check-lint-style` (a copy of devops templates/ci/check-lint-style) forces the style
+# `scripts/check-lint-style` (devops' step of that name, `dev ci step check-lint-style`) forces the style
 # rules on over `eslint.config.js`, prints each finding and exits 0. A build's checks step (or
 # this repository's whole-build shard) runs it and files each new finding that is not baselined
 # as its own issue.
 # ci-advisory: scripts/check-lint-style
-scripts/check-lint-style || echo "check-lint-style: could not measure this tree — advisory, nothing fails on it"
+dev ci step check-lint-style || echo "check-lint-style: could not measure this tree — advisory, nothing fails on it"
 
 # `sveltekit`: everything the family runs after `npm run check`, in order —
 # the advisory format report (formatting never fails a build, ISS-19427), the
@@ -158,8 +135,8 @@ scripts/check-lint-style || echo "check-lint-style: could not measure this tree 
 # svelte-check cannot give (ISS-868).
 #
 # A build's checks step (or this repository's whole-build shard) reads the
-# declaration below out of this file, runs the repo's `scripts/check-format` (a
-# copy of devops templates/ci/check-format) and files each new finding that is not
+# declaration below out of this file, runs `scripts/check-format` (devops'
+# `check-format` step) and files each new finding that is not
 # baselined as its own issue.
 # ci-advisory: scripts/check-format
 dev ci step sveltekit
