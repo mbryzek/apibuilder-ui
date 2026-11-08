@@ -838,6 +838,10 @@ export class ApiClient {
       return await Util.mustParse<SessionState>(response, 'SessionState');
     }
 
+    if (response.status === 404) {
+      throw new VoidResponse(response);
+    }
+
     if (response.status === 422) {
       throw new ValidationErrorsResponse(response);
     }
