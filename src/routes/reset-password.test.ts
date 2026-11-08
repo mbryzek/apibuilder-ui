@@ -111,13 +111,6 @@ describe('the reset-password action', () => {
 
   const goodPair = { password: 'pw', confirm_password: 'pw' };
 
-  it('answers with the dead-link state when a 422 re-reads as a link the platform no longer holds', async () => {
-    client.createTenantSessionPasswordAndChanges.mockRejectedValue(failure(422));
-    client.getTenantSessionPasswordAndResetsById.mockRejectedValue(failure(404));
-
-    expect(await submit(goodPair)).toMatchObject({ status: 404, data: { errors: [], linkInvalid: true } });
-  });
-
   it('answers with the dead-link state when the submit itself answers 404, without reading again', async () => {
     client.createTenantSessionPasswordAndChanges.mockRejectedValue(failure(404));
 
@@ -125,20 +118,14 @@ describe('the reset-password action', () => {
     expect(client.getTenantSessionPasswordAndResetsById).not.toHaveBeenCalled();
   });
 
-  it('passes a 422 through as the form error when the link is still live', async () => {
+  it('passes a 422 through as the form error without reading the link', async () => {
     client.createTenantSessionPasswordAndChanges.mockRejectedValue(failure(422));
 
     const result = await submit(goodPair);
 
     expect(result.status).toBe(422);
     expect(result.data?.linkInvalid).toBeUndefined();
-  });
-
-  it('passes a 422 through when the read cannot say whether the link is dead', async () => {
-    client.createTenantSessionPasswordAndChanges.mockRejectedValue(failure(422));
-    client.getTenantSessionPasswordAndResetsById.mockRejectedValue(failure(500));
-
-    expect((await submit(goodPair)).status).toBe(422);
+    expect(client.getTenantSessionPasswordAndResetsById).not.toHaveBeenCalled();
   });
 
   it('passes a platform failure through without reading the link', async () => {
