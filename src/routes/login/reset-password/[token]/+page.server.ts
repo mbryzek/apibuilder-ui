@@ -46,13 +46,9 @@ export const actions: Actions = {
     );
 
     // The link was live when `load` read it and can be dead now: it is single use and it expires.
-    // The platform answers a dead id here with a 422 like any other refusal, so the read says which
-    // this is, and the page shows it as a dead link rather than as a password that was rejected.
-    if (
-      isApiError(response) &&
-      (emailedLinkFailure(response.status) === 'invalid' ||
-        (response.status === 422 && linkOutcome(await readResetLink(params.token)).kind === 'invalid'))
-    ) {
+    // The platform answers a dead reset id here with a 404, which the page shows as its dead-link panel
+    // rather than as a password that was rejected.
+    if (isApiError(response) && emailedLinkFailure(response.status) === 'invalid') {
       return fail(404, { errors: [], linkInvalid: true });
     }
 
