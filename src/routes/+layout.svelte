@@ -5,11 +5,12 @@
   import Footer from '#lib/components/Footer.svelte';
   import Toast from '#lib/components/Toast.svelte';
   import type { Flash } from '#lib/flash.ts';
+  import type { MyOrgs } from '#lib/my-orgs.ts';
   import type { Snippet } from 'svelte';
   import { afterNavigate } from '$app/navigation';
 
   interface Props {
-    data: { session?: PublicSession; flash?: Flash };
+    data: { session?: PublicSession; myOrgs?: Promise<MyOrgs>; flash?: Flash };
     children: Snippet;
   }
 
@@ -49,7 +50,7 @@
 </svelte:head>
 
 <div class="flex min-h-screen flex-col">
-  <Header {session} />
+  <Header {session} myOrgs={data?.myOrgs} />
 
   {#if flash}
     <Toast message={flash.message} variant={flash.type} onDismiss={handleDismissFlash} />
