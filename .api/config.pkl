@@ -26,3 +26,8 @@ applications = new Listing<AppGroup> {
 nestedConfigs {
   "playwright"
 }
+
+// The base API specs (platform-error, platform-storage) are read from play-core, where they are declared. ISS-59587
+specSources {
+  "play-core"
+}
