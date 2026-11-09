@@ -46,14 +46,14 @@
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <div class="flex h-16 items-center justify-between">
       <!-- Brand -->
-      <div class="flex items-center">
+      <div class="flex shrink-0 items-center">
         <a href="/" class="text-lg font-bold tracking-wide text-white sm:text-xl">
           API <span class="font-light">|</span> BUILDER
         </a>
       </div>
 
       <!-- Desktop Navigation -->
-      <div class="hidden items-center space-x-6 md:flex">
+      <div class="hidden min-w-0 items-center space-x-6 whitespace-nowrap md:flex">
         <!-- Center nav -->
 
         <a href="/doc" class="text-sm font-medium text-white/80 transition-colors hover:text-white">Docs</a>
@@ -81,9 +81,11 @@
         {#if session}
           <!-- On every signed-in page, an organization page included: its sidebar holds the account
                menu, never the way to another organization. -->
-          <OrgSwitcher {myOrgs} placement="down" />
+          <!-- The switcher keeps its width and a long account name truncates instead, so the header
+               holds one row however long the member's email is. -->
+          <div class="shrink-0"><OrgSwitcher {myOrgs} placement="down" /></div>
           {#if !hasSidebar}
-            <AccountMenu {session} placement="down" tone="dark" />
+            <div class="max-w-56 min-w-0"><AccountMenu {session} placement="down" tone="dark" /></div>
           {/if}
         {:else}
           <a
