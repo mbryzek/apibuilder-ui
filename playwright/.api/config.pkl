@@ -14,3 +14,8 @@ applications = new Listing<AppGroup> {
   new { names { "platform-storage" }; generators = module.singleGenerator("typescript", tsGen); filter = fileFilter }
   new { names { "platform-error" };   generators = module.singleGenerator("typescript", tsGen) }
 }
+
+// The base API specs (platform-error, platform-storage) are read from play-core, where they are declared. ISS-59587
+specSources {
+  "play-core"
+}
