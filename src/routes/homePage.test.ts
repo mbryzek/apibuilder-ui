@@ -19,6 +19,7 @@ const client = vi.hoisted(() => ({
 vi.mock('#lib/api/clients.ts', (importOriginal) => mockApiClients(client, importOriginal));
 
 const { load } = await import('./+page.server');
+const { load: layoutLoad } = await import('./+layout.server');
 const { apiBuilderClient } = await import('#lib/api/clients.ts');
 
 function organization(key: string): Record<string, unknown> {
@@ -30,7 +31,13 @@ function unauthorized(): never {
 }
 
 function invokeLoad(locals: Partial<App.Locals>): ReturnType<typeof load> {
-  return load({ locals } as never);
+  // The page awaits what the root layout streams, as SvelteKit's parent() hands it over.
+  const parent = async () => layoutLoad({ locals, cookies: { get: () => undefined, delete: () => {} } } as never);
+  return load({ locals, parent } as never);
+}
+
+function membership(key: string): Record<string, unknown> {
+  return { guid: `m-${key}`, organization: organization(key), role: 'member' };
 }
 
 describe('home page load', () => {
@@ -65,6 +72,28 @@ describe('home page load', () => {
 
     expect(client.getMemberships).toHaveBeenCalledWith({ userId: 'user-1', limit: 100, offset: 0 });
     expect(data).toMatchObject({ myOrgs: [], loadError: { status: 401 } });
+  });
+
+  it('sends a member of no organization to create one', async () => {
+    client.getMemberships.mockResolvedValue([]);
+
+    await expect(invokeLoad({ session: session() })).rejects.toMatchObject({ status: 303, location: '/org/create' });
+  });
+
+  it('lists the one organization of a member of one, rather than redirecting into it', async () => {
+    client.getMemberships.mockResolvedValue([membership('acme')]);
+
+    const data = await invokeLoad({ session: session() });
+
+    expect(data).toMatchObject({ myOrgs: [{ key: 'acme' }], loadError: null });
+  });
+
+  it('lists an organization once when the member holds two roles in it', async () => {
+    client.getMemberships.mockResolvedValue([membership('acme'), { ...membership('acme'), role: 'admin' }, membership('globex')]);
+
+    const data = await invokeLoad({ session: session() });
+
+    expect((data as { myOrgs: { key: string }[] }).myOrgs.map((o) => o.key)).toEqual(['acme', 'globex']);
   });
 });
 
@@ -121,5 +150,13 @@ describe('home page', () => {
 
     expect(target.querySelector('[role="alert"]')?.textContent).toContain('The server had a problem.');
     expect(target.querySelector('h1')?.textContent).toBe('My Organizations');
+  });
+
+  it('shows a member of one organization the list and Create Organization', () => {
+    render({ session: { user: { id: 'user-1' } }, myOrgs: [organization('acme')], loadError: null });
+
+    expect(target.querySelector('h1')?.textContent).toBe('My Organizations');
+    expect(target.querySelector('a[href="/acme"] h3')?.textContent).toBe('acme name');
+    expect(target.querySelector('a[href="/org/create"]')?.textContent?.trim()).toBe('Create Organization');
   });
 });

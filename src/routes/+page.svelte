@@ -30,33 +30,30 @@
       <LoadErrorBanner error={data.loadError} />
     {/if}
 
-    <!-- Heading and Create link sit outside the list guard: when the memberships call fails the
-         loader correctly suppresses the redirects, and without this the page was a lone red box
-         with no way forward. -->
-    {#if myOrgs.length > 1 || data.loadError}
-      <div class="mb-12">
-        <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between">
-          <h1 class="text-ab-dark-blue text-2xl font-bold">My Organizations</h1>
-          <a href="/org/create" class="btn-primary mt-4 inline-block text-center sm:mt-0"> Create Organization </a>
-        </div>
-
-        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {#each myOrgs as org (org.key)}
-            <a href="/{org.key}" class="card transition-shadow hover:shadow-[0_0_17px_-4px_rgba(0,0,0,0.2)]">
-              <h3 class="text-ab-dark-blue font-semibold">{org.name}</h3>
-              <p class="text-ab-gray mt-1 text-sm">{org.namespace}</p>
-              <span
-                class="mt-2 inline-block rounded-full px-2 py-0.5 text-xs font-medium {org.visibility === 'public'
-                  ? 'bg-green-100 text-green-800'
-                  : 'bg-gray-100 text-gray-600'}"
-              >
-                {org.visibility}
-              </span>
-            </a>
-          {/each}
-        </div>
+    <!-- A member of no organization is redirected to /org/create, so this is every other member,
+         and a failed memberships read too: the heading and Create link keep a way forward. -->
+    <div class="mb-12">
+      <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <h1 class="text-ab-dark-blue text-2xl font-bold">My Organizations</h1>
+        <a href="/org/create" class="btn-primary mt-4 inline-block text-center sm:mt-0"> Create Organization </a>
       </div>
-    {/if}
+
+      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {#each myOrgs as org (org.key)}
+          <a href="/{org.key}" class="card transition-shadow hover:shadow-[0_0_17px_-4px_rgba(0,0,0,0.2)]">
+            <h3 class="text-ab-dark-blue font-semibold">{org.name}</h3>
+            <p class="text-ab-gray mt-1 text-sm">{org.namespace}</p>
+            <span
+              class="mt-2 inline-block rounded-full px-2 py-0.5 text-xs font-medium {org.visibility === 'public'
+                ? 'bg-green-100 text-green-800'
+                : 'bg-gray-100 text-gray-600'}"
+            >
+              {org.visibility}
+            </span>
+          </a>
+        {/each}
+      </div>
+    </div>
   {:else}
     <!-- Hero for logged out users -->
     <div class="py-20 text-center sm:py-32">

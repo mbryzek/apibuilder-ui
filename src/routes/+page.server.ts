@@ -1,33 +1,25 @@
 import type { PageServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
-import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.ts';
+import { apiBuilderClient } from '#lib/api/clients.ts';
 import { handleApiCall } from '#lib/api/error-handler.ts';
 import { dataOr, loadErrorFrom } from '#lib/api/load-error.ts';
-import type { Organization, Membership } from '#generated/com-bryzek-apibuilder.ts';
+import type { Organization } from '#generated/com-bryzek-apibuilder.ts';
 
-export const load: PageServerLoad = async ({ locals }) => {
+export const load: PageServerLoad = async ({ locals, parent }) => {
   if (locals.session) {
-    const headers = getSessionHeaders(locals.session.id);
-    const membershipsResponse = await handleApiCall<Membership[]>(() =>
-      apiBuilderClient({ headers }).getMemberships({ userId: locals.session!.user.id, limit: 100, offset: 0 })
-    );
-    const loadError = loadErrorFrom(membershipsResponse);
-    const myOrgs: Organization[] = dataOr(membershipsResponse, []).map((m) => m.organization);
+    // The same read the header's organization switcher streams, awaited here: this page is the list.
+    const { myOrgs } = await parent();
+    const { orgs, loadError } = await (myOrgs ?? Promise.resolve({ orgs: [] as Organization[], loadError: null }));
 
-    // Only route off the org list when we actually know what it is. On a failure the
-    // list is empty because the call failed, and redirecting would send a member of
-    // several organizations to "create your first organization".
-    if (!loadError) {
-      if (myOrgs.length === 0) {
-        throw redirect(303, '/org/create');
-      }
-      if (myOrgs.length === 1) {
-        const org = myOrgs[0];
-        if (org) throw redirect(303, '/' + org.key);
-      }
+    // A member of no organization has one thing to do here. Only routed when the list is known: on a
+    // failure it is empty because the call failed, and a member of several organizations would be
+    // sent to "create your first organization". A member of ONE organization sees the list, with
+    // Create Organization beside it: sending them straight to it hid the only way to make a second.
+    if (!loadError && orgs.length === 0) {
+      throw redirect(303, '/org/create');
     }
 
-    return { myOrgs, loadError };
+    return { myOrgs: orgs, loadError };
   }
 
   // A signed-out visitor reads the public organizations with no credential: the platform answers
