@@ -1,3 +1,4 @@
+import { ctx } from '#lib/telemetry/context.ts';
 import type { PageServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
 import { apiBuilderClient } from '#lib/api/clients.ts';
@@ -5,7 +6,8 @@ import { handleApiCall } from '#lib/api/error-handler.ts';
 import { dataOr, loadErrorFrom } from '#lib/api/load-error.ts';
 import type { Organization } from '#generated/com-bryzek-apibuilder.ts';
 
-export const load: PageServerLoad = async ({ locals, parent }) => {
+export const load: PageServerLoad = async (event) => {
+  const { locals, parent } = event;
   if (locals.session) {
     // The same read the header's organization switcher streams, awaited here: this page is the list.
     const { myOrgs } = await parent();
@@ -24,7 +26,9 @@ export const load: PageServerLoad = async ({ locals, parent }) => {
 
   // A signed-out visitor reads the public organizations with no credential: the platform answers
   // that read for an anonymous caller with only the organizations whose visibility is public.
-  const publicOrgsResponse = await handleApiCall<Organization[]>(() => apiBuilderClient().getOrganizations({ limit: 25, offset: 0 }));
+  const publicOrgsResponse = await handleApiCall<Organization[]>(() =>
+    apiBuilderClient().getOrganizations(ctx(event, 'load'), { limit: 25, offset: 0 })
+  );
 
   return {
     myOrgs: [] as Organization[],

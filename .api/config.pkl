@@ -9,11 +9,17 @@ local platformFilter = new Filter {
 }
 local fileFilter = new Filter { types { "file" } }
 
+// The call context (DES-65431): every generated operation takes `{ route, view, part, recorder }`
+// first, so each call names its screen view and part and the type checker finds every call site.
+local callContextAttrs = new Mapping<String, Any> {
+  ["call_context"] = true
+}
+
 applications = new Listing<AppGroup> {
-  new { names { "platform" };         generators = module.singleGenerator("typescript", tsSrc); filter = platformFilter }
-  new { names { "platform-storage" }; generators = module.singleGenerator("typescript", tsSrc); filter = fileFilter }
+  new { names { "platform" };         generators = module.singleGenerator("typescript", tsSrc); filter = platformFilter; attributes = callContextAttrs }
+  new { names { "platform-storage" }; generators = module.singleGenerator("typescript", tsSrc); filter = fileFilter; attributes = callContextAttrs }
   new { names { "apibuilder-spec"; "apibuilder"; "apibuilder-generator"; "platform-error" }
-                                      generators = module.singleGenerator("typescript", tsSrc) }
+                                      generators = module.singleGenerator("typescript", tsSrc); attributes = callContextAttrs }
 }
 
 // playwright/ is its own codegen root: it regenerates a narrower client into

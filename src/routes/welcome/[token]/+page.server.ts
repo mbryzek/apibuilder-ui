@@ -1,3 +1,4 @@
+import { ctx } from '#lib/telemetry/context.ts';
 import type { Actions, PageServerLoad } from './$types';
 import { fail } from '@sveltejs/kit';
 import { linkOutcome } from 'ui/emailedLink/outcome.ts';
@@ -27,9 +28,10 @@ import type { SessionState, UserActivation } from '#generated/com-bryzek-platfor
  * Which failure means the link is dead is `ui/emailedLink/outcome.ts`: only a 404, so an outage
  * never tells somebody holding a live invitation that it is dead.
  */
-export const load: PageServerLoad = async ({ params, url }) => {
+export const load: PageServerLoad = async (event) => {
+  const { params, url } = event;
   const response = await handleApiCall<UserActivation>(() =>
-    platformClient({ headers: getSessionHeaders() }).getUserActivationByToken(params.token)
+    platformClient({ headers: getSessionHeaders() }).getUserActivationByToken(ctx(event, 'load'), params.token)
   );
 
   const outcome = linkOutcome(response);
@@ -42,7 +44,8 @@ export const load: PageServerLoad = async ({ params, url }) => {
 };
 
 export const actions: Actions = {
-  default: async ({ request, params, cookies }) => {
+  default: async (event) => {
+    const { request, params, cookies } = event;
     const formData = await request.formData();
     const password = requiredSecret(formData, 'password') ?? '';
     const refusal = passwordRefusal(password, { confirmation: requiredSecret(formData, 'confirm_password') ?? '' });
@@ -51,7 +54,7 @@ export const actions: Actions = {
     }
 
     const response = await handleApiCall<SessionState>(() =>
-      platformClient({ headers: getSessionHeaders() }).createUserActivationPasswordByToken({
+      platformClient({ headers: getSessionHeaders() }).createUserActivationPasswordByToken(ctx(event, 'form'), {
         token: params.token,
         body: { password }
       })

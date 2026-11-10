@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { testCtx } from '#lib/test-support/context.ts';
 import { session } from '#lib/test-support/fixtures.ts';
 import { actionEvent } from '#lib/test-support/invoke-action.ts';
 
@@ -26,7 +27,7 @@ function event(form: Record<string, string>) {
 }
 
 const listing = vi.fn();
-const scope = vi.fn((_client: unknown, _orgKey: string) => listing);
+const scope = vi.fn((_context: unknown, _client: unknown, _orgKey: string) => listing);
 const act = vi.fn();
 
 beforeEach(() => {
@@ -38,21 +39,21 @@ beforeEach(() => {
 
 describe('adminGuidAction', () => {
   it('acts on the row the org listing returned, with the authorized client', async () => {
-    expect(await adminGuidAction<Row>(event({ guid: ' row-1 ' }), scope, act)).toEqual({ success: true });
-    expect(adminClient).toHaveBeenCalledWith({}, 'my-org');
-    expect(scope).toHaveBeenCalledWith(client, 'my-org');
+    expect(await adminGuidAction<Row>(testCtx(), event({ guid: ' row-1 ' }), scope, act)).toEqual({ success: true });
+    expect(adminClient).toHaveBeenCalledWith(expect.objectContaining({ part: 'load' }), {}, 'my-org');
+    expect(scope).toHaveBeenCalledWith(expect.objectContaining({ part: 'load' }), client, 'my-org');
     expect(act).toHaveBeenCalledWith({ id: 'row-1' }, client);
   });
 
   it('authorizes before reading the form, so a refused caller never reaches the scan', async () => {
     adminClient.mockRejectedValue(new Error('forbidden'));
-    await expect(adminGuidAction<Row>(event({ guid: 'row-1' }), scope, act)).rejects.toThrow('forbidden');
+    await expect(adminGuidAction<Row>(testCtx(), event({ guid: 'row-1' }), scope, act)).rejects.toThrow('forbidden');
     expect(listing).not.toHaveBeenCalled();
     expect(act).not.toHaveBeenCalled();
   });
 
   it('refuses a blank guid with 400 before scanning', async () => {
-    expect(await adminGuidAction<Row>(event({ guid: '  ' }), scope, act)).toMatchObject({
+    expect(await adminGuidAction<Row>(testCtx(), event({ guid: '  ' }), scope, act)).toMatchObject({
       status: 400,
       data: { errors: [{ message: INVALID_REQUEST }] }
     });
@@ -60,13 +61,13 @@ describe('adminGuidAction', () => {
   });
 
   it('answers 404 for a guid outside the org and never acts', async () => {
-    expect(await adminGuidAction<Row>(event({ guid: 'someone-elses' }), scope, act)).toMatchObject({ status: 404 });
+    expect(await adminGuidAction<Row>(testCtx(), event({ guid: 'someone-elses' }), scope, act)).toMatchObject({ status: 404 });
     expect(act).not.toHaveBeenCalled();
   });
 
   it('surfaces a failed act as an action failure', async () => {
     act.mockRejectedValue(new Error('fetch failed'));
-    expect(await adminGuidAction<Row>(event({ guid: 'row-1' }), scope, act)).toMatchObject({
+    expect(await adminGuidAction<Row>(testCtx(), event({ guid: 'row-1' }), scope, act)).toMatchObject({
       data: { errors: [{ message: expect.any(String) }] }
     });
   });

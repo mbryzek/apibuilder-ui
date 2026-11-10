@@ -528,6 +528,26 @@ import { ValidationErrorsResponse } from './generated-error-validation-errors-re
 import { ApiException, Util } from './generated-util.ts';
 import type { ApiClientOptions } from './generated-util.ts';
 
+/**
+ * What a call is made for: the route and screen view it belongs to, the part of the view
+ * (`load`, a part that fills in after, a poll) and the recorder that notes it.
+ */
+export interface CallContext {
+  readonly route: string | null;
+  readonly view: string;
+  readonly part: string;
+  readonly recorder: CallRecorder;
+}
+
+export interface CallRecorder {
+  call<T>(context: CallContext, operation: string, run: (note: CallNote) => Promise<T>): Promise<T>;
+}
+
+export interface CallNote {
+  headers(url: string): Record<string, string>;
+  response(response: Response): void;
+}
+
 export interface UpdateEmailVerificationByTokenOptions {
   headers?: Record<string, string>;
   signal?: AbortSignal;
@@ -788,943 +808,1067 @@ export class ApiClient {
     }
   }
 
-  async updateEmailVerificationByToken(token: string, options?: UpdateEmailVerificationByTokenOptions): Promise<void> {
-    const url = `${this.baseUrl}/email/verifications/${encodeURIComponent(token)}`;
+  async updateEmailVerificationByToken(
+    context: CallContext,
+    token: string,
+    options?: UpdateEmailVerificationByTokenOptions
+  ): Promise<void> {
+    return context.recorder.call(context, 'PUT /email/verifications/:token', async (note) => {
+      const url = `${this.baseUrl}/email/verifications/${encodeURIComponent(token)}`;
 
-    const response = await this.request(
-      url,
-      {
-        method: 'PUT'
-      },
-      'application/json',
-      options?.headers || {},
-      options?.signal
-    );
+      const response = await this.request(
+        url,
+        {
+          method: 'PUT'
+        },
+        'application/json',
+        { ...note.headers(url), ...options?.headers },
+        options?.signal
+      );
+      note.response(response);
 
-    if (response.status === 204) {
-      return;
-    }
+      if (response.status === 204) {
+        return;
+      }
 
-    if (response.status === 404) {
-      throw new VoidResponse(response);
-    }
+      if (response.status === 404) {
+        throw new VoidResponse(response);
+      }
 
-    throw new ApiException(response, `Request failed with status ${response.status}`);
+      throw new ApiException(response, `Request failed with status ${response.status}`);
+    });
   }
 
-  async createPhoneOptinAndResendById(id: string, options?: CreatePhoneOptinAndResendByIdOptions): Promise<SmsOptinRequestResult> {
-    const url = `${this.baseUrl}/phones/${encodeURIComponent(id)}/optin/resend`;
+  async createPhoneOptinAndResendById(
+    context: CallContext,
+    id: string,
+    options?: CreatePhoneOptinAndResendByIdOptions
+  ): Promise<SmsOptinRequestResult> {
+    return context.recorder.call(context, 'POST /phones/:id/optin/resend', async (note) => {
+      const url = `${this.baseUrl}/phones/${encodeURIComponent(id)}/optin/resend`;
 
-    const response = await this.request(
-      url,
-      {
-        method: 'POST'
-      },
-      'application/json',
-      options?.headers || {},
-      options?.signal
-    );
+      const response = await this.request(
+        url,
+        {
+          method: 'POST'
+        },
+        'application/json',
+        { ...note.headers(url), ...options?.headers },
+        options?.signal
+      );
+      note.response(response);
 
-    if (response.status === 200) {
-      return await Util.mustParse<SmsOptinRequestResult>(response, 'SmsOptinRequestResult');
-    }
+      if (response.status === 200) {
+        return await Util.mustParse<SmsOptinRequestResult>(response, 'SmsOptinRequestResult');
+      }
 
-    if (response.status === 401) {
-      throw new UnauthorizedErrorResponse(response);
-    }
+      if (response.status === 401) {
+        throw new UnauthorizedErrorResponse(response);
+      }
 
-    if (response.status === 404) {
-      throw new VoidResponse(response);
-    }
+      if (response.status === 404) {
+        throw new VoidResponse(response);
+      }
 
-    if (response.status === 422) {
-      throw new ValidationErrorsResponse(response);
-    }
+      if (response.status === 422) {
+        throw new ValidationErrorsResponse(response);
+      }
 
-    throw new ApiException(response, `Request failed with status ${response.status}`);
+      throw new ApiException(response, `Request failed with status ${response.status}`);
+    });
   }
 
-  async getTenantSession(tenantId: string, options?: GetTenantSessionOptions): Promise<TenantSession> {
-    const url = `${this.baseUrl}/tenant/${encodeURIComponent(tenantId)}/session`;
+  async getTenantSession(context: CallContext, tenantId: string, options?: GetTenantSessionOptions): Promise<TenantSession> {
+    return context.recorder.call(context, 'GET /tenant/:tenant_id/session', async (note) => {
+      const url = `${this.baseUrl}/tenant/${encodeURIComponent(tenantId)}/session`;
 
-    const response = await this.request(
-      url,
-      {
-        method: 'GET'
-      },
-      'application/json',
-      options?.headers || {},
-      options?.signal
-    );
+      const response = await this.request(
+        url,
+        {
+          method: 'GET'
+        },
+        'application/json',
+        { ...note.headers(url), ...options?.headers },
+        options?.signal
+      );
+      note.response(response);
 
-    if (response.status === 200) {
-      return await Util.mustParse<TenantSession>(response, 'TenantSession');
-    }
+      if (response.status === 200) {
+        return await Util.mustParse<TenantSession>(response, 'TenantSession');
+      }
 
-    if (response.status === 401) {
-      throw new UnauthorizedErrorResponse(response);
-    }
+      if (response.status === 401) {
+        throw new UnauthorizedErrorResponse(response);
+      }
 
-    if (response.status === 404) {
-      throw new VoidResponse(response);
-    }
+      if (response.status === 404) {
+        throw new VoidResponse(response);
+      }
 
-    throw new ApiException(response, `Request failed with status ${response.status}`);
+      throw new ApiException(response, `Request failed with status ${response.status}`);
+    });
   }
 
-  async createTenantSessionLogins(params: CreateTenantSessionLoginsOptions): Promise<SessionState> {
-    const url = `${this.baseUrl}/tenant/${encodeURIComponent(params.tenantId)}/session/logins`;
+  async createTenantSessionLogins(context: CallContext, params: CreateTenantSessionLoginsOptions): Promise<SessionState> {
+    return context.recorder.call(context, 'POST /tenant/:tenant_id/session/logins', async (note) => {
+      const url = `${this.baseUrl}/tenant/${encodeURIComponent(params.tenantId)}/session/logins`;
 
-    const response = await this.request(
-      url,
-      {
-        method: 'POST',
-        body: JSON.stringify(params.body)
-      },
-      'application/json',
-      params.headers || {},
-      params.signal
-    );
+      const response = await this.request(
+        url,
+        {
+          method: 'POST',
+          body: JSON.stringify(params.body)
+        },
+        'application/json',
+        { ...note.headers(url), ...params.headers },
+        params.signal
+      );
+      note.response(response);
 
-    if (response.status === 201) {
-      return await Util.mustParse<SessionState>(response, 'SessionState');
-    }
+      if (response.status === 201) {
+        return await Util.mustParse<SessionState>(response, 'SessionState');
+      }
 
-    if (response.status === 422) {
-      throw new ValidationErrorsResponse(response);
-    }
+      if (response.status === 422) {
+        throw new ValidationErrorsResponse(response);
+      }
 
-    throw new ApiException(response, `Request failed with status ${response.status}`);
+      throw new ApiException(response, `Request failed with status ${response.status}`);
+    });
   }
 
-  async createTenantSessionSignups(params: CreateTenantSessionSignupsOptions): Promise<SessionState> {
-    const queryParts: string[] = [];
-    if (params.inviteToken !== undefined && params.inviteToken !== null) {
-      queryParts.push(`invite_token=${encodeURIComponent(params.inviteToken)}`);
-    }
-    if (params.heightCm !== undefined && params.heightCm !== null) {
-      queryParts.push(`height_cm=${encodeURIComponent(String(params.heightCm))}`);
-    }
-    const queryString = queryParts.length > 0 ? '?' + queryParts.join('&') : '';
-    const url = `${this.baseUrl}/tenant/${encodeURIComponent(params.tenantId)}/session/signups${queryString}`;
+  async createTenantSessionSignups(context: CallContext, params: CreateTenantSessionSignupsOptions): Promise<SessionState> {
+    return context.recorder.call(context, 'POST /tenant/:tenant_id/session/signups', async (note) => {
+      const queryParts: string[] = [];
+      if (params.inviteToken !== undefined && params.inviteToken !== null) {
+        queryParts.push(`invite_token=${encodeURIComponent(params.inviteToken)}`);
+      }
+      if (params.heightCm !== undefined && params.heightCm !== null) {
+        queryParts.push(`height_cm=${encodeURIComponent(String(params.heightCm))}`);
+      }
+      const queryString = queryParts.length > 0 ? '?' + queryParts.join('&') : '';
+      const url = `${this.baseUrl}/tenant/${encodeURIComponent(params.tenantId)}/session/signups${queryString}`;
 
-    const response = await this.request(
-      url,
-      {
-        method: 'POST',
-        body: JSON.stringify(params.body)
-      },
-      'application/json',
-      params.headers || {},
-      params.signal
-    );
+      const response = await this.request(
+        url,
+        {
+          method: 'POST',
+          body: JSON.stringify(params.body)
+        },
+        'application/json',
+        { ...note.headers(url), ...params.headers },
+        params.signal
+      );
+      note.response(response);
 
-    if (response.status === 201) {
-      return await Util.mustParse<SessionState>(response, 'SessionState');
-    }
+      if (response.status === 201) {
+        return await Util.mustParse<SessionState>(response, 'SessionState');
+      }
 
-    if (response.status === 422) {
-      throw new ValidationErrorsResponse(response);
-    }
+      if (response.status === 422) {
+        throw new ValidationErrorsResponse(response);
+      }
 
-    throw new ApiException(response, `Request failed with status ${response.status}`);
+      throw new ApiException(response, `Request failed with status ${response.status}`);
+    });
   }
 
-  async createTenantSessionPasswordAndChanges(params: CreateTenantSessionPasswordAndChangesOptions): Promise<SessionState> {
-    const url = `${this.baseUrl}/tenant/${encodeURIComponent(params.tenantId)}/session/password/changes`;
+  async createTenantSessionPasswordAndChanges(
+    context: CallContext,
+    params: CreateTenantSessionPasswordAndChangesOptions
+  ): Promise<SessionState> {
+    return context.recorder.call(context, 'POST /tenant/:tenant_id/session/password/changes', async (note) => {
+      const url = `${this.baseUrl}/tenant/${encodeURIComponent(params.tenantId)}/session/password/changes`;
 
-    const response = await this.request(
-      url,
-      {
-        method: 'POST',
-        body: JSON.stringify(params.body)
-      },
-      'application/json',
-      params.headers || {},
-      params.signal
-    );
+      const response = await this.request(
+        url,
+        {
+          method: 'POST',
+          body: JSON.stringify(params.body)
+        },
+        'application/json',
+        { ...note.headers(url), ...params.headers },
+        params.signal
+      );
+      note.response(response);
 
-    if (response.status === 201) {
-      return await Util.mustParse<SessionState>(response, 'SessionState');
-    }
+      if (response.status === 201) {
+        return await Util.mustParse<SessionState>(response, 'SessionState');
+      }
 
-    if (response.status === 404) {
-      throw new VoidResponse(response);
-    }
+      if (response.status === 404) {
+        throw new VoidResponse(response);
+      }
 
-    if (response.status === 422) {
-      throw new ValidationErrorsResponse(response);
-    }
+      if (response.status === 422) {
+        throw new ValidationErrorsResponse(response);
+      }
 
-    throw new ApiException(response, `Request failed with status ${response.status}`);
+      throw new ApiException(response, `Request failed with status ${response.status}`);
+    });
   }
 
-  async createTenantSessionPasswordAndResets(params: CreateTenantSessionPasswordAndResetsOptions): Promise<void> {
-    const url = `${this.baseUrl}/tenant/${encodeURIComponent(params.tenantId)}/session/password/resets`;
+  async createTenantSessionPasswordAndResets(context: CallContext, params: CreateTenantSessionPasswordAndResetsOptions): Promise<void> {
+    return context.recorder.call(context, 'POST /tenant/:tenant_id/session/password/resets', async (note) => {
+      const url = `${this.baseUrl}/tenant/${encodeURIComponent(params.tenantId)}/session/password/resets`;
 
-    const response = await this.request(
-      url,
-      {
-        method: 'POST',
-        body: JSON.stringify(params.body)
-      },
-      'application/json',
-      params.headers || {},
-      params.signal
-    );
+      const response = await this.request(
+        url,
+        {
+          method: 'POST',
+          body: JSON.stringify(params.body)
+        },
+        'application/json',
+        { ...note.headers(url), ...params.headers },
+        params.signal
+      );
+      note.response(response);
 
-    if (response.status === 204) {
-      return;
-    }
+      if (response.status === 204) {
+        return;
+      }
 
-    if (response.status === 422) {
-      throw new ValidationErrorsResponse(response);
-    }
+      if (response.status === 422) {
+        throw new ValidationErrorsResponse(response);
+      }
 
-    throw new ApiException(response, `Request failed with status ${response.status}`);
+      throw new ApiException(response, `Request failed with status ${response.status}`);
+    });
   }
 
-  async getTenantSessionPasswordAndResetsById(params: GetTenantSessionPasswordAndResetsByIdOptions): Promise<void> {
-    const url = `${this.baseUrl}/tenant/${encodeURIComponent(params.tenantId)}/session/password/resets/${encodeURIComponent(params.id)}`;
+  async getTenantSessionPasswordAndResetsById(context: CallContext, params: GetTenantSessionPasswordAndResetsByIdOptions): Promise<void> {
+    return context.recorder.call(context, 'GET /tenant/:tenant_id/session/password/resets/:id', async (note) => {
+      const url = `${this.baseUrl}/tenant/${encodeURIComponent(params.tenantId)}/session/password/resets/${encodeURIComponent(params.id)}`;
 
-    const response = await this.request(
-      url,
-      {
-        method: 'GET'
-      },
-      'application/json',
-      params.headers || {},
-      params.signal
-    );
+      const response = await this.request(
+        url,
+        {
+          method: 'GET'
+        },
+        'application/json',
+        { ...note.headers(url), ...params.headers },
+        params.signal
+      );
+      note.response(response);
 
-    if (response.status === 204) {
-      return;
-    }
+      if (response.status === 204) {
+        return;
+      }
 
-    if (response.status === 404) {
-      throw new VoidResponse(response);
-    }
+      if (response.status === 404) {
+        throw new VoidResponse(response);
+      }
 
-    throw new ApiException(response, `Request failed with status ${response.status}`);
+      throw new ApiException(response, `Request failed with status ${response.status}`);
+    });
   }
 
-  async createTenantSessionLoginAndLinkAndRequests(params: CreateTenantSessionLoginAndLinkAndRequestsOptions): Promise<void> {
-    const url = `${this.baseUrl}/tenant/${encodeURIComponent(params.tenantId)}/session/login/link/requests`;
+  async createTenantSessionLoginAndLinkAndRequests(
+    context: CallContext,
+    params: CreateTenantSessionLoginAndLinkAndRequestsOptions
+  ): Promise<void> {
+    return context.recorder.call(context, 'POST /tenant/:tenant_id/session/login/link/requests', async (note) => {
+      const url = `${this.baseUrl}/tenant/${encodeURIComponent(params.tenantId)}/session/login/link/requests`;
 
-    const response = await this.request(
-      url,
-      {
-        method: 'POST',
-        body: JSON.stringify(params.body)
-      },
-      'application/json',
-      params.headers || {},
-      params.signal
-    );
+      const response = await this.request(
+        url,
+        {
+          method: 'POST',
+          body: JSON.stringify(params.body)
+        },
+        'application/json',
+        { ...note.headers(url), ...params.headers },
+        params.signal
+      );
+      note.response(response);
 
-    if (response.status === 204) {
-      return;
-    }
+      if (response.status === 204) {
+        return;
+      }
 
-    if (response.status === 422) {
-      throw new ValidationErrorsResponse(response);
-    }
+      if (response.status === 422) {
+        throw new ValidationErrorsResponse(response);
+      }
 
-    throw new ApiException(response, `Request failed with status ${response.status}`);
+      throw new ApiException(response, `Request failed with status ${response.status}`);
+    });
   }
 
-  async createTenantSessionLoginAndPhoneAndRequests(params: CreateTenantSessionLoginAndPhoneAndRequestsOptions): Promise<void> {
-    const url = `${this.baseUrl}/tenant/${encodeURIComponent(params.tenantId)}/session/login/phone/requests`;
+  async createTenantSessionLoginAndPhoneAndRequests(
+    context: CallContext,
+    params: CreateTenantSessionLoginAndPhoneAndRequestsOptions
+  ): Promise<void> {
+    return context.recorder.call(context, 'POST /tenant/:tenant_id/session/login/phone/requests', async (note) => {
+      const url = `${this.baseUrl}/tenant/${encodeURIComponent(params.tenantId)}/session/login/phone/requests`;
 
-    const response = await this.request(
-      url,
-      {
-        method: 'POST',
-        body: JSON.stringify(params.body)
-      },
-      'application/json',
-      params.headers || {},
-      params.signal
-    );
+      const response = await this.request(
+        url,
+        {
+          method: 'POST',
+          body: JSON.stringify(params.body)
+        },
+        'application/json',
+        { ...note.headers(url), ...params.headers },
+        params.signal
+      );
+      note.response(response);
 
-    if (response.status === 204) {
-      return;
-    }
+      if (response.status === 204) {
+        return;
+      }
 
-    if (response.status === 422) {
-      throw new ValidationErrorsResponse(response);
-    }
+      if (response.status === 422) {
+        throw new ValidationErrorsResponse(response);
+      }
 
-    throw new ApiException(response, `Request failed with status ${response.status}`);
+      throw new ApiException(response, `Request failed with status ${response.status}`);
+    });
   }
 
   async createTenantSessionLoginAndPhoneAndVerifications(
+    context: CallContext,
     params: CreateTenantSessionLoginAndPhoneAndVerificationsOptions
   ): Promise<SessionState> {
-    const url = `${this.baseUrl}/tenant/${encodeURIComponent(params.tenantId)}/session/login/phone/verifications`;
+    return context.recorder.call(context, 'POST /tenant/:tenant_id/session/login/phone/verifications', async (note) => {
+      const url = `${this.baseUrl}/tenant/${encodeURIComponent(params.tenantId)}/session/login/phone/verifications`;
 
-    const response = await this.request(
-      url,
-      {
-        method: 'POST',
-        body: JSON.stringify(params.body)
-      },
-      'application/json',
-      params.headers || {},
-      params.signal
-    );
+      const response = await this.request(
+        url,
+        {
+          method: 'POST',
+          body: JSON.stringify(params.body)
+        },
+        'application/json',
+        { ...note.headers(url), ...params.headers },
+        params.signal
+      );
+      note.response(response);
 
-    if (response.status === 201) {
-      return await Util.mustParse<SessionState>(response, 'SessionState');
-    }
+      if (response.status === 201) {
+        return await Util.mustParse<SessionState>(response, 'SessionState');
+      }
 
-    if (response.status === 422) {
-      throw new ValidationErrorsResponse(response);
-    }
+      if (response.status === 422) {
+        throw new ValidationErrorsResponse(response);
+      }
 
-    throw new ApiException(response, `Request failed with status ${response.status}`);
+      throw new ApiException(response, `Request failed with status ${response.status}`);
+    });
   }
 
-  async deleteTenantSession(tenantId: string, options?: DeleteTenantSessionOptions): Promise<void> {
-    const url = `${this.baseUrl}/tenant/${encodeURIComponent(tenantId)}/session`;
+  async deleteTenantSession(context: CallContext, tenantId: string, options?: DeleteTenantSessionOptions): Promise<void> {
+    return context.recorder.call(context, 'DELETE /tenant/:tenant_id/session', async (note) => {
+      const url = `${this.baseUrl}/tenant/${encodeURIComponent(tenantId)}/session`;
 
-    const response = await this.request(
-      url,
-      {
-        method: 'DELETE'
-      },
-      'application/json',
-      options?.headers || {},
-      options?.signal
-    );
+      const response = await this.request(
+        url,
+        {
+          method: 'DELETE'
+        },
+        'application/json',
+        { ...note.headers(url), ...options?.headers },
+        options?.signal
+      );
+      note.response(response);
 
-    if (response.status === 204) {
-      return;
-    }
+      if (response.status === 204) {
+        return;
+      }
 
-    if (response.status === 401) {
-      throw new UnauthorizedErrorResponse(response);
-    }
+      if (response.status === 401) {
+        throw new UnauthorizedErrorResponse(response);
+      }
 
-    throw new ApiException(response, `Request failed with status ${response.status}`);
+      throw new ApiException(response, `Request failed with status ${response.status}`);
+    });
   }
 
-  async getTokensUsersByUserId(params: GetTokensUsersByUserIdOptions): Promise<Token[]> {
-    const queryParts: string[] = [];
-    queryParts.push(`limit=${encodeURIComponent(String(params.limit))}`);
-    queryParts.push(`offset=${encodeURIComponent(String(params.offset))}`);
-    const queryString = queryParts.length > 0 ? '?' + queryParts.join('&') : '';
-    const url = `${this.baseUrl}/tokens/users/${encodeURIComponent(params.userId)}${queryString}`;
+  async getTokensUsersByUserId(context: CallContext, params: GetTokensUsersByUserIdOptions): Promise<Token[]> {
+    return context.recorder.call(context, 'GET /tokens/users/:user_id', async (note) => {
+      const queryParts: string[] = [];
+      queryParts.push(`limit=${encodeURIComponent(String(params.limit))}`);
+      queryParts.push(`offset=${encodeURIComponent(String(params.offset))}`);
+      const queryString = queryParts.length > 0 ? '?' + queryParts.join('&') : '';
+      const url = `${this.baseUrl}/tokens/users/${encodeURIComponent(params.userId)}${queryString}`;
 
-    const response = await this.request(
-      url,
-      {
-        method: 'GET'
-      },
-      'application/json',
-      params.headers || {},
-      params.signal
-    );
+      const response = await this.request(
+        url,
+        {
+          method: 'GET'
+        },
+        'application/json',
+        { ...note.headers(url), ...params.headers },
+        params.signal
+      );
+      note.response(response);
 
-    if (response.status === 200) {
-      return await Util.mustParseArray<Token>(response, 'Token');
-    }
+      if (response.status === 200) {
+        return await Util.mustParseArray<Token>(response, 'Token');
+      }
 
-    if (response.status === 401) {
-      throw new UnauthorizedErrorResponse(response);
-    }
+      if (response.status === 401) {
+        throw new UnauthorizedErrorResponse(response);
+      }
 
-    if (response.status === 422) {
-      throw new ValidationErrorsResponse(response);
-    }
+      if (response.status === 422) {
+        throw new ValidationErrorsResponse(response);
+      }
 
-    throw new ApiException(response, `Request failed with status ${response.status}`);
+      throw new ApiException(response, `Request failed with status ${response.status}`);
+    });
   }
 
-  async createToken(params: CreateTokenOptions): Promise<CreatedToken> {
-    const url = `${this.baseUrl}/tokens`;
+  async createToken(context: CallContext, params: CreateTokenOptions): Promise<CreatedToken> {
+    return context.recorder.call(context, 'POST /tokens', async (note) => {
+      const url = `${this.baseUrl}/tokens`;
 
-    const response = await this.request(
-      url,
-      {
-        method: 'POST',
-        body: JSON.stringify(params.body)
-      },
-      'application/json',
-      params.headers || {},
-      params.signal
-    );
+      const response = await this.request(
+        url,
+        {
+          method: 'POST',
+          body: JSON.stringify(params.body)
+        },
+        'application/json',
+        { ...note.headers(url), ...params.headers },
+        params.signal
+      );
+      note.response(response);
 
-    if (response.status === 201) {
-      return await Util.mustParse<CreatedToken>(response, 'CreatedToken');
-    }
+      if (response.status === 201) {
+        return await Util.mustParse<CreatedToken>(response, 'CreatedToken');
+      }
 
-    if (response.status === 401) {
-      throw new UnauthorizedErrorResponse(response);
-    }
+      if (response.status === 401) {
+        throw new UnauthorizedErrorResponse(response);
+      }
 
-    if (response.status === 422) {
-      throw new ValidationErrorsResponse(response);
-    }
+      if (response.status === 422) {
+        throw new ValidationErrorsResponse(response);
+      }
 
-    throw new ApiException(response, `Request failed with status ${response.status}`);
+      throw new ApiException(response, `Request failed with status ${response.status}`);
+    });
   }
 
-  async deleteTokenById(id: string, options?: DeleteTokenByIdOptions): Promise<void> {
-    const url = `${this.baseUrl}/tokens/${encodeURIComponent(id)}`;
+  async deleteTokenById(context: CallContext, id: string, options?: DeleteTokenByIdOptions): Promise<void> {
+    return context.recorder.call(context, 'DELETE /tokens/:id', async (note) => {
+      const url = `${this.baseUrl}/tokens/${encodeURIComponent(id)}`;
 
-    const response = await this.request(
-      url,
-      {
-        method: 'DELETE'
-      },
-      'application/json',
-      options?.headers || {},
-      options?.signal
-    );
+      const response = await this.request(
+        url,
+        {
+          method: 'DELETE'
+        },
+        'application/json',
+        { ...note.headers(url), ...options?.headers },
+        options?.signal
+      );
+      note.response(response);
 
-    if (response.status === 204) {
-      return;
-    }
+      if (response.status === 204) {
+        return;
+      }
 
-    if (response.status === 401) {
-      throw new UnauthorizedErrorResponse(response);
-    }
+      if (response.status === 401) {
+        throw new UnauthorizedErrorResponse(response);
+      }
 
-    if (response.status === 404) {
-      throw new VoidResponse(response);
-    }
+      if (response.status === 404) {
+        throw new VoidResponse(response);
+      }
 
-    throw new ApiException(response, `Request failed with status ${response.status}`);
+      throw new ApiException(response, `Request failed with status ${response.status}`);
+    });
   }
 
-  async createUser(params: CreateUserOptions): Promise<User> {
-    const url = `${this.baseUrl}/users`;
+  async createUser(context: CallContext, params: CreateUserOptions): Promise<User> {
+    return context.recorder.call(context, 'POST /users', async (note) => {
+      const url = `${this.baseUrl}/users`;
 
-    const response = await this.request(
-      url,
-      {
-        method: 'POST',
-        body: JSON.stringify(params.body)
-      },
-      'application/json',
-      params.headers || {},
-      params.signal
-    );
+      const response = await this.request(
+        url,
+        {
+          method: 'POST',
+          body: JSON.stringify(params.body)
+        },
+        'application/json',
+        { ...note.headers(url), ...params.headers },
+        params.signal
+      );
+      note.response(response);
 
-    if (response.status === 201) {
-      return await Util.mustParse<User>(response, 'User');
-    }
+      if (response.status === 201) {
+        return await Util.mustParse<User>(response, 'User');
+      }
 
-    if (response.status === 401) {
-      throw new UnauthorizedErrorResponse(response);
-    }
+      if (response.status === 401) {
+        throw new UnauthorizedErrorResponse(response);
+      }
 
-    if (response.status === 422) {
-      throw new ValidationErrorsResponse(response);
-    }
+      if (response.status === 422) {
+        throw new ValidationErrorsResponse(response);
+      }
 
-    throw new ApiException(response, `Request failed with status ${response.status}`);
+      throw new ApiException(response, `Request failed with status ${response.status}`);
+    });
   }
 
-  async getUsers(params: GetUsersOptions): Promise<User[]> {
-    const queryParts: string[] = [];
-    if (params.id !== undefined && params.id !== null) {
-      params.id.forEach((value) => queryParts.push(`id=${encodeURIComponent(value)}`));
-    }
-    if (params.q !== undefined && params.q !== null) {
-      queryParts.push(`q=${encodeURIComponent(params.q)}`);
-    }
-    if (params.tenantId !== undefined && params.tenantId !== null) {
-      queryParts.push(`tenant_id=${encodeURIComponent(params.tenantId)}`);
-    }
-    if (params.status !== undefined && params.status !== null) {
-      params.status.forEach((value) => queryParts.push(`status=${encodeURIComponent(String(value))}`));
-    }
-    if (params.role !== undefined && params.role !== null) {
-      params.role.forEach((value) => queryParts.push(`role=${encodeURIComponent(String(value))}`));
-    }
-    queryParts.push(`limit=${encodeURIComponent(String(params.limit))}`);
-    queryParts.push(`offset=${encodeURIComponent(String(params.offset))}`);
-    if (params.sort !== undefined && params.sort !== null) {
-      queryParts.push(`sort=${encodeURIComponent(params.sort)}`);
-    }
-    const queryString = queryParts.length > 0 ? '?' + queryParts.join('&') : '';
-    const url = `${this.baseUrl}/users${queryString}`;
+  async getUsers(context: CallContext, params: GetUsersOptions): Promise<User[]> {
+    return context.recorder.call(context, 'GET /users', async (note) => {
+      const queryParts: string[] = [];
+      if (params.id !== undefined && params.id !== null) {
+        params.id.forEach((value) => queryParts.push(`id=${encodeURIComponent(value)}`));
+      }
+      if (params.q !== undefined && params.q !== null) {
+        queryParts.push(`q=${encodeURIComponent(params.q)}`);
+      }
+      if (params.tenantId !== undefined && params.tenantId !== null) {
+        queryParts.push(`tenant_id=${encodeURIComponent(params.tenantId)}`);
+      }
+      if (params.status !== undefined && params.status !== null) {
+        params.status.forEach((value) => queryParts.push(`status=${encodeURIComponent(String(value))}`));
+      }
+      if (params.role !== undefined && params.role !== null) {
+        params.role.forEach((value) => queryParts.push(`role=${encodeURIComponent(String(value))}`));
+      }
+      queryParts.push(`limit=${encodeURIComponent(String(params.limit))}`);
+      queryParts.push(`offset=${encodeURIComponent(String(params.offset))}`);
+      if (params.sort !== undefined && params.sort !== null) {
+        queryParts.push(`sort=${encodeURIComponent(params.sort)}`);
+      }
+      const queryString = queryParts.length > 0 ? '?' + queryParts.join('&') : '';
+      const url = `${this.baseUrl}/users${queryString}`;
 
-    const response = await this.request(
-      url,
-      {
-        method: 'GET'
-      },
-      'application/json',
-      params.headers || {},
-      params.signal
-    );
+      const response = await this.request(
+        url,
+        {
+          method: 'GET'
+        },
+        'application/json',
+        { ...note.headers(url), ...params.headers },
+        params.signal
+      );
+      note.response(response);
 
-    if (response.status === 200) {
-      return await Util.mustParseArray<User>(response, 'User');
-    }
+      if (response.status === 200) {
+        return await Util.mustParseArray<User>(response, 'User');
+      }
 
-    if (response.status === 401) {
-      throw new UnauthorizedErrorResponse(response);
-    }
+      if (response.status === 401) {
+        throw new UnauthorizedErrorResponse(response);
+      }
 
-    if (response.status === 422) {
-      throw new ValidationErrorsResponse(response);
-    }
+      if (response.status === 422) {
+        throw new ValidationErrorsResponse(response);
+      }
 
-    throw new ApiException(response, `Request failed with status ${response.status}`);
+      throw new ApiException(response, `Request failed with status ${response.status}`);
+    });
   }
 
-  async getUserById(id: string, options?: GetUserByIdOptions): Promise<User> {
-    const url = `${this.baseUrl}/users/${encodeURIComponent(id)}`;
+  async getUserById(context: CallContext, id: string, options?: GetUserByIdOptions): Promise<User> {
+    return context.recorder.call(context, 'GET /users/:id', async (note) => {
+      const url = `${this.baseUrl}/users/${encodeURIComponent(id)}`;
 
-    const response = await this.request(
-      url,
-      {
-        method: 'GET'
-      },
-      'application/json',
-      options?.headers || {},
-      options?.signal
-    );
+      const response = await this.request(
+        url,
+        {
+          method: 'GET'
+        },
+        'application/json',
+        { ...note.headers(url), ...options?.headers },
+        options?.signal
+      );
+      note.response(response);
 
-    if (response.status === 200) {
-      return await Util.mustParse<User>(response, 'User');
-    }
+      if (response.status === 200) {
+        return await Util.mustParse<User>(response, 'User');
+      }
 
-    if (response.status === 401) {
-      throw new UnauthorizedErrorResponse(response);
-    }
+      if (response.status === 401) {
+        throw new UnauthorizedErrorResponse(response);
+      }
 
-    if (response.status === 404) {
-      throw new VoidResponse(response);
-    }
+      if (response.status === 404) {
+        throw new VoidResponse(response);
+      }
 
-    throw new ApiException(response, `Request failed with status ${response.status}`);
+      throw new ApiException(response, `Request failed with status ${response.status}`);
+    });
   }
 
-  async updateUserById(params: UpdateUserByIdOptions): Promise<User> {
-    const url = `${this.baseUrl}/users/${encodeURIComponent(params.id)}`;
+  async updateUserById(context: CallContext, params: UpdateUserByIdOptions): Promise<User> {
+    return context.recorder.call(context, 'PUT /users/:id', async (note) => {
+      const url = `${this.baseUrl}/users/${encodeURIComponent(params.id)}`;
 
-    const response = await this.request(
-      url,
-      {
-        method: 'PUT',
-        body: JSON.stringify(params.body)
-      },
-      'application/json',
-      params.headers || {},
-      params.signal
-    );
+      const response = await this.request(
+        url,
+        {
+          method: 'PUT',
+          body: JSON.stringify(params.body)
+        },
+        'application/json',
+        { ...note.headers(url), ...params.headers },
+        params.signal
+      );
+      note.response(response);
 
-    if (response.status === 200) {
-      return await Util.mustParse<User>(response, 'User');
-    }
+      if (response.status === 200) {
+        return await Util.mustParse<User>(response, 'User');
+      }
 
-    if (response.status === 401) {
-      throw new UnauthorizedErrorResponse(response);
-    }
+      if (response.status === 401) {
+        throw new UnauthorizedErrorResponse(response);
+      }
 
-    if (response.status === 404) {
-      throw new VoidResponse(response);
-    }
+      if (response.status === 404) {
+        throw new VoidResponse(response);
+      }
 
-    if (response.status === 422) {
-      throw new ValidationErrorsResponse(response);
-    }
+      if (response.status === 422) {
+        throw new ValidationErrorsResponse(response);
+      }
 
-    throw new ApiException(response, `Request failed with status ${response.status}`);
+      throw new ApiException(response, `Request failed with status ${response.status}`);
+    });
   }
 
-  async updateUserSecondaryById(params: UpdateUserSecondaryByIdOptions): Promise<User> {
-    const url = `${this.baseUrl}/users/${encodeURIComponent(params.id)}/secondary`;
+  async updateUserSecondaryById(context: CallContext, params: UpdateUserSecondaryByIdOptions): Promise<User> {
+    return context.recorder.call(context, 'PUT /users/:id/secondary', async (note) => {
+      const url = `${this.baseUrl}/users/${encodeURIComponent(params.id)}/secondary`;
 
-    const response = await this.request(
-      url,
-      {
-        method: 'PUT',
-        body: JSON.stringify(params.body)
-      },
-      'application/json',
-      params.headers || {},
-      params.signal
-    );
+      const response = await this.request(
+        url,
+        {
+          method: 'PUT',
+          body: JSON.stringify(params.body)
+        },
+        'application/json',
+        { ...note.headers(url), ...params.headers },
+        params.signal
+      );
+      note.response(response);
 
-    if (response.status === 200) {
-      return await Util.mustParse<User>(response, 'User');
-    }
+      if (response.status === 200) {
+        return await Util.mustParse<User>(response, 'User');
+      }
 
-    if (response.status === 401) {
-      throw new UnauthorizedErrorResponse(response);
-    }
+      if (response.status === 401) {
+        throw new UnauthorizedErrorResponse(response);
+      }
 
-    if (response.status === 404) {
-      throw new VoidResponse(response);
-    }
+      if (response.status === 404) {
+        throw new VoidResponse(response);
+      }
 
-    if (response.status === 422) {
-      throw new ValidationErrorsResponse(response);
-    }
+      if (response.status === 422) {
+        throw new ValidationErrorsResponse(response);
+      }
 
-    throw new ApiException(response, `Request failed with status ${response.status}`);
+      throw new ApiException(response, `Request failed with status ${response.status}`);
+    });
   }
 
-  async updateUserPrimaryById(params: UpdateUserPrimaryByIdOptions): Promise<User> {
-    const url = `${this.baseUrl}/users/${encodeURIComponent(params.id)}/primary`;
+  async updateUserPrimaryById(context: CallContext, params: UpdateUserPrimaryByIdOptions): Promise<User> {
+    return context.recorder.call(context, 'PUT /users/:id/primary', async (note) => {
+      const url = `${this.baseUrl}/users/${encodeURIComponent(params.id)}/primary`;
 
-    const response = await this.request(
-      url,
-      {
-        method: 'PUT',
-        body: JSON.stringify(params.body)
-      },
-      'application/json',
-      params.headers || {},
-      params.signal
-    );
+      const response = await this.request(
+        url,
+        {
+          method: 'PUT',
+          body: JSON.stringify(params.body)
+        },
+        'application/json',
+        { ...note.headers(url), ...params.headers },
+        params.signal
+      );
+      note.response(response);
 
-    if (response.status === 200) {
-      return await Util.mustParse<User>(response, 'User');
-    }
+      if (response.status === 200) {
+        return await Util.mustParse<User>(response, 'User');
+      }
 
-    if (response.status === 401) {
-      throw new UnauthorizedErrorResponse(response);
-    }
+      if (response.status === 401) {
+        throw new UnauthorizedErrorResponse(response);
+      }
 
-    if (response.status === 404) {
-      throw new VoidResponse(response);
-    }
+      if (response.status === 404) {
+        throw new VoidResponse(response);
+      }
 
-    if (response.status === 422) {
-      throw new ValidationErrorsResponse(response);
-    }
+      if (response.status === 422) {
+        throw new ValidationErrorsResponse(response);
+      }
 
-    throw new ApiException(response, `Request failed with status ${response.status}`);
+      throw new ApiException(response, `Request failed with status ${response.status}`);
+    });
   }
 
-  async updateUserRoleByIdAndRole(params: UpdateUserRoleByIdAndRoleOptions): Promise<User> {
-    const url = `${this.baseUrl}/users/${encodeURIComponent(params.id)}/role/${encodeURIComponent(String(params.role))}`;
+  async updateUserRoleByIdAndRole(context: CallContext, params: UpdateUserRoleByIdAndRoleOptions): Promise<User> {
+    return context.recorder.call(context, 'PUT /users/:id/role/:role', async (note) => {
+      const url = `${this.baseUrl}/users/${encodeURIComponent(params.id)}/role/${encodeURIComponent(String(params.role))}`;
 
-    const response = await this.request(
-      url,
-      {
-        method: 'PUT'
-      },
-      'application/json',
-      params.headers || {},
-      params.signal
-    );
+      const response = await this.request(
+        url,
+        {
+          method: 'PUT'
+        },
+        'application/json',
+        { ...note.headers(url), ...params.headers },
+        params.signal
+      );
+      note.response(response);
 
-    if (response.status === 200) {
-      return await Util.mustParse<User>(response, 'User');
-    }
+      if (response.status === 200) {
+        return await Util.mustParse<User>(response, 'User');
+      }
 
-    if (response.status === 401) {
-      throw new UnauthorizedErrorResponse(response);
-    }
+      if (response.status === 401) {
+        throw new UnauthorizedErrorResponse(response);
+      }
 
-    if (response.status === 404) {
-      throw new VoidResponse(response);
-    }
+      if (response.status === 404) {
+        throw new VoidResponse(response);
+      }
 
-    if (response.status === 422) {
-      throw new ValidationErrorsResponse(response);
-    }
+      if (response.status === 422) {
+        throw new ValidationErrorsResponse(response);
+      }
 
-    throw new ApiException(response, `Request failed with status ${response.status}`);
+      throw new ApiException(response, `Request failed with status ${response.status}`);
+    });
   }
 
-  async updateUserStatusById(params: UpdateUserStatusByIdOptions): Promise<User> {
-    const url = `${this.baseUrl}/users/${encodeURIComponent(params.id)}/status`;
+  async updateUserStatusById(context: CallContext, params: UpdateUserStatusByIdOptions): Promise<User> {
+    return context.recorder.call(context, 'PUT /users/:id/status', async (note) => {
+      const url = `${this.baseUrl}/users/${encodeURIComponent(params.id)}/status`;
 
-    const response = await this.request(
-      url,
-      {
-        method: 'PUT',
-        body: JSON.stringify(params.body)
-      },
-      'application/json',
-      params.headers || {},
-      params.signal
-    );
+      const response = await this.request(
+        url,
+        {
+          method: 'PUT',
+          body: JSON.stringify(params.body)
+        },
+        'application/json',
+        { ...note.headers(url), ...params.headers },
+        params.signal
+      );
+      note.response(response);
 
-    if (response.status === 200) {
-      return await Util.mustParse<User>(response, 'User');
-    }
+      if (response.status === 200) {
+        return await Util.mustParse<User>(response, 'User');
+      }
 
-    if (response.status === 401) {
-      throw new UnauthorizedErrorResponse(response);
-    }
+      if (response.status === 401) {
+        throw new UnauthorizedErrorResponse(response);
+      }
 
-    if (response.status === 404) {
-      throw new VoidResponse(response);
-    }
+      if (response.status === 404) {
+        throw new VoidResponse(response);
+      }
 
-    if (response.status === 422) {
-      throw new ValidationErrorsResponse(response);
-    }
+      if (response.status === 422) {
+        throw new ValidationErrorsResponse(response);
+      }
 
-    throw new ApiException(response, `Request failed with status ${response.status}`);
+      throw new ApiException(response, `Request failed with status ${response.status}`);
+    });
   }
 
-  async updateUserPasswordById(params: UpdateUserPasswordByIdOptions): Promise<void> {
-    const url = `${this.baseUrl}/users/${encodeURIComponent(params.id)}/password`;
+  async updateUserPasswordById(context: CallContext, params: UpdateUserPasswordByIdOptions): Promise<void> {
+    return context.recorder.call(context, 'PUT /users/:id/password', async (note) => {
+      const url = `${this.baseUrl}/users/${encodeURIComponent(params.id)}/password`;
 
-    const response = await this.request(
-      url,
-      {
-        method: 'PUT',
-        body: JSON.stringify(params.body)
-      },
-      'application/json',
-      params.headers || {},
-      params.signal
-    );
+      const response = await this.request(
+        url,
+        {
+          method: 'PUT',
+          body: JSON.stringify(params.body)
+        },
+        'application/json',
+        { ...note.headers(url), ...params.headers },
+        params.signal
+      );
+      note.response(response);
 
-    if (response.status === 204) {
-      return;
-    }
+      if (response.status === 204) {
+        return;
+      }
 
-    if (response.status === 401) {
-      throw new UnauthorizedErrorResponse(response);
-    }
+      if (response.status === 401) {
+        throw new UnauthorizedErrorResponse(response);
+      }
 
-    if (response.status === 404) {
-      throw new VoidResponse(response);
-    }
+      if (response.status === 404) {
+        throw new VoidResponse(response);
+      }
 
-    if (response.status === 422) {
-      throw new ValidationErrorsResponse(response);
-    }
+      if (response.status === 422) {
+        throw new ValidationErrorsResponse(response);
+      }
 
-    throw new ApiException(response, `Request failed with status ${response.status}`);
+      throw new ApiException(response, `Request failed with status ${response.status}`);
+    });
   }
 
-  async createUserPasswordAndResetsById(id: string, options?: CreateUserPasswordAndResetsByIdOptions): Promise<void> {
-    const url = `${this.baseUrl}/users/${encodeURIComponent(id)}/password/resets`;
+  async createUserPasswordAndResetsById(context: CallContext, id: string, options?: CreateUserPasswordAndResetsByIdOptions): Promise<void> {
+    return context.recorder.call(context, 'POST /users/:id/password/resets', async (note) => {
+      const url = `${this.baseUrl}/users/${encodeURIComponent(id)}/password/resets`;
 
-    const response = await this.request(
-      url,
-      {
-        method: 'POST'
-      },
-      'application/json',
-      options?.headers || {},
-      options?.signal
-    );
+      const response = await this.request(
+        url,
+        {
+          method: 'POST'
+        },
+        'application/json',
+        { ...note.headers(url), ...options?.headers },
+        options?.signal
+      );
+      note.response(response);
 
-    if (response.status === 204) {
-      return;
-    }
+      if (response.status === 204) {
+        return;
+      }
 
-    if (response.status === 401) {
-      throw new UnauthorizedErrorResponse(response);
-    }
+      if (response.status === 401) {
+        throw new UnauthorizedErrorResponse(response);
+      }
 
-    if (response.status === 404) {
-      throw new VoidResponse(response);
-    }
+      if (response.status === 404) {
+        throw new VoidResponse(response);
+      }
 
-    if (response.status === 422) {
-      throw new ValidationErrorsResponse(response);
-    }
+      if (response.status === 422) {
+        throw new ValidationErrorsResponse(response);
+      }
 
-    throw new ApiException(response, `Request failed with status ${response.status}`);
+      throw new ApiException(response, `Request failed with status ${response.status}`);
+    });
   }
 
-  async createUserPasswordAndSuggestions(params?: CreateUserPasswordAndSuggestionsOptions): Promise<UserPasswordSuggestion> {
-    const url = `${this.baseUrl}/users/password/suggestions`;
+  async createUserPasswordAndSuggestions(
+    context: CallContext,
+    params?: CreateUserPasswordAndSuggestionsOptions
+  ): Promise<UserPasswordSuggestion> {
+    return context.recorder.call(context, 'POST /users/password/suggestions', async (note) => {
+      const url = `${this.baseUrl}/users/password/suggestions`;
 
-    const response = await this.request(
-      url,
-      {
-        method: 'POST'
-      },
-      'application/json',
-      params?.headers || {},
-      params?.signal
-    );
+      const response = await this.request(
+        url,
+        {
+          method: 'POST'
+        },
+        'application/json',
+        { ...note.headers(url), ...params?.headers },
+        params?.signal
+      );
+      note.response(response);
 
-    if (response.status === 201) {
-      return await Util.mustParse<UserPasswordSuggestion>(response, 'UserPasswordSuggestion');
-    }
+      if (response.status === 201) {
+        return await Util.mustParse<UserPasswordSuggestion>(response, 'UserPasswordSuggestion');
+      }
 
-    throw new ApiException(response, `Request failed with status ${response.status}`);
+      throw new ApiException(response, `Request failed with status ${response.status}`);
+    });
   }
 
-  async createUserEmailAndVerificationsById(id: string, options?: CreateUserEmailAndVerificationsByIdOptions): Promise<void> {
-    const url = `${this.baseUrl}/users/${encodeURIComponent(id)}/email/verifications`;
+  async createUserEmailAndVerificationsById(
+    context: CallContext,
+    id: string,
+    options?: CreateUserEmailAndVerificationsByIdOptions
+  ): Promise<void> {
+    return context.recorder.call(context, 'POST /users/:id/email/verifications', async (note) => {
+      const url = `${this.baseUrl}/users/${encodeURIComponent(id)}/email/verifications`;
 
-    const response = await this.request(
-      url,
-      {
-        method: 'POST'
-      },
-      'application/json',
-      options?.headers || {},
-      options?.signal
-    );
+      const response = await this.request(
+        url,
+        {
+          method: 'POST'
+        },
+        'application/json',
+        { ...note.headers(url), ...options?.headers },
+        options?.signal
+      );
+      note.response(response);
 
-    if (response.status === 204) {
-      return;
-    }
+      if (response.status === 204) {
+        return;
+      }
 
-    if (response.status === 401) {
-      throw new UnauthorizedErrorResponse(response);
-    }
+      if (response.status === 401) {
+        throw new UnauthorizedErrorResponse(response);
+      }
 
-    if (response.status === 404) {
-      throw new VoidResponse(response);
-    }
+      if (response.status === 404) {
+        throw new VoidResponse(response);
+      }
 
-    if (response.status === 422) {
-      throw new ValidationErrorsResponse(response);
-    }
+      if (response.status === 422) {
+        throw new ValidationErrorsResponse(response);
+      }
 
-    throw new ApiException(response, `Request failed with status ${response.status}`);
+      throw new ApiException(response, `Request failed with status ${response.status}`);
+    });
   }
 
-  async createUserEmailAndChangeById(params: CreateUserEmailAndChangeByIdOptions): Promise<UserEmailChange> {
-    const url = `${this.baseUrl}/users/${encodeURIComponent(params.id)}/email/change`;
+  async createUserEmailAndChangeById(context: CallContext, params: CreateUserEmailAndChangeByIdOptions): Promise<UserEmailChange> {
+    return context.recorder.call(context, 'POST /users/:id/email/change', async (note) => {
+      const url = `${this.baseUrl}/users/${encodeURIComponent(params.id)}/email/change`;
 
-    const response = await this.request(
-      url,
-      {
-        method: 'POST',
-        body: JSON.stringify(params.body)
-      },
-      'application/json',
-      params.headers || {},
-      params.signal
-    );
+      const response = await this.request(
+        url,
+        {
+          method: 'POST',
+          body: JSON.stringify(params.body)
+        },
+        'application/json',
+        { ...note.headers(url), ...params.headers },
+        params.signal
+      );
+      note.response(response);
 
-    if (response.status === 201) {
-      return await Util.mustParse<UserEmailChange>(response, 'UserEmailChange');
-    }
+      if (response.status === 201) {
+        return await Util.mustParse<UserEmailChange>(response, 'UserEmailChange');
+      }
 
-    if (response.status === 401) {
-      throw new UnauthorizedErrorResponse(response);
-    }
+      if (response.status === 401) {
+        throw new UnauthorizedErrorResponse(response);
+      }
 
-    if (response.status === 404) {
-      throw new VoidResponse(response);
-    }
+      if (response.status === 404) {
+        throw new VoidResponse(response);
+      }
 
-    if (response.status === 422) {
-      throw new ValidationErrorsResponse(response);
-    }
+      if (response.status === 422) {
+        throw new ValidationErrorsResponse(response);
+      }
 
-    throw new ApiException(response, `Request failed with status ${response.status}`);
+      throw new ApiException(response, `Request failed with status ${response.status}`);
+    });
   }
 
-  async getUserEmailAndChangeById(id: string, options?: GetUserEmailAndChangeByIdOptions): Promise<UserEmailChange> {
-    const url = `${this.baseUrl}/users/${encodeURIComponent(id)}/email/change`;
+  async getUserEmailAndChangeById(context: CallContext, id: string, options?: GetUserEmailAndChangeByIdOptions): Promise<UserEmailChange> {
+    return context.recorder.call(context, 'GET /users/:id/email/change', async (note) => {
+      const url = `${this.baseUrl}/users/${encodeURIComponent(id)}/email/change`;
 
-    const response = await this.request(
-      url,
-      {
-        method: 'GET'
-      },
-      'application/json',
-      options?.headers || {},
-      options?.signal
-    );
+      const response = await this.request(
+        url,
+        {
+          method: 'GET'
+        },
+        'application/json',
+        { ...note.headers(url), ...options?.headers },
+        options?.signal
+      );
+      note.response(response);
 
-    if (response.status === 200) {
-      return await Util.mustParse<UserEmailChange>(response, 'UserEmailChange');
-    }
+      if (response.status === 200) {
+        return await Util.mustParse<UserEmailChange>(response, 'UserEmailChange');
+      }
 
-    if (response.status === 401) {
-      throw new UnauthorizedErrorResponse(response);
-    }
+      if (response.status === 401) {
+        throw new UnauthorizedErrorResponse(response);
+      }
 
-    if (response.status === 404) {
-      throw new VoidResponse(response);
-    }
+      if (response.status === 404) {
+        throw new VoidResponse(response);
+      }
 
-    throw new ApiException(response, `Request failed with status ${response.status}`);
+      throw new ApiException(response, `Request failed with status ${response.status}`);
+    });
   }
 
-  async deleteUserEmailAndChangeById(id: string, options?: DeleteUserEmailAndChangeByIdOptions): Promise<void> {
-    const url = `${this.baseUrl}/users/${encodeURIComponent(id)}/email/change`;
+  async deleteUserEmailAndChangeById(context: CallContext, id: string, options?: DeleteUserEmailAndChangeByIdOptions): Promise<void> {
+    return context.recorder.call(context, 'DELETE /users/:id/email/change', async (note) => {
+      const url = `${this.baseUrl}/users/${encodeURIComponent(id)}/email/change`;
 
-    const response = await this.request(
-      url,
-      {
-        method: 'DELETE'
-      },
-      'application/json',
-      options?.headers || {},
-      options?.signal
-    );
+      const response = await this.request(
+        url,
+        {
+          method: 'DELETE'
+        },
+        'application/json',
+        { ...note.headers(url), ...options?.headers },
+        options?.signal
+      );
+      note.response(response);
 
-    if (response.status === 204) {
-      return;
-    }
+      if (response.status === 204) {
+        return;
+      }
 
-    if (response.status === 401) {
-      throw new UnauthorizedErrorResponse(response);
-    }
+      if (response.status === 401) {
+        throw new UnauthorizedErrorResponse(response);
+      }
 
-    if (response.status === 404) {
-      throw new VoidResponse(response);
-    }
+      if (response.status === 404) {
+        throw new VoidResponse(response);
+      }
 
-    throw new ApiException(response, `Request failed with status ${response.status}`);
+      throw new ApiException(response, `Request failed with status ${response.status}`);
+    });
   }
 
-  async getUserActivationByToken(token: string, options?: GetUserActivationByTokenOptions): Promise<UserActivation> {
-    const url = `${this.baseUrl}/activations/${encodeURIComponent(token)}`;
+  async getUserActivationByToken(context: CallContext, token: string, options?: GetUserActivationByTokenOptions): Promise<UserActivation> {
+    return context.recorder.call(context, 'GET /activations/:token', async (note) => {
+      const url = `${this.baseUrl}/activations/${encodeURIComponent(token)}`;
 
-    const response = await this.request(
-      url,
-      {
-        method: 'GET'
-      },
-      'application/json',
-      options?.headers || {},
-      options?.signal
-    );
+      const response = await this.request(
+        url,
+        {
+          method: 'GET'
+        },
+        'application/json',
+        { ...note.headers(url), ...options?.headers },
+        options?.signal
+      );
+      note.response(response);
 
-    if (response.status === 200) {
-      return await Util.mustParse<UserActivation>(response, 'UserActivation');
-    }
+      if (response.status === 200) {
+        return await Util.mustParse<UserActivation>(response, 'UserActivation');
+      }
 
-    if (response.status === 404) {
-      throw new VoidResponse(response);
-    }
+      if (response.status === 404) {
+        throw new VoidResponse(response);
+      }
 
-    throw new ApiException(response, `Request failed with status ${response.status}`);
+      throw new ApiException(response, `Request failed with status ${response.status}`);
+    });
   }
 
-  async createUserActivationPasswordByToken(params: CreateUserActivationPasswordByTokenOptions): Promise<SessionState> {
-    const url = `${this.baseUrl}/activations/${encodeURIComponent(params.token)}/password`;
+  async createUserActivationPasswordByToken(
+    context: CallContext,
+    params: CreateUserActivationPasswordByTokenOptions
+  ): Promise<SessionState> {
+    return context.recorder.call(context, 'POST /activations/:token/password', async (note) => {
+      const url = `${this.baseUrl}/activations/${encodeURIComponent(params.token)}/password`;
 
-    const response = await this.request(
-      url,
-      {
-        method: 'POST',
-        body: JSON.stringify(params.body)
-      },
-      'application/json',
-      params.headers || {},
-      params.signal
-    );
+      const response = await this.request(
+        url,
+        {
+          method: 'POST',
+          body: JSON.stringify(params.body)
+        },
+        'application/json',
+        { ...note.headers(url), ...params.headers },
+        params.signal
+      );
+      note.response(response);
 
-    if (response.status === 201) {
-      return await Util.mustParse<SessionState>(response, 'SessionState');
-    }
+      if (response.status === 201) {
+        return await Util.mustParse<SessionState>(response, 'SessionState');
+      }
 
-    if (response.status === 404) {
-      throw new VoidResponse(response);
-    }
+      if (response.status === 404) {
+        throw new VoidResponse(response);
+      }
 
-    if (response.status === 422) {
-      throw new ValidationErrorsResponse(response);
-    }
+      if (response.status === 422) {
+        throw new ValidationErrorsResponse(response);
+      }
 
-    throw new ApiException(response, `Request failed with status ${response.status}`);
+      throw new ApiException(response, `Request failed with status ${response.status}`);
+    });
   }
 }

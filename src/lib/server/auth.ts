@@ -1,3 +1,4 @@
+import type { CallContext } from '#lib/telemetry/context.ts';
 import { redirect, error } from '@sveltejs/kit';
 import type { RequestEvent } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.ts';
@@ -68,12 +69,23 @@ function assertSafeOrgKey(orgKey: string): void {
  * when one is named. Both exported guards are this with a different `role`, so how an outage or
  * an empty page is treated cannot drift between them.
  */
-async function requireOrgRole(locals: App.Locals, orgKey: string, role?: MembershipRole): Promise<NonNullable<App.Locals['session']>> {
+async function requireOrgRole(
+  context: CallContext,
+  locals: App.Locals,
+  orgKey: string,
+  role?: MembershipRole
+): Promise<NonNullable<App.Locals['session']>> {
   assertSafeOrgKey(orgKey);
   const session = requireAuthForAction(locals);
   const headers = getSessionHeaders(session.id);
   const response = await handleApiCall<Membership[]>(() =>
-    apiBuilderClient({ headers }).getMemberships({ orgKey, userId: session.user.id, ...(role && { role: role }), limit: 25, offset: 0 })
+    apiBuilderClient({ headers }).getMemberships(context, {
+      orgKey,
+      userId: session.user.id,
+      ...(role && { role: role }),
+      limit: 25,
+      offset: 0
+    })
   );
   // An unanswered membership lookup is not a denial: reporting "Forbidden" for an
   // outage tells a member their access was revoked.
@@ -84,12 +96,20 @@ async function requireOrgRole(locals: App.Locals, orgKey: string, role?: Members
   return session;
 }
 
-export async function requireMemberForAction(locals: App.Locals, orgKey: string): Promise<NonNullable<App.Locals['session']>> {
-  return requireOrgRole(locals, orgKey);
+export async function requireMemberForAction(
+  context: CallContext,
+  locals: App.Locals,
+  orgKey: string
+): Promise<NonNullable<App.Locals['session']>> {
+  return requireOrgRole(context, locals, orgKey);
 }
 
-export async function requireAdminForAction(locals: App.Locals, orgKey: string): Promise<NonNullable<App.Locals['session']>> {
-  return requireOrgRole(locals, orgKey, MembershipRole.Admin);
+export async function requireAdminForAction(
+  context: CallContext,
+  locals: App.Locals,
+  orgKey: string
+): Promise<NonNullable<App.Locals['session']>> {
+  return requireOrgRole(context, locals, orgKey, MembershipRole.Admin);
 }
 
 /**
@@ -110,13 +130,13 @@ function clientFor(session: NonNullable<App.Locals['session']>): AuthorizedClien
 }
 
 /** Authorize an org admin and hand back a client acting as them. */
-export async function adminClient(locals: App.Locals, orgKey: string): Promise<AuthorizedClient> {
-  return clientFor(await requireAdminForAction(locals, orgKey));
+export async function adminClient(context: CallContext, locals: App.Locals, orgKey: string): Promise<AuthorizedClient> {
+  return clientFor(await requireAdminForAction(context, locals, orgKey));
 }
 
 /** Authorize an org member and hand back a client acting as them. */
-export async function memberClient(locals: App.Locals, orgKey: string): Promise<AuthorizedClient> {
-  return clientFor(await requireMemberForAction(locals, orgKey));
+export async function memberClient(context: CallContext, locals: App.Locals, orgKey: string): Promise<AuthorizedClient> {
+  return clientFor(await requireMemberForAction(context, locals, orgKey));
 }
 
 /**

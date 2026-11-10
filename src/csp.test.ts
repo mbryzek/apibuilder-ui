@@ -68,7 +68,8 @@ const { handle } = await import('./hooks.server');
 
 /** Run the hook over an anonymous request and hand back the headers it left on the response. */
 async function headersFor(resolved = new Response('ok')): Promise<Headers> {
-  const event = { cookies: { get: () => undefined }, locals: {} };
+  const url = new URL('https://apibuilder.org/');
+  const event = { url, request: new Request(url), route: { id: '/' }, isDataRequest: false, cookies: { get: () => undefined }, locals: {} };
   const res = await (handle as unknown as (input: { event: typeof event; resolve: () => Promise<Response> }) => Promise<Response>)({
     event,
     resolve: async () => resolved

@@ -10,6 +10,9 @@ import { clearSessionCookie } from '#lib/server/session.ts';
 import type { TenantSession } from '#generated/com-bryzek-platform.ts';
 import type { RequestEvent } from '@sveltejs/kit';
 import { installBackendRequestFetch, runWithBackendRequest } from 'ui/server/request-id.ts';
+import { shellCtx } from '#lib/server/shellContext.ts';
+import { screenReportHandle } from '#lib/telemetry/server.ts';
+import { screenReport } from '#lib/server/screenReport.ts';
 
 // Every API call this app makes runs here on the server, so this is where its failures are
 // reported: through the server half of PostHog, under the event names every app shares.
@@ -38,12 +41,16 @@ function clientAddress(event: RequestEvent): string | undefined {
   }
 }
 
+// The screen view opens here, after the session check: that is the shell's read for every request,
+// never a screen's (DES-65431).
+const reportScreen = screenReportHandle(screenReport);
+
 const handleRequest: Handle = async ({ event, resolve }) => {
   const sessionId = event.cookies.get(SESSION_COOKIE) || undefined;
 
   if (sessionId) {
     const client = clients({ headers: getSessionHeaders(sessionId) });
-    const response = await handleApiCall<TenantSession>(() => client.platform.getTenantSession(config.tenantId), {
+    const response = await handleApiCall<TenantSession>(() => client.platform.getTenantSession(shellCtx(), config.tenantId), {
       onUnauthorized: () => {
         // Stale/invalid cookie: clear it and treat the request as anonymous. Do NOT
         // force a global redirect to /login here -- that would bounce users off public
@@ -73,7 +80,7 @@ const handleRequest: Handle = async ({ event, resolve }) => {
     event.locals.session = undefined;
   }
 
-  const res = await resolve(event);
+  const res = await reportScreen({ event, resolve });
 
   res.headers.set('X-Frame-Options', 'DENY');
   res.headers.set('X-Content-Type-Options', 'nosniff');

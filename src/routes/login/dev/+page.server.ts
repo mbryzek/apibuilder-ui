@@ -1,3 +1,4 @@
+import { ctx } from '#lib/telemetry/context.ts';
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
 import { clients, getSessionHeaders } from '#lib/api/clients.ts';
@@ -7,7 +8,8 @@ import { redirectWithFlash } from '#lib/server/flash.ts';
 import { setSessionCookie } from '#lib/server/session.ts';
 import type { TenantSession } from '#generated/com-bryzek-platform.ts';
 
-export const load: PageServerLoad = async ({ cookies }) => {
+export const load: PageServerLoad = async (event) => {
+  const { cookies } = event;
   // This route hands the backend the literal session id 'dev' and mints a real session cookie from
   // whatever comes back. In production that is total account impersonation if the backend ever
   // stops rejecting it — a backend invariant this repo neither states nor enforces. Do not ship the
@@ -17,7 +19,7 @@ export const load: PageServerLoad = async ({ cookies }) => {
   }
 
   const client = clients({ headers: getSessionHeaders('dev') });
-  const response = await handleApiCall<TenantSession>(() => client.platform.getTenantSession(config.tenantId));
+  const response = await handleApiCall<TenantSession>(() => client.platform.getTenantSession(ctx(event, 'load'), config.tenantId));
 
   if ('data' in response && response.data) {
     setSessionCookie(cookies, response.data.session.id);

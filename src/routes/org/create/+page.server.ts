@@ -1,3 +1,4 @@
+import { ctx } from '#lib/telemetry/context.ts';
 import type { PageServerLoad, Actions } from './$types';
 import { fail } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.ts';
@@ -12,7 +13,8 @@ import { Visibility } from '#generated/com-bryzek-apibuilder.ts';
 export const load: PageServerLoad = requireAuthLoad;
 
 export const actions: Actions = {
-  default: async ({ request, locals, cookies }) => {
+  default: async (event) => {
+    const { request, locals, cookies } = event;
     // The shared guard, not a hand-rolled `locals.session` check: a session lookup that got no
     // answer is a 503 there, where a redirect to /login would drop everything typed below.
     const session = requireAuthForAction(locals);
@@ -35,7 +37,9 @@ export const actions: Actions = {
     }
 
     const headers = getSessionHeaders(session.id);
-    const response = await handleApiCall<Organization>(() => apiBuilderClient({ headers }).createOrganization({ body }));
+    const response = await handleApiCall<Organization>(() =>
+      apiBuilderClient({ headers }).createOrganization(ctx(event, 'form'), { body })
+    );
 
     if (isApiError(response)) {
       return actionFail(response, values);

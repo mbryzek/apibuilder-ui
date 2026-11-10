@@ -1,3 +1,5 @@
+import { ctx } from '#lib/telemetry/context.ts';
+import type { CallContext } from '#lib/telemetry/context.ts';
 import type { PageServerLoad, Actions } from './$types';
 import { fail } from '@sveltejs/kit';
 import { emailedLinkFailure, linkOutcome } from 'ui/emailedLink/outcome.ts';
@@ -17,20 +19,22 @@ import type { SessionState } from '#generated/com-bryzek-platform.ts';
  * Which failure means the link is dead is `ui/emailedLink/outcome.ts`: only a 404, so an outage
  * never tells somebody holding a live link that it is dead.
  */
-function readResetLink(id: string) {
-  return handleApiCall(() => platformClient().getTenantSessionPasswordAndResetsById({ tenantId: config.tenantId, id }));
+function readResetLink(context: CallContext, id: string) {
+  return handleApiCall(() => platformClient().getTenantSessionPasswordAndResetsById(context, { tenantId: config.tenantId, id }));
 }
 
-export const load: PageServerLoad = async ({ params, url }) => {
+export const load: PageServerLoad = async (event) => {
+  const { params, url } = event;
   return {
-    outcome: linkOutcome(await readResetLink(params.token)),
+    outcome: linkOutcome(await readResetLink(ctx(event, 'load'), params.token)),
     // The same URL, for the retry link on a transient failure, so it works with no JavaScript.
     retryUrl: url.pathname
   };
 };
 
 export const actions: Actions = {
-  default: async ({ request, params, cookies }) => {
+  default: async (event) => {
+    const { request, params, cookies } = event;
     const formData = await request.formData();
     const password = requiredSecret(formData, 'password') ?? '';
     const refusal = passwordRefusal(password, { confirmation: requiredSecret(formData, 'confirm_password') ?? '' });
@@ -39,7 +43,7 @@ export const actions: Actions = {
     }
 
     const response = await handleApiCall<SessionState>(() =>
-      platformClient().createTenantSessionPasswordAndChanges({
+      platformClient().createTenantSessionPasswordAndChanges(ctx(event, 'form'), {
         tenantId: config.tenantId,
         body: { id: params.token, password }
       })

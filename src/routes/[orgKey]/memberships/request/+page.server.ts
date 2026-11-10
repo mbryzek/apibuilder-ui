@@ -1,3 +1,4 @@
+import { ctx } from '#lib/telemetry/context.ts';
 import type { PageServerLoad, Actions } from './$types';
 import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.ts';
 import { handleApiCall, isApiError } from '#lib/api/error-handler.ts';
@@ -16,13 +17,13 @@ export const load: PageServerLoad = async (event) => {
 
   // Check if already a member
   const membershipsResponse = await handleApiCall<Membership[]>(() =>
-    client.getMemberships({ orgKey: params.orgKey, userId: session.user.id, limit: 25, offset: 0 })
+    client.getMemberships(ctx(event, 'load'), { orgKey: params.orgKey, userId: session.user.id, limit: 25, offset: 0 })
   );
   const isMember = dataOr(membershipsResponse, []).length > 0;
 
   // Check if already requested
   const requestsResponse = await handleApiCall<MembershipRequest[]>(() =>
-    client.getMembershipRequests({ orgKey: params.orgKey, userId: session.user.id, limit: 25, offset: 0 })
+    client.getMembershipRequests(ctx(event, 'load'), { orgKey: params.orgKey, userId: session.user.id, limit: 25, offset: 0 })
   );
   const hasPendingRequest = dataOr(requestsResponse, []).length > 0;
 
@@ -32,7 +33,8 @@ export const load: PageServerLoad = async (event) => {
 };
 
 export const actions: Actions = {
-  default: async ({ locals, params }) => {
+  default: async (event) => {
+    const { locals, params } = event;
     // Any signed-in user may ask to join, so this action deliberately does not use the member
     // guard — which means it does not inherit that guard's orgKey check either.
     assertSafePathParams(params);
@@ -40,13 +42,13 @@ export const actions: Actions = {
     const headers = getSessionHeaders(session.id);
     const client = apiBuilderClient({ headers });
 
-    const orgResponse = await handleApiCall<Organization>(() => client.getOrganizationByKey(params.orgKey));
+    const orgResponse = await handleApiCall<Organization>(() => client.getOrganizationByKey(ctx(event, 'form'), params.orgKey));
     if (isApiError(orgResponse)) {
       return actionFailMissing(orgResponse, 'Organization not found');
     }
 
     const response = await handleApiCall<MembershipRequest>(() =>
-      client.createMembershipRequest({
+      client.createMembershipRequest(ctx(event, 'form'), {
         body: { org_id: orgResponse.data.id, user_id: session.user.id, role: MembershipRole.Member }
       })
     );

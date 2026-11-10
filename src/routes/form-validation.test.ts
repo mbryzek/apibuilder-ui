@@ -23,12 +23,15 @@ const client = {
   createTenantSessionLogins: vi.fn()
 };
 
-vi.mock('#lib/api/clients.ts', () => ({
-  apiBuilderClient: () => client,
-  platformClient: () => client,
-  clients: () => ({ platform: client, apiBuilder: client }),
-  getSessionHeaders: () => ({})
-}));
+vi.mock('#lib/api/clients.ts', async () => {
+  const { moduleWithoutContext, withoutContext } = await import('#lib/test-support/withoutContext.ts');
+  return moduleWithoutContext({
+    apiBuilderClient: () => client,
+    platformClient: () => client,
+    clients: () => withoutContext({ platform: client, apiBuilder: client }),
+    getSessionHeaders: () => ({})
+  });
+});
 
 vi.mock('#lib/server/auth.ts', async (importOriginal) => mockServerAuth(SESSION, client, importOriginal));
 

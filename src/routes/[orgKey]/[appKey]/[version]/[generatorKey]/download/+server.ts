@@ -1,3 +1,4 @@
+import { ctx } from '#lib/telemetry/context.ts';
 import type { RequestHandler } from './$types';
 import { error } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.ts';
@@ -7,12 +8,13 @@ import type { Code } from '#generated/com-bryzek-apibuilder.ts';
 import { attachmentHeader } from '#lib/server/download.ts';
 import { assertSafePathParams } from '#lib/server/path-params.ts';
 
-export const GET: RequestHandler = async ({ params, locals }) => {
+export const GET: RequestHandler = async (event) => {
+  const { params, locals } = event;
   assertSafePathParams(params);
   const headers = getSessionHeaders(locals.session?.id);
 
   const response = await handleApiCall<Code>(() =>
-    apiBuilderClient({ headers }).getCode({
+    apiBuilderClient({ headers }).getCode(ctx(event, 'endpoint'), {
       orgKey: params.orgKey,
       appKey: params.appKey,
       version: params.version,

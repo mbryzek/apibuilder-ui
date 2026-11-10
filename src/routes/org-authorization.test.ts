@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { testCtx } from '#lib/test-support/context.ts';
 import { session } from '#lib/test-support/fixtures.ts';
 import { invokeAction } from '#lib/test-support/invoke-action.ts';
 import { mockApiClients } from '#lib/test-support/mocks.ts';
@@ -83,15 +84,15 @@ describe('org-scoped action helpers validate orgKey', () => {
 
   for (const orgKey of hostile) {
     it(`rejects ${JSON.stringify(orgKey)} before looking up membership`, async () => {
-      expect((await caughtAsync(() => requireMemberForAction(LOCALS, orgKey))).status).toBe(400);
-      expect((await caughtAsync(() => requireAdminForAction(LOCALS, orgKey))).status).toBe(400);
+      expect((await caughtAsync(() => requireMemberForAction(testCtx(), LOCALS, orgKey))).status).toBe(400);
+      expect((await caughtAsync(() => requireAdminForAction(testCtx(), LOCALS, orgKey))).status).toBe(400);
       expect(client.getMemberships).not.toHaveBeenCalled();
     });
   }
 
   it('still accepts a normal org key', async () => {
     client.getMemberships.mockResolvedValue([{ id: 'membership-1' }]);
-    await expect(requireMemberForAction(LOCALS, 'gilt')).resolves.toEqual(SESSION);
+    await expect(requireMemberForAction(testCtx(), LOCALS, 'gilt')).resolves.toEqual(SESSION);
   });
 });
 
@@ -156,10 +157,10 @@ describe('adminClient / memberClient', () => {
   it('hands back the session it authorized, with a client carrying that session', async () => {
     client.getMemberships.mockResolvedValue([{ id: 'membership-1' }]);
 
-    const authorized = await adminClient(LOCALS, 'gilt');
+    const authorized = await adminClient(testCtx(), LOCALS, 'gilt');
 
     expect(authorized.session).toEqual(SESSION);
-    expect(authorized.client).toBe(client);
+    expect(authorized.client).toBe(vi.mocked(apiBuilderClient).mock.results[0]?.value);
     expect(apiBuilderClient).toHaveBeenCalledWith({ headers: expect.objectContaining({ session_id: SESSION.id }) });
   });
 
@@ -167,17 +168,17 @@ describe('adminClient / memberClient', () => {
     ['adminClient', adminClient],
     ['memberClient', memberClient]
   ])('%s refuses a caller the org does not know', async (_name, authorize) => {
-    expect((await caughtAsync(() => authorize(LOCALS, 'victim-org'))).status).toBe(403);
+    expect((await caughtAsync(() => authorize(testCtx(), LOCALS, 'victim-org'))).status).toBe(403);
   });
 
   it('checks the org key before looking anything up, like the guards it wraps', async () => {
-    expect((await caughtAsync(() => adminClient(LOCALS, '/evil.com'))).status).toBe(400);
+    expect((await caughtAsync(() => adminClient(testCtx(), LOCALS, '/evil.com'))).status).toBe(400);
     expect(client.getMemberships).not.toHaveBeenCalled();
   });
 
   it('asks for the admin role, which membership alone does not satisfy', async () => {
     client.getMemberships.mockResolvedValue([{ id: 'membership-1' }]);
-    await adminClient(LOCALS, 'gilt');
+    await adminClient(testCtx(), LOCALS, 'gilt');
 
     expect(client.getMemberships).toHaveBeenCalledWith(expect.objectContaining({ role: 'admin' }));
   });

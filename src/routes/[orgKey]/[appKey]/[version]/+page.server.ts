@@ -1,3 +1,4 @@
+import { ctx } from '#lib/telemetry/context.ts';
 import type { PageServerLoad, Actions } from './$types';
 import { redirect } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.ts';
@@ -14,7 +15,8 @@ export const load: PageServerLoad = async () => {
 };
 
 export const actions: Actions = {
-  watch: async ({ params, locals }) => {
+  watch: async (event) => {
+    const { params, locals } = event;
     // `requireAuthForAction` authorizes a session and validates nothing about the route, and this
     // action reflects `params.orgKey` into the redirect below. The member/admin guards run this
     // check themselves; the ones that only need a session have to run it here.
@@ -24,7 +26,7 @@ export const actions: Actions = {
     const client = apiBuilderClient({ headers });
 
     const response = await handleApiCall<Watch>(() =>
-      client.createWatch({
+      client.createWatch(ctx(event, 'form'), {
         body: {
           user_id: session.user.id,
           organization_key: params.orgKey,
@@ -56,14 +58,15 @@ export const actions: Actions = {
    * The delete result is also checked now, matching the sibling `watch` action above. Discarding
    * it redirected as though a failed unwatch had succeeded, with nothing shown to the user.
    */
-  unwatch: async ({ params, locals }) => {
+  unwatch: async (event) => {
+    const { params, locals } = event;
     assertSafePathParams(params);
     const session = requireAuthForAction(locals);
     const headers = getSessionHeaders(session.id);
     const client = apiBuilderClient({ headers });
 
     const watches = await handleApiCall<Watch[]>(() =>
-      client.getWatches({
+      client.getWatches(ctx(event, 'form'), {
         userId: session.user.id,
         organizationKey: params.orgKey,
         applicationKey: params.appKey,
@@ -80,7 +83,7 @@ export const actions: Actions = {
     // re-render the toggle from what the server actually has.
     const watch = watches.data[0];
     if (watch) {
-      const response = await handleApiCall<void>(() => client.deleteWatchById(watch.id));
+      const response = await handleApiCall<void>(() => client.deleteWatchById(ctx(event, 'form'), watch.id));
 
       if (isApiError(response)) {
         return actionFail(response);
@@ -90,11 +93,12 @@ export const actions: Actions = {
     throw redirect(303, `/${params.orgKey}/${params.appKey}/${params.version}`);
   },
 
-  deleteVersion: async ({ params, locals, cookies }) => {
-    const { client } = await memberClient(locals, params.orgKey);
+  deleteVersion: async (event) => {
+    const { params, locals, cookies } = event;
+    const { client } = await memberClient(ctx(event, 'form'), locals, params.orgKey);
 
     const response = await handleApiCall<void>(() =>
-      client.deleteVersionByVersion({ orgKey: params.orgKey, appKey: params.appKey, version: params.version })
+      client.deleteVersionByVersion(ctx(event, 'form'), { orgKey: params.orgKey, appKey: params.appKey, version: params.version })
     );
 
     if (isApiError(response)) {

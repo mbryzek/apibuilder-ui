@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { testCtx } from '#lib/test-support/context.ts';
 import { mockApiClients } from '#lib/test-support/mocks.ts';
 import { loadAllGenerators } from './generators';
 import type { Generator } from '#generated/com-bryzek-apibuilder-generator.ts';
@@ -16,7 +17,7 @@ describe('loadAllGenerators', () => {
   it('stops after a short first page', async () => {
     getGenerators.mockResolvedValueOnce(generators(16));
 
-    const response = await loadAllGenerators({});
+    const response = await loadAllGenerators(testCtx(), {});
 
     expect(response).toMatchObject({ data: generators(16) });
     expect(getGenerators).toHaveBeenCalledTimes(1);
@@ -26,7 +27,7 @@ describe('loadAllGenerators', () => {
   it('reads past a full page, so a generator sorting after it is not lost', async () => {
     getGenerators.mockResolvedValueOnce(generators(100)).mockResolvedValueOnce(generators(3, 100));
 
-    const response = await loadAllGenerators({});
+    const response = await loadAllGenerators(testCtx(), {});
 
     expect(response).toMatchObject({ data: generators(103) });
     expect(getGenerators).toHaveBeenLastCalledWith({ limit: 100, offset: 100 });
@@ -35,7 +36,7 @@ describe('loadAllGenerators', () => {
   it('fails the whole read when a later page fails, rather than answering with a partial list', async () => {
     getGenerators.mockResolvedValueOnce(generators(100)).mockRejectedValueOnce(new Error('connection dropped'));
 
-    const response = await loadAllGenerators({});
+    const response = await loadAllGenerators(testCtx(), {});
 
     expect(response).not.toHaveProperty('data');
   });

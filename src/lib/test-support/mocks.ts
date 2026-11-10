@@ -1,4 +1,5 @@
 import { vi } from 'vitest';
+import { withoutContext } from './withoutContext';
 
 /**
  * `#lib/api/clients.ts` is mocked by every test that exercises a route module, and a mock that
@@ -9,6 +10,9 @@ import { vi } from 'vitest';
  * client CONSTRUCTION rather than on each operation call, so what a test asserts the session id
  * reached is the options the factory was called with — see `session-lifecycle.test.ts`.
  *
+ * The client is handed out {@link withoutContext}, so a test asserts each operation's own arguments
+ * without the call context every call site passes first (DES-65431).
+ *
  * `getSessionHeaders` is deliberately not replaced — it is a pure function over `#lib/config.ts`,
  * and the header it builds is part of what the session tests pin.
  */
@@ -16,12 +20,13 @@ export async function mockApiClients(
   client: unknown,
   importOriginal: <T = Record<string, unknown>>() => Promise<T>
 ): Promise<Record<string, unknown>> {
+  const wrapped = withoutContext(client);
   return {
     ...(await importOriginal<Record<string, unknown>>()),
-    clients: vi.fn(() => ({ apibuilder: client, platform: client })),
-    apiBuilderClient: vi.fn(() => client),
-    generatorClient: vi.fn(() => client),
-    platformClient: vi.fn(() => client)
+    clients: vi.fn(() => ({ apibuilder: wrapped, platform: wrapped })),
+    apiBuilderClient: vi.fn(() => wrapped),
+    generatorClient: vi.fn(() => wrapped),
+    platformClient: vi.fn(() => wrapped)
   };
 }
 
@@ -41,7 +46,7 @@ export async function mockServerAuth(
   client: unknown,
   importOriginal: <T = Record<string, unknown>>() => Promise<T>
 ): Promise<Record<string, unknown>> {
-  const authorized = { session, client };
+  const authorized = { session, client: withoutContext(client) };
   return {
     ...(await importOriginal<Record<string, unknown>>()),
     requireAuth: () => session,

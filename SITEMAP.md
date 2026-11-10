@@ -684,6 +684,16 @@ All doc pages are public and use a dedicated layout with doc sidebar navigation.
 
 ---
 
+### 16. Screen report
+
+**Route:** `POST /_telemetry`
+**Auth:** Public (same-origin `sendBeacon` from the page)
+
+- Receives the browser half of each screen view and forwards it to the monitoring collector (DES-65431)
+- Posts nothing where the Worker holds no `OBS_REPORT_TOKEN`
+
+---
+
 ## Client-Side Behavior (JavaScript)
 
 All handled in `public/javascripts/util.js`:
