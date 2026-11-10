@@ -1,3 +1,4 @@
+import { ctx } from '#lib/telemetry/context.ts';
 import type { PageServerLoad } from './$types';
 import { platformClient, getSessionHeaders } from '#lib/api/clients.ts';
 import { handleApiCall } from '#lib/api/error-handler.ts';
@@ -12,7 +13,7 @@ export const load: PageServerLoad = async (event) => {
   const offset = parseOffset(event.url);
 
   const response = await handleApiCall<Token[]>(() =>
-    platformClient({ headers }).getTokensUsersByUserId({ userId: session.user.id, limit: PAGE_FETCH_LIMIT, offset })
+    platformClient({ headers }).getTokensUsersByUserId(ctx(event, 'load'), { userId: session.user.id, limit: PAGE_FETCH_LIMIT, offset })
   );
 
   const { rows: tokens, ...page } = toPage(dataOr(response, []), offset);

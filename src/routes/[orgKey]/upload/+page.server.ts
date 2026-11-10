@@ -1,3 +1,4 @@
+import { ctx } from '#lib/telemetry/context.ts';
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
 import { handleApiCall, isApiError } from '#lib/api/error-handler.ts';
@@ -16,8 +17,9 @@ export const actions: Actions = {
    * "+ Upload" link is gated on `data.isMember` (`[version]/+page.svelte`), and hiding a link is
    * not access control — a non-member can post the form directly, so the guard is here.
    */
-  default: async ({ request, params, locals }) => {
-    const { client } = await memberClient(locals, params.orgKey);
+  default: async (event) => {
+    const { request, params, locals } = event;
+    const { client } = await memberClient(ctx(event, 'form'), locals, params.orgKey);
     const formData = await request.formData();
 
     const appKey = optionalString(formData, 'app_key');
@@ -52,7 +54,7 @@ export const actions: Actions = {
     const version = deriveVersionFromSpec(data) || '0.0.1';
 
     const response = await handleApiCall<Version>(() =>
-      client.updateVersionByVersion({
+      client.updateVersionByVersion(ctx(event, 'form'), {
         orgKey: params.orgKey,
         appKey: targetAppKey,
         version,

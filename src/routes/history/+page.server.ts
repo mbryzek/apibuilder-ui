@@ -1,3 +1,4 @@
+import { ctx } from '#lib/telemetry/context.ts';
 import type { PageServerLoad } from './$types';
 import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.ts';
 import { handleApiCall } from '#lib/api/error-handler.ts';
@@ -5,11 +6,14 @@ import { dataOr, loadErrorFrom } from '#lib/api/load-error.ts';
 import type { Change } from '#generated/com-bryzek-apibuilder.ts';
 import { PAGE_FETCH_LIMIT, parseOffset, toPage } from '#lib/pagination.ts';
 
-export const load: PageServerLoad = async ({ url, locals }) => {
+export const load: PageServerLoad = async (event) => {
+  const { url, locals } = event;
   const headers = getSessionHeaders(locals.session?.id);
   const offset = parseOffset(url);
 
-  const response = await handleApiCall<Change[]>(() => apiBuilderClient({ headers }).getChanges({ limit: PAGE_FETCH_LIMIT, offset }));
+  const response = await handleApiCall<Change[]>(() =>
+    apiBuilderClient({ headers }).getChanges(ctx(event, 'load'), { limit: PAGE_FETCH_LIMIT, offset })
+  );
 
   const { rows: changes, ...page } = toPage(dataOr(response, []), offset);
 

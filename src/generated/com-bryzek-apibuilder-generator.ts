@@ -98,6 +98,26 @@ import { VoidResponse } from './generated-error-void-response.ts';
 import { ApiException, Util } from './generated-util.ts';
 import type { ApiClientOptions } from './generated-util.ts';
 
+/**
+ * What a call is made for: the route and screen view it belongs to, the part of the view
+ * (`load`, a part that fills in after, a poll) and the recorder that notes it.
+ */
+export interface CallContext {
+  readonly route: string | null;
+  readonly view: string;
+  readonly part: string;
+  readonly recorder: CallRecorder;
+}
+
+export interface CallRecorder {
+  call<T>(context: CallContext, operation: string, run: (note: CallNote) => Promise<T>): Promise<T>;
+}
+
+export interface CallNote {
+  headers(url: string): Record<string, string>;
+  response(response: Response): void;
+}
+
 export interface GetGeneratorsOptions {
   limit: number;
   offset: number;
@@ -179,119 +199,134 @@ export class ApiClient {
     }
   }
 
-  async getGenerators(params: GetGeneratorsOptions): Promise<Generator[]> {
-    const queryParts: string[] = [];
-    if (params.q !== undefined && params.q !== null) {
-      queryParts.push(`q=${encodeURIComponent(params.q)}`);
-    }
-    if (params.key !== undefined && params.key !== null) {
-      queryParts.push(`key=${encodeURIComponent(params.key)}`);
-    }
-    queryParts.push(`limit=${encodeURIComponent(String(params.limit))}`);
-    queryParts.push(`offset=${encodeURIComponent(String(params.offset))}`);
-    const queryString = queryParts.length > 0 ? '?' + queryParts.join('&') : '';
-    const url = `${this.baseUrl}/apibuilder/generators${queryString}`;
+  async getGenerators(context: CallContext, params: GetGeneratorsOptions): Promise<Generator[]> {
+    return context.recorder.call(context, 'GET /apibuilder/generators', async (note) => {
+      const queryParts: string[] = [];
+      if (params.q !== undefined && params.q !== null) {
+        queryParts.push(`q=${encodeURIComponent(params.q)}`);
+      }
+      if (params.key !== undefined && params.key !== null) {
+        queryParts.push(`key=${encodeURIComponent(params.key)}`);
+      }
+      queryParts.push(`limit=${encodeURIComponent(String(params.limit))}`);
+      queryParts.push(`offset=${encodeURIComponent(String(params.offset))}`);
+      const queryString = queryParts.length > 0 ? '?' + queryParts.join('&') : '';
+      const url = `${this.baseUrl}/apibuilder/generators${queryString}`;
 
-    const response = await this.request(
-      url,
-      {
-        method: 'GET'
-      },
-      'application/json',
-      params.headers || {},
-      params.signal
-    );
+      const response = await this.request(
+        url,
+        {
+          method: 'GET'
+        },
+        'application/json',
+        { ...note.headers(url), ...params.headers },
+        params.signal
+      );
+      note.response(response);
 
-    if (response.status === 200) {
-      return await Util.mustParseArray<Generator>(response, 'Generator');
-    }
+      if (response.status === 200) {
+        return await Util.mustParseArray<Generator>(response, 'Generator');
+      }
 
-    if (response.status === 422) {
-      throw new ValidationErrorsResponse(response);
-    }
+      if (response.status === 422) {
+        throw new ValidationErrorsResponse(response);
+      }
 
-    throw new ApiException(response, `Request failed with status ${response.status}`);
+      throw new ApiException(response, `Request failed with status ${response.status}`);
+    });
   }
 
-  async getGeneratorByKey(key: string, options?: GetGeneratorByKeyOptions): Promise<Generator> {
-    const url = `${this.baseUrl}/apibuilder/generators/${encodeURIComponent(key)}`;
+  async getGeneratorByKey(context: CallContext, key: string, options?: GetGeneratorByKeyOptions): Promise<Generator> {
+    return context.recorder.call(context, 'GET /apibuilder/generators/:key', async (note) => {
+      const url = `${this.baseUrl}/apibuilder/generators/${encodeURIComponent(key)}`;
 
-    const response = await this.request(
-      url,
-      {
-        method: 'GET'
-      },
-      'application/json',
-      options?.headers || {},
-      options?.signal
-    );
+      const response = await this.request(
+        url,
+        {
+          method: 'GET'
+        },
+        'application/json',
+        { ...note.headers(url), ...options?.headers },
+        options?.signal
+      );
+      note.response(response);
 
-    if (response.status === 200) {
-      return await Util.mustParse<Generator>(response, 'Generator');
-    }
+      if (response.status === 200) {
+        return await Util.mustParse<Generator>(response, 'Generator');
+      }
 
-    if (response.status === 404) {
-      throw new VoidResponse(response);
-    }
+      if (response.status === 404) {
+        throw new VoidResponse(response);
+      }
 
-    throw new ApiException(response, `Request failed with status ${response.status}`);
+      throw new ApiException(response, `Request failed with status ${response.status}`);
+    });
   }
 
-  async createGeneratorInvocationByKey(params: CreateGeneratorInvocationByKeyOptions): Promise<Invocation> {
-    const url = `${this.baseUrl}/apibuilder/generators/${encodeURIComponent(params.key)}/invocation`;
+  async createGeneratorInvocationByKey(context: CallContext, params: CreateGeneratorInvocationByKeyOptions): Promise<Invocation> {
+    return context.recorder.call(context, 'POST /apibuilder/generators/:key/invocation', async (note) => {
+      const url = `${this.baseUrl}/apibuilder/generators/${encodeURIComponent(params.key)}/invocation`;
 
-    const response = await this.request(
-      url,
-      {
-        method: 'POST',
-        body: JSON.stringify(params.body)
-      },
-      'application/json',
-      params.headers || {},
-      params.signal
-    );
+      const response = await this.request(
+        url,
+        {
+          method: 'POST',
+          body: JSON.stringify(params.body)
+        },
+        'application/json',
+        { ...note.headers(url), ...params.headers },
+        params.signal
+      );
+      note.response(response);
 
-    if (response.status === 200) {
-      return await Util.mustParse<Invocation>(response, 'Invocation');
-    }
+      if (response.status === 200) {
+        return await Util.mustParse<Invocation>(response, 'Invocation');
+      }
 
-    if (response.status === 404) {
-      throw new VoidResponse(response);
-    }
+      if (response.status === 404) {
+        throw new VoidResponse(response);
+      }
 
-    if (response.status === 422) {
-      throw new ValidationErrorsResponse(response);
-    }
+      if (response.status === 422) {
+        throw new ValidationErrorsResponse(response);
+      }
 
-    throw new ApiException(response, `Request failed with status ${response.status}`);
+      throw new ApiException(response, `Request failed with status ${response.status}`);
+    });
   }
 
-  async createGeneratorMultiSpecInvocationsByKey(params: CreateGeneratorMultiSpecInvocationsByKeyOptions): Promise<Invocation> {
-    const url = `${this.baseUrl}/apibuilder/generators/${encodeURIComponent(params.key)}/multi-spec-invocations`;
+  async createGeneratorMultiSpecInvocationsByKey(
+    context: CallContext,
+    params: CreateGeneratorMultiSpecInvocationsByKeyOptions
+  ): Promise<Invocation> {
+    return context.recorder.call(context, 'POST /apibuilder/generators/:key/multi-spec-invocations', async (note) => {
+      const url = `${this.baseUrl}/apibuilder/generators/${encodeURIComponent(params.key)}/multi-spec-invocations`;
 
-    const response = await this.request(
-      url,
-      {
-        method: 'POST',
-        body: JSON.stringify(params.body)
-      },
-      'application/json',
-      params.headers || {},
-      params.signal
-    );
+      const response = await this.request(
+        url,
+        {
+          method: 'POST',
+          body: JSON.stringify(params.body)
+        },
+        'application/json',
+        { ...note.headers(url), ...params.headers },
+        params.signal
+      );
+      note.response(response);
 
-    if (response.status === 200) {
-      return await Util.mustParse<Invocation>(response, 'Invocation');
-    }
+      if (response.status === 200) {
+        return await Util.mustParse<Invocation>(response, 'Invocation');
+      }
 
-    if (response.status === 404) {
-      throw new VoidResponse(response);
-    }
+      if (response.status === 404) {
+        throw new VoidResponse(response);
+      }
 
-    if (response.status === 422) {
-      throw new ValidationErrorsResponse(response);
-    }
+      if (response.status === 422) {
+        throw new ValidationErrorsResponse(response);
+      }
 
-    throw new ApiException(response, `Request failed with status ${response.status}`);
+      throw new ApiException(response, `Request failed with status ${response.status}`);
+    });
   }
 }

@@ -1,3 +1,4 @@
+import { ctx } from '#lib/telemetry/context.ts';
 import type { Actions } from './$types';
 import { fail } from '@sveltejs/kit';
 import { platformClient } from '#lib/api/clients.ts';
@@ -8,7 +9,8 @@ import { config } from '#lib/config.ts';
 import { requiredString } from '#lib/server/form.ts';
 
 export const actions: Actions = {
-  default: async ({ request }) => {
+  default: async (event) => {
+    const { request } = event;
     const formData = await request.formData();
     const email = requiredString(formData, 'email');
 
@@ -17,7 +19,7 @@ export const actions: Actions = {
     }
 
     const response = await handleApiCall<void>(() =>
-      platformClient().createTenantSessionPasswordAndResets({
+      platformClient().createTenantSessionPasswordAndResets(ctx(event, 'form'), {
         tenantId: config.tenantId,
         body: { email }
       })

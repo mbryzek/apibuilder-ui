@@ -1,3 +1,4 @@
+import { ctx } from '#lib/telemetry/context.ts';
 import type { PageServerLoad } from './$types';
 import { verificationOutcome } from 'ui/emailedLink/outcome.ts';
 import { platformClient, getSessionHeaders } from '#lib/api/clients.ts';
@@ -23,11 +24,14 @@ import { handleApiCall } from '#lib/api/error-handler.ts';
  *
  * Which failure means the link is dead is `ui/emailedLink/outcome.ts`: only a 404.
  */
-export const load: PageServerLoad = async ({ params, locals, url }) => {
+export const load: PageServerLoad = async (event) => {
+  const { params, locals, url } = event;
   const headers = getSessionHeaders(locals.session?.id);
 
   return {
-    outcome: verificationOutcome(await handleApiCall<void>(() => platformClient({ headers }).updateEmailVerificationByToken(params.token))),
+    outcome: verificationOutcome(
+      await handleApiCall<void>(() => platformClient({ headers }).updateEmailVerificationByToken(ctx(event, 'load'), params.token))
+    ),
     // The same URL, for the retry link on a transient failure, so it works with no JavaScript.
     retryUrl: url.pathname
   };

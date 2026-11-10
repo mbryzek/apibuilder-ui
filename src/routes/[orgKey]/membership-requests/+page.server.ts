@@ -1,3 +1,4 @@
+import { ctx } from '#lib/telemetry/context.ts';
 import type { PageServerLoad, Actions } from './$types';
 import { error } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.ts';
@@ -22,7 +23,11 @@ export const load: PageServerLoad = async (event) => {
   const offset = parseOffset(event.url);
 
   const response = await handleApiCall<MembershipRequest[]>(() =>
-    apiBuilderClient({ headers }).getMembershipRequests({ orgKey: event.params.orgKey, limit: PAGE_FETCH_LIMIT, offset })
+    apiBuilderClient({ headers }).getMembershipRequests(ctx(event, 'load'), {
+      orgKey: event.params.orgKey,
+      limit: PAGE_FETCH_LIMIT,
+      offset
+    })
   );
 
   const { rows: requests, ...page } = toPage(dataOr(response, []), offset);
@@ -41,11 +46,17 @@ export const load: PageServerLoad = async (event) => {
  * from the org the caller was just checked to administer rather than straight from the form
  * body — where it names whatever org the submitter likes. See `#lib/server/scoped-action.ts`.
  */
-const requestsInOrg: OrgScope<MembershipRequest> = (client, orgKey) => (limit, offset) =>
-  handleApiCall<MembershipRequest[]>(() => client.getMembershipRequests({ orgKey, limit, offset }));
+const requestsInOrg: OrgScope<MembershipRequest> = (context, client, orgKey) => (limit, offset) =>
+  handleApiCall<MembershipRequest[]>(() => client.getMembershipRequests(context, { orgKey, limit, offset }));
 
 export const actions: Actions = {
-  accept: (event) => adminGuidAction(event, requestsInOrg, (req, client) => client.createMembershipRequestAcceptById(req.id)),
+  accept: (event) =>
+    adminGuidAction(ctx(event, 'form'), event, requestsInOrg, (req, client) =>
+      client.createMembershipRequestAcceptById(ctx(event, 'form'), req.id)
+    ),
 
-  decline: (event) => adminGuidAction(event, requestsInOrg, (req, client) => client.createMembershipRequestDeclineById(req.id))
+  decline: (event) =>
+    adminGuidAction(ctx(event, 'form'), event, requestsInOrg, (req, client) =>
+      client.createMembershipRequestDeclineById(ctx(event, 'form'), req.id)
+    )
 };

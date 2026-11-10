@@ -1,3 +1,4 @@
+import { ctx } from '#lib/telemetry/context.ts';
 import type { LayoutServerLoad } from './$types';
 import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.ts';
 import { handleApiCall } from '#lib/api/error-handler.ts';
@@ -6,7 +7,8 @@ import { loadAllGenerators } from '#lib/server/generators.ts';
 import { assertSafePathParams } from '#lib/server/path-params.ts';
 import type { Version, Watch } from '#generated/com-bryzek-apibuilder.ts';
 
-export const load: LayoutServerLoad = async ({ params, locals }) => {
+export const load: LayoutServerLoad = async (event) => {
+  const { params, locals } = event;
   // getVersionByVersion interpolates orgKey/appKey/version into the upstream path unencoded.
   // Layout and page loads run in parallel, so each loader that makes such a call has to guard
   // its own — a check here alone would not stop a child's request from going out.
@@ -15,7 +17,7 @@ export const load: LayoutServerLoad = async ({ params, locals }) => {
   const client = apiBuilderClient({ headers });
 
   const versionResponse = await handleApiCall<Version>(() =>
-    client.getVersionByVersion({ orgKey: params.orgKey, appKey: params.appKey, version: params.version })
+    client.getVersionByVersion(ctx(event, 'load'), { orgKey: params.orgKey, appKey: params.appKey, version: params.version })
   );
 
   const version = dataOrThrow(versionResponse, 'Version not found');
@@ -23,7 +25,7 @@ export const load: LayoutServerLoad = async ({ params, locals }) => {
   const [watchResponse, generatorsResponse] = await Promise.all([
     locals.session
       ? handleApiCall<Watch[]>(() =>
-          client.getWatches({
+          client.getWatches(ctx(event, 'load'), {
             userId: locals.session!.user.id,
             organizationKey: params.orgKey,
             applicationKey: params.appKey,
@@ -32,7 +34,7 @@ export const load: LayoutServerLoad = async ({ params, locals }) => {
           })
         )
       : null,
-    loadAllGenerators({ headers })
+    loadAllGenerators(ctx(event, 'load'), { headers })
   ]);
 
   const watchData = watchResponse ? dataOr(watchResponse, []) : [];

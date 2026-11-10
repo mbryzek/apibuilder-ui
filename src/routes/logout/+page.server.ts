@@ -1,3 +1,4 @@
+import { ctx } from '#lib/telemetry/context.ts';
 import type { PageServerLoad, Actions } from './$types';
 import { redirect } from '@sveltejs/kit';
 import { clearSessionCookie } from '#lib/server/session.ts';
@@ -15,7 +16,8 @@ export const load: PageServerLoad = async () => {
 };
 
 export const actions: Actions = {
-  default: async ({ cookies, locals }) => {
+  default: async (event) => {
+    const { cookies, locals } = event;
     // Revoke the session on the platform, not just in the browser. The cookie is minted with a
     // one-year maxAge, so without this any copy of its value (shared machine, proxy log, backup)
     // keeps authenticating for a year after the user "logs out".
@@ -25,7 +27,9 @@ export const actions: Actions = {
     // live session, and skipping revocation then cleared the browser's copy alone.
     const sessionId = locals.session?.id ?? cookies.get(SESSION_COOKIE);
     if (sessionId) {
-      await handleApiCall<void>(() => platformClient({ headers: getSessionHeaders(sessionId) }).deleteTenantSession(config.tenantId));
+      await handleApiCall<void>(() =>
+        platformClient({ headers: getSessionHeaders(sessionId) }).deleteTenantSession(ctx(event, 'form'), config.tenantId)
+      );
     }
 
     // Always clear the cookie, even if revocation failed — the user asked to be logged out.

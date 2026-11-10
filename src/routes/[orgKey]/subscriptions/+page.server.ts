@@ -1,3 +1,4 @@
+import { ctx } from '#lib/telemetry/context.ts';
 import type { PageServerLoad, Actions } from './$types';
 import { fail } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.ts';
@@ -14,7 +15,12 @@ export const load: PageServerLoad = async (event) => {
   const headers = getSessionHeaders(session.id);
 
   const response = await handleApiCall<Subscription[]>(() =>
-    apiBuilderClient({ headers }).getSubscriptions({ limit: 100, offset: 0, organizationKey: event.params.orgKey, userId: session.user.id })
+    apiBuilderClient({ headers }).getSubscriptions(ctx(event, 'load'), {
+      limit: 100,
+      offset: 0,
+      organizationKey: event.params.orgKey,
+      userId: session.user.id
+    })
   );
 
   return {
@@ -35,8 +41,9 @@ export const actions: Actions = {
    * Membership is what it requires: the platform resolves the org under the caller's own
    * authorization, so only a member can subscribe to it in the first place.
    */
-  toggle: async ({ request, params, locals }) => {
-    const { session, client } = await memberClient(locals, params.orgKey);
+  toggle: async (event) => {
+    const { request, params, locals } = event;
+    const { session, client } = await memberClient(ctx(event, 'form'), locals, params.orgKey);
     const formData = await request.formData();
     const publication = requiredEnum(formData, 'publication', Object.values(Publication));
 
@@ -45,7 +52,7 @@ export const actions: Actions = {
     }
 
     const existing = await handleApiCall<Subscription[]>(() =>
-      client.getSubscriptions({
+      client.getSubscriptions(ctx(event, 'form'), {
         organizationKey: params.orgKey,
         userId: session.user.id,
         publication,
@@ -59,14 +66,14 @@ export const actions: Actions = {
 
     if (existing.data.length > 0) {
       for (const subscription of existing.data) {
-        const response = await handleApiCall<void>(() => client.deleteSubscriptionById(subscription.id));
+        const response = await handleApiCall<void>(() => client.deleteSubscriptionById(ctx(event, 'form'), subscription.id));
         if (isApiError(response)) {
           return actionFail(response);
         }
       }
     } else {
       const response = await handleApiCall<Subscription>(() =>
-        client.createSubscription({
+        client.createSubscription(ctx(event, 'form'), {
           body: {
             organization_key: params.orgKey,
             user_id: session.user.id,

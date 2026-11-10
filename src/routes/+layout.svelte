@@ -8,13 +8,20 @@
   import type { MyOrgs } from '#lib/my-orgs.ts';
   import type { Snippet } from 'svelte';
   import { afterNavigate } from '$app/navigation';
+  import { registerScreenReport } from '#lib/telemetry/browser.ts';
 
   interface Props {
-    data: { session?: PublicSession; myOrgs?: Promise<MyOrgs>; flash?: Flash };
+    data: { session?: PublicSession; myOrgs?: Promise<MyOrgs>; flash?: Flash; screenView?: string };
     children: Snippet;
   }
 
   let { data, children }: Props = $props();
+
+  // The screen report's browser half (DES-65431): every call the browser makes, time to show, INP
+  // and the finished-loading mark, sent once when the view ends. The hard load's view id is the one
+  // the server hook minted, handed over by the root layout's load.
+  // svelte-ignore state_referenced_locally
+  registerScreenReport({ view: data?.screenView });
 
   const session = $derived(data?.session);
 

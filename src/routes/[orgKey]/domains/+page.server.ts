@@ -1,3 +1,4 @@
+import { ctx } from '#lib/telemetry/context.ts';
 import type { PageServerLoad, Actions } from './$types';
 import { fail } from '@sveltejs/kit';
 import { handleApiCall, isApiError } from '#lib/api/error-handler.ts';
@@ -9,8 +10,9 @@ import type { Domain } from '#generated/com-bryzek-apibuilder.ts';
 export const load: PageServerLoad = requireAuthLoad;
 
 export const actions: Actions = {
-  addDomain: async ({ request, params, locals }) => {
-    const { client } = await adminClient(locals, params.orgKey);
+  addDomain: async (event) => {
+    const { request, params, locals } = event;
+    const { client } = await adminClient(ctx(event, 'form'), locals, params.orgKey);
     const formData = await request.formData();
     const name = requiredString(formData, 'name');
 
@@ -18,7 +20,7 @@ export const actions: Actions = {
       return fail(400, { errors: [{ message: 'Domain name is required' }] });
     }
 
-    const response = await handleApiCall<Domain>(() => client.createDomain({ orgKey: params.orgKey, body: { name } }));
+    const response = await handleApiCall<Domain>(() => client.createDomain(ctx(event, 'form'), { orgKey: params.orgKey, body: { name } }));
 
     if (isApiError(response)) {
       return actionFail(response);
@@ -27,8 +29,9 @@ export const actions: Actions = {
     return { success: true };
   },
 
-  removeDomain: async ({ request, params, locals }) => {
-    const { client } = await adminClient(locals, params.orgKey);
+  removeDomain: async (event) => {
+    const { request, params, locals } = event;
+    const { client } = await adminClient(ctx(event, 'form'), locals, params.orgKey);
     const formData = await request.formData();
     const name = requiredString(formData, 'name');
 
@@ -36,7 +39,7 @@ export const actions: Actions = {
       return fail(400, { errors: [{ message: 'Invalid request' }] });
     }
 
-    const response = await handleApiCall<void>(() => client.deleteDomainByName({ orgKey: params.orgKey, name }));
+    const response = await handleApiCall<void>(() => client.deleteDomainByName(ctx(event, 'form'), { orgKey: params.orgKey, name }));
 
     if (isApiError(response)) {
       return actionFail(response);

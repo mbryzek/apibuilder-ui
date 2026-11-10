@@ -1,3 +1,4 @@
+import { ctx } from '#lib/telemetry/context.ts';
 import type { LayoutServerLoad } from './$types';
 import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.ts';
 import { handleApiCall } from '#lib/api/error-handler.ts';
@@ -5,11 +6,12 @@ import { dataOr, dataOrThrow, loadErrorFrom, type LoadError } from '#lib/api/loa
 import type { Organization, Membership } from '#generated/com-bryzek-apibuilder.ts';
 import { MembershipRole } from '#generated/com-bryzek-apibuilder.ts';
 
-export const load: LayoutServerLoad = async ({ params, locals }) => {
+export const load: LayoutServerLoad = async (event) => {
+  const { params, locals } = event;
   const headers = getSessionHeaders(locals.session?.id);
   const client = apiBuilderClient({ headers });
 
-  const orgResponse = await handleApiCall<Organization>(() => client.getOrganizationByKey(params.orgKey));
+  const orgResponse = await handleApiCall<Organization>(() => client.getOrganizationByKey(ctx(event, 'load'), params.orgKey));
   const org = dataOrThrow(orgResponse, 'Organization not found');
 
   let isMember = false;
@@ -20,7 +22,7 @@ export const load: LayoutServerLoad = async ({ params, locals }) => {
 
   if (locals.session) {
     const membershipsResponse = await handleApiCall<Membership[]>(() =>
-      client.getMemberships({ orgKey: params.orgKey, userId: locals.session!.user.id, limit: 25, offset: 0 })
+      client.getMemberships(ctx(event, 'load'), { orgKey: params.orgKey, userId: locals.session!.user.id, limit: 25, offset: 0 })
     );
     // Falling back to "not a member" would tell a member they need to request access.
     membershipLoadError = loadErrorFrom(membershipsResponse);

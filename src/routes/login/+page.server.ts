@@ -1,3 +1,4 @@
+import { ctx } from '#lib/telemetry/context.ts';
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
 import { clients, getSessionHeaders } from '#lib/api/clients.ts';
@@ -18,7 +19,8 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 };
 
 export const actions: Actions = {
-  default: async ({ request, cookies, url }) => {
+  default: async (event) => {
+    const { request, cookies, url } = event;
     const formData = await request.formData();
     const email = requiredString(formData, 'email');
     const password = requiredSecret(formData, 'password');
@@ -30,7 +32,7 @@ export const actions: Actions = {
 
     const client = clients({ headers: getSessionHeaders() });
     const response = await handleApiCall<SessionState>(() =>
-      client.platform.createTenantSessionLogins({ tenantId: config.tenantId, body: { email, password } })
+      client.platform.createTenantSessionLogins(ctx(event, 'form'), { tenantId: config.tenantId, body: { email, password } })
     );
 
     return completeSession(cookies, response, redirectTo, 'Welcome back!');

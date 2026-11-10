@@ -1,3 +1,4 @@
+import { ctx } from '#lib/telemetry/context.ts';
 import type { PageServerLoad } from './$types';
 import { generatorClient, getSessionHeaders } from '#lib/api/clients.ts';
 import { handleApiCall } from '#lib/api/error-handler.ts';
@@ -13,7 +14,8 @@ import { PAGE_FETCH_LIMIT, parseOffset, toPage } from '#lib/pagination.ts';
  * a filter over all of them, and a generator sorting past the page boundary is reported as
  * nonexistent (ISS-495). `q` goes to the API, which filters and then paginates the matches.
  */
-export const load: PageServerLoad = async ({ url, locals }) => {
+export const load: PageServerLoad = async (event) => {
+  const { url, locals } = event;
   const headers = getSessionHeaders(locals.session?.id);
   const q = url.searchParams.get('q') ?? '';
   const offset = parseOffset(url);
@@ -21,7 +23,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
   // Spread rather than `q: q || undefined`: `exactOptionalPropertyTypes` makes an explicit
   // `undefined` a type error, and omitting the param is what "no filter" means on the wire.
   const response = await handleApiCall<Generator[]>(() =>
-    generatorClient({ headers }).getGenerators({ ...(q ? { q: q } : {}), limit: PAGE_FETCH_LIMIT, offset })
+    generatorClient({ headers }).getGenerators(ctx(event, 'load'), { ...(q ? { q: q } : {}), limit: PAGE_FETCH_LIMIT, offset })
   );
 
   const { rows: generators, ...page } = toPage(dataOr(response, []), offset);

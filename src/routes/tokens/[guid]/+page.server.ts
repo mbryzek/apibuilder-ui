@@ -1,3 +1,4 @@
+import { ctx } from '#lib/telemetry/context.ts';
 import type { PageServerLoad, Actions } from './$types';
 import { error, redirect } from '@sveltejs/kit';
 import { platformClient, getSessionHeaders } from '#lib/api/clients.ts';
@@ -23,7 +24,9 @@ export const load: PageServerLoad = async (event) => {
   const headers = getSessionHeaders(session.id);
 
   const token = await findScopedById<Token>(event.params.guid, (limit, offset) =>
-    handleApiCall<Token[]>(() => platformClient({ headers }).getTokensUsersByUserId({ userId: session.user.id, limit, offset }))
+    handleApiCall<Token[]>(() =>
+      platformClient({ headers }).getTokensUsersByUserId(ctx(event, 'load'), { userId: session.user.id, limit, offset })
+    )
   );
   if (!token) {
     throw error(404, 'Not found');
@@ -33,7 +36,8 @@ export const load: PageServerLoad = async (event) => {
 };
 
 export const actions: Actions = {
-  delete: async ({ params, locals }) => {
+  delete: async (event) => {
+    const { params, locals } = event;
     const session = requireAuthForAction(locals);
     const headers = getSessionHeaders(session.id);
     const client = platformClient({ headers });
@@ -41,13 +45,13 @@ export const actions: Actions = {
     // See `#lib/server/scoped-id.ts`: the guid is a selector among the caller's own tokens, never an
     // id trusted straight from the URL.
     const token = await findScopedById<Token>(params.guid, (limit, offset) =>
-      handleApiCall<Token[]>(() => client.getTokensUsersByUserId({ userId: session.user.id, limit, offset }))
+      handleApiCall<Token[]>(() => client.getTokensUsersByUserId(ctx(event, 'form'), { userId: session.user.id, limit, offset }))
     );
     if (!token) {
       return outOfScope();
     }
 
-    const response = await handleApiCall<void>(() => client.deleteTokenById(token.id));
+    const response = await handleApiCall<void>(() => client.deleteTokenById(ctx(event, 'form'), token.id));
 
     if (isApiError(response)) {
       return actionFail(response);

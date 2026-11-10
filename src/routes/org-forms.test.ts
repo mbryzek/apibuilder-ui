@@ -18,10 +18,12 @@ const client = {
   updateOrganizationByKey: vi.fn()
 };
 
-vi.mock('#lib/api/clients.ts', () => ({
-  apiBuilderClient: () => client,
-  getSessionHeaders: () => ({})
-}));
+vi.mock('#lib/api/clients.ts', async () =>
+  (await import('#lib/test-support/withoutContext.ts')).moduleWithoutContext({
+    apiBuilderClient: () => client,
+    getSessionHeaders: () => ({})
+  })
+);
 
 // Only the org-scoped guard is stubbed; `requireAuthForAction` is the real one under test.
 vi.mock('#lib/server/auth.ts', async (importOriginal) => ({

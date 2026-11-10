@@ -1,3 +1,5 @@
+import { ctx } from '#lib/telemetry/context.ts';
+import type { CallContext } from '#lib/telemetry/context.ts';
 import type { PageServerLoad, Actions } from './$types';
 import { fail } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.ts';
@@ -21,7 +23,7 @@ export const load: PageServerLoad = async (event) => {
   const offset = parseOffset(event.url);
 
   const membershipsResponse = await handleApiCall<Membership[]>(() =>
-    client.getMemberships({ orgKey: params.orgKey, limit: PAGE_FETCH_LIMIT, offset })
+    client.getMemberships(ctx(event, 'load'), { orgKey: params.orgKey, limit: PAGE_FETCH_LIMIT, offset })
   );
 
   // The badge used to render the length of a limit-capped page as though it were a total, so an
@@ -32,7 +34,7 @@ export const load: PageServerLoad = async (event) => {
   let requestsResponse: ApiResponse<MembershipRequest[]> | null = null;
   if (isAdmin) {
     requestsResponse = await handleApiCall<MembershipRequest[]>(() =>
-      client.getMembershipRequests({ orgKey: params.orgKey, limit: PAGE_FETCH_LIMIT, offset: 0 })
+      client.getMembershipRequests(ctx(event, 'load'), { orgKey: params.orgKey, limit: PAGE_FETCH_LIMIT, offset: 0 })
     );
     const pending = dataOr(requestsResponse, []);
     pendingRequestsCount = Math.min(pending.length, PAGE_LIMIT);
@@ -57,8 +59,8 @@ export const load: PageServerLoad = async (event) => {
  * separately in the form body, so the id has to be resolved against the org that was authorized
  * rather than trusted. See `#lib/server/scoped-id.ts` and `#lib/server/scoped-action.ts`.
  */
-const membershipsInOrg: OrgScope<Membership> = (client, orgKey) => (limit, offset) =>
-  handleApiCall<Membership[]>(() => client.getMemberships({ orgKey, limit, offset }));
+const membershipsInOrg: OrgScope<Membership> = (context, client, orgKey) => (limit, offset) =>
+  handleApiCall<Membership[]>(() => client.getMemberships(context, { orgKey, limit, offset }));
 
 /**
  * Promotion and demotion are the same act: a role change on the membership the table already
@@ -71,15 +73,16 @@ const membershipsInOrg: OrgScope<Membership> = (client, orgKey) => (limit, offse
  * not demote anybody: it removes them from the organization, which is what "Revoke Admin" did
  * before ISS-4833.
  */
-function changeRole(event: AdminActionEvent, role: MembershipRole) {
-  return adminGuidAction(event, membershipsInOrg, (membership, client) =>
-    client.updateMembershipById({ id: membership.id, body: { role } })
+function changeRole(context: CallContext, event: AdminActionEvent, role: MembershipRole) {
+  return adminGuidAction(context, event, membershipsInOrg, (membership, client) =>
+    client.updateMembershipById(context, { id: membership.id, body: { role } })
   );
 }
 
 export const actions: Actions = {
-  addMember: async ({ request, params, locals }) => {
-    const { client } = await adminClient(locals, params.orgKey);
+  addMember: async (event) => {
+    const { request, params, locals } = event;
+    const { client } = await adminClient(ctx(event, 'form'), locals, params.orgKey);
     const formData = await request.formData();
     const emailOrNickname = requiredString(formData, 'email_or_nickname');
     const role = requiredEnum(formData, 'role', Object.values(MembershipRole)) ?? MembershipRole.Member;
@@ -91,11 +94,11 @@ export const actions: Actions = {
     // Find user by email or nickname. The email lookup is allowed to fail — an `emailOrNickname`
     // that is a nickname is not a valid email — so the last lookup is the one that decides, and
     // `actionFailMissing` keeps an unanswered one from reading as "no such user".
-    let lookup = await handleApiCall<User[]>(() => client.getUsers({ email: emailOrNickname }));
+    let lookup = await handleApiCall<User[]>(() => client.getUsers(ctx(event, 'form'), { email: emailOrNickname }));
     let user = isApiSuccess(lookup) ? lookup.data[0] : undefined;
 
     if (!user) {
-      lookup = await handleApiCall<User[]>(() => client.getUsers({ nickname: emailOrNickname }));
+      lookup = await handleApiCall<User[]>(() => client.getUsers(ctx(event, 'form'), { nickname: emailOrNickname }));
       user = isApiSuccess(lookup) ? lookup.data[0] : undefined;
     }
 
@@ -103,13 +106,13 @@ export const actions: Actions = {
       return actionFailMissing(lookup, `User not found: ${emailOrNickname}`);
     }
 
-    const orgResponse = await handleApiCall<Organization>(() => client.getOrganizationByKey(params.orgKey));
+    const orgResponse = await handleApiCall<Organization>(() => client.getOrganizationByKey(ctx(event, 'form'), params.orgKey));
     if (isApiError(orgResponse)) {
       return actionFailMissing(orgResponse, 'Organization not found');
     }
 
     const requestResponse = await handleApiCall<MembershipRequest>(() =>
-      client.createMembershipRequest({
+      client.createMembershipRequest(ctx(event, 'form'), {
         body: { org_id: orgResponse.data.id, user_id: user.id, role }
       })
     );
@@ -118,7 +121,9 @@ export const actions: Actions = {
       return actionFail(requestResponse);
     }
 
-    const acceptResponse = await handleApiCall<Membership>(() => client.createMembershipRequestAcceptById(requestResponse.data.id));
+    const acceptResponse = await handleApiCall<Membership>(() =>
+      client.createMembershipRequestAcceptById(ctx(event, 'form'), requestResponse.data.id)
+    );
 
     if (isApiError(acceptResponse)) {
       return actionFail(acceptResponse);
@@ -127,9 +132,12 @@ export const actions: Actions = {
     return { success: true };
   },
 
-  removeMember: (event) => adminGuidAction(event, membershipsInOrg, (membership, client) => client.deleteMembershipById(membership.id)),
+  removeMember: (event) =>
+    adminGuidAction(ctx(event, 'form'), event, membershipsInOrg, (membership, client) =>
+      client.deleteMembershipById(ctx(event, 'form'), membership.id)
+    ),
 
-  makeAdmin: (event) => changeRole(event, MembershipRole.Admin),
+  makeAdmin: (event) => changeRole(ctx(event, 'form'), event, MembershipRole.Admin),
 
-  revokeAdmin: (event) => changeRole(event, MembershipRole.Member)
+  revokeAdmin: (event) => changeRole(ctx(event, 'form'), event, MembershipRole.Member)
 };

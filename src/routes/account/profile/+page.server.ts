@@ -1,3 +1,4 @@
+import { ctx } from '#lib/telemetry/context.ts';
 import type { PageServerLoad, Actions } from './$types';
 import { fail } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.ts';
@@ -12,14 +13,15 @@ import type { User, UserForm } from '#generated/com-bryzek-apibuilder.ts';
 export const load: PageServerLoad = async (event) => {
   const session = requireAuth(event);
   const headers = getSessionHeaders(session.id);
-  const response = await handleApiCall<User>(() => apiBuilderClient({ headers }).getUserById(session.user.id));
+  const response = await handleApiCall<User>(() => apiBuilderClient({ headers }).getUserById(ctx(event, 'load'), session.user.id));
   // Never invent a profile: a blank nickname prefilled into the form is one honest
   // Save away from being written back over the real one.
   return { user: dataOr<User | null>(response, null), loadError: loadErrorFrom(response) };
 };
 
 export const actions: Actions = {
-  default: async ({ request, locals, cookies }) => {
+  default: async (event) => {
+    const { request, locals, cookies } = event;
     const session = requireAuthForAction(locals);
 
     const formData = await request.formData();
@@ -40,7 +42,9 @@ export const actions: Actions = {
     }
 
     const headers = getSessionHeaders(session.id);
-    const response = await handleApiCall<User>(() => apiBuilderClient({ headers }).updateUserById({ id: session.user.id, body }));
+    const response = await handleApiCall<User>(() =>
+      apiBuilderClient({ headers }).updateUserById(ctx(event, 'form'), { id: session.user.id, body })
+    );
 
     if (isApiError(response)) {
       return actionFail(response, { email, nickname, name });

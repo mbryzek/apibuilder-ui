@@ -1,3 +1,4 @@
+import { ctx } from '#lib/telemetry/context.ts';
 import type { PageServerLoad } from './$types';
 import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.ts';
 import { handleApiCall } from '#lib/api/error-handler.ts';
@@ -6,7 +7,8 @@ import { assertSafePathParams } from '#lib/server/path-params.ts';
 import type { Change } from '#generated/com-bryzek-apibuilder.ts';
 import { PAGE_FETCH_LIMIT, parseOffset, toPage } from '#lib/pagination.ts';
 
-export const load: PageServerLoad = async ({ url, parent, params, locals }) => {
+export const load: PageServerLoad = async (event) => {
+  const { url, parent, params, locals } = event;
   // getChanges goes out before the parent settles, so the layout's guard cannot stop a malformed key.
   assertSafePathParams(params);
   const headers = getSessionHeaders(locals.session?.id);
@@ -17,7 +19,9 @@ export const load: PageServerLoad = async ({ url, parent, params, locals }) => {
 
   const [{ version }, response] = await Promise.all([
     parent(),
-    handleApiCall<Change[]>(() => client.getChanges({ orgKey, applicationKey: appKey, limit: PAGE_FETCH_LIMIT, offset }))
+    handleApiCall<Change[]>(() =>
+      client.getChanges(ctx(event, 'load'), { orgKey, applicationKey: appKey, limit: PAGE_FETCH_LIMIT, offset })
+    )
   ]);
 
   const { rows: changes, ...page } = toPage(dataOr(response, []), offset);

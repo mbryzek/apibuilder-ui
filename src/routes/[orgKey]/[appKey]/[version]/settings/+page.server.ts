@@ -1,3 +1,5 @@
+import { ctx } from '#lib/telemetry/context.ts';
+import type { CallContext } from '#lib/telemetry/context.ts';
 import type { PageServerLoad, Actions } from './$types';
 import { fail } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.ts';
@@ -19,14 +21,14 @@ import { Visibility } from '#generated/com-bryzek-apibuilder.ts';
  * `[orgKey]` layout has the Organization and the `[version]` layout has the Version, whose
  * `service.name` is the spec's name rather than the application's.
  */
-async function loadApplication(orgKey: string, appKey: string, sessionId: string | undefined) {
+async function loadApplication(context: CallContext, orgKey: string, appKey: string, sessionId: string | undefined) {
   const client = apiBuilderClient({ headers: getSessionHeaders(sessionId) });
-  return handleApiCall<Application>(() => client.getApplicationByAppKey({ orgKey, appKey }));
+  return handleApiCall<Application>(() => client.getApplicationByAppKey(context, { orgKey, appKey }));
 }
 
 export const load: PageServerLoad = async (event) => {
   const session = requireAuth(event);
-  const response = await loadApplication(event.params.orgKey, event.params.appKey, session.id);
+  const response = await loadApplication(ctx(event, 'load'), event.params.orgKey, event.params.appKey, session.id);
 
   return {
     application: isApiError(response) ? null : response.data,
@@ -37,8 +39,9 @@ export const load: PageServerLoad = async (event) => {
 };
 
 export const actions: Actions = {
-  updateVisibility: async ({ request, params, locals, cookies }) => {
-    const { session, client } = await adminClient(locals, params.orgKey);
+  updateVisibility: async (event) => {
+    const { request, params, locals, cookies } = event;
+    const { session, client } = await adminClient(ctx(event, 'form'), locals, params.orgKey);
     const formData = await request.formData();
 
     const visibility = requiredEnum(formData, 'visibility', Object.values(Visibility));
@@ -50,7 +53,7 @@ export const actions: Actions = {
     // `ApplicationForm`, so `name` and `description` are rewritten by every submission. Taking
     // them from the form would let a stale page rename the application, and taking `name` from
     // the spec would rename it to the service name on every visibility change.
-    const current = await loadApplication(params.orgKey, params.appKey, session.id);
+    const current = await loadApplication(ctx(event, 'form'), params.orgKey, params.appKey, session.id);
     if (isApiError(current)) {
       return actionFailMissing(current, 'Application not found');
     }
@@ -60,7 +63,7 @@ export const actions: Actions = {
     // value is what would clear a description this action has no business touching.
     const { name, description } = current.data;
     const response = await handleApiCall<Application>(() =>
-      client.updateApplicationByAppKey({
+      client.updateApplicationByAppKey(ctx(event, 'form'), {
         orgKey: params.orgKey,
         appKey: params.appKey,
         body: { name, visibility, ...(description === undefined ? {} : { description: description }) }
@@ -74,10 +77,13 @@ export const actions: Actions = {
     redirectWithFlash(cookies, `/${params.orgKey}/${response.data.key}/${params.version}/settings`, 'Visibility updated');
   },
 
-  deleteApp: async ({ params, locals, cookies }) => {
-    const { client } = await adminClient(locals, params.orgKey);
+  deleteApp: async (event) => {
+    const { params, locals, cookies } = event;
+    const { client } = await adminClient(ctx(event, 'form'), locals, params.orgKey);
 
-    const response = await handleApiCall<void>(() => client.deleteApplicationByAppKey({ orgKey: params.orgKey, appKey: params.appKey }));
+    const response = await handleApiCall<void>(() =>
+      client.deleteApplicationByAppKey(ctx(event, 'form'), { orgKey: params.orgKey, appKey: params.appKey })
+    );
 
     if (isApiError(response)) {
       return actionFail(response);

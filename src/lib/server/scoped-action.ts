@@ -1,3 +1,4 @@
+import type { CallContext } from '#lib/telemetry/context.ts';
 import { fail } from '@sveltejs/kit';
 import { handleApiCall, isApiError } from '#lib/api/error-handler.ts';
 import { actionFail } from '#lib/api/action-error.ts';
@@ -28,21 +29,22 @@ export type AdminActionEvent = {
 };
 
 /** The listing that defines the scope, for the org that was authorized. */
-export type OrgScope<T> = (client: AuthorizedClient['client'], orgKey: string) => FetchPage<T>;
+export type OrgScope<T> = (context: CallContext, client: AuthorizedClient['client'], orgKey: string) => FetchPage<T>;
 
 export async function adminGuidAction<T extends { id: string }>(
+  context: CallContext,
   { request, locals, params }: AdminActionEvent,
   scope: OrgScope<T>,
   act: (row: T, client: AuthorizedClient['client']) => Promise<unknown>
 ) {
-  const { client } = await adminClient(locals, params.orgKey);
+  const { client } = await adminClient(context, locals, params.orgKey);
   const guid = requiredString(await request.formData(), 'guid');
 
   if (!guid) {
     return fail(400, { errors: [{ message: INVALID_REQUEST }] });
   }
 
-  const row = await findScopedById(guid, scope(client, params.orgKey));
+  const row = await findScopedById(guid, scope(context, client, params.orgKey));
   if (!row) {
     return outOfScope();
   }
