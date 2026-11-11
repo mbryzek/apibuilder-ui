@@ -17,39 +17,58 @@
  * they read anything, so the event carries the session the request hook would have found, and each
  * screen makes every call it makes for a member. The hook's own session check is the shell's read,
  * never a screen's, so it is not part of the run.
+ *
+ * AND THEN IT ANSWERS NOTHING. Each route runs a second time against {@link emptyAnswer}, where every
+ * list the screen's own loads read, at every depth, has no rows, so a call made only when a list is
+ * empty (a lookup an empty state makes) is counted too, against the same budget. The calls the
+ * route's layouts make keep their full answer: they are who is signed in and which organization they
+ * are in, noted by running the layouts alone first ({@link layoutsOf}, {@link noting}). That run may
+ * stop early at a 404 or a redirect: it only adds a branch to the full run, never replaces it.
+ * ISS-78653
  */
 
-/** A value answering any field, call, iteration or coercion with another of its kind. */
-export function anything(): unknown {
+/** How many rows every list of an answer has: two for the full run, none for the empty one. */
+export type RowCount = 0 | 2;
+
+/**
+ * A value answering any field, call, iteration or coercion with another of its kind. As a list it
+ * has `count` rows, and so does every list read off it.
+ */
+export function anything(count: RowCount = 2): unknown {
   const fields = new Map<PropertyKey, unknown>();
-  const rows = (): unknown[] => [anything(), anything()];
+  const rows = (): unknown[] => Array.from({ length: count }, () => anything(count));
   const target = () => undefined;
   return new Proxy(target, {
-    apply: () => anything(),
-    construct: () => anything() as object,
+    apply: () => anything(count),
+    construct: () => anything(count) as object,
     get: (_, key) => {
       if (key === 'then' || key === 'toJSON') return undefined;
-      if (key === 'length') return 2;
+      if (key === 'length') return count;
       if (key === Symbol.iterator) return () => rows()[Symbol.iterator]();
       if (key === Symbol.asyncIterator) return undefined;
       if (key === Symbol.toPrimitive)
         return (hint: string) => (hint === 'number' ? 1 : hint === 'string' ? 'value' : '2026-01-01T00:00:00.000Z');
       if (key === 'toString') return () => 'value';
       if (key === 'valueOf') return () => 1;
-      if (!fields.has(key)) fields.set(key, anything());
+      if (!fields.has(key)) fields.set(key, anything(count));
       return fields.get(key);
     }
   });
 }
 
-/** The body every call is answered with: a real two-row array (a list read checks for one), each row {@link anything}. */
-export function answerBody(): unknown {
-  const rows = [anything(), anything()];
+/**
+ * The body every call is answered with: a real array of `count` rows (a list read checks for one),
+ * each row {@link anything}. Any other field is read off a row of the same kind, so an answer that is
+ * an object rather than a list still answers, its own lists `count` rows long.
+ */
+export function answerBody(count: RowCount = 2): unknown {
+  const rows = Array.from({ length: count }, () => anything(count));
+  const single = anything(count) as Record<PropertyKey, unknown>;
   return new Proxy(rows, {
     get: (target, key, receiver) => {
       if (key === 'then' || key === 'toJSON') return undefined;
       if (key in target) return Reflect.get(target, key, receiver) as unknown;
-      return (target[0] as Record<PropertyKey, unknown>)[key];
+      return ((target[0] ?? single) as Record<PropertyKey, unknown>)[key];
     }
   });
 }
@@ -63,7 +82,32 @@ function respondWith(body: () => unknown): Response {
 
 /** What the backend answers every call with: {@link answerBody}. */
 export function answer(_input: RequestInfo | URL): Response {
-  return respondWith(answerBody);
+  return respondWith(() => answerBody());
+}
+
+/** What the backend answers a call with. */
+export type Respond = (input: RequestInfo | URL, init?: RequestInit) => Response;
+
+/** A call's address, without its origin: the path and the query. */
+function addressOf(input: RequestInfo | URL): string {
+  const url = new URL(input instanceof Request ? input.url : String(input), 'https://apibuilder.org');
+  return `${url.pathname}${url.search}`;
+}
+
+/** `respond`, adding the address of every call it answers to `seen`. */
+export function noting(respond: Respond, seen: Set<string>): Respond {
+  return (input, init) => {
+    seen.add(addressOf(input));
+    return respond(input, init);
+  };
+}
+
+/**
+ * What the backend answers in the empty run: a call the route's layouts make (`shell`, as
+ * {@link noting} saw them) as {@link answer} does, every other call with no rows in any list, at any depth.
+ */
+export function emptyAnswer(shell: ReadonlySet<string> = new Set()): Respond {
+  return (input) => (shell.has(addressOf(input)) ? answer(input) : respondWith(() => answerBody(0)));
 }
 
 /** One route's load modules, from the root down: each level's layouts, then the page's. */
@@ -103,6 +147,11 @@ export async function routeLoads(route: string, modules: Record<string, Importer
     if (leaf) out.push({ server: await read(`${dir}/+page.server.ts`), universal: await read(`${dir}/+page.ts`) });
   }
   return { route, levels: out };
+}
+
+/** The route's layouts alone, every level above its page: what the empty run's backend answers in full. */
+export function layoutsOf(loads: RouteLoads): RouteLoads {
+  return { route: loads.route, levels: loads.levels.slice(0, -1) };
 }
 
 /** The params a route's URL fills: `1` for each `[name]`, `[name=matcher]` and `[...rest]`. */
