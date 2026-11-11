@@ -7,7 +7,8 @@
  *   document spent hidden; for a soft navigation, which has no LCP, `beforeNavigate` to
  *   `afterNavigate` less the time the tab spent hidden.
  * - INP: the slowest interaction of the view, skipping one per fifty interactions, as the metric
- *   is defined.
+ *   is defined. The fifty count every interaction of the view (the browser's `interactionCount`
+ *   across it, where it keeps one), not only the slow ones an observer with a duration floor sees.
  * - The finished-loading mark: when every part that fills in after has rendered.
  *
  * THE HIDDEN-TIME ACCOUNTING IS PAGETIMING'S, carried here rather than imported: `pageTiming.ts`
@@ -166,9 +167,12 @@ export interface InteractionEntry {
 
 /**
  * Interaction to Next Paint over one view: the longest interaction, where an interaction's latency
- * is its slowest event, skipping the single longest per fifty interactions. Null with none.
+ * is its slowest event, skipping the single longest per fifty interactions. `interactionCount` is
+ * how many interactions the view had in all, entries or not (an observer with a duration floor sees
+ * only the slow ones); null where the browser keeps no count, and the entries are then the count.
+ * Null with no entries.
  */
-export function interactionToNextPaint(entries: InteractionEntry[]): number | null {
+export function interactionToNextPaint(entries: InteractionEntry[], interactionCount: number | null = null): number | null {
   const longest = new Map<number, number>();
   for (const entry of entries) {
     if (entry.interactionId > 0) {
@@ -177,7 +181,8 @@ export function interactionToNextPaint(entries: InteractionEntry[]): number | nu
   }
   if (longest.size === 0) return null;
   const sorted = [...longest.values()].sort((a, b) => b - a);
-  const skip = Math.min(sorted.length - 1, Math.floor(sorted.length / 50));
+  const total = Math.max(sorted.length, interactionCount ?? 0);
+  const skip = Math.min(sorted.length - 1, Math.floor(total / 50));
   return clamp(sorted[skip] ?? 0);
 }
 
