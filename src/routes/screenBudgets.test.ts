@@ -12,6 +12,11 @@
  * not, read from the data the hard load returns. Counted as `load`, its calls would bill the
  * screen's wait for calls the screen never waits on.
  *
+ * Each screen runs a second time against empty answers (`emptyAnswer`), every list its own loads read
+ * with no rows while its layouts' calls answer in full, held to the same budget: a call a load makes
+ * only when a list is empty is counted there. That run may stop at a 404 or a redirect, since it only
+ * adds a branch to the full run. ISS-78653
+ *
  * `SCREEN_BUDGET_MEASURE=<file>` measures instead of holding: every route runs against an unlimited
  * budget and its counts are written to the file, which is how an override is first measured.
  */
@@ -20,7 +25,16 @@ import { writeFileSync } from 'node:fs';
 import { expectWithinBudget, type BudgetRun } from '#lib/telemetry/testing.ts';
 import type { BudgetOverride } from '#lib/telemetry/budget.ts';
 import { budgets } from '#lib/telemetry/budgets.ts';
-import { answer, hardLoad, hardLoadEvent, routeLoads, routeOfPage } from '#lib/test-support/screenBudget.ts';
+import {
+  answer,
+  emptyAnswer,
+  hardLoad,
+  hardLoadEvent,
+  layoutsOf,
+  noting,
+  routeLoads,
+  routeOfPage
+} from '#lib/test-support/screenBudget.ts';
 
 const pages = Object.keys(import.meta.glob('/src/routes/**/+page.svelte'));
 const modules = import.meta.glob([
@@ -35,6 +49,13 @@ const measuring = process.env['SCREEN_BUDGET_MEASURE'];
 const unlimited: BudgetOverride = { load: { calls: 1_000, waits: 1_000 }, parts: 1_000, poll: 1_000 };
 const measured: Record<string, Pick<BudgetRun, 'load' | 'peaks' | 'unrecorded'> & { thrown: string[] }> = {};
 
+/** Records a route's counted run under `name` when measuring. */
+function measure(name: string, run: BudgetRun, thrown: unknown[]): void {
+  if (!measuring) return;
+  const threw = thrown.map((t) => (t instanceof Error ? String(t) : JSON.stringify(t)));
+  measured[name] = { load: run.load, peaks: run.peaks, unrecorded: run.unrecorded, thrown: threw };
+}
+
 describe('every screen stays within its budget', () => {
   it('finds the screens', () => {
     expect(routes).toContain('/[orgKey]/[appKey]/[version]');
@@ -46,13 +67,18 @@ describe('every screen stays within its budget', () => {
     const load = hardLoad(await routeLoads(route, modules), thrown);
     const table = measuring ? new Map([[route, unlimited]]) : budgets;
     const run = await expectWithinBudget(load, hardLoadEvent(route), (input) => answer(input), { budgets: table });
-    if (measuring)
-      measured[route] = {
-        load: run.load,
-        peaks: run.peaks,
-        unrecorded: run.unrecorded,
-        thrown: thrown.map((t) => (t instanceof Error ? String(t) : JSON.stringify(t)))
-      };
+    measure(route, run, thrown);
+  });
+
+  it.each(routes)('%s, every list empty', async (route) => {
+    const thrown: unknown[] = [];
+    const loads = await routeLoads(route, modules);
+    const shell = new Set<string>();
+    const asLayouts = { budgets: new Map([[route, unlimited]]) };
+    await expectWithinBudget(hardLoad(layoutsOf(loads)), hardLoadEvent(route), noting(answer, shell), asLayouts);
+    const table = measuring ? new Map([[route, unlimited]]) : budgets;
+    const run = await expectWithinBudget(hardLoad(loads, thrown), hardLoadEvent(route), emptyAnswer(shell), { budgets: table });
+    measure(`${route} (empty)`, run, thrown);
   });
 
   it('counts the reads a version screen makes, its layouts included', async () => {
