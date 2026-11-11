@@ -15,7 +15,7 @@
       offset: number;
       limit: number;
       hasMore: boolean;
-      hasPendingRequests: boolean;
+      pendingRequests?: Promise<{ hasPendingRequests: boolean; loadError: LoadError | null }>;
       loadError: LoadError | null;
       session?: PublicSession;
     };
@@ -39,13 +39,19 @@
     {/if}
   </div>
 
-  {#if data.isAdmin && data.hasPendingRequests}
-    <div class="mb-6 rounded-lg border border-yellow-200 bg-yellow-50 p-4">
-      <p class="text-sm text-yellow-800">
-        There are pending membership requests.
-        <a href="/{org.key}/membership-requests" class="font-semibold underline hover:no-underline">Review requests</a>
-      </p>
-    </div>
+  {#if data.isAdmin && data.pendingRequests}
+    {#await data.pendingRequests then pending}
+      {#if pending.loadError}
+        <LoadErrorBanner error={pending.loadError} />
+      {:else if pending.hasPendingRequests}
+        <div class="mb-6 rounded-lg border border-yellow-200 bg-yellow-50 p-4">
+          <p class="text-sm text-yellow-800">
+            There are pending membership requests.
+            <a href="/{org.key}/membership-requests" class="font-semibold underline hover:no-underline">Review requests</a>
+          </p>
+        </div>
+      {/if}
+    {/await}
   {/if}
 
   {#if !data.isMember && data.session && !data.membershipLoadError}
