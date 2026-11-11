@@ -16,7 +16,7 @@ interface Navigation {
 }
 
 let before: ((navigation: Required<Navigation>) => void) | null = null;
-let after: ((navigation: { type: string }) => void) | null = null;
+let after: ((navigation: { type: string; to?: { url: URL } }) => void) | null = null;
 let clock = 0;
 const page = { route: { id: '/issues/[id]' as string | null }, data: {} as Record<string, unknown> };
 
@@ -27,7 +27,7 @@ vi.mock('$app/navigation', () => ({
   beforeNavigate: (fn: (navigation: Required<Navigation>) => void) => {
     before = fn;
   },
-  afterNavigate: (fn: (navigation: { type: string }) => void) => {
+  afterNavigate: (fn: (navigation: { type: string; to?: { url: URL } }) => void) => {
     after = fn;
   }
 }));
@@ -210,6 +210,21 @@ describe('a hard load', () => {
     after?.({ type: 'link' });
     expect(await headerOf('/issues/1/__data.json')).toBeNull();
     expect(await headerOf('/other/__data.json')).not.toBeNull();
+  });
+
+  it("names no view on a preload of the same route's page under another query, a filter or pager link", async () => {
+    history.replaceState(null, '', '/issues?stage=open&page=2');
+    const { browser } = await load();
+    browser.registerScreenReport({ view: VIEW });
+    after?.({ type: 'enter' });
+    expect(await headerOf('/issues/__data.json?stage=closed')).toBeNull();
+    expect(await headerOf('/issues/__data.json?stage=open&page=3')).toBeNull();
+    expect(await headerOf('/issues/__data.json')).toBeNull();
+    expect(await headerOf('/issues/__data.json?page=2&stage=open&x-sveltekit-invalidated=01')).toBe(VIEW);
+    navigate({ type: 'link', to: { route: { id: '/issues' }, url: new URL('/issues?stage=closed', location.href) } });
+    after?.({ type: 'link', to: { url: new URL('/issues?stage=closed', location.href) } });
+    expect(await headerOf('/issues/__data.json?stage=closed&x-sveltekit-invalidated=01')).not.toBeNull();
+    expect(await headerOf('/issues/__data.json?stage=open&page=2')).toBeNull();
   });
 
   it('leaves alone a request that is not a data request or form action of its own origin', async () => {
