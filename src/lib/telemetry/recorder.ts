@@ -146,6 +146,9 @@ export class ViewRecorder implements CallRecorder {
   private readonly origin: string | null;
   private readonly scopes = new WeakMap<object, Scope>();
   private readonly polls = new Map<string, number>();
+  /** Calls of each poll's current tick, and the most any one tick made: counted whether or not the call is carried. */
+  private readonly pollTickCalls = new Map<string, number>();
+  private readonly pollPeaks = new Map<string, number>();
   private readonly pending = new Set<Promise<unknown>>();
   /** Every context whose code issued a `load` call: a page load's calls after `await parent()` wait on the others. */
   private readonly loadScopes = new Set<Scope>();
@@ -207,6 +210,7 @@ export class ViewRecorder implements CallRecorder {
   }
 
   private open(context: CallContext, operation: string, scope: Scope): RecordedCall | null {
+    this.countPollCall(context.part);
     if (this.calls.length >= MAX_CALLS) {
       this.dropped += 1;
       return null;
@@ -284,13 +288,31 @@ export class ViewRecorder implements CallRecorder {
     return tracked;
   }
 
-  /** One tick of the poll `name`; the report carries each poll's count. */
+  /** One tick of the poll `name`; the report carries each poll's count. Calls of `poll:<name>` from here count toward this tick. */
   pollTick(name: string): void {
     this.polls.set(name, (this.polls.get(name) ?? 0) + 1);
+    this.pollTickCalls.set(name, 0);
   }
 
   pollCounts(): Record<string, number> {
     return Object.fromEntries(this.polls);
+  }
+
+  /**
+   * The most calls one tick of each poll made. Counted at the call, before the cap, so a view open
+   * long enough to pass `MAX_CALLS` still reports its ticks' real size: dividing the calls carried by
+   * the ticks counted would read a poll over budget as within it once calls are dropped.
+   */
+  pollPeakCounts(): Record<string, number> {
+    return Object.fromEntries(this.pollPeaks);
+  }
+
+  private countPollCall(part: string): void {
+    if (!part.startsWith('poll:')) return;
+    const name = part.slice('poll:'.length);
+    const count = (this.pollTickCalls.get(name) ?? 0) + 1;
+    this.pollTickCalls.set(name, count);
+    if (count > (this.pollPeaks.get(name) ?? 0)) this.pollPeaks.set(name, count);
   }
 
   /** A part that fills in after: the view has not settled until it has. */
