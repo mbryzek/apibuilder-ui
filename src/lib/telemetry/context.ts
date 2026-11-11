@@ -34,6 +34,20 @@ export interface ContextEvent {
   route?: { id: string | null };
   locals?: object;
   parent?: () => Promise<unknown>;
+  untrack?: <T>(fn: () => T) => T;
+}
+
+/**
+ * The route the context is labelled with, READ UNTRACKED. A load's read of `event.route` is a
+ * dependency SvelteKit records, and a load depending on its route re-runs on every navigation that
+ * changes the route — a server load then costs a `__data.json` and every call it makes. The label is
+ * telemetry and nothing the load returns, so naming it must not make every layout that calls the
+ * backend a dependency of whichever page sits under it (ISS-76162). A load whose data does depend on
+ * the route reads `event.route` itself.
+ */
+function routeOf(event: ContextEvent): string | null {
+  const read = (): string | null => event.route?.id ?? null;
+  return typeof event.untrack === 'function' ? event.untrack(read) : read();
 }
 
 /** Where `ctx` finds the view when the event carries none: the server's request, or the browser's current view. */
@@ -85,7 +99,7 @@ export function watchParent(event: ContextEvent, view: ViewRecorder, context: Ca
 
 /** The context for a call `event`'s load, action or endpoint makes as `part`. Never throws. */
 export function ctx(event: ContextEvent, part: Part = 'load'): CallContext {
-  const route = event.route?.id ?? null;
+  const route = routeOf(event);
   const resolved = resolvePart(part, route);
   try {
     let byPart = contexts.get(event);
