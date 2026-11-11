@@ -39,10 +39,40 @@ describe('which view a request belongs to', () => {
     expect(viewIdFor(event, 'document')).not.toBe(VIEW);
   });
 
-  it("takes a soft navigation's id from the cookie on its data request", () => {
-    const event = hookEvent('/issues/1/__data.json', { isDataRequest: true, cookie: VIEW });
+  it("takes a soft navigation's id from the cookie an older bundle's beforeNavigate marked", () => {
+    const event = hookEvent('/issues/1/__data.json', { isDataRequest: true, cookie: `${VIEW}.nav` });
     expect(requestKind(event)).toBe('data');
     expect(viewIdFor(event, 'data')).toBe(VIEW);
+  });
+
+  it('reads a data request under an unmarked cookie as a refresh of the view the page shows', () => {
+    const event = hookEvent('/issues/1/__data.json', { isDataRequest: true, cookie: VIEW });
+    expect(requestKind(event)).toBe('refresh');
+    expect(viewIdFor(event, 'refresh')).toBe(VIEW);
+  });
+
+  it("takes a data request's view from its own header first, marked or not, whatever the cookie says", () => {
+    const OTHER = 'sv_fedcba9876543210fedcba9876543210';
+    const entering = hookEvent('/issues/1/__data.json', { isDataRequest: true, headers: { [VIEW_HEADER]: `${VIEW}.nav` }, cookie: OTHER });
+    expect(requestKind(entering)).toBe('data');
+    expect(viewIdFor(entering, 'data')).toBe(VIEW);
+    const refresh = hookEvent('/issues/1/__data.json', { isDataRequest: true, headers: { [VIEW_HEADER]: VIEW }, cookie: `${OTHER}.nav` });
+    expect(requestKind(refresh)).toBe('refresh');
+    expect(viewIdFor(refresh, 'refresh')).toBe(VIEW);
+  });
+
+  it("takes a form action's view from its header before the cookie", () => {
+    const OTHER = 'sv_fedcba9876543210fedcba9876543210';
+    const event = hookEvent('/issues/1', { method: 'POST', headers: { 'x-sveltekit-action': 'true', [VIEW_HEADER]: VIEW }, cookie: OTHER });
+    expect(viewIdFor(event, 'form')).toBe(VIEW);
+  });
+
+  it('mints a view for a data request with no cookie it can read', () => {
+    for (const cookie of [{}, { cookie: 'sv_nope' }, { cookie: 'sv_nope.nav' }]) {
+      const event = hookEvent('/issues/1/__data.json', { isDataRequest: true, ...cookie });
+      expect(requestKind(event)).toBe('data');
+      expect(viewIdFor(event, 'data')).toMatch(/^sv_[0-9a-f]{32}$/);
+    }
   });
 
   it("takes an endpoint call's id from the page script's header, and records nothing without one", () => {
@@ -111,6 +141,39 @@ describe('screenReportHandle', () => {
     expect(record.attributes['screen.load.calls']).toBe(1);
     expect(record.attributes['screen.later.max_calls']).toBe(1);
     expect(record.attributes['screen.client_rtt_ms']).toBe(753);
+  });
+
+  it("books a refresh's load calls as one tick of the view's refresh poll, and sends nothing for one with no call", async () => {
+    const fetch = vi.fn(async (_url: string | URL | Request, _init?: RequestInit) => new Response(null, { status: 204 }));
+    const handle = screenReportHandle({
+      app: 'a',
+      repo: 'mbryzek/a',
+      token: () => 'tok',
+      fetch: fetch as unknown as typeof globalThis.fetch
+    });
+    const waitUntil = vi.fn();
+    const refresh = () => ({
+      ...hookEvent('/issues/1/__data.json', { isDataRequest: true, cookie: VIEW }),
+      platform: { ctx: { waitUntil } }
+    });
+    await handle({ event: refresh(), resolve: async () => new Response('{}') });
+    await waitUntil.mock.calls[0]![0];
+    expect(fetch).not.toHaveBeenCalled();
+    await handle({
+      event: refresh(),
+      resolve: async (e) => {
+        await getIssue(ctx(e));
+        await getIssue(ctx(e));
+        return new Response('{}');
+      }
+    });
+    await waitUntil.mock.calls[1]![0];
+    const record = decodeLogs(fetch.mock.calls[0]![1]?.body as Uint8Array);
+    expect(record.attributes['screen.view']).toBe(VIEW);
+    expect(record.attributes['screen.navigation']).toBeUndefined();
+    expect(record.attributes['screen.load.calls']).toBe(0);
+    expect(record.attributes['screen.poll.count']).toBe(1);
+    expect(record.attributes['screen.poll.max_calls']).toBe(2);
   });
 
   it('leaves the telemetry route, skipped paths and unmatched routes alone', async () => {
