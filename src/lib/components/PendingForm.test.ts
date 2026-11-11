@@ -4,6 +4,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mount, unmount, flushSync } from 'svelte';
 import PendingFormPair from '#lib/test-support/PendingFormPair.svelte';
 import { submitFunctions } from '#lib/test-support/app-forms.ts';
+import { invalidated } from '#lib/test-support/app-navigation.ts';
 
 let target: HTMLElement;
 let component: Record<string, unknown> | undefined;
@@ -14,7 +15,7 @@ function button(testid: string): HTMLButtonElement {
   return el as HTMLButtonElement;
 }
 
-function render(props: { onSettled?: () => void } = {}): void {
+function render(props: { onSettled?: () => void; refreshes?: `${string}:${string}` } = {}): void {
   component = mount(PendingFormPair, { target, props });
   // `use:enhance` is applied by a mount effect, which is queued rather than run inline.
   flushSync();
@@ -24,6 +25,7 @@ describe('PendingForm', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
     submitFunctions.length = 0;
+    invalidated.length = 0;
     target = document.createElement('div');
     document.body.append(target);
   });
@@ -86,5 +88,33 @@ describe('PendingForm', () => {
 
     expect(disabledDuringUpdate).toBe(true);
     expect(button('first').disabled).toBe(false);
+  });
+
+  it('refreshes every load after a success when it names no dependency', async () => {
+    render();
+    const settled = await submitFunctions[0]!();
+    const updates: unknown[] = [];
+    await settled({ update: async (opts) => void updates.push(opts), result: { type: 'success' } });
+
+    expect(updates).toEqual([undefined]);
+    expect(invalidated).toEqual([]);
+  });
+
+  it('re-runs only the dependency it names after a success, so no layout load repeats', async () => {
+    render({ refreshes: 'apibuilder:subscriptions' });
+    const settled = await submitFunctions[0]!();
+    const updates: unknown[] = [];
+    await settled({ update: async (opts) => void updates.push(opts), result: { type: 'success' } });
+
+    expect(updates).toEqual([{ refreshAll: false }]);
+    expect(invalidated).toEqual(['apibuilder:subscriptions']);
+  });
+
+  it('re-runs nothing after a failure, whose errors the form shows over the data it has', async () => {
+    render({ refreshes: 'apibuilder:subscriptions' });
+    const settled = await submitFunctions[0]!();
+    await settled({ update: async () => {}, result: { type: 'failure' } });
+
+    expect(invalidated).toEqual([]);
   });
 });
