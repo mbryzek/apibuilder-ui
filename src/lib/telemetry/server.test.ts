@@ -220,14 +220,35 @@ describe('screenReportHandle', () => {
   });
 });
 describe('what keeps the server half alive', () => {
-  it("prefers the platform's waitUntil, then the app's, and is null off Cloudflare", async () => {
+  it("prefers the platform's waitUntil, then the app's", async () => {
     const platform = vi.fn();
     const app = vi.fn();
     const promise = Promise.resolve();
     (await keepAliveOf({ ctx: { waitUntil: platform } }, { waitUntil: app }))?.(promise);
     expect(platform).toHaveBeenCalledWith(promise);
     expect(await keepAliveOf(undefined, { waitUntil: app })).toBe(app);
-    expect(await keepAliveOf(undefined, {})).toBeNull();
+  });
+
+  // Each app's test run decides whether `cloudflare:workers` resolves (some alias it to a stub), so
+  // both cases load a fresh `server.ts` against a module of their own.
+  it("falls back to the Worker's own waitUntil, and is null off Cloudflare", async () => {
+    const promise = Promise.resolve();
+    const worker = vi.fn();
+    try {
+      vi.resetModules();
+      vi.doMock('cloudflare:workers', () => ({ waitUntil: worker }));
+      (await (await import('./server')).keepAliveOf(undefined, {}))?.(promise);
+      expect(worker).toHaveBeenCalledWith(promise);
+
+      vi.resetModules();
+      vi.doMock('cloudflare:workers', () => {
+        throw new Error('no Worker runtime');
+      });
+      expect(await (await import('./server')).keepAliveOf(undefined, {})).toBeNull();
+    } finally {
+      vi.doUnmock('cloudflare:workers');
+      vi.resetModules();
+    }
   });
 
   it('stops waiting on a later part that never settles', async () => {
