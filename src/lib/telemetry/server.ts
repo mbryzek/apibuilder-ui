@@ -17,8 +17,11 @@
  * WHICH VIEW A REQUEST BELONGS TO:
  *
  * - a document request mints a view (a hard load);
- * - a `__data.json` request is a soft navigation's server half, and takes the id the browser wrote
- *   to the `sv` cookie in `beforeNavigate`;
+ * - a `__data.json` request takes the view its `x-screen-view-id` header names (`view.ts`), or,
+ *   with no header, the `sv` cookie an older browser bundle writes. Marked as a navigation, it is a
+ *   soft navigation's server half; unmarked, it is a refresh of the view the page shows
+ *   (`invalidate`, a poll, the reload after a form action), and its load's calls are one tick of
+ *   that view's `refresh` poll, never a second first load. Naming no view, it mints one;
  * - a form action or an app endpoint takes the id the page's script sent as `x-screen-view-id`
  *   (or, for a form, the cookie). One that names no view records nothing: it is not a screen's.
  *
@@ -29,8 +32,8 @@ import { getRequestEvent } from '$app/server';
 import { budgetFor, type BudgetTable } from './budget';
 import { setViewLookup, viewOfLocals } from './context';
 import { VIEW_HEADER, ViewRecorder } from './recorder';
-import { halfOf, postReport, type ReportDoor, type ServerRequest } from './report';
-import { VIEW_COOKIE, isViewId, mintViewId } from './view';
+import { REFRESH_POLL, halfOf, postReport, type ReportDoor, type ReportHalf, type ServerRequest } from './report';
+import { VIEW_COOKIE, mintViewId, readViewMark } from './view';
 
 /** One app's screen report: where its halves go, and what it holds its screens to. */
 export interface ScreenReportConfig extends ReportDoor {
@@ -62,9 +65,22 @@ setViewLookup(() => {
   }
 });
 
+export { REFRESH_POLL } from './report';
+
+/**
+ * The view `event` names and whether a navigation is entering it: its `x-screen-view-id` header,
+ * else, where `cookie` allows, the `sv` cookie. A header always wins: it is the requesting
+ * document's own, the cookie is the origin's.
+ */
+export function viewMarkOf(event: HookEvent, cookie = true): { view: string; navigation: boolean } | null {
+  const header = event.request.headers.get(VIEW_HEADER);
+  if (header !== null) return readViewMark(header);
+  return cookie ? readViewMark(event.cookies.get(VIEW_COOKIE)) : null;
+}
+
 /** What request `event` is, as far as the report cares. */
 export function requestKind(event: HookEvent): ServerRequest {
-  if (event.isDataRequest) return 'data';
+  if (event.isDataRequest) return viewMarkOf(event)?.navigation === false ? 'refresh' : 'data';
   const method = event.request.method;
   const accept = event.request.headers.get('accept') ?? '';
   const dest = event.request.headers.get('sec-fetch-dest');
@@ -77,11 +93,8 @@ export function requestKind(event: HookEvent): ServerRequest {
 /** The view `event` belongs to: minted for a document, else the one the browser named, else none. */
 export function viewIdFor(event: HookEvent, kind: ServerRequest): string | null {
   if (kind === 'document') return mintViewId();
-  const header = event.request.headers.get(VIEW_HEADER);
-  if (isViewId(header)) return header;
-  if (kind === 'endpoint') return null;
-  const cookie = event.cookies.get(VIEW_COOKIE);
-  if (isViewId(cookie)) return cookie;
+  const mark = viewMarkOf(event, kind !== 'endpoint');
+  if (mark !== null) return mark.view;
   return kind === 'data' ? mintViewId() : null;
 }
 
@@ -125,10 +138,21 @@ function skipped(event: HookEvent, config: ScreenReportConfig): boolean {
   return event.route.id === null || path === TELEMETRY_PATH || (config.skip?.(path) ?? false);
 }
 
+/** A refresh's half: its load's calls are one tick of the view's `refresh` poll, which its view already loaded once. */
+export function asRefresh(half: ReportHalf): ReportHalf {
+  const part = `poll:${REFRESH_POLL}`;
+  return {
+    ...half,
+    calls: half.calls.map((call) => (call.part === 'load' ? { ...call, part } : call)),
+    polls: { ...half.polls, [REFRESH_POLL]: (half.polls[REFRESH_POLL] ?? 0) + 1 }
+  };
+}
+
 /** Forward the half once the view's later parts settle. A document or data request reports even with no call. */
 async function forward(view: ViewRecorder, kind: ServerRequest, config: ScreenReportConfig, clientRtt: number | null): Promise<void> {
   await view.settled();
-  const half = halfOf(view, { request: kind, client_rtt_ms: clientRtt });
+  const taken = halfOf(view, { request: kind, client_rtt_ms: clientRtt });
+  const half = kind === 'refresh' ? asRefresh(taken) : taken;
   if (half.calls.length === 0 && half.dropped_calls === 0 && kind !== 'document' && kind !== 'data') return;
   await postReport(half, budgetFor(view.route, config.budgets), config);
 }
