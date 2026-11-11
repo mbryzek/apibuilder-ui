@@ -7,9 +7,10 @@
  * A screen over the global budget gets a `budget.ts` beside its `+page` files naming only what
  * differs; that override is the screen's named debt, and lowering it is the fix.
  *
- * Each screen's loads also declare what they stream: a call still in flight when every load has
- * returned is one the page does not wait for, so it is a part that fills in after, opened by
- * `later`. Counted as `load`, it would bill the screen's wait for a call the screen never waits on.
+ * Each screen's loads also declare what they stream: every promise a load returns is a part the
+ * page fills in after, so it must be opened by `later`, and `expectWithinBudget` fails one that is
+ * not, read from the data the hard load returns. Counted as `load`, its calls would bill the
+ * screen's wait for calls the screen never waits on.
  *
  * `SCREEN_BUDGET_MEASURE=<file>` measures instead of holding: every route runs against an unlimited
  * budget and its counts are written to the file, which is how an override is first measured.
@@ -60,42 +61,6 @@ describe('every screen stays within its budget', () => {
       budgets
     });
     expect(run.load.calls).toBeGreaterThan(0);
-  });
-});
-
-/** The hard load of `route`, noting which of its fetches were still in flight when every load had returned. */
-function watchingStreams(load: (event: Record<string, unknown>) => Promise<void>): {
-  load: (event: Record<string, unknown>) => Promise<void>;
-  streamed: boolean[];
-} {
-  const streamed: boolean[] = [];
-  let returned = false;
-  return {
-    streamed,
-    load: async (event) => {
-      const fetching = globalThis.fetch;
-      globalThis.fetch = ((...args: Parameters<typeof fetch>) => {
-        const i = streamed.push(true) - 1;
-        const answered = fetching(...args);
-        const settle = () => {
-          if (!returned) streamed[i] = false;
-        };
-        answered.then(settle, settle);
-        return answered;
-      }) as typeof fetch;
-      await load(event);
-      returned = true;
-    }
-  };
-}
-
-describe('every screen declares what it streams', () => {
-  it.each(routes)('%s', async (route) => {
-    const watched = watchingStreams(hardLoad(await routeLoads(route, modules), []));
-    const table = new Map([[route, unlimited]]);
-    const run = await expectWithinBudget(watched.load, hardLoadEvent(route), (input) => answer(input), { budgets: table });
-    const undeclared = run.calls.filter((call, i) => watched.streamed[i] === true && call.part === 'load').map((call) => call.operation);
-    expect(undeclared, 'still in flight when the load returned, so each is a later part').toEqual([]);
   });
 });
 

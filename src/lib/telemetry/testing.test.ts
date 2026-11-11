@@ -115,6 +115,64 @@ describe('expectWithinBudget', () => {
     expect(run.peaks.poll).toBe(1);
   });
 
+  it('fails a returned promise of load calls that settled before the load returned', async () => {
+    // The shape that passed a clock-read check: the streamed call is issued first, so it is answered
+    // before the slower call the load awaits after it.
+    const load = async (e: Event): Promise<{ issue: Promise<unknown>; comments: unknown }> => {
+      const issue = getIssue(ctx(e));
+      const comments = await getComments(ctx(e));
+      return { issue, comments };
+    };
+    await expect(expectWithinBudget(load, event(), answer)).rejects.toThrow(/not opened by later\(\.\.\.\)[^\n]*: issue/);
+  });
+
+  it('passes the same load once later opens the streamed part, chained or not', async () => {
+    const load = async (e: Event): Promise<Record<string, unknown>> => {
+      const issue = later(ctx(e), 'issue', (c) => getIssue(c));
+      const user = later(ctx(e), 'user', (c) => getUser(c)).catch(() => null);
+      const comments = await getComments(ctx(e));
+      return { issue, user, comments };
+    };
+    const run = await expectWithinBudget(load, event(), answer);
+    expect(run.undeclared).toEqual([]);
+    expect(run.calls.map((call) => call.part)).toEqual(['later:issue', 'later:user', 'load']);
+  });
+
+  it('fails a returned promise of a load call still in flight when the load returned', async () => {
+    const load = async (e: Event): Promise<{ issue: Promise<unknown> }> => {
+      await getTenant(ctx(e));
+      return { issue: getIssue(ctx(e)) };
+    };
+    await expect(expectWithinBudget(load, event(), answer)).rejects.toThrow(/not opened by later\(\.\.\.\)[^\n]*: issue$/m);
+  });
+
+  it('does not judge a load call the load neither awaited nor returned, as when it threw first', async () => {
+    const load = async (e: Event): Promise<Record<string, never>> => {
+      void getIssue(ctx(e)).catch(() => undefined);
+      return Promise.resolve({});
+    };
+    const run = await expectWithinBudget(load, event(), answer);
+    expect(run.undeclared).toEqual([]);
+  });
+
+  it('reads an array as one data object per load, the way a hard load returns its levels', async () => {
+    const load = async (e: Event): Promise<unknown[]> => {
+      const tenant = getTenant(ctx(e));
+      await getIssue(ctx(e));
+      return [{ tenant }, { comments: later(ctx(e), 'comments', (c) => getComments(c)) }];
+    };
+    await expect(expectWithinBudget(load, event(), answer)).rejects.toThrow(/not opened by later\(\.\.\.\)[^\n]*: tenant$/m);
+  });
+
+  it('returns from a load that awaits its own later part', async () => {
+    const load = async (e: Event): Promise<{ issue: unknown }> => {
+      const issue = await later(ctx(e), 'issue', (c) => getIssue(c));
+      return { issue };
+    };
+    const run = await expectWithinBudget(load, event(), answer);
+    expect(run.calls.map((call) => call.part)).toEqual(['later:issue']);
+  });
+
   it('fails a fetch no call context noted', async () => {
     const load = async (): Promise<void> => {
       await fetch('https://api.test/untyped');
@@ -133,6 +191,27 @@ describe('orderedFetch', () => {
     await Promise.all([fake.fetch('a'), fake.fetch('b'), fake.fetch('c')]);
     expect(order).toEqual(['a', 'b', 'c']);
     expect(fake.count()).toBe(3);
+  });
+
+  it('holds a call issued while hold() is true until release, answering the rest in turn', async () => {
+    const order: string[] = [];
+    let holding = true;
+    const fake = orderedFetch(
+      (input) => {
+        order.push(String(input));
+        return answer();
+      },
+      () => holding
+    );
+    const held = fake.fetch('later');
+    holding = false;
+    await fake.fetch('load');
+    expect(order).toEqual(['load']);
+    expect(fake.holding()).toBe(true);
+    fake.release();
+    await held;
+    expect(order).toEqual(['load', 'later']);
+    expect(fake.count()).toBe(2);
   });
 });
 // dry-copy-end

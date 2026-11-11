@@ -171,9 +171,14 @@ async function settle(run: () => unknown, thrown: unknown[]): Promise<Record<str
 /**
  * The hard load of a route, as one load `expectWithinBudget` runs: `event` is the recorded event it
  * hands over, whose `fetch` and `locals` every level's own event shares. What each load threw is
- * pushed onto `thrown`.
+ * pushed onto `thrown`. It returns every level's data, the server loads' and then the universal
+ * loads' (a level with no universal load counted once), so `expectWithinBudget` reads what the page
+ * streams from it.
  */
-export function hardLoad(loads: RouteLoads, thrown: unknown[] = []): (event: Record<string, unknown>) => Promise<void> {
+export function hardLoad(
+  loads: RouteLoads,
+  thrown: unknown[] = []
+): (event: Record<string, unknown>) => Promise<Record<string, unknown>[]> {
   return async (event) => {
     const serverData: Promise<Record<string, unknown>>[] = [];
     loads.levels.forEach((level, i) => {
@@ -192,6 +197,7 @@ export function hardLoad(loads: RouteLoads, thrown: unknown[] = []): (event: Rec
         load ? settle(() => load({ ...event, parent, data: server[i] } as never), thrown) : Promise.resolve(server[i] ?? {})
       );
     });
-    await Promise.all(universalData);
+    const universal = await Promise.all(universalData);
+    return [...server, ...universal.filter((_, i) => loads.levels[i]?.universal?.load)];
   };
 }
