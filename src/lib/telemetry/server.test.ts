@@ -6,7 +6,7 @@ import { telemetryHandler } from './endpoint';
 import { ctx, later } from './context';
 import { decodeLogs } from './otlp.test.decode';
 import { VIEW_HEADER, type CallContext } from './recorder';
-import { requestKind, screenReportHandle, screenViewId, viewIdFor, type HookEvent } from './server';
+import { clientRttOf, requestKind, screenReportHandle, screenViewId, viewIdFor, type HookEvent } from './server';
 import { VIEW_COOKIE } from './view';
 
 const VIEW = 'sv_0123456789abcdef0123456789abcdef';
@@ -57,6 +57,22 @@ describe('which view a request belongs to', () => {
   });
 });
 
+describe('the client round trip', () => {
+  it("reads Cloudflare's TCP or QUIC round trip, from the platform or the request", () => {
+    expect(clientRttOf({ cf: { clientTcpRtt: 42, clientQuicRtt: 0 } })).toBe(42);
+    expect(clientRttOf({ cf: { clientTcpRtt: 0, clientQuicRtt: 753.4 } })).toBe(753);
+    const request = Object.assign(new Request('https://admin.test/'), { cf: { clientTcpRtt: 61 } });
+    expect(clientRttOf(undefined, request)).toBe(61);
+  });
+
+  it('is null off Cloudflare and where nothing was measured', () => {
+    expect(clientRttOf(undefined)).toBeNull();
+    expect(clientRttOf({ ctx: {} }, new Request('https://admin.test/'))).toBeNull();
+    expect(clientRttOf({ cf: { clientTcpRtt: 0, clientQuicRtt: 0 } })).toBeNull();
+    expect(clientRttOf({ cf: { clientTcpRtt: 'slow', clientQuicRtt: -1 } })).toBeNull();
+  });
+});
+
 describe('screenReportHandle', () => {
   it('opens the view, and forwards the server half once every later part settles', async () => {
     const fetch = vi.fn(async (_url: string | URL | Request, _init?: RequestInit) => new Response(null, { status: 204 }));
@@ -67,7 +83,10 @@ describe('screenReportHandle', () => {
       fetch: fetch as unknown as typeof globalThis.fetch
     });
     const waitUntil = vi.fn();
-    const event = { ...hookEvent('/issues/1', { headers: { accept: 'text/html' } }), platform: { ctx: { waitUntil } } };
+    const event = {
+      ...hookEvent('/issues/1', { headers: { accept: 'text/html' } }),
+      platform: { ctx: { waitUntil }, cf: { clientTcpRtt: 0, clientQuicRtt: 753 } }
+    };
     let release: () => void = () => {};
     const response = await handle({
       event,
@@ -91,6 +110,7 @@ describe('screenReportHandle', () => {
     expect(record.attributes['screen.navigation']).toBe('hard');
     expect(record.attributes['screen.load.calls']).toBe(1);
     expect(record.attributes['screen.later.max_calls']).toBe(1);
+    expect(record.attributes['screen.client_rtt_ms']).toBe(753);
   });
 
   it('leaves the telemetry route, skipped paths and unmatched routes alone', async () => {
