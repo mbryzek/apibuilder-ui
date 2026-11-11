@@ -47,6 +47,13 @@ describe('interactionToNextPaint', () => {
     expect(interactionToNextPaint(entries)).toBe(100);
   });
 
+  it('counts every interaction the browser counted toward the fifty, not only the slow ones observed', () => {
+    const slow = [300, 200, 100].map((duration, i) => ({ interactionId: i + 1, duration }));
+    expect(interactionToNextPaint(slow)).toBe(300);
+    expect(interactionToNextPaint(slow, 120)).toBe(100);
+    expect(interactionToNextPaint(slow, 1)).toBe(300);
+  });
+
   it('is absent with no interaction', () => {
     expect(interactionToNextPaint([])).toBeNull();
   });
