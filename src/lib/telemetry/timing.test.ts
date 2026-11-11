@@ -1,6 +1,14 @@
 // dry-copy: sveltekit/screen-report/timing-test — every copy of this region must match; `dev repo copies` checks it (DES-65431)
 import { describe, expect, it } from 'vitest';
-import { HiddenSpans, VisibleStopwatch, documentStart, hardLoadShowMs, hiddenSpansAtRegistration, interactionToNextPaint } from './timing';
+import {
+  HiddenSpans,
+  VisibleStopwatch,
+  documentStart,
+  hardLoadShowMs,
+  hiddenSpansAtRegistration,
+  interactionToNextPaint,
+  softNavigationShowMs
+} from './timing';
 
 describe('time to show', () => {
   it("is a hard load's LCP from the document's own start, less the time it spent hidden", () => {
@@ -23,6 +31,12 @@ describe('time to show', () => {
     watch.visibilityChanged(1100, true);
     watch.visibilityChanged(5100, false);
     expect(watch.elapsed(5200)).toBe(200);
+  });
+
+  it('is absent, never zero, for a soft navigation that entered its view within the tick it began', () => {
+    expect(softNavigationShowMs(0)).toBeNull();
+    expect(softNavigationShowMs(0.4)).toBeNull();
+    expect(softNavigationShowMs(6.6)).toBe(7);
   });
 
   it('bills a document opened out of sight from its first byte as hidden', () => {

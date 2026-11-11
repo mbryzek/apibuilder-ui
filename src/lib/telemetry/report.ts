@@ -11,7 +11,10 @@
  * Each half is one OTLP log record (`otlpRecord`, the attributes monitoring's rules read) posted to `obs-report.idempotent.io`, the report door, as the
  * writer whose token is the Worker secret `OBS_REPORT_TOKEN`. A browser never holds the token. The
  * budget a half is stamped with is resolved on the server from the route, never taken from a client.
+ * Each half names the release its own code was built as (`screen.release`), so a rule reads a fix
+ * from the views the fixed release served and no other.
  */
+import { PUBLIC_VERSION } from '$app/env/public';
 import type { Budget } from './budget';
 import { MAX_CALLS, type RecordedCall, type ViewRecorder } from './recorder';
 import { encodeLogs, type Attribute, type LogRecordInput } from './otlp';
@@ -62,6 +65,19 @@ export interface ReportHalf {
    * Stamped on the server, never taken from a client; absent off Cloudflare.
    */
   client_rtt_ms?: number;
+  /**
+   * Halves this isolate failed to deliver since it last delivered one: refused, failed, or abandoned
+   * with the Worker before their post was made (`LostHalves`). Stamped as the half leaves, never
+   * taken from a client.
+   */
+  lost_halves?: number;
+  /**
+   * The release the half's own code was built as, the `PUBLIC_VERSION` the release bakes in: the
+   * server's for the server half, the bundle's for the browser half, since a tab opened before a
+   * deploy goes on running the release it loaded. Absent from a build no release made, and from a
+   * half a browser bundle older than the field posted.
+   */
+  release?: string;
 }
 
 /** A half as it leaves for the door: stamped with the app, its repository and the budget its screen was held to. */
@@ -86,13 +102,20 @@ export function halfOf(
     poll_peaks: recorder.pollPeakCounts(),
     ...(extra.request === undefined ? {} : { request: extra.request }),
     ...(extra.timing === undefined ? {} : { timing: extra.timing }),
-    ...withClientRtt(extra.client_rtt_ms)
+    ...withClientRtt(extra.client_rtt_ms),
+    ...withRelease(PUBLIC_VERSION)
   };
 }
 
 /** The `client_rtt_ms` field a half carries: present only for a measured round trip. */
 export function withClientRtt(rttMs: number | null | undefined): { client_rtt_ms?: number } {
   return rttMs === null || rttMs === undefined ? {} : { client_rtt_ms: rttMs };
+}
+
+/** The `release` field a half carries: present only for a release's own build. */
+export function withRelease(release: unknown): { release?: string } {
+  const named = text(release);
+  return named === null ? {} : { release: named };
 }
 
 const MAX_TEXT = 200;
@@ -182,7 +205,8 @@ export function sanitizeBrowserHalf(body: unknown): ReportHalf | null {
     dropped_calls: (millis(half['dropped_calls']) ?? 0) + Math.max(0, posted.length - MAX_CALLS),
     polls: sanitizePolls(half['polls']),
     poll_peaks: sanitizePolls(half['poll_peaks']),
-    timing
+    timing,
+    ...withRelease(half['release'])
   };
 }
 
@@ -218,7 +242,9 @@ export function reportAttributes(stamped: StampedHalf, peaks: PartPeaks): Attrib
     ['screen.show_ms', timing?.show_ms],
     ['screen.inp_ms', timing?.inp_ms],
     ['screen.loaded_ms', timing?.finished_ms],
-    ['screen.client_rtt_ms', stamped.client_rtt_ms]
+    ['screen.client_rtt_ms', stamped.client_rtt_ms],
+    ['screen.report.lost', stamped.lost_halves === 0 ? undefined : stamped.lost_halves],
+    ['screen.release', stamped.release]
   ];
   return [
     attribute('screen.report', stamped.half),
@@ -281,6 +307,34 @@ export function otlpRecord(stamped: StampedHalf, peaks: PartPeaks, nowMs: number
   };
 }
 
+/**
+ * The halves one isolate lost, carried on the next half it delivers: a send nobody saw fail is
+ * invisible in the log, and a gap between the two halves of a screen view could not tell a slow
+ * Worker from a lost report (ISS-77398). Counted per isolate, so a count is a floor: an isolate that
+ * never delivers again takes its count with it.
+ */
+export class LostHalves {
+  private count = 0;
+
+  /** Count `n` halves lost. */
+  lose(n = 1): void {
+    this.count += n;
+  }
+
+  /** The count a half leaving now carries. */
+  pending(): number {
+    return this.count;
+  }
+
+  /** A half carrying `carried` was delivered: those are said, and only later losses remain. */
+  said(carried: number): void {
+    this.count = Math.max(0, this.count - carried);
+  }
+}
+
+/** This isolate's ledger, shared by every half it posts. */
+export const lostHalves = new LostHalves();
+
 /** Where a half is posted from: the app's name, the writer's token, and the fetch to post with. */
 export interface ReportDoor {
   app: string;
@@ -290,22 +344,30 @@ export interface ReportDoor {
   token: () => string | undefined;
   fetch?: typeof fetch;
   endpoint?: string;
+  /** Where lost halves are counted; this isolate's `lostHalves` unless a test hands its own. */
+  lost?: LostHalves;
 }
 
 const POST_TIMEOUT_MS = 5_000;
 
-/** Post one stamped half to the report door as OTLP protobuf. Never throws: a failed send is dropped, and says so by `false`. */
+/**
+ * Post one stamped half to the report door as OTLP protobuf. Never throws: a failed send is dropped,
+ * says so by `false`, and is counted on the next half delivered (`screen.report.lost`).
+ */
 export async function postReport(
   half: ReportHalf,
   budget: Budget,
   door: ReportDoor,
   peaks: PartPeaks = peaksOfCalls(half)
 ): Promise<boolean> {
+  const lost = door.lost ?? lostHalves;
   try {
     const token = door.token();
     if (token === undefined || token === '') return false;
     const send = door.fetch ?? fetch;
-    const body = encodeLogs(otlpRecord({ ...half, app: door.app, repo: door.repo, budget }, peaks, Date.now()));
+    const carried = lost.pending();
+    const stamped: StampedHalf = { ...half, app: door.app, repo: door.repo, budget, lost_halves: carried };
+    const body = encodeLogs(otlpRecord(stamped, peaks, Date.now()));
     const response = await send(door.endpoint ?? REPORT_ENDPOINT, {
       method: 'POST',
       headers: { 'content-type': 'application/x-protobuf', authorization: `Bearer ${token}` },
@@ -314,9 +376,16 @@ export async function postReport(
     });
     // A refusal from the door is a fault in the report or its writer, not in the page: it is said
     // in the app's log, where a door turning every report away is seen, and the page goes on.
-    if (!response.ok) console.warn(`screen report: the report door answered ${response.status}`);
-    return response.ok;
-  } catch {
+    if (!response.ok) {
+      console.warn(`screen report: the report door answered ${response.status}`);
+      lost.lose();
+      return false;
+    }
+    lost.said(carried);
+    return true;
+  } catch (error) {
+    console.warn(`screen report: a ${half.half} half was not sent: ${String(error)}`);
+    lost.lose();
     return false;
   }
 }

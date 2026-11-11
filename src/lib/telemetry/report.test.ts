@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { globalBudget } from './budget';
 import { decodeLogs } from './otlp.test.decode';
 import { MAX_CALLS, type RecordedCall } from './recorder';
-import { peaksOfCalls, postReport, reportAttributes, sanitizeBrowserHalf, type ReportHalf } from './report';
+import { LostHalves, peaksOfCalls, postReport, reportAttributes, sanitizeBrowserHalf, type ReportHalf } from './report';
 
 const VIEW = 'sv_0123456789abcdef0123456789abcdef';
 
@@ -19,7 +19,8 @@ const browserHalf = {
   dropped_calls: 0,
   polls: { status: 2 },
   poll_peaks: { status: 1 },
-  timing: { navigation: 'soft', show_ms: 120, inp_ms: null, finished_ms: 300 }
+  timing: { navigation: 'soft', show_ms: 120, inp_ms: null, finished_ms: 300 },
+  release: '0.3.96'
 };
 
 describe('sanitizeBrowserHalf', () => {
@@ -102,6 +103,20 @@ describe('the record monitoring reads', () => {
     expect(far.find((a) => a.key === 'screen.client_rtt_ms')?.value).toBe(753);
   });
 
+  it('names the release the half was built as, and nothing for a build no release made', () => {
+    const stamped = { ...server, app: 'idempotent', repo: 'mbryzek/idempotent', budget: globalBudget };
+    const release = (half: typeof stamped) => reportAttributes(half, peaksOfCalls(half)).find((a) => a.key === 'screen.release');
+    expect(release(stamped)).toBeUndefined();
+    expect(release({ ...stamped, release: '0.3.96' })?.value).toBe('0.3.96');
+  });
+
+  it('keeps the release a browser half names, and drops one that is not a name', () => {
+    expect(sanitizeBrowserHalf(browserHalf)?.release).toBe('0.3.96');
+    expect(sanitizeBrowserHalf({ ...browserHalf, release: '' })).not.toHaveProperty('release');
+    expect(sanitizeBrowserHalf({ ...browserHalf, release: 96 })).not.toHaveProperty('release');
+    expect(sanitizeBrowserHalf({ ...browserHalf, release: undefined })).not.toHaveProperty('release');
+  });
+
   it('reads a poll per tick', () => {
     const half = sanitizeBrowserHalf(browserHalf);
     expect(half === null ? null : peaksOfCalls(half)).toEqual({ later: 0, poll: 1 });
@@ -149,6 +164,7 @@ describe('postReport', () => {
     const record = decodeLogs(init?.body as Uint8Array);
     expect(record.resource).toEqual({ 'service.name': 'idempotent' });
     expect(record.attributes['screen.show_ms']).toBe(120);
+    expect(record.attributes['screen.release']).toBe('0.3.96');
     expect(JSON.parse(record.body)).toEqual(half.calls);
   });
 
@@ -166,6 +182,25 @@ describe('postReport', () => {
     expect(
       await postReport(half, globalBudget, { ...door, token: () => 'tok', fetch: throwing as unknown as typeof globalThis.fetch })
     ).toBe(false);
+    warn.mockRestore();
+  });
+
+  it('counts each lost half on the next half delivered, and only once', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const lost = new LostHalves();
+    const answers = [400, 503, 204, 204];
+    const fetch = vi.fn(
+      async (_url: string | URL | Request, _init?: RequestInit) => new Response(null, { status: answers.shift() ?? 204 })
+    );
+    const door = { app: 'a', repo: 'mbryzek/a', token: () => 'tok', fetch: fetch as unknown as typeof globalThis.fetch, lost };
+    lost.lose();
+    for (let i = 0; i < 4; i += 1) await postReport(half, globalBudget, door);
+    const lostOf = (n: number) => decodeLogs(fetch.mock.calls[n]![1]?.body as Uint8Array).attributes['screen.report.lost'];
+    expect(lostOf(0)).toBe(1);
+    expect(lostOf(1)).toBe(2);
+    expect(lostOf(2)).toBe(3);
+    expect(lostOf(3)).toBeUndefined();
+    expect(lost.pending()).toBe(0);
     warn.mockRestore();
   });
 });

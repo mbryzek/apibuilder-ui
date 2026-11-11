@@ -6,10 +6,26 @@ import { telemetryHandler } from './endpoint';
 import { ctx, later } from './context';
 import { decodeLogs } from './otlp.test.decode';
 import { VIEW_HEADER, type CallContext } from './recorder';
-import { clientRttOf, requestKind, screenReportHandle, screenViewId, viewIdFor, type HookEvent } from './server';
+import { LostHalves } from './report';
+import {
+  ABANDONED_AFTER_MS,
+  Forwards,
+  SETTLE_LIMIT_MS,
+  clientRttOf,
+  keepAliveOf,
+  requestKind,
+  screenReportHandle,
+  screenViewId,
+  settledWithin,
+  viewIdFor,
+  type HookEvent
+} from './server';
+import { ViewRecorder } from './recorder';
 import { VIEW_COOKIE } from './view';
 
 const VIEW = 'sv_0123456789abcdef0123456789abcdef';
+
+vi.mock('$app/env/public', () => ({ PUBLIC_VERSION: '0.3.97' }));
 
 function hookEvent(
   path: string,
@@ -141,6 +157,7 @@ describe('screenReportHandle', () => {
     expect(record.attributes['screen.load.calls']).toBe(1);
     expect(record.attributes['screen.later.max_calls']).toBe(1);
     expect(record.attributes['screen.client_rtt_ms']).toBe(753);
+    expect(record.attributes['screen.release']).toBe('0.3.97');
   });
 
   it("books a refresh's load calls as one tick of the view's refresh poll, and sends nothing for one with no call", async () => {
@@ -176,6 +193,24 @@ describe('screenReportHandle', () => {
     expect(record.attributes['screen.poll.max_calls']).toBe(2);
   });
 
+  it("keeps the Worker alive with the app's waitUntil where the platform carries none", async () => {
+    const fetch = vi.fn(async (_url: string | URL | Request, _init?: RequestInit) => new Response(null, { status: 204 }));
+    const waitUntil = vi.fn();
+    const handle = screenReportHandle({
+      app: 'a',
+      repo: 'mbryzek/a',
+      token: () => 'tok',
+      fetch: fetch as unknown as typeof globalThis.fetch,
+      waitUntil
+    });
+    const event = hookEvent('/issues/1', { headers: { accept: 'text/html' } });
+    await handle({ event, resolve: async () => new Response('page') });
+    expect(waitUntil).toHaveBeenCalledTimes(1);
+    await waitUntil.mock.calls[0]![0];
+    const record = decodeLogs(fetch.mock.calls[0]![1]?.body as Uint8Array);
+    expect(record.attributes['screen.navigation']).toBe('hard');
+  });
+
   it('leaves the telemetry route, skipped paths and unmatched routes alone', async () => {
     const handle = screenReportHandle({ app: 'a', repo: 'mbryzek/a', token: () => 'tok', skip: (path) => path.startsWith('/api/') });
     for (const event of [hookEvent('/_telemetry'), hookEvent('/api/issues'), hookEvent('/nowhere', { route: null })]) {
@@ -184,6 +219,59 @@ describe('screenReportHandle', () => {
     }
   });
 });
+describe('what keeps the server half alive', () => {
+  it("prefers the platform's waitUntil, then the app's", async () => {
+    const platform = vi.fn();
+    const app = vi.fn();
+    const promise = Promise.resolve();
+    (await keepAliveOf({ ctx: { waitUntil: platform } }, { waitUntil: app }))?.(promise);
+    expect(platform).toHaveBeenCalledWith(promise);
+    expect(await keepAliveOf(undefined, { waitUntil: app })).toBe(app);
+  });
+
+  // Each app's test run decides what `cloudflare:workers` is (a stub of its own, adapter-cloudflare's
+  // stand-in, or nothing), so the fallback is measured against whichever this run loads.
+  it("falls back to the Worker's own waitUntil, and is null off Cloudflare", async () => {
+    const worker = await import('cloudflare:workers' as string).then(
+      (module: { waitUntil?: unknown }) => module.waitUntil,
+      () => undefined
+    );
+    const fallback = await keepAliveOf(undefined, {});
+    expect(fallback === null).toBe(typeof worker !== 'function');
+  });
+
+  it('stops waiting on a later part that never settles', async () => {
+    vi.useFakeTimers();
+    try {
+      const view = new ViewRecorder(VIEW, '/issues/[id]', { side: 'server' });
+      view.pend(new Promise(() => {}));
+      let done = false;
+      const waited = settledWithin(view).then(() => (done = true));
+      await vi.advanceTimersByTimeAsync(SETTLE_LIMIT_MS - 1);
+      expect(done).toBe(false);
+      await vi.advanceTimersByTimeAsync(1);
+      await waited;
+      expect(done).toBe(true);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('counts a forward its Worker abandoned as lost when the next one starts', () => {
+    let now = 0;
+    const lost = new LostHalves();
+    const forwards = new Forwards(lost, () => now);
+    const finished = forwards.start();
+    forwards.start();
+    finished();
+    now = ABANDONED_AFTER_MS;
+    forwards.start();
+    expect(lost.pending()).toBe(1);
+    forwards.start();
+    expect(lost.pending()).toBe(1);
+  });
+});
+
 describe("SvelteKit's own types", () => {
   it('take the hook, the /_telemetry handler and ctx as they stand', () => {
     const config = { app: 'a', repo: 'mbryzek/a', token: () => undefined };

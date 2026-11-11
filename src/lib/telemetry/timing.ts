@@ -5,7 +5,8 @@
  *
  * - Time to show: LCP for a hard load, timed from the document's own request, less the time the
  *   document spent hidden; for a soft navigation, which has no LCP, `beforeNavigate` to
- *   `afterNavigate` less the time the tab spent hidden.
+ *   `afterNavigate` less the time the tab spent hidden. A soft navigation that loaded nothing has
+ *   no time to show at all, never a zero.
  * - INP: the slowest interaction of the view, skipping one per fifty interactions, as the metric
  *   is defined. The fifty count every interaction of the view (the browser's `interactionCount`
  *   across it, where it keeps one), not only the slow ones an observer with a duration floor sees.
@@ -157,6 +158,17 @@ export function documentStart(nav: DocumentEntry): number {
 export function hardLoadShowMs(lcpAt: number | null, start: number, hidden: HiddenSpans | null, now: number): number | null {
   if (lcpAt === null || lcpAt < start) return null;
   return clamp(lcpAt - start - (hidden?.within({ start, end: lcpAt }, now) ?? 0));
+}
+
+/**
+ * A soft navigation's time to show: its visible time from `beforeNavigate` to `afterNavigate`. Null
+ * where that rounds to nothing: a navigation that entered its view within the tick it began awaited
+ * no request and no render (a form action's result applied to the page it was posted from), so it
+ * loaded nothing to time, and a zero would count toward the screen's budget as a view shown at once.
+ */
+export function softNavigationShowMs(visibleMs: number): number | null {
+  const ms = clamp(visibleMs);
+  return ms > 0 ? ms : null;
 }
 
 /** An `event` timing entry, as far as INP reads it. */

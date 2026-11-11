@@ -14,7 +14,7 @@
  */
 import { budgetFor } from './budget';
 import { postReport, sanitizeBrowserHalf, withClientRtt } from './report';
-import { clientRttOf, waitUntilOf, type ScreenReportConfig } from './server';
+import { clientRttOf, keepAliveOf, type ScreenReportConfig } from './server';
 
 /** The largest browser half accepted, in bytes. */
 export const MAX_REPORT_BYTES = 64 * 1024;
@@ -113,7 +113,7 @@ export function telemetryHandler(
     if (posted === null) return new Response(null, { status: 400 });
     const half = { ...posted, ...withClientRtt(clientRttOf(event.platform, event.request)) };
     const sent = postReport(half, budgetFor(half.route, config.budgets), config);
-    const waitUntil = waitUntilOf(event.platform);
+    const waitUntil = await keepAliveOf(event.platform, config);
     if (waitUntil === null) await sent;
     else waitUntil(sent);
     return new Response(null, { status: 204 });

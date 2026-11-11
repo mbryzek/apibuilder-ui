@@ -21,6 +21,7 @@ let clock = 0;
 const page = { route: { id: '/issues/[id]' as string | null }, data: {} as Record<string, unknown> };
 
 vi.mock('$app/env', () => ({ browser: true }));
+vi.mock('$app/env/public', () => ({ PUBLIC_VERSION: '0.3.97' }));
 vi.mock('$app/state', () => ({ page }));
 vi.mock('$app/navigation', () => ({
   beforeNavigate: (fn: (navigation: Required<Navigation>) => void) => {
@@ -144,7 +145,8 @@ describe('a hard load', () => {
       half: 'browser',
       view: VIEW,
       route: '/issues/[id]',
-      timing: { navigation: 'hard', show_ms: 420, inp_ms: null }
+      timing: { navigation: 'hard', show_ms: 420, inp_ms: null },
+      release: '0.3.97'
     });
     expect(halves[0]?.['calls']).toMatchObject([{ operation: 'markRead', part: 'browser', queries_counted: true }]);
   });
@@ -236,6 +238,19 @@ describe('a soft navigation', () => {
     const halves = await sent();
     expect(halves[1]).toMatchObject({ view: id, route: '/other', timing: { navigation: 'soft', show_ms: 300 } });
     expect(halves[1]?.['calls']).toMatchObject([{ operation: 'getOther', part: 'load' }]);
+  });
+
+  it('reports no time to show for a navigation that entered its view within the tick it began', async () => {
+    const { browser } = await load();
+    browser.registerScreenReport({ view: VIEW });
+    after?.({ type: 'enter' });
+    clock = 1000;
+    navigate({ type: 'form' });
+    after?.({ type: 'form' });
+    hide();
+    const halves = await sent();
+    expect(halves[1]).toMatchObject({ timing: { navigation: 'soft' } });
+    expect((halves[1]?.['timing'] as Record<string, unknown>)['show_ms']).toBeNull();
   });
 
   it("keeps the navigation's own load as load, and books a re-run after entry as a refresh tick", async () => {

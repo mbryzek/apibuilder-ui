@@ -36,11 +36,11 @@ import { VIEW_HEADER, ViewRecorder, type CallContext, type CallNote } from './re
 import { REFRESH_POLL, halfOf, type ReportTiming } from './report';
 import {
   VisibleStopwatch,
-  clamp,
   documentStart,
   hardLoadShowMs,
   hiddenSpansAtRegistration,
   interactionToNextPaint,
+  softNavigationShowMs,
   type HiddenSpans,
   type InteractionEntry,
   type VisibilityStateEntry
@@ -363,7 +363,7 @@ export function registerScreenReport(options: ScreenReportOptions): void {
     if (view === null) return;
     sendLeaving(endpoint);
     view.recorder.enteredAt = view.recorder.elapsed();
-    if (type !== 'enter') view.showMs = clamp(softNav.elapsed(performance.now()));
+    if (type !== 'enter') view.showMs = softNavigationShowMs(softNav.elapsed(performance.now()));
     watchFinished(view);
   });
 }

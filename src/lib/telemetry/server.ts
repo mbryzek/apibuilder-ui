@@ -26,13 +26,25 @@
  *   (or, for a form, the cookie). One that names no view records nothing: it is not a screen's.
  *
  * The half is forwarded in process, never through a rate-limited route, and on Cloudflare through
- * the request's `waitUntil` so the Worker lives until the post is made. A failed send is dropped.
+ * the request's `waitUntil` so the Worker lives until the post is made (`keepAliveOf`). The wait on
+ * the later parts is bounded (`SETTLE_LIMIT_MS`), so a part that never settles still sends what the
+ * view holds. A failed send, and a post the Worker abandoned before making it, is counted on the next
+ * half delivered (`screen.report.lost`).
  */
 import { getRequestEvent } from '$app/server';
 import { budgetFor, type BudgetTable } from './budget';
 import { setViewLookup, viewOfLocals } from './context';
 import { VIEW_HEADER, ViewRecorder } from './recorder';
-import { REFRESH_POLL, halfOf, postReport, type ReportDoor, type ReportHalf, type ServerRequest } from './report';
+import {
+  REFRESH_POLL,
+  halfOf,
+  lostHalves,
+  postReport,
+  type LostHalves,
+  type ReportDoor,
+  type ReportHalf,
+  type ServerRequest
+} from './report';
 import { VIEW_COOKIE, mintViewId, readViewMark } from './view';
 
 /** One app's screen report: where its halves go, and what it holds its screens to. */
@@ -40,7 +52,12 @@ export interface ScreenReportConfig extends ReportDoor {
   budgets?: BudgetTable;
   /** Same-origin paths that are not a screen's (an API proxy the browser half already counts). */
   skip?: (pathname: string) => boolean;
+  /** Keeps the Worker alive for a promise where the request's platform carries no `waitUntil`; `cloudflare:workers`' own by default. */
+  waitUntil?: KeepAlive;
 }
+
+/** Keeps the runtime alive until a promise settles. */
+export type KeepAlive = (promise: Promise<unknown>) => void;
 
 /** The path the browser half is posted to, in every app. */
 export const TELEMETRY_PATH = '/_telemetry';
@@ -99,12 +116,32 @@ export function viewIdFor(event: HookEvent, kind: ServerRequest): string | null 
 }
 
 /** The request's own `waitUntil` on Cloudflare (`platform.ctx` or `platform.context`), when it has one. */
-export function waitUntilOf(platform: unknown): ((promise: Promise<unknown>) => void) | null {
+export function waitUntilOf(platform: unknown): KeepAlive | null {
   const holder = platform as
     { ctx?: { waitUntil?: (p: Promise<unknown>) => void }; context?: { waitUntil?: (p: Promise<unknown>) => void } } | undefined;
   const owner = holder?.ctx ?? holder?.context;
   const waitUntil = owner?.waitUntil;
   return typeof waitUntil === 'function' ? (promise) => waitUntil.call(owner, promise) : null;
+}
+
+/**
+ * The Worker's own `waitUntil`, from `cloudflare:workers`, which keeps the request that is running
+ * alive: adapter-cloudflare hands SvelteKit no `platform` at all, so without it the server half's
+ * post was abandoned as the response ended (ISS-77398). Null off Cloudflare, where the module does
+ * not exist. Imported by a specifier the type checker does not resolve, so an app without Workers
+ * types still checks; the bundler still sees the literal and leaves it to the Worker.
+ */
+const workerWaitUntil: Promise<KeepAlive | null> = import('cloudflare:workers' as string).then(
+  (module: { waitUntil?: unknown }) => {
+    const waitUntil = module.waitUntil;
+    return typeof waitUntil === 'function' ? (promise: Promise<unknown>) => void waitUntil(promise) : null;
+  },
+  () => null
+);
+
+/** What keeps the Worker alive for a request's post: the platform's `waitUntil`, else the app's, else the Worker's own. */
+export async function keepAliveOf(platform: unknown, config: { waitUntil?: KeepAlive }): Promise<KeepAlive | null> {
+  return waitUntilOf(platform) ?? config.waitUntil ?? (await workerWaitUntil);
 }
 
 /** Cloudflare's per-request connection facts (`request.cf`), the two round trips the report reads. */
@@ -148,14 +185,64 @@ export function asRefresh(half: ReportHalf): ReportHalf {
   };
 }
 
+/**
+ * The longest the server half waits on the view's later parts. Cloudflare keeps a Worker alive for
+ * 30 s after its response for `waitUntil`; past this the half is sent with what the view holds, a
+ * call still open carrying no end, rather than lost with the Worker.
+ */
+export const SETTLE_LIMIT_MS = 20_000;
+/** A forward that has not finished by this age was abandoned with its Worker: the settle limit, the post's own timeout, and slack. */
+export const ABANDONED_AFTER_MS = SETTLE_LIMIT_MS + 10_000;
+
+/** Resolves once every later part of `view` has settled, or after `limitMs`, whichever is first. */
+export async function settledWithin(view: ViewRecorder, limitMs: number = SETTLE_LIMIT_MS): Promise<void> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const limit = new Promise<void>((resolve) => (timer = setTimeout(resolve, limitMs)));
+  try {
+    await Promise.race([view.settled(), limit]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * The forwards this isolate has started and not finished. One that outlives `ABANDONED_AFTER_MS`
+ * never will: its Worker ended first, and it is counted lost when the next forward starts.
+ */
+export class Forwards {
+  private readonly open = new Map<object, number>();
+
+  constructor(
+    private readonly lost: LostHalves = lostHalves,
+    private readonly clock: () => number = Date.now
+  ) {}
+
+  /** A forward starts; returns what finishes it. */
+  start(): () => void {
+    const now = this.clock();
+    for (const [key, startedAt] of this.open) {
+      if (now - startedAt < ABANDONED_AFTER_MS) continue;
+      this.open.delete(key);
+      this.lost.lose();
+    }
+    const key = {};
+    this.open.set(key, now);
+    return () => void this.open.delete(key);
+  }
+}
+
+const forwards = new Forwards();
+
 /** Forward the half once the view's later parts settle. A document or data request reports even with no call. */
 async function forward(view: ViewRecorder, kind: ServerRequest, config: ScreenReportConfig, clientRtt: number | null): Promise<void> {
-  await view.settled();
+  await settledWithin(view);
   const taken = halfOf(view, { request: kind, client_rtt_ms: clientRtt });
   const half = kind === 'refresh' ? asRefresh(taken) : taken;
   if (half.calls.length === 0 && half.dropped_calls === 0 && kind !== 'document' && kind !== 'data') return;
   await postReport(half, budgetFor(view.route, config.budgets), config);
 }
+
+let warnedNoKeepAlive = false;
 
 /** The `handle` that opens each request's screen view and forwards its server half. */
 export function screenReportHandle(
@@ -177,8 +264,16 @@ export function screenReportHandle(
     }
     const response = await resolve(event);
     if (view !== null) {
-      const sent = forward(view, kind, config, clientRttOf(event.platform, event.request)).catch(() => undefined);
-      waitUntilOf(event.platform)?.(sent);
+      const keepAlive = await keepAliveOf(event.platform, config);
+      if (keepAlive === null && !warnedNoKeepAlive) {
+        warnedNoKeepAlive = true;
+        console.warn('screen report: nothing keeps this runtime alive for the server half; a half may be lost as the response ends');
+      }
+      const finish = forwards.start();
+      const sent = forward(view, kind, config, clientRttOf(event.platform, event.request))
+        .catch(() => undefined)
+        .finally(finish);
+      keepAlive?.(sent);
     }
     return response;
   };
