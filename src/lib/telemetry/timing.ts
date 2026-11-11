@@ -10,10 +10,10 @@
  *   is defined.
  * - The finished-loading mark: when every part that fills in after has rendered.
  *
- * THE HIDDEN-TIME ACCOUNTING IS PAGETIMING'S, carried here rather than imported: `pageTiming.ts`
- * (`sveltekit/page-timing`) retires once every app reports, and this region outlives it. A
- * backgrounded tab is throttled and its navigation suspended, so the wall clock across it measures
- * a wait no person sat through; a hard load's totals and a soft navigation's both subtract it.
+ * THE HIDDEN-TIME ACCOUNTING came from the retired `pageTiming.ts` (`sveltekit/page-timing`) and
+ * now lives only here. A backgrounded tab is throttled and its navigation suspended, so the wall
+ * clock across it measures a wait no person sat through; a hard load's totals and a soft
+ * navigation's both subtract it.
  */
 
 /** A half-open [start, end) window on the `performance.now()` clock. */
