@@ -9,9 +9,11 @@ import { requireAuth, memberClient } from '#lib/server/auth.ts';
 import { requiredEnum } from '#lib/server/form.ts';
 import type { Subscription } from '#generated/com-bryzek-apibuilder.ts';
 import { Publication } from '#generated/com-bryzek-apibuilder.ts';
+import { SUBSCRIPTIONS_DEPENDENCY } from './dependency.ts';
 
 export const load: PageServerLoad = async (event) => {
   const session = requireAuth(event);
+  event.depends(SUBSCRIPTIONS_DEPENDENCY);
   const headers = getSessionHeaders(session.id);
 
   const response = await handleApiCall<Subscription[]>(() =>

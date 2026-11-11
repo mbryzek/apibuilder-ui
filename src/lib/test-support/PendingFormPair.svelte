@@ -5,12 +5,13 @@
 
   interface Props {
     onSettled?: () => void;
+    refreshes?: `${string}:${string}`;
   }
 
-  let { onSettled }: Props = $props();
+  let { onSettled, refreshes }: Props = $props();
 </script>
 
-<PendingForm action="?/first" {onSettled}>
+<PendingForm action="?/first" {onSettled} {refreshes}>
   {#snippet children(pending)}
     <button type="submit" data-testid="first" disabled={pending}>First</button>
   {/snippet}

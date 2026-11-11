@@ -3,12 +3,16 @@
 /**
  * Two org pages whose markup offered something the action could not deliver: an upload Format select
  * that rendered blank because its default matched no option, and subscription toggles shown to a
- * non-member, which the toggle refuses with a 403 page.
+ * non-member, which the toggle refuses with a 403 page. A toggle re-runs the subscriptions load
+ * alone, never the org layout's. ISS-78824
  */
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mount, unmount, flushSync } from 'svelte';
 import Upload from './upload/+page.svelte';
 import Subscriptions from './subscriptions/+page.svelte';
+import { SUBSCRIPTIONS_DEPENDENCY } from './subscriptions/dependency.ts';
+import { submitFor } from '#lib/test-support/app-forms.ts';
+import { invalidated } from '#lib/test-support/app-navigation.ts';
 
 let target: HTMLElement;
 let component: Record<string, unknown> | undefined;
@@ -23,6 +27,7 @@ const org = { key: 'acme', name: 'Acme' };
 describe('org pages', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
+    invalidated.length = 0;
     target = document.createElement('div');
     document.body.append(target);
   });
@@ -57,5 +62,16 @@ describe('org pages', () => {
     render(Subscriptions, { data: { org, isMember: true, isAdmin: false, subscriptions: [], loadError: null }, form: null });
 
     expect(target.querySelectorAll('form[action="?/toggle"]').length).toBeGreaterThan(0);
+  });
+
+  it('re-runs only the subscriptions load after a toggle', async () => {
+    render(Subscriptions, { data: { org, isMember: true, isAdmin: false, subscriptions: [], loadError: null }, form: null });
+
+    const settled = await submitFor(target.querySelector<HTMLFormElement>('form[action="?/toggle"]')!)();
+    const updates: unknown[] = [];
+    await settled({ update: async (opts) => void updates.push(opts), result: { type: 'success' } });
+
+    expect(updates).toEqual([{ refreshAll: false }]);
+    expect(invalidated).toEqual([SUBSCRIPTIONS_DEPENDENCY]);
   });
 });

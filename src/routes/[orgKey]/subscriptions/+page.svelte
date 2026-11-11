@@ -6,6 +6,7 @@
   import type { LoadError } from '#lib/api/load-error.ts';
   import LoadErrorBanner from '#lib/components/LoadErrorBanner.svelte';
   import FormErrors from '#lib/components/FormErrors.svelte';
+  import { SUBSCRIPTIONS_DEPENDENCY } from './dependency.ts';
 
   interface Props {
     data: {
@@ -77,7 +78,7 @@
               {isSubscribed ? 'Subscribed' : 'Not subscribed'}
             </span>
           </div>
-          <PendingForm action="?/toggle">
+          <PendingForm action="?/toggle" refreshes={SUBSCRIPTIONS_DEPENDENCY}>
             {#snippet children(pending)}
               <input type="hidden" name="publication" value={publication} />
               <button type="submit" class="{isSubscribed ? 'btn-secondary' : 'btn-primary'} px-4 py-2 text-sm" disabled={pending}>

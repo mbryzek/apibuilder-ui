@@ -7,7 +7,9 @@
  * its way (PendingForm.svelte, through ui's `Submission`) without either of those.
  */
 
-export type SubmitCallback = (args: { update: () => Promise<void> }) => Promise<void>;
+/** What `enhance` hands a submit function's callback, as far as a component here reads it. */
+export type SubmitResult = { update: (opts?: { refreshAll?: boolean }) => Promise<void>; result?: { type: string } };
+export type SubmitCallback = (args: SubmitResult) => Promise<void>;
 /** Plays a click: runs the form's submit function and resolves to the callback it returns. */
 export type SubmitFunction = () => Promise<SubmitCallback>;
 
