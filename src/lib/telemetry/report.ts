@@ -45,6 +45,12 @@ export interface ReportHalf {
   polls: Record<string, number>;
   request?: ServerRequest;
   timing?: ReportTiming;
+  /**
+   * The round trip Cloudflare measured to the client on the request this half arrived by (the
+   * document or data request for the server half, the `/_telemetry` post for the browser half).
+   * Stamped on the server, never taken from a client; absent off Cloudflare.
+   */
+  client_rtt_ms?: number;
 }
 
 /** A half as it leaves for the door: stamped with the app, its repository and the budget its screen was held to. */
@@ -55,7 +61,10 @@ export interface StampedHalf extends ReportHalf {
 }
 
 /** The half a recorder holds now. */
-export function halfOf(recorder: ViewRecorder, extra: { request?: ServerRequest; timing?: ReportTiming } = {}): ReportHalf {
+export function halfOf(
+  recorder: ViewRecorder,
+  extra: { request?: ServerRequest; timing?: ReportTiming; client_rtt_ms?: number | null } = {}
+): ReportHalf {
   return {
     half: recorder.side,
     view: recorder.view,
@@ -64,8 +73,14 @@ export function halfOf(recorder: ViewRecorder, extra: { request?: ServerRequest;
     dropped_calls: recorder.dropped,
     polls: recorder.pollCounts(),
     ...(extra.request === undefined ? {} : { request: extra.request }),
-    ...(extra.timing === undefined ? {} : { timing: extra.timing })
+    ...(extra.timing === undefined ? {} : { timing: extra.timing }),
+    ...withClientRtt(extra.client_rtt_ms)
   };
+}
+
+/** The `client_rtt_ms` field a half carries: present only for a measured round trip. */
+export function withClientRtt(rttMs: number | null | undefined): { client_rtt_ms?: number } {
+  return rttMs === null || rttMs === undefined ? {} : { client_rtt_ms: rttMs };
 }
 
 const MAX_TEXT = 200;
@@ -188,7 +203,8 @@ export function reportAttributes(stamped: StampedHalf, peaks: PartPeaks): Attrib
     ['screen.navigation', navigation],
     ['screen.show_ms', timing?.show_ms],
     ['screen.inp_ms', timing?.inp_ms],
-    ['screen.loaded_ms', timing?.finished_ms]
+    ['screen.loaded_ms', timing?.finished_ms],
+    ['screen.client_rtt_ms', stamped.client_rtt_ms]
   ];
   return [
     attribute('screen.report', stamped.half),
