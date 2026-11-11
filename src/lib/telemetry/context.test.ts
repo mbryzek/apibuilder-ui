@@ -26,6 +26,28 @@ describe('ctx', () => {
     expect(ctx(event('/search'), 'endpoint').part).toBe('endpoint:/search');
   });
 
+  it('reads the route untracked, so naming it makes no load depend on its route', () => {
+    let tracking = true;
+    const reads: boolean[] = [];
+    const e = {
+      ...event(),
+      get route() {
+        reads.push(tracking);
+        return { id: '/issues/[id]' };
+      },
+      untrack<T>(fn: () => T): T {
+        tracking = false;
+        try {
+          return fn();
+        } finally {
+          tracking = true;
+        }
+      }
+    };
+    expect(ctx(e).route).toBe('/issues/[id]');
+    expect(reads).toEqual([false]);
+  });
+
   it('records into nothing reported, rather than failing, outside any view', () => {
     const c = ctx({ route: { id: '/x' } });
     expect(c.view).toBe('detached');
