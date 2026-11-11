@@ -94,8 +94,8 @@ export class BrowserViewRecorder extends ViewRecorder {
 interface ViewState {
   recorder: BrowserViewRecorder;
   navigation: 'hard' | 'soft';
-  /** The path of the page the view shows, which a refresh's data request reloads; null where the navigation named none. */
-  path: string | null;
+  /** The page the view shows (`pageOf`), which a refresh's data request reloads; null where the navigation named none. */
+  page: string | null;
   showMs: number | null;
   finishedMs: number | null;
   interactions: InteractionEntry[];
@@ -139,12 +139,12 @@ function interactionsSince(view: ViewState): number | null {
   return now === null || view.interactionCountAt === null ? null : Math.max(0, now - view.interactionCountAt);
 }
 
-function newView(id: string, route: string | null, path: string | null, navigation: 'hard' | 'soft', startedAt: number): ViewState {
+function newView(id: string, route: string | null, url: URL | null, navigation: 'hard' | 'soft', startedAt: number): ViewState {
   const count = interactionCount();
   return {
     recorder: new BrowserViewRecorder(id, route, { side: 'browser', startedAt, origin: location.origin }),
     navigation,
-    path: path === null ? null : pagePath(path),
+    page: url === null ? null : pageOf(url.pathname, url.search),
     showMs: null,
     finishedMs: null,
     interactions: [],
@@ -205,22 +205,34 @@ export function namesView(input: RequestInfo | URL, init: RequestInit | undefine
   return new Headers(init?.headers ?? request?.headers).has('x-sveltekit-action');
 }
 
-/** `path` without a trailing slash, the root excepted, the way SvelteKit names a page's data request. */
-function pagePath(path: string): string {
-  return path.replace(/\/+$/, '') || '/';
+/** SvelteKit's own query parameters on a data request (`x-sveltekit-invalidated`, `x-sveltekit-trailing-slash`), which name no page. */
+const SVELTEKIT_PARAM = 'x-sveltekit-';
+
+/**
+ * The page `path` and `search` name: the path without a trailing slash, the root excepted, the way
+ * SvelteKit names a page's data request, and the query without SvelteKit's own parameters, sorted.
+ * The query is part of the page: a filter or pager link changes only it, and its preload loads a
+ * different page of the same route. ISS-78682
+ */
+function pageOf(path: string, search: string): string {
+  const params = [...new URLSearchParams(search)].filter(([name]) => !name.startsWith(SVELTEKIT_PARAM));
+  params.sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
+  const query = new URLSearchParams(params).toString();
+  const pathname = path.replace(/\/+$/, '') || '/';
+  return query === '' ? pathname : `${pathname}?${query}`;
 }
 
-/** The page path a `__data.json` request loads, or null for any other request. */
-export function dataRequestPath(input: RequestInfo | URL): string | null {
+/** The page (`pageOf`) a `__data.json` request loads, or null for any other request. */
+export function dataRequestPage(input: RequestInfo | URL): string | null {
   const request = typeof Request !== 'undefined' && input instanceof Request ? input : null;
-  const pathname = new URL(request?.url ?? String(input), location.href).pathname;
-  return pathname.endsWith(DATA_SUFFIX) ? pagePath(pathname.slice(0, -DATA_SUFFIX.length)) : null;
+  const url = new URL(request?.url ?? String(input), location.href);
+  return url.pathname.endsWith(DATA_SUFFIX) ? pageOf(url.pathname.slice(0, -DATA_SUFFIX.length), url.search) : null;
 }
 
 /**
  * The header value naming the browser's current view for `fetch(input)`, marked while a soft
  * navigation is entering it. Outside a navigation, a data request for a page other than the one
- * the view shows is a preload (`data-sveltekit-preload-data`, a pointer passing over a link): it is
+ * the view shows, its query included, is a preload (`data-sveltekit-preload-data`, a pointer passing over a link): it is
  * no refresh of this view, so it names none and its server half mints its own, read against the
  * load budget of the route it loads.
  */
@@ -228,9 +240,9 @@ function currentMark(input: RequestInfo | URL): string | null {
   const view = current;
   if (view === null) return null;
   const navigating = view.navigation === 'soft' && view.recorder.enteredAt === null;
-  if (!navigating && view.path !== null) {
-    const path = dataRequestPath(input);
-    if (path !== null && path !== view.path) return null;
+  if (!navigating && view.page !== null) {
+    const loads = dataRequestPage(input);
+    if (loads !== null && loads !== view.page) return null;
   }
   return viewMark(view.recorder.view, navigating);
 }
@@ -363,7 +375,7 @@ export function registerScreenReport(options: ScreenReportOptions): void {
   if (browser) {
     const nav = navigationEntry();
     const id = isViewId(options.view) ? options.view : mintViewId();
-    current = newView(id, page.route.id, location.pathname, 'hard', nav === undefined ? 0 : documentStart(nav));
+    current = newView(id, page.route.id, new URL(location.href), 'hard', nav === undefined ? 0 : documentStart(nav));
     clearViewCookie();
     setViewLookup(() => current?.recorder);
     registerDocument(endpoint);
@@ -377,7 +389,7 @@ export function registerScreenReport(options: ScreenReportOptions): void {
     const previous = current;
     const now = performance.now();
     if (previous !== null && leaving === null) leaving = { view: previous, half: browserHalfOf(previous, now) };
-    const next = newView(mintViewId(), to?.route.id ?? null, to?.url.pathname ?? null, 'soft', now);
+    const next = newView(mintViewId(), to?.route.id ?? null, to?.url ?? null, 'soft', now);
     current = next;
     softNav.start(now, document.hidden);
     complete.catch((error: unknown) => {
@@ -392,7 +404,7 @@ export function registerScreenReport(options: ScreenReportOptions): void {
     const view = current;
     if (view === null) return;
     // The page the view entered, which a redirect in its load can have moved from where the navigation began.
-    if (to?.url) view.path = pagePath(to.url.pathname);
+    if (to?.url) view.page = pageOf(to.url.pathname, to.url.search);
     sendLeaving(endpoint);
     view.recorder.enteredAt = view.recorder.elapsed();
     if (type !== 'enter') view.showMs = softNavigationShowMs(softNav.elapsed(performance.now()));
