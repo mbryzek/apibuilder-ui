@@ -306,7 +306,7 @@ export interface TenantSession {
   user: User;
   tenant: TenantSummary;
   impersonated_by?: UserReference;
-  /** User-features enabled for this tenant AND this session user's role. Clients match subproject+feature against their generated feature enum (e.g. playbook_feature). System features are never included. */
+  /** User-features enabled for this tenant AND this session user's role, and the platform's rollout flags that are on, whatever the session user's tenant. Clients match subproject+feature against their generated feature enum (e.g. playbook_feature). No other system feature is included. */
   enabled_features: EnabledFeature[];
   /** True when an admin set this user's password and required them to choose their own. Clients gate the session on this until the user sets a new password - regardless of how the session was obtained (password, login link, sms code). Never true for an impersonated session. */
   password_change_required: boolean;
