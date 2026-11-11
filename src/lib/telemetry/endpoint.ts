@@ -9,11 +9,12 @@
  * minute per client address, answering 429 beyond. A Worker isolate holds its own counter, so that
  * limit stops one page looping its beacon rather than metering the fleet; the payload cap and the
  * door's token are the hard bounds. The server half never comes here: the hook forwards it in
- * process. The budget the half is stamped with is the server's, resolved from the route.
+ * process. The budget the half is stamped with is the server's, resolved from the route, and so is
+ * the client round trip: Cloudflare's measure of the post's own connection.
  */
 import { budgetFor } from './budget';
-import { postReport, sanitizeBrowserHalf } from './report';
-import { waitUntilOf, type ScreenReportConfig } from './server';
+import { postReport, sanitizeBrowserHalf, withClientRtt } from './report';
+import { clientRttOf, waitUntilOf, type ScreenReportConfig } from './server';
 
 /** The largest browser half accepted, in bytes. */
 export const MAX_REPORT_BYTES = 64 * 1024;
@@ -108,8 +109,9 @@ export function telemetryHandler(
     if (!limiter.admit(event.getClientAddress())) return new Response(null, { status: 429 });
     const text = await readCapped(event.request);
     if (text === null) return new Response(null, { status: 413 });
-    const half = sanitizeBrowserHalf(parse(text));
-    if (half === null) return new Response(null, { status: 400 });
+    const posted = sanitizeBrowserHalf(parse(text));
+    if (posted === null) return new Response(null, { status: 400 });
+    const half = { ...posted, ...withClientRtt(clientRttOf(event.platform, event.request)) };
     const sent = postReport(half, budgetFor(half.route, config.budgets), config);
     const waitUntil = waitUntilOf(event.platform);
     if (waitUntil === null) await sent;

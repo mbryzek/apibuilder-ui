@@ -94,6 +94,27 @@ export function waitUntilOf(platform: unknown): ((promise: Promise<unknown>) => 
   return typeof waitUntil === 'function' ? (promise) => waitUntil.call(owner, promise) : null;
 }
 
+/** Cloudflare's per-request connection facts (`request.cf`), the two round trips the report reads. */
+interface ClientConnection {
+  clientTcpRtt?: unknown;
+  clientQuicRtt?: unknown;
+}
+
+/**
+ * The round trip, in ms, Cloudflare measured to the client on this request: `clientTcpRtt` over
+ * TCP, `clientQuicRtt` over HTTP/3, each 0 or absent when the request did not come that way. Read
+ * from `platform.cf` (SvelteKit's adapter) or the request's own `cf`; null off Cloudflare. A
+ * screen's time to show is several round trips, so the rules read it to tell a slow network from
+ * a slow screen (ISS-76085).
+ */
+export function clientRttOf(platform: unknown, request?: Request): number | null {
+  const cf = (platform as { cf?: ClientConnection } | undefined)?.cf ?? (request as { cf?: ClientConnection } | undefined)?.cf;
+  const rtts = [cf?.clientTcpRtt, cf?.clientQuicRtt].filter(
+    (rtt): rtt is number => typeof rtt === 'number' && Number.isFinite(rtt) && rtt > 0
+  );
+  return rtts.length === 0 ? null : Math.round(Math.max(...rtts));
+}
+
 /** The view id a hard load's root layout hands the browser; null for a request with no view. */
 export function screenViewId(event: { locals: object }): string | null {
   return viewOfLocals(event.locals)?.view ?? null;
@@ -105,9 +126,9 @@ function skipped(event: HookEvent, config: ScreenReportConfig): boolean {
 }
 
 /** Forward the half once the view's later parts settle. A document or data request reports even with no call. */
-async function forward(view: ViewRecorder, kind: ServerRequest, config: ScreenReportConfig): Promise<void> {
+async function forward(view: ViewRecorder, kind: ServerRequest, config: ScreenReportConfig, clientRtt: number | null): Promise<void> {
   await view.settled();
-  const half = halfOf(view, { request: kind });
+  const half = halfOf(view, { request: kind, client_rtt_ms: clientRtt });
   if (half.calls.length === 0 && half.dropped_calls === 0 && kind !== 'document' && kind !== 'data') return;
   await postReport(half, budgetFor(view.route, config.budgets), config);
 }
@@ -132,7 +153,7 @@ export function screenReportHandle(
     }
     const response = await resolve(event);
     if (view !== null) {
-      const sent = forward(view, kind, config).catch(() => undefined);
+      const sent = forward(view, kind, config, clientRttOf(event.platform, event.request)).catch(() => undefined);
       waitUntilOf(event.platform)?.(sent);
     }
     return response;

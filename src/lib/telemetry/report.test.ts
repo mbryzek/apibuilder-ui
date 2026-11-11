@@ -93,6 +93,14 @@ describe('the record monitoring reads', () => {
     });
   });
 
+  it('carries the client round trip only where one was measured', () => {
+    const stamped = { ...server, app: 'idempotent', repo: 'mbryzek/idempotent', budget: globalBudget };
+    const keys = (half: typeof stamped) => reportAttributes(half, peaksOfCalls(half)).map((a) => a.key);
+    expect(keys(stamped)).not.toContain('screen.client_rtt_ms');
+    const far = reportAttributes({ ...stamped, client_rtt_ms: 753 }, peaksOfCalls(stamped));
+    expect(far.find((a) => a.key === 'screen.client_rtt_ms')?.value).toBe(753);
+  });
+
   it('reads a poll per tick', () => {
     const half = sanitizeBrowserHalf(browserHalf);
     expect(half === null ? null : peaksOfCalls(half)).toEqual({ later: 0, poll: 1 });

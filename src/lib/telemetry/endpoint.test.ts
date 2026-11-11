@@ -50,6 +50,15 @@ describe('/_telemetry', () => {
     expect(record.attributes['screen.report']).toBe('browser');
   });
 
+  it("stamps the post's own client round trip, never one the body claims", async () => {
+    const { fetch, config } = door();
+    const forged = JSON.stringify({ ...half, client_rtt_ms: 1 });
+    await telemetryHandler(config)({ ...post(forged), platform: { cf: { clientTcpRtt: 0, clientQuicRtt: 753 } } });
+    expect(decodeLogs(fetch.mock.calls[0]![1]?.body as Uint8Array).attributes['screen.client_rtt_ms']).toBe(753);
+    await telemetryHandler(config)(post(forged));
+    expect(decodeLogs(fetch.mock.calls[1]![1]?.body as Uint8Array).attributes).not.toHaveProperty('screen.client_rtt_ms');
+  });
+
   it('answers 413 over 64 KB, declared or not', async () => {
     const { config } = door();
     const big = JSON.stringify({ ...half, pad: 'x'.repeat(MAX_REPORT_BYTES) });
