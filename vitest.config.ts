@@ -13,7 +13,8 @@ export default defineConfig({
   // `$app/state` to a `page` a spec sets — see src/lib/test-support/app-state.svelte.ts.
   // `$app/env`, `$app/server` and `cloudflare:workers` likewise, for the API-failure telemetry in
   // `#lib/api/error-handler.ts` and `hooks.server.ts`, and `$app/env/private` for the screen
-  // report's token. It is listed before `$app/env`, which would otherwise claim it as a prefix.
+  // report's token and `$app/env/public` for the release it stamps. Both are listed before `$app/env`,
+  // which would otherwise claim them as a prefix.
   plugins: [svelte({ configFile: false })],
   // Nothing here is pre-bundled. Vite's dependency optimizer reads tsconfig.json, which extends
   // `$app/tsconfig`, a path only the sveltekit() plugin resolves; installing `jsdom` is what wakes
@@ -25,6 +26,7 @@ export default defineConfig({
       '$app/navigation': fileURLToPath(new URL('./src/lib/test-support/app-navigation.ts', import.meta.url)),
       '$app/state': fileURLToPath(new URL('./src/lib/test-support/app-state.svelte.ts', import.meta.url)),
       '$app/env/private': fileURLToPath(new URL('./src/lib/test-support/app-env-private.ts', import.meta.url)),
+      '$app/env/public': fileURLToPath(new URL('./src/lib/test-support/app-env-public.ts', import.meta.url)),
       '$app/env': fileURLToPath(new URL('./src/lib/test-support/app-env.ts', import.meta.url)),
       '$app/server': fileURLToPath(new URL('./src/lib/test-support/app-server.ts', import.meta.url)),
       'cloudflare:workers': fileURLToPath(new URL('./src/lib/test-support/cloudflare-workers.ts', import.meta.url))
