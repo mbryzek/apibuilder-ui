@@ -94,6 +94,8 @@ export class BrowserViewRecorder extends ViewRecorder {
 interface ViewState {
   recorder: BrowserViewRecorder;
   navigation: 'hard' | 'soft';
+  /** The path of the page the view shows, which a refresh's data request reloads; null where the navigation named none. */
+  path: string | null;
   showMs: number | null;
   finishedMs: number | null;
   interactions: InteractionEntry[];
@@ -107,6 +109,9 @@ export interface ScreenReportOptions {
   view: string | null | undefined;
   endpoint?: string;
 }
+
+/** What SvelteKit appends to a page's path for its data request. */
+const DATA_SUFFIX = '/__data.json';
 
 let current: ViewState | null = null;
 /** The view a soft navigation is leaving, and its half as of `beforeNavigate`; null once the navigation commits or is cancelled. */
@@ -134,11 +139,12 @@ function interactionsSince(view: ViewState): number | null {
   return now === null || view.interactionCountAt === null ? null : Math.max(0, now - view.interactionCountAt);
 }
 
-function newView(id: string, route: string | null, navigation: 'hard' | 'soft', startedAt: number): ViewState {
+function newView(id: string, route: string | null, path: string | null, navigation: 'hard' | 'soft', startedAt: number): ViewState {
   const count = interactionCount();
   return {
     recorder: new BrowserViewRecorder(id, route, { side: 'browser', startedAt, origin: location.origin }),
     navigation,
+    path: path === null ? null : pagePath(path),
     showMs: null,
     finishedMs: null,
     interactions: [],
@@ -195,14 +201,38 @@ export function namesView(input: RequestInfo | URL, init: RequestInit | undefine
   const url = new URL(request?.url ?? String(input), location.href);
   if (url.origin !== location.origin) return false;
   const method = (init?.method ?? request?.method ?? 'GET').toUpperCase();
-  if (method === 'GET') return url.pathname.endsWith('/__data.json');
+  if (method === 'GET') return url.pathname.endsWith(DATA_SUFFIX);
   return new Headers(init?.headers ?? request?.headers).has('x-sveltekit-action');
 }
 
-/** The header value naming the browser's current view, marked while a soft navigation is entering it. */
-function currentMark(): string | null {
+/** `path` without a trailing slash, the root excepted, the way SvelteKit names a page's data request. */
+function pagePath(path: string): string {
+  return path.replace(/\/+$/, '') || '/';
+}
+
+/** The page path a `__data.json` request loads, or null for any other request. */
+export function dataRequestPath(input: RequestInfo | URL): string | null {
+  const request = typeof Request !== 'undefined' && input instanceof Request ? input : null;
+  const pathname = new URL(request?.url ?? String(input), location.href).pathname;
+  return pathname.endsWith(DATA_SUFFIX) ? pagePath(pathname.slice(0, -DATA_SUFFIX.length)) : null;
+}
+
+/**
+ * The header value naming the browser's current view for `fetch(input)`, marked while a soft
+ * navigation is entering it. Outside a navigation, a data request for a page other than the one
+ * the view shows is a preload (`data-sveltekit-preload-data`, a pointer passing over a link): it is
+ * no refresh of this view, so it names none and its server half mints its own, read against the
+ * load budget of the route it loads.
+ */
+function currentMark(input: RequestInfo | URL): string | null {
   const view = current;
-  return view === null ? null : viewMark(view.recorder.view, view.navigation === 'soft' && view.recorder.enteredAt === null);
+  if (view === null) return null;
+  const navigating = view.navigation === 'soft' && view.recorder.enteredAt === null;
+  if (!navigating && view.path !== null) {
+    const path = dataRequestPath(input);
+    if (path !== null && path !== view.path) return null;
+  }
+  return viewMark(view.recorder.view, navigating);
 }
 
 /**
@@ -214,8 +244,8 @@ function wrapFetch(): void {
   const native = window.fetch.bind(window);
   window.fetch = (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
     try {
-      const mark = currentMark();
-      if (mark !== null && namesView(input, init)) {
+      const mark = namesView(input, init) ? currentMark(input) : null;
+      if (mark !== null) {
         const headers = new Headers(init?.headers ?? (input instanceof Request ? input.headers : undefined));
         if (!headers.has(VIEW_HEADER)) {
           headers.set(VIEW_HEADER, mark);
@@ -333,7 +363,7 @@ export function registerScreenReport(options: ScreenReportOptions): void {
   if (browser) {
     const nav = navigationEntry();
     const id = isViewId(options.view) ? options.view : mintViewId();
-    current = newView(id, page.route.id, 'hard', nav === undefined ? 0 : documentStart(nav));
+    current = newView(id, page.route.id, location.pathname, 'hard', nav === undefined ? 0 : documentStart(nav));
     clearViewCookie();
     setViewLookup(() => current?.recorder);
     registerDocument(endpoint);
@@ -347,7 +377,7 @@ export function registerScreenReport(options: ScreenReportOptions): void {
     const previous = current;
     const now = performance.now();
     if (previous !== null && leaving === null) leaving = { view: previous, half: browserHalfOf(previous, now) };
-    const next = newView(mintViewId(), to?.route.id ?? null, 'soft', now);
+    const next = newView(mintViewId(), to?.route.id ?? null, to?.url.pathname ?? null, 'soft', now);
     current = next;
     softNav.start(now, document.hidden);
     complete.catch((error: unknown) => {
@@ -358,9 +388,11 @@ export function registerScreenReport(options: ScreenReportOptions): void {
     });
   });
 
-  afterNavigate(({ type }) => {
+  afterNavigate(({ type, to }) => {
     const view = current;
     if (view === null) return;
+    // The page the view entered, which a redirect in its load can have moved from where the navigation began.
+    if (to?.url) view.path = pagePath(to.url.pathname);
     sendLeaving(endpoint);
     view.recorder.enteredAt = view.recorder.elapsed();
     if (type !== 'enter') view.showMs = softNavigationShowMs(softNav.elapsed(performance.now()));

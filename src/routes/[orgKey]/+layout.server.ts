@@ -11,8 +11,16 @@ export const load: LayoutServerLoad = async (event) => {
   const headers = getSessionHeaders(locals.session?.id);
   const client = apiBuilderClient({ headers });
 
-  const orgResponse = await handleApiCall<Organization>(() => client.getOrganizationByKey(ctx(event, 'load'), params.orgKey));
-  const org = dataOrThrow(orgResponse, 'Organization not found');
+  // Both reads go out together: the memberships read needs only the URL's key, never the organization,
+  // so neither waits on the other.
+  const orgRead = handleApiCall<Organization>(() => client.getOrganizationByKey(ctx(event, 'load'), params.orgKey));
+  const session = locals.session;
+  const membershipsRead = session
+    ? handleApiCall<Membership[]>(() =>
+        client.getMemberships(ctx(event, 'load'), { orgKey: params.orgKey, userId: session.user.id, limit: 25, offset: 0 })
+      )
+    : null;
+  const org = dataOrThrow(await orgRead, 'Organization not found');
 
   let isMember = false;
   let isAdmin = false;
@@ -20,10 +28,8 @@ export const load: LayoutServerLoad = async (event) => {
   // layout data, so a shared key would silently drop whichever one the page also set.
   let membershipLoadError: LoadError | null = null;
 
-  if (locals.session) {
-    const membershipsResponse = await handleApiCall<Membership[]>(() =>
-      client.getMemberships(ctx(event, 'load'), { orgKey: params.orgKey, userId: locals.session!.user.id, limit: 25, offset: 0 })
-    );
+  if (membershipsRead) {
+    const membershipsResponse = await membershipsRead;
     // Falling back to "not a member" would tell a member they need to request access.
     membershipLoadError = loadErrorFrom(membershipsResponse);
     const memberships = dataOr(membershipsResponse, []);
