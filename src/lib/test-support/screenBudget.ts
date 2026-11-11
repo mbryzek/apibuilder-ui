@@ -9,7 +9,8 @@
  * report's server half counts for a hard load, layouts included.
  *
  * THE BACKEND ANSWERS EVERYTHING. A call's answer is two rows, each of which answers any field with
- * another such value, so a load reaches every call it would make on a page with data. A load that
+ * another such value, so a load reaches every call it would make on a page with data, and a read made
+ * once per row of a nested list shows up as two. A load that
  * throws (a redirect, a value the stub cannot stand in for) is counted up to where it threw: the
  * budget is about the calls it made, and the route's own tests are about what it does.
  *
@@ -32,14 +33,28 @@ export type RowCount = 0 | 2;
 
 /**
  * A value answering any field, call, iteration or coercion with another of its kind. As a list it
- * has `count` rows, and so does every list read off it.
+ * has `count` rows, and so does every list read off it, and every array method runs on them: a load
+ * that maps a nested list to calls makes one per row, as it would on a page with data.
  */
 export function anything(count: RowCount = 2): unknown {
+  return generic(count);
+}
+
+/** An array method's name: a field the generic answer answers by running that method over its rows. */
+function isListMethod(key: PropertyKey): key is string {
+  return (
+    typeof key === 'string' && key !== 'constructor' && typeof (Array.prototype as unknown as Record<string, unknown>)[key] === 'function'
+  );
+}
+
+/** {@link anything}, answering a call with `call` where it has one: how an array method reads as a field. */
+function generic(count: RowCount, call?: (...args: unknown[]) => unknown): unknown {
   const fields = new Map<PropertyKey, unknown>();
-  const rows = (): unknown[] => Array.from({ length: count }, () => anything(count));
+  let list: unknown[] | undefined;
+  const rows = (): unknown[] => (list ??= Array.from({ length: count }, () => anything(count)));
   const target = () => undefined;
   return new Proxy(target, {
-    apply: () => anything(count),
+    apply: (_, __, args: unknown[]) => (call ? call(...args) : anything(count)),
     construct: () => anything(count) as object,
     get: (_, key) => {
       if (key === 'then' || key === 'toJSON') return undefined;
@@ -50,7 +65,12 @@ export function anything(count: RowCount = 2): unknown {
         return (hint: string) => (hint === 'number' ? 1 : hint === 'string' ? 'value' : '2026-01-01T00:00:00.000Z');
       if (key === 'toString') return () => 'value';
       if (key === 'valueOf') return () => 1;
-      if (!fields.has(key)) fields.set(key, anything(count));
+      if (!fields.has(key)) {
+        const method = isListMethod(key)
+          ? (...args: unknown[]) => (rows() as unknown as Record<string, (...a: unknown[]) => unknown>)[key]!(...args)
+          : undefined;
+        fields.set(key, generic(count, method));
+      }
       return fields.get(key);
     }
   });
