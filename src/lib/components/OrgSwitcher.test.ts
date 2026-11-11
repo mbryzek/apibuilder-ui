@@ -1,8 +1,8 @@
 // @vitest-environment happy-dom
 
 /**
- * The organization switcher: the member's organizations, the one being viewed marked, and Create
- * organization — the way a member of one organization reaches a second.
+ * The organization switcher: the name of the organization being viewed, cut to 12 characters, and a
+ * menu of the member's other organizations, offered only to a member of more than one.
  */
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { flushSync, mount, tick, unmount } from 'svelte';
@@ -46,33 +46,56 @@ afterEach(async () => {
 });
 
 describe('the organization switcher', () => {
-  it('offers a member of one organization that organization and Create organization', async () => {
-    const menu = await openWith({ orgs: [organization('acme')], loadError: null });
+  async function render(myOrgs: MyOrgs): Promise<void> {
+    component = mount(OrgSwitcher, { target, props: { myOrgs: Promise.resolve(myOrgs), placement: 'down' } });
+    await tick();
+    await Promise.resolve();
+    flushSync();
+  }
 
+  it('shows a member of one organization its name as a link and no menu', async () => {
+    await render({ orgs: [organization('acme')], loadError: null });
+
+    expect(button()).toBeNull();
+    const link = target.querySelector('a') as HTMLAnchorElement;
+    expect(link.getAttribute('href')).toBe('/acme');
+    expect(link.textContent?.trim()).toBe('acme name');
+  });
+
+  it('names the organization being viewed and lists only the others', async () => {
+    page.params = { orgKey: 'globex' };
+    const menu = await openWith({ orgs: [organization('acme'), organization('globex'), organization('initech')], loadError: null });
+
+    expect(button().textContent?.trim()).toBe('globex name');
     const items = [...menu.querySelectorAll('[role="menuitem"]')];
-    expect(items.map((a) => a.textContent?.trim())).toEqual(['acme name', 'Create organization']);
-    expect(items.map((a) => a.getAttribute('href'))).toEqual(['/acme', '/org/create']);
+    expect(items.map((a) => a.getAttribute('href'))).toEqual(['/acme', '/initech']);
     expect(button().getAttribute('aria-expanded')).toBe('true');
   });
 
-  it('marks the organization being viewed and names it on the button', async () => {
-    page.params = { orgKey: 'globex' };
+  it('names the first organization when none is being viewed', async () => {
     const menu = await openWith({ orgs: [organization('acme'), organization('globex')], loadError: null });
 
-    expect(menu.querySelector('[aria-current="page"]')?.getAttribute('href')).toBe('/globex');
-    expect(menu.querySelectorAll('[aria-current]').length).toBe(1);
-    expect(button().textContent?.trim()).toBe('globex name');
+    expect(button().textContent?.trim()).toBe('acme name');
+    expect([...menu.querySelectorAll('[role="menuitem"]')].map((a) => a.getAttribute('href'))).toEqual(['/globex']);
   });
 
-  it('reports a failed read and still offers Create organization', async () => {
+  it('cuts a name longer than 12 characters and keeps the full name as its title', async () => {
+    const long = { ...organization('playbook'), name: 'Playbook Systems' } as Organization;
+    await openWith({ orgs: [long, organization('bryzek')], loadError: null });
+
+    expect(button().textContent?.trim()).toBe('Playbook Sys...');
+    expect(button().getAttribute('title')).toBe('Playbook Systems');
+  });
+
+  it('reports a failed read', async () => {
     const menu = await openWith({ orgs: [], loadError: { status: 500, message: 'The server had a problem.' } });
 
     expect(menu.querySelector('[role="alert"]')?.textContent).toBe('The server had a problem.');
-    expect([...menu.querySelectorAll('[role="menuitem"]')].map((a) => a.getAttribute('href'))).toEqual(['/org/create']);
+    expect(menu.querySelectorAll('[role="menuitem"]').length).toBe(0);
   });
 
   it('closes on Escape', async () => {
-    await openWith({ orgs: [organization('acme')], loadError: null });
+    await openWith({ orgs: [organization('acme'), organization('globex')], loadError: null });
 
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
     flushSync();
@@ -88,14 +111,16 @@ describe('the header', () => {
     Object.assign(page, { route: { id: '/generators' }, error: null });
   });
 
-  it('carries the switcher for a signed-in member and none for a visitor', () => {
+  it('carries the switcher for a signed-in member and none for a visitor', async () => {
     component = mount(Header, {
       target,
       props: {
         session: { user: { id: 'user-1', person: { name: 'Ada Lovelace' } } } as never,
-        myOrgs: Promise.resolve({ orgs: [], loadError: null })
+        myOrgs: Promise.resolve({ orgs: [organization('acme'), organization('globex')], loadError: null })
       }
     });
+    await tick();
+    await Promise.resolve();
     flushSync();
     expect(target.querySelectorAll('button[aria-label="Switch organization"]').length).toBeGreaterThan(0);
 

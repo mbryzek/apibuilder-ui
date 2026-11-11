@@ -4,13 +4,13 @@
   import type { MyOrgs } from '#lib/my-orgs.ts';
 
   /**
-   * The organization switcher: on every signed-in page, the member's organizations with the one
-   * being viewed marked, and Create organization. It sits in the header beside the account menu,
-   * never inside it: the account menu holds the person's profile and log out alone
+   * The organization switcher: on every signed-in page, the name of the organization being viewed
+   * (the member's first when none is), and a menu of the member's other organizations. A member of
+   * one organization sees its name as a link and no menu. It sits in the header beside the account
+   * menu, never inside it: the account menu holds the person's profile and log out alone
    * (rules/frontend.account.menu.mdc).
    *
-   * The list streams from the root layout, so the button renders at once and the menu fills when
-   * the memberships read answers.
+   * The list streams from the root layout; the switcher renders when the memberships read answers.
    */
   interface Props {
     myOrgs: Promise<MyOrgs> | undefined;
@@ -37,9 +37,16 @@
     };
   });
 
+  const LABEL_LENGTH = 12;
+
   const currentKey = $derived(page.params['orgKey']);
-  const currentOrg = $derived(resolved?.orgs.find((org) => org.key === currentKey));
-  const label = $derived(currentOrg?.name ?? 'Organizations');
+  const shown = $derived(resolved?.orgs.find((org) => org.key === currentKey) ?? resolved?.orgs[0]);
+  const others = $derived(resolved?.orgs.filter((org) => org.key !== shown?.key) ?? []);
+  const label = $derived(shortName(shown?.name ?? 'Organizations'));
+
+  function shortName(name: string): string {
+    return name.length > LABEL_LENGTH ? `${name.slice(0, LABEL_LENGTH)}...` : name;
+  }
 
   afterNavigate(({ shallow, type }) => {
     if (shallow && type === 'goto') return;
@@ -70,84 +77,74 @@
   }
 </script>
 
-<div class="relative min-w-0" bind:this={wrap}>
-  {#if open}
-    <div
-      class="absolute z-50 w-64 rounded-lg border border-gray-100 bg-white py-1 shadow-lg {placement === 'up'
-        ? 'bottom-full left-0 mb-2'
-        : 'top-full right-0 mt-2'}"
-      role="menu"
-      aria-label="Organizations"
-    >
-      {#if resolved === null}
-        <p class="text-ab-gray px-4 py-2 text-sm">Loading…</p>
-      {:else}
+{#snippet buildingIcon()}
+  <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+    <path
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+    ></path>
+  </svg>
+{/snippet}
+
+{#if resolved !== null && (others.length > 0 || resolved.loadError)}
+  <div class="relative min-w-0" bind:this={wrap}>
+    {#if open}
+      <div
+        class="absolute z-50 w-64 rounded-lg border border-gray-100 bg-white py-1 shadow-lg {placement === 'up'
+          ? 'bottom-full left-0 mb-2'
+          : 'top-full right-0 mt-2'}"
+        role="menu"
+        aria-label="Organizations"
+      >
         {#if resolved.loadError}
           <p class="px-4 py-2 text-sm text-red-700" role="alert">{resolved.loadError.message}</p>
         {/if}
-        {#each resolved.orgs as org (org.key)}
+        {#each others as org (org.key)}
           <a
             href="/{org.key}"
             role="menuitem"
-            aria-current={org.key === currentKey ? 'page' : undefined}
-            class="hover:bg-ab-light-gray flex items-center gap-2 px-4 py-2 text-sm transition-colors {org.key === currentKey
-              ? 'text-ab-dark-blue font-semibold'
-              : 'text-gray-700'}"
+            class="hover:bg-ab-light-gray block truncate px-4 py-2 text-sm text-gray-700 transition-colors"
             onclick={choose}
           >
-            <svg
-              class="h-4 w-4 shrink-0 {org.key === currentKey ? '' : 'invisible'}"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              aria-hidden="true"
-            >
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-            </svg>
-            <span class="min-w-0 flex-1 truncate">{org.name}</span>
+            {org.name}
           </a>
         {/each}
-      {/if}
-      <div class="my-1 border-t border-gray-100"></div>
-      <a
-        href="/org/create"
-        role="menuitem"
-        class="hover:bg-ab-light-gray flex items-center gap-2 px-4 py-2 text-sm text-gray-700 transition-colors"
-        onclick={choose}
-      >
-        <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-        </svg>
-        Create organization
-      </a>
-    </div>
-  {/if}
+      </div>
+    {/if}
 
-  <button
-    type="button"
-    class="flex w-full min-w-0 items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium text-white transition-colors hover:bg-white/10"
-    onclick={() => (open = !open)}
-    aria-haspopup="menu"
-    aria-expanded={open}
-    aria-label="Switch organization"
-  >
-    <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-      <path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="2"
-        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-      ></path>
-    </svg>
-    <span class="max-w-40 min-w-0 flex-1 truncate text-left">{label}</span>
-    <svg
-      class="h-4 w-4 shrink-0 transition-transform {open === (placement === 'down') ? 'rotate-180' : ''}"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      aria-hidden="true"
+    <button
+      type="button"
+      class="flex w-full min-w-0 items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium text-white transition-colors hover:bg-white/10"
+      onclick={() => (open = !open)}
+      aria-haspopup="menu"
+      aria-expanded={open}
+      aria-label="Switch organization"
+      title={shown?.name}
     >
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-    </svg>
-  </button>
-</div>
+      {@render buildingIcon()}
+      <span class="min-w-0 flex-1 truncate text-left whitespace-nowrap">{label}</span>
+      <svg
+        class="h-4 w-4 shrink-0 transition-transform {open === (placement === 'down') ? 'rotate-180' : ''}"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        aria-hidden="true"
+      >
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+      </svg>
+    </button>
+  </div>
+{:else if shown}
+  <a
+    href="/{shown.key}"
+    class="flex min-w-0 items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium text-white transition-colors hover:bg-white/10"
+    title={shown.name}
+    aria-label="Organization {shown.name}"
+    onclick={choose}
+  >
+    {@render buildingIcon()}
+    <span class="min-w-0 truncate whitespace-nowrap">{label}</span>
+  </a>
+{/if}
