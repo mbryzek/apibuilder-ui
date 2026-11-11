@@ -11,7 +11,7 @@ interface Navigation {
   type: string;
   shallow?: boolean;
   willUnload?: boolean;
-  to?: { route: { id: string | null } } | null;
+  to?: { route: { id: string | null }; url: URL } | null;
   complete?: Promise<void>;
 }
 
@@ -54,7 +54,13 @@ function navigate(navigation: Navigation): { reject: (message: string) => Promis
   let reject: (error: Error) => void = () => {};
   const complete = new Promise<void>((_resolve, fail) => (reject = fail));
   complete.catch(() => undefined);
-  before?.({ shallow: false, willUnload: false, to: { route: { id: '/other' } }, complete, ...navigation } as Required<Navigation>);
+  before?.({
+    shallow: false,
+    willUnload: false,
+    to: { route: { id: '/other' }, url: new URL('/other', location.href) },
+    complete,
+    ...navigation
+  } as Required<Navigation>);
   return {
     reject: async (message) => {
       reject(new Error(message));
@@ -113,6 +119,7 @@ beforeEach(() => {
     }
   });
   document.cookie = 'sv=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
+  history.replaceState(null, '', '/issues/1');
   requests = [];
   vi.stubGlobal('fetch', (input: RequestInfo | URL, init?: RequestInit) => {
     requests.push({ url: String(input), headers: new Headers(init?.headers) });
@@ -190,6 +197,19 @@ describe('a hard load', () => {
     expect(document.cookie).toBe('');
     expect(await headerOf('/issues/1/__data.json?x-sveltekit-invalidated=01')).toBe(VIEW);
     expect(await headerOf('/issues/1?/comment', { method: 'POST', headers: { 'x-sveltekit-action': 'true' } })).toBe(VIEW);
+  });
+
+  it("names no view on a preload of another page's data, so its first load is not booked as a refresh", async () => {
+    const { browser } = await load();
+    browser.registerScreenReport({ view: VIEW });
+    after?.({ type: 'enter' });
+    expect(await headerOf('/__data.json?x-sveltekit-invalidated=01')).toBeNull();
+    expect(await headerOf('/issues/2/__data.json')).toBeNull();
+    expect(await headerOf('/issues/1/__data.json?x-sveltekit-trailing-slash=1')).toBe(VIEW);
+    navigate({ type: 'link' });
+    after?.({ type: 'link' });
+    expect(await headerOf('/issues/1/__data.json')).toBeNull();
+    expect(await headerOf('/other/__data.json')).not.toBeNull();
   });
 
   it('leaves alone a request that is not a data request or form action of its own origin', async () => {
