@@ -45,9 +45,13 @@ export interface BudgetRun {
   undeclared: string[];
 }
 
-/** One macrotask: every promise continuation already queued has run when it resolves. */
+/**
+ * One macrotask: every promise continuation already queued has run when it resolves. `setImmediate`,
+ * never `setTimeout(0)`, which Node holds for at least a millisecond: a run takes one of these per
+ * call and per turn it waits, so a timer here is most of a screen budget suite's time.
+ */
 function macrotask(): Promise<void> {
-  return new Promise<void>((resolve) => setTimeout(resolve, 0));
+  return new Promise<void>((resolve) => setImmediate(resolve));
 }
 
 /** A fake fetch, and what a budget run asks of it. */

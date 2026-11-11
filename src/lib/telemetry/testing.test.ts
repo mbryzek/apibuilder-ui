@@ -1,5 +1,5 @@
 // dry-copy: sveltekit/screen-report/testing-test — every copy of this region must match; `dev repo copies` checks it (DES-65431)
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { budgetTable } from './budget';
 import { ctx, later, poll, type CallContext } from './context';
 import { expectWithinBudget, orderedFetch } from './testing';
@@ -191,6 +191,17 @@ describe('orderedFetch', () => {
     await Promise.all([fake.fetch('a'), fake.fetch('b'), fake.fetch('c')]);
     expect(order).toEqual(['a', 'b', 'c']);
     expect(fake.count()).toBe(3);
+  });
+
+  it("answers without a timer, so no call waits out setTimeout's millisecond", async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout'] });
+    try {
+      const fake = orderedFetch(() => answer());
+      await Promise.all([fake.fetch('a'), fake.fetch('b')]);
+      expect(fake.idle()).toBe(true);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('holds a call issued while hold() is true until release, answering the rest in turn', async () => {
