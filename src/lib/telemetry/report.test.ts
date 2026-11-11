@@ -18,6 +18,7 @@ const browserHalf = {
   calls: [call('poll:status'), call('poll:status')],
   dropped_calls: 0,
   polls: { status: 2 },
+  poll_peaks: { status: 1 },
   timing: { navigation: 'soft', show_ms: 120, inp_ms: null, finished_ms: 300 }
 };
 
@@ -104,6 +105,29 @@ describe('the record monitoring reads', () => {
   it('reads a poll per tick', () => {
     const half = sanitizeBrowserHalf(browserHalf);
     expect(half === null ? null : peaksOfCalls(half)).toEqual({ later: 0, poll: 1 });
+  });
+});
+
+describe('peaksOfCalls', () => {
+  const half = sanitizeBrowserHalf(browserHalf);
+  if (half === null) throw new Error('fixture refused');
+
+  it("reads a poll's peak from the per-tick count its recorder carried, which the call cap cannot shrink", () => {
+    // 1000 ticks of two calls each: the cap kept 500 calls, which divided by the ticks reads 1.
+    const capped: ReportHalf = {
+      ...half,
+      calls: Array.from({ length: MAX_CALLS }, () => call('poll:status')),
+      dropped_calls: 1500,
+      polls: { status: 1000 },
+      poll_peaks: { status: 2 }
+    };
+    expect(peaksOfCalls(capped).poll).toBe(2);
+  });
+
+  it('divides the carried calls by the ticks for a half that names no peak', () => {
+    const old = sanitizeBrowserHalf({ ...browserHalf, poll_peaks: undefined, calls: [1, 2, 3].map(() => call('poll:status')) });
+    expect(old?.poll_peaks).toEqual({});
+    expect(old === null ? null : peaksOfCalls(old).poll).toBe(2);
   });
 });
 
