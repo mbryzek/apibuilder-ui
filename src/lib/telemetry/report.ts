@@ -20,6 +20,9 @@ import { isViewId } from './view';
 /** The report door's OTLP logs path, admitted to the report writers alone. */
 export const REPORT_ENDPOINT = 'https://obs-report.idempotent.io/insert/opentelemetry/v1/logs';
 
+/** The poll a refresh's load calls are booked to, one tick per refresh, in both halves (`server.ts`, `browser.ts`). */
+export const REFRESH_POLL = 'refresh';
+
 /** How the browser half times a view. */
 export interface ReportTiming {
   navigation: 'hard' | 'soft';
@@ -31,8 +34,11 @@ export interface ReportTiming {
   finished_ms: number | null;
 }
 
-/** What request the server half answered. */
-export type ServerRequest = 'document' | 'data' | 'form' | 'endpoint';
+/**
+ * What request the server half answered: `data` is a soft navigation's data request, `refresh` a
+ * data request that reloads the view the page shows (`invalidate`, the reload after a form action).
+ */
+export type ServerRequest = 'document' | 'data' | 'refresh' | 'form' | 'endpoint';
 
 export interface ReportHalf {
   half: 'server' | 'browser';
@@ -43,6 +49,11 @@ export interface ReportHalf {
   dropped_calls: number;
   /** Ticks per poll name. */
   polls: Record<string, number>;
+  /**
+   * The most calls one tick made, per poll name, counted before the call cap. Absent from a half a
+   * browser bundle older than the field posted; its poll peak is then read from its calls.
+   */
+  poll_peaks?: Record<string, number>;
   request?: ServerRequest;
   timing?: ReportTiming;
   /**
@@ -72,6 +83,7 @@ export function halfOf(
     calls: recorder.calls.map((call) => ({ ...call })),
     dropped_calls: recorder.dropped,
     polls: recorder.pollCounts(),
+    poll_peaks: recorder.pollPeakCounts(),
     ...(extra.request === undefined ? {} : { request: extra.request }),
     ...(extra.timing === undefined ? {} : { timing: extra.timing }),
     ...withClientRtt(extra.client_rtt_ms)
@@ -122,13 +134,14 @@ function sanitizeCall(value: unknown): RecordedCall | null {
   };
 }
 
+/** A count per poll name (ticks, or one tick's peak calls), field by field. */
 function sanitizePolls(value: unknown): Record<string, number> {
   const polls = record(value);
   if (polls === null) return {};
   const kept: Record<string, number> = {};
   for (const [name, count] of Object.entries(polls).slice(0, MAX_POLLS)) {
-    const ticks = millis(count);
-    if (text(name) !== null && ticks !== null) kept[name] = ticks;
+    const n = millis(count);
+    if (text(name) !== null && n !== null) kept[name] = n;
   }
   return kept;
 }
@@ -168,6 +181,7 @@ export function sanitizeBrowserHalf(body: unknown): ReportHalf | null {
     calls,
     dropped_calls: (millis(half['dropped_calls']) ?? 0) + Math.max(0, posted.length - MAX_CALLS),
     polls: sanitizePolls(half['polls']),
+    poll_peaks: sanitizePolls(half['poll_peaks']),
     timing
   };
 }
@@ -232,17 +246,22 @@ export function reportAttributes(stamped: StampedHalf, peaks: PartPeaks): Attrib
 
 /**
  * The peaks a sanitized browser half carries no contexts for, read from its calls: a later part or
- * endpoint is one part name, and a poll's tick count divides its calls.
+ * endpoint is one part name. A poll's peak is the one its recorder counted per tick (`poll_peaks`),
+ * which the call cap cannot shrink; a poll the half names no peak for has its tick count divide its
+ * carried calls.
  */
 export function peaksOfCalls(half: ReportHalf): PartPeaks {
   const byPart = new Map<string, number>();
   for (const call of half.calls) byPart.set(call.part, (byPart.get(call.part) ?? 0) + 1);
+  const peaks = half.poll_peaks ?? {};
   let later = 0;
-  let poll = 0;
+  let poll = Math.max(0, ...Object.values(peaks));
   for (const [part, count] of byPart) {
     if (part.startsWith('later:') || part.startsWith('endpoint:')) later = Math.max(later, count);
     if (part.startsWith('poll:')) {
-      const ticks = Math.max(1, half.polls[part.slice('poll:'.length)] ?? 1);
+      const name = part.slice('poll:'.length);
+      if (peaks[name] !== undefined) continue;
+      const ticks = Math.max(1, half.polls[name] ?? 1);
       poll = Math.max(poll, Math.ceil(count / ticks));
     }
   }
