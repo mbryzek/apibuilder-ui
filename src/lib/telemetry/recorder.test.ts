@@ -137,5 +137,18 @@ describe('parts that fill in after and polls', () => {
     recorder.pollTick('status');
     expect(recorder.pollCounts()).toEqual({ status: 2 });
   });
+
+  it("counts each poll's busiest tick, past the call cap too", async () => {
+    const recorder = new ViewRecorder(VIEW, '/r', { side: 'browser' });
+    const poll = context(recorder, 'poll:status');
+    for (let i = 0; i < MAX_CALLS; i += 1) await recorder.call(context(recorder, 'browser'), 'op', async () => 1);
+    for (let tick = 0; tick < 1000; tick += 1) {
+      recorder.pollTick('status');
+      await recorder.call(poll, 'getStatus', async () => 1);
+      if (tick === 7) await recorder.call(poll, 'getStatus', async () => 1);
+    }
+    expect(recorder.calls).toHaveLength(MAX_CALLS);
+    expect(recorder.pollPeakCounts()).toEqual({ status: 2 });
+  });
 });
 // dry-copy-end
