@@ -139,15 +139,60 @@ export function busyMs(spans: Span[], window: Span): number {
 export interface DocumentEntry {
   startTime: number;
   fetchStart: number;
-  redirectEnd: number;
 }
 
 /**
- * Where this document's own load begins: `fetchStart` when the navigation was redirected (the hops
- * before it are the redirecting request's cost), `startTime` when it was not.
+ * Where this document's own load begins: `fetchStart`, which the browser records before it fetches
+ * the resource a redirect chain ends at. Everything before it (the redirecting requests, the
+ * previous document's unload) is the cost of whatever led here, not of this document. A redirect's
+ * own `redirectStart` and `redirectEnd` cannot say so: the browser zeroes both when any hop is
+ * cross-origin, the very chain whose hops cost most. ISS-80761
  */
 export function documentStart(nav: DocumentEntry): number {
-  return nav.redirectEnd > 0 && nav.fetchStart > nav.startTime ? nav.fetchStart : nav.startTime;
+  return nav.fetchStart > nav.startTime ? nav.fetchStart : nav.startTime;
+}
+
+/** A navigation entry's phase marks, as far as `loadPhases` reads them. */
+export interface PhaseEntry extends DocumentEntry {
+  domainLookupStart: number;
+  connectEnd: number;
+  requestStart: number;
+  responseStart: number;
+}
+
+/**
+ * Where a hard load's time went, so a slow one names its slow hop. Each is a visible duration in
+ * milliseconds, null where the browser did not record both of its marks. Past the wait they cover
+ * time to show, less the cache lookup and the gap before the request, which are next to nothing.
+ *
+ * - `wait_ms`: navigation start to `fetchStart`, the redirects and the previous document's unload
+ *   that led here (`documentStart`), which time to show leaves out.
+ * - `connect_ms`: DNS, TCP and TLS for the document (`domainLookupStart` to `connectEnd`); zero on
+ *   a reused connection.
+ * - `ttfb_ms`: the document request's wait for its first byte (`requestStart` to `responseStart`):
+ *   the server's load and the round trip.
+ * - `render_ms`: the first byte to the largest contentful paint, the document's download included,
+ *   since a streamed page paints before its last byte; null with no LCP.
+ */
+export interface LoadPhases {
+  wait_ms: number | null;
+  connect_ms: number | null;
+  ttfb_ms: number | null;
+  render_ms: number | null;
+}
+
+/** A hard load's phases, each less the time the document spent hidden inside it. */
+export function loadPhases(nav: PhaseEntry, lcpAt: number | null, hidden: HiddenSpans | null, now: number): LoadPhases {
+  // A mark the browser did not record reads 0; the navigation start and `fetchStart` are always recorded.
+  const recorded = (mark: number): number | null => (mark > 0 ? mark : null);
+  const phase = (start: number | null, end: number | null): number | null =>
+    start === null || end === null || end < start ? null : clamp(end - start - (hidden?.within({ start, end }, now) ?? 0));
+  return {
+    wait_ms: phase(nav.startTime, nav.fetchStart),
+    connect_ms: phase(recorded(nav.domainLookupStart), recorded(nav.connectEnd)),
+    ttfb_ms: phase(recorded(nav.requestStart), recorded(nav.responseStart)),
+    render_ms: phase(recorded(nav.responseStart), lcpAt)
+  };
 }
 
 /**
