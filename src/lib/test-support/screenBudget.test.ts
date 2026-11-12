@@ -2,7 +2,19 @@ import { describe, expect, it } from 'vitest';
 import { expectWithinBudget } from '#lib/telemetry/testing.ts';
 import { ctx } from '#lib/telemetry/context.ts';
 import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.ts';
-import { answer, anything, emptyAnswer, hardLoadEvent, layoutsOf, noting } from './screenBudget.ts';
+import { error, redirect } from '@sveltejs/kit';
+import {
+  answer,
+  answerWith,
+  anything,
+  emptyAnswer,
+  hardLoad,
+  hardLoadEvent,
+  layoutsOf,
+  noting,
+  stubTable,
+  unexpectedEnd
+} from './screenBudget.ts';
 
 type Rows = { length: number; [Symbol.iterator](): Iterator<unknown> };
 
@@ -77,5 +89,74 @@ describe('the generic answer', () => {
       'GET /apibuilder/:org_key/applications',
       'GET /apibuilder/:org_key/applications'
     ]);
+  });
+});
+
+/** What `run` throws: a redirect or an error as SvelteKit builds it. */
+function thrownBy(run: () => unknown): unknown {
+  try {
+    run();
+  } catch (caught) {
+    return caught;
+  }
+  throw new Error('did not throw');
+}
+
+describe('unexpectedEnd', () => {
+  const toHome = thrownBy(() => redirect(303, '/'));
+  const forbidden = thrownBy(() => error(403, 'Forbidden'));
+
+  it('passes a load that threw nothing', () => {
+    expect(unexpectedEnd([])).toEqual([]);
+  });
+
+  it('names every throw of a route that declares no redirect, a redirect included', () => {
+    expect(unexpectedEnd([forbidden, new TypeError('x is undefined'), toHome])).toEqual([
+      'threw error 403: Forbidden',
+      expect.stringMatching(/^threw TypeError: x is undefined/),
+      'threw redirect 303 to /'
+    ]);
+  });
+
+  it('passes a declared redirect and names anything else thrown beside it', () => {
+    expect(unexpectedEnd([toHome], true)).toEqual([]);
+    expect(unexpectedEnd([toHome, forbidden], true)).toEqual(['threw error 403: Forbidden']);
+  });
+
+  it('fails a declared redirect the load never reached', () => {
+    expect(unexpectedEnd([], true)).toHaveLength(1);
+  });
+
+  it('sees what a hard load threw, which it settles rather than rethrows', async () => {
+    const thrown: unknown[] = [];
+    const notThere = () => {
+      throw thrownBy(() => error(404, 'gone'));
+    };
+    await hardLoad({ route: '/x', levels: [{ server: { load: notThere } }] }, thrown)({});
+    expect(unexpectedEnd(thrown)).toEqual(['threw error 404: gone']);
+  });
+});
+
+describe('the stubs a route declares', () => {
+  it('keys each budgetStub.ts by its route', () => {
+    const table = stubTable({
+      '/src/routes/login/budgetStub.ts': { stub: { redirects: true } },
+      '/src/routes/tokens/[guid]/budgetStub.ts': { stub: { fields: { id: '1' } } },
+      '/src/routes/signup/budgetStub.ts': {}
+    });
+    expect([...table]).toEqual([
+      ['/login', { redirects: true }],
+      ['/tokens/[guid]', { fields: { id: '1' } }]
+    ]);
+  });
+
+  it('answers a stub field with its value at any depth, in the full answer and the empty one', async () => {
+    const known = { role: 'admin' };
+    const full = (await answerWith(known)('https://apibuilder.org/x').json()) as { role: string; org: { role: string } }[];
+    expect(full.map((row) => row.role)).toEqual(['admin', 'admin']);
+    expect(full[0]!.org.role).toBe('admin');
+    const empty = (await emptyAnswer(new Set(), known)('https://apibuilder.org/x').json()) as unknown[] & { role: string };
+    expect(empty).toHaveLength(0);
+    expect(empty.role).toBe('admin');
   });
 });
