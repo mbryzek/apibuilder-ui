@@ -274,16 +274,6 @@ export function hardLoadEvent(route: string): Record<string, unknown> {
   };
 }
 
-async function settle(run: () => unknown, thrown: unknown[]): Promise<Record<string, unknown>> {
-  try {
-    const data = await run();
-    return typeof data === 'object' && data !== null ? (data as Record<string, unknown>) : {};
-  } catch (caught) {
-    thrown.push(caught);
-    return {};
-  }
-}
-
 // dry-copy: sveltekit/screen-budget/unexpected-end — every copy of this region must match; `dev repo copies` checks it (ISS-80742)
 /** What a load threw, as a line naming it: a redirect's target, an error's status and message, an exception's first frame. */
 export function describeThrown(caught: unknown): string {
@@ -307,6 +297,16 @@ export function unexpectedEnd(thrown: unknown[], redirects = false): string[] {
   return ['declares redirects in its budgetScene.ts but its load ended without one'];
 }
 // dry-copy-end
+
+async function settle(run: () => unknown, thrown: unknown[]): Promise<Record<string, unknown>> {
+  try {
+    const data = await run();
+    return typeof data === 'object' && data !== null ? (data as Record<string, unknown>) : {};
+  } catch (caught) {
+    thrown.push(caught);
+    return {};
+  }
+}
 
 /**
  * The hard load of a route, as one load `expectWithinBudget` runs: `event` is the recorded event it
