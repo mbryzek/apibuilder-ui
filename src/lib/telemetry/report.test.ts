@@ -50,6 +50,14 @@ describe('sanitizeBrowserHalf', () => {
     expect(half?.calls).toEqual([call('load', { status: null, end_ms: null })]);
   });
 
+  it("keeps a hard load's phases, and none a soft navigation posts", () => {
+    const phases = { wait_ms: 18_700, connect_ms: 240, ttfb_ms: 112, render_ms: 380 };
+    const hard = { ...browserHalf, timing: { ...browserHalf.timing, navigation: 'hard', phases: { ...phases, render_ms: -1, extra: 1 } } };
+    expect(sanitizeBrowserHalf(hard)?.timing?.phases).toEqual({ ...phases, render_ms: null });
+    expect(sanitizeBrowserHalf({ ...browserHalf, timing: { ...browserHalf.timing, phases } })?.timing).not.toHaveProperty('phases');
+    expect(sanitizeBrowserHalf({ ...hard, timing: { ...hard.timing, phases: undefined } })?.timing).not.toHaveProperty('phases');
+  });
+
   it('keeps at most MAX_CALLS and counts the rest as dropped', () => {
     const half = sanitizeBrowserHalf({ ...browserHalf, calls: Array.from({ length: MAX_CALLS + 7 }, () => call('load')) });
     expect(half?.calls).toHaveLength(MAX_CALLS);
@@ -101,6 +109,30 @@ describe('the record monitoring reads', () => {
     expect(keys(stamped)).not.toContain('screen.client_rtt_ms');
     const far = reportAttributes({ ...stamped, client_rtt_ms: 753 }, peaksOfCalls(stamped));
     expect(far.find((a) => a.key === 'screen.client_rtt_ms')?.value).toBe(753);
+  });
+
+  it("carries a hard load's phases, each only where the browser recorded it", () => {
+    const browser: ReportHalf = {
+      half: 'browser',
+      view: VIEW,
+      route: '/login',
+      calls: [],
+      dropped_calls: 0,
+      polls: {},
+      timing: {
+        navigation: 'hard',
+        show_ms: 900,
+        inp_ms: null,
+        finished_ms: null,
+        phases: { wait_ms: 18_700, connect_ms: 240, ttfb_ms: 112, render_ms: null }
+      }
+    };
+    const attributes = reportAttributes(
+      { ...browser, app: 'account', repo: 'playbook-systems/account', budget: globalBudget },
+      peaksOfCalls(browser)
+    );
+    const phases = Object.fromEntries(attributes.filter((a) => a.key.startsWith('screen.phase.')).map((a) => [a.key, a.value]));
+    expect(phases).toEqual({ 'screen.phase.wait_ms': 18_700, 'screen.phase.connect_ms': 240, 'screen.phase.ttfb_ms': 112 });
   });
 
   it('names the release the half was built as, and nothing for a build no release made', () => {
