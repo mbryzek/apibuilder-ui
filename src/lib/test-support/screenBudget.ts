@@ -10,9 +10,14 @@
  *
  * THE BACKEND ANSWERS EVERYTHING. A call's answer is two rows, each of which answers any field with
  * another such value, so a load reaches every call it would make on a page with data, and a read made
- * once per row of a nested list shows up as two. A load that
- * throws (a redirect, a value the stub cannot stand in for) is counted up to where it threw: the
- * budget is about the calls it made, and the route's own tests are about what it does.
+ * once per row of a nested list shows up as two.
+ *
+ * A LOAD THAT THROWS FAILS ITS ROUTE. A load that stops at a redirect, a 403 or a TypeError made only
+ * the calls before it, so a budget it passes says nothing about the screen's real load. A screen the
+ * generic answer cannot reach (a role it checks, a row it finds by the route's param) keeps a
+ * `budgetStub.ts` beside its `+page` files exporting a {@link ScreenStub} naming the fields that reach
+ * it. A screen whose hard load answers with a redirect (a page that exists only to send a person on)
+ * says so with its stub's `redirects`, and then a redirect, and nothing else, is what its run must end in.
  *
  * EVERY REQUEST IS SIGNED IN. Most of this app's screens send a signed-out visitor to sign in before
  * they read anything, so the event carries the session the request hook would have found, and each
@@ -27,6 +32,39 @@
  * stop early at a 404 or a redirect: it only adds a branch to the full run, never replaces it.
  * ISS-78653
  */
+import { isHttpError, isRedirect } from '@sveltejs/kit';
+
+/** What a route's `budgetStub.ts` changes about its hard load, where the generic answer stops the load short of the page. */
+export interface ScreenStub {
+  /**
+   * Fields answered with this value wherever any answer is read, at any depth, where the generic
+   * answer reaches the wrong branch: `{ id: '1' }` for a load that finds its row by the route's param.
+   */
+  fields?: Record<string, unknown>;
+  /**
+   * The hard load ends in a redirect, and nothing else, on purpose: the screen exists only to send a
+   * person on. A route's own stub alone says so.
+   */
+  redirects?: boolean;
+}
+
+/** A `budgetStub.ts` module, as the glob hands it over. */
+export interface ScreenStubModule {
+  stub?: ScreenStub;
+}
+
+/** Route id to its stub, from the app's glob of `/src/routes/**\/budgetStub.ts`. */
+export function stubTable(modules: Record<string, ScreenStubModule>): ReadonlyMap<string, ScreenStub> {
+  const table = new Map<string, ScreenStub>();
+  for (const [path, module] of Object.entries(modules)) {
+    const match = /^\/src\/routes(.*)\/budgetStub\.ts$/.exec(path);
+    if (match && module.stub) table.set(match[1] === '' ? '/' : match[1]!, module.stub);
+  }
+  return table;
+}
+
+/** No field answered with a value of its own: the generic answer everywhere. */
+const NO_FIELDS: Readonly<Record<string, unknown>> = Object.freeze({});
 
 /** How many rows every list of an answer has: two for the full run, none for the empty one. */
 export type RowCount = 0 | 2;
@@ -34,10 +72,11 @@ export type RowCount = 0 | 2;
 /**
  * A value answering any field, call, iteration or coercion with another of its kind. As a list it
  * has `count` rows, and so does every list read off it, and every array method runs on them: a load
- * that maps a nested list to calls makes one per row, as it would on a page with data.
+ * that maps a nested list to calls makes one per row, as it would on a page with data. A field `known`
+ * names answers with its value.
  */
-export function anything(count: RowCount = 2): unknown {
-  return generic(count);
+export function anything(count: RowCount = 2, known: Readonly<Record<string, unknown>> = NO_FIELDS): unknown {
+  return generic(count, known);
 }
 
 /** An array method's name: a field the generic answer answers by running that method over its rows. */
@@ -48,14 +87,14 @@ function isListMethod(key: PropertyKey): key is string {
 }
 
 /** {@link anything}, answering a call with `call` where it has one: how an array method reads as a field. */
-function generic(count: RowCount, call?: (...args: unknown[]) => unknown): unknown {
+function generic(count: RowCount, known: Readonly<Record<string, unknown>>, call?: (...args: unknown[]) => unknown): unknown {
   const fields = new Map<PropertyKey, unknown>();
   let list: unknown[] | undefined;
-  const rows = (): unknown[] => (list ??= Array.from({ length: count }, () => anything(count)));
+  const rows = (): unknown[] => (list ??= Array.from({ length: count }, () => anything(count, known)));
   const target = () => undefined;
   return new Proxy(target, {
-    apply: (_, __, args: unknown[]) => (call ? call(...args) : anything(count)),
-    construct: () => anything(count) as object,
+    apply: (_, __, args: unknown[]) => (call ? call(...args) : anything(count, known)),
+    construct: () => anything(count, known) as object,
     get: (_, key) => {
       if (key === 'then' || key === 'toJSON') return undefined;
       if (key === 'length') return count;
@@ -63,13 +102,14 @@ function generic(count: RowCount, call?: (...args: unknown[]) => unknown): unkno
       if (key === Symbol.asyncIterator) return undefined;
       if (key === Symbol.toPrimitive)
         return (hint: string) => (hint === 'number' ? 1 : hint === 'string' ? 'value' : '2026-01-01T00:00:00.000Z');
+      if (typeof key === 'string' && Object.hasOwn(known, key)) return known[key];
       if (key === 'toString') return () => 'value';
       if (key === 'valueOf') return () => 1;
       if (!fields.has(key)) {
         const method = isListMethod(key)
           ? (...args: unknown[]) => (rows() as unknown as Record<string, (...a: unknown[]) => unknown>)[key]!(...args)
           : undefined;
-        fields.set(key, generic(count, method));
+        fields.set(key, generic(count, known, method));
       }
       return fields.get(key);
     }
@@ -79,11 +119,12 @@ function generic(count: RowCount, call?: (...args: unknown[]) => unknown): unkno
 /**
  * The body every call is answered with: a real array of `count` rows (a list read checks for one),
  * each row {@link anything}. Any other field is read off a row of the same kind, so an answer that is
- * an object rather than a list still answers, its own lists `count` rows long.
+ * an object rather than a list still answers, its own lists `count` rows long. A field `known` names
+ * answers with its value, at any depth.
  */
-export function answerBody(count: RowCount = 2): unknown {
-  const rows = Array.from({ length: count }, () => anything(count));
-  const single = anything(count) as Record<PropertyKey, unknown>;
+export function answerBody(count: RowCount = 2, known: Readonly<Record<string, unknown>> = NO_FIELDS): unknown {
+  const rows = Array.from({ length: count }, () => anything(count, known));
+  const single = anything(count, known) as Record<PropertyKey, unknown>;
   return new Proxy(rows, {
     get: (target, key, receiver) => {
       if (key === 'then' || key === 'toJSON') return undefined;
@@ -108,6 +149,11 @@ export function answer(_input: RequestInfo | URL): Response {
 /** What the backend answers a call with. */
 export type Respond = (input: RequestInfo | URL, init?: RequestInit) => Response;
 
+/** {@link answer}, its rows answering `known`'s fields (a route's stub's) with their values. */
+export function answerWith(known: Readonly<Record<string, unknown>> = NO_FIELDS): Respond {
+  return () => respondWith(() => answerBody(2, known));
+}
+
 /** A call's address, without its origin: the path and the query. */
 function addressOf(input: RequestInfo | URL): string {
   const url = new URL(input instanceof Request ? input.url : String(input), 'https://apibuilder.org');
@@ -124,10 +170,11 @@ export function noting(respond: Respond, seen: Set<string>): Respond {
 
 /**
  * What the backend answers in the empty run: a call the route's layouts make (`shell`, as
- * {@link noting} saw them) as {@link answer} does, every other call with no rows in any list, at any depth.
+ * {@link noting} saw them) as {@link answer} does, every other call with no rows in any list, at any depth;
+ * `known`'s fields answered with their values in both.
  */
-export function emptyAnswer(shell: ReadonlySet<string> = new Set()): Respond {
-  return (input) => (shell.has(addressOf(input)) ? answer(input) : respondWith(() => answerBody(0)));
+export function emptyAnswer(shell: ReadonlySet<string> = new Set(), known: Readonly<Record<string, unknown>> = NO_FIELDS): Respond {
+  return (input) => (shell.has(addressOf(input)) ? answerWith(known)(input) : respondWith(() => answerBody(0, known)));
 }
 
 /** One route's load modules, from the root down: each level's layouts, then the page's. */
@@ -226,6 +273,30 @@ export function hardLoadEvent(route: string): Record<string, unknown> {
     tracing: { enabled: false, root: undefined, current: undefined }
   };
 }
+
+// dry-copy: sveltekit/screen-budget/unexpected-end — every copy of this region must match; `dev repo copies` checks it (ISS-80742)
+/** What a load threw, as a line naming it: a redirect's target, an error's status and message, an exception's first frame. */
+export function describeThrown(caught: unknown): string {
+  if (isRedirect(caught)) return `redirect ${caught.status} to ${caught.location}`;
+  if (isHttpError(caught)) return `error ${caught.status}: ${caught.body.message}`;
+  if (caught instanceof Error) {
+    const frame = caught.stack?.split('\n').find((line) => line.trim().startsWith('at '));
+    return `${caught.name}: ${caught.message}${frame ? ` (${frame.trim()})` : ''}`;
+  }
+  return String(caught);
+}
+
+/**
+ * Why a route's run did not reach the end its scene declares, one line per reason, or none when it
+ * did: a route ends without a throw, and a route whose own scene `redirects` ends in redirects alone,
+ * at least one of them.
+ */
+export function unexpectedEnd(thrown: unknown[], redirects = false): string[] {
+  if (!redirects) return thrown.map((caught) => `threw ${describeThrown(caught)}`);
+  if (thrown.length > 0) return thrown.filter((caught) => !isRedirect(caught)).map((caught) => `threw ${describeThrown(caught)}`);
+  return ['declares redirects in its budgetScene.ts but its load ended without one'];
+}
+// dry-copy-end
 
 async function settle(run: () => unknown, thrown: unknown[]): Promise<Record<string, unknown>> {
   try {
