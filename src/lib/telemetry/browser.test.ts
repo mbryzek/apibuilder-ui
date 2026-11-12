@@ -108,7 +108,11 @@ beforeEach(() => {
   vi.stubGlobal('requestAnimationFrame', (fn: () => void) => setTimeout(fn, 0));
   vi.spyOn(performance, 'now').mockImplementation(() => clock);
   vi.spyOn(performance, 'getEntriesByType').mockImplementation((type: string) =>
-    type === 'navigation' ? ([{ startTime: 0, fetchStart: 0, redirectEnd: 0, responseStart: 50 }] as unknown as PerformanceEntryList) : []
+    type === 'navigation'
+      ? ([
+          { startTime: 0, fetchStart: 0, domainLookupStart: 0, connectEnd: 0, requestStart: 10, responseStart: 50 }
+        ] as unknown as PerformanceEntryList)
+      : []
   );
   Object.defineProperty(document, 'hidden', { configurable: true, get: () => hidden });
   Object.defineProperty(navigator, 'sendBeacon', {
@@ -152,7 +156,7 @@ describe('a hard load', () => {
       half: 'browser',
       view: VIEW,
       route: '/issues/[id]',
-      timing: { navigation: 'hard', show_ms: 420, inp_ms: null },
+      timing: { navigation: 'hard', show_ms: 420, inp_ms: null, phases: { wait_ms: 0, connect_ms: null, ttfb_ms: 40, render_ms: 370 } },
       release: '0.3.97'
     });
     expect(halves[0]?.['calls']).toMatchObject([{ operation: 'markRead', part: 'browser', queries_counted: true }]);
@@ -273,6 +277,20 @@ describe('a soft navigation', () => {
     const halves = await sent();
     expect(halves[1]).toMatchObject({ view: id, route: '/other', timing: { navigation: 'soft', show_ms: 300 } });
     expect(halves[1]?.['calls']).toMatchObject([{ operation: 'getOther', part: 'load' }]);
+  });
+
+  it("names no view on another page's data request while it is entering, so a preload is not booked as its load", async () => {
+    const { browser } = await load();
+    browser.registerScreenReport({ view: VIEW });
+    after?.({ type: 'enter' });
+    navigate({ type: 'link' });
+    const id = /^(sv_[0-9a-f]{32})\.nav$/.exec((await headerOf('/other/__data.json')) ?? '')?.[1];
+    expect(id).toBeDefined();
+    // A pointer passing over a link to another page, or the leaving page's poll, before the navigation enters.
+    expect(await headerOf('/issues/2/__data.json')).toBeNull();
+    expect(await headerOf('/issues/1/__data.json?x-sveltekit-invalidated=01')).toBeNull();
+    expect(await headerOf('/other/__data.json?x-sveltekit-trailing-slash=1')).toBe(`${id}.nav`);
+    expect(await headerOf('/other?/save', { method: 'POST', headers: { 'x-sveltekit-action': 'true' } })).toBe(`${id}.nav`);
   });
 
   it('reports no time to show for a navigation that entered its view within the tick it began', async () => {
