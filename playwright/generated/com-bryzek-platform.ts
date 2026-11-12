@@ -35,12 +35,6 @@ export enum RallydNotificationType {
   ConnectionShare = 'connection_share'
 }
 
-export enum SportRatingSystem {
-  PickleballDupr = 'pickleball_dupr',
-  PadelWpr = 'padel_wpr',
-  TennisNtrp = 'tennis_ntrp'
-}
-
 export enum Subproject {
   Platform = 'platform',
   Playbook = 'playbook'
@@ -138,7 +132,10 @@ export interface Email {
  * A feature enabled for the current session (already role-filtered). Returned on tenant_session.
  */
 export interface EnabledFeature {
+  /** The same value as subproject_key, typed by the enum subproject_key replaces. */
   subproject: Subproject;
+  /** The key of the product that owns the feature, as its own spec or feature catalog declares it (platform for the base subproject). Clients match subproject_key and feature against their own generated feature enum. */
+  subproject_key: string;
   feature: string;
 }
 
@@ -243,16 +240,6 @@ export interface Phone {
   consent: Consent;
 }
 
-export interface RallydRating {
-  system: SportRatingSystem;
-  rating: number;
-}
-
-export interface RallydRatingForm {
-  system: SportRatingSystem;
-  rating: number;
-}
-
 export interface SessionReference {
   id: string;
 }
@@ -262,6 +249,8 @@ export interface SignupForm {
   password?: string;
   /** Notification types to opt into during registration */
   opt_ins?: RallydNotificationType[];
+  /** Notification types to opt into during registration, each a value of the notification_type enum of the product's own spec. Joined with opt_ins. */
+  notification_opt_ins?: string[];
 }
 
 export interface SmsOptinRequestResultOptedIn {
@@ -296,7 +285,7 @@ export interface TenantSession {
   user: User;
   tenant: TenantSummary;
   impersonated_by?: UserReference;
-  /** User-features enabled for this tenant AND this session user's role, and the platform's rollout flags that are on, whatever the session user's tenant. Clients match subproject+feature against their generated feature enum (e.g. playbook_feature). No other system feature is included. */
+  /** User-features enabled for this tenant AND this session user's role, and the platform's rollout flags that are on, whatever the session user's tenant. Clients match subproject_key+feature against their own generated feature enum. No other system feature is included. */
   enabled_features: EnabledFeature[];
   /** True when an admin set this user's password and required them to choose their own. Clients gate the session on this until the user sets a new password - regardless of how the session was obtained (password, login link, sms code). Never true for an impersonated session. */
   password_change_required: boolean;
@@ -315,7 +304,6 @@ export interface User {
   person: Person;
   status: UserStatus;
   role: UserRole;
-  rallyd?: RallydRating[];
 }
 
 /**
@@ -348,7 +336,6 @@ export interface UserEmailChangeForm {
 
 export interface UserForm {
   person: PersonForm;
-  rallyd?: RallydRatingForm[];
 }
 
 export interface UserInactive {
@@ -381,7 +368,6 @@ export interface UserReference {
 
 export interface UserSecondaryForm {
   person: PersonSecondaryForm;
-  rallyd?: RallydRatingForm[];
 }
 
 /**
