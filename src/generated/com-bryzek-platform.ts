@@ -25,21 +25,6 @@ export enum Gender {
   Other = 'other'
 }
 
-export enum RallydNotificationType {
-  GameActivity = 'game_activity',
-  OrganizerHelp = 'organizer_help',
-  OrganizerAdded = 'organizer_added',
-  OrganizerGameConfirmed = 'organizer_game_confirmed',
-  Marketing = 'marketing',
-  SmsOptinExpired = 'sms_optin_expired',
-  ConnectionShare = 'connection_share'
-}
-
-export enum Subproject {
-  Platform = 'platform',
-  Playbook = 'playbook'
-}
-
 export enum TimeZone {
   AmericaNewYork = 'america_new_york',
   AmericaChicago = 'america_chicago',
@@ -142,8 +127,6 @@ export interface EmailVerification {}
  * A feature enabled for the current session (already role-filtered). Returned on tenant_session.
  */
 export interface EnabledFeature {
-  /** The same value as subproject_key, typed by the enum subproject_key replaces. */
-  subproject: Subproject;
   /** The key of the product that owns the feature, as its own spec or feature catalog declares it (platform for the base subproject). Clients match subproject_key and feature against their own generated feature enum. */
   subproject_key: string;
   feature: string;
@@ -257,9 +240,7 @@ export interface SessionReference {
 export interface SignupForm {
   user: UserForm;
   password?: string;
-  /** Notification types to opt into during registration */
-  opt_ins?: RallydNotificationType[];
-  /** Notification types to opt into during registration, each a value of the notification_type enum of the product's own spec. Joined with opt_ins. */
+  /** Notification types to opt into during registration, each a value of the notification_type enum of the product's own spec. */
   notification_opt_ins?: string[];
 }
 
