@@ -25,16 +25,6 @@ export enum Gender {
   Other = 'other'
 }
 
-export enum RallydNotificationType {
-  GameActivity = 'game_activity',
-  OrganizerHelp = 'organizer_help',
-  OrganizerAdded = 'organizer_added',
-  OrganizerGameConfirmed = 'organizer_game_confirmed',
-  Marketing = 'marketing',
-  SmsOptinExpired = 'sms_optin_expired',
-  ConnectionShare = 'connection_share'
-}
-
 export enum Subproject {
   Platform = 'platform',
   Playbook = 'playbook'
@@ -247,9 +237,7 @@ export interface SessionReference {
 export interface SignupForm {
   user: UserForm;
   password?: string;
-  /** Notification types to opt into during registration */
-  opt_ins?: RallydNotificationType[];
-  /** Notification types to opt into during registration, each a value of the notification_type enum of the product's own spec. Joined with opt_ins. */
+  /** Notification types to opt into during registration, each a value of the notification_type enum of the product's own spec. */
   notification_opt_ins?: string[];
 }
 
