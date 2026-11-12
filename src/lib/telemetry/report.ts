@@ -18,6 +18,7 @@ import { PUBLIC_VERSION } from '$app/env/public';
 import type { Budget } from './budget';
 import { MAX_CALLS, type RecordedCall, type ViewRecorder } from './recorder';
 import { encodeLogs, type Attribute, type LogRecordInput } from './otlp';
+import type { LoadPhases } from './timing';
 import { isViewId } from './view';
 
 /** The report door's OTLP logs path, admitted to the report writers alone. */
@@ -35,6 +36,11 @@ export interface ReportTiming {
   inp_ms: number | null;
   /** Every later part rendered; null when the view ended first. */
   finished_ms: number | null;
+  /**
+   * Where a hard load's time went (`loadPhases`). Absent from a soft navigation, and from a half a
+   * browser bundle older than the field posted.
+   */
+  phases?: LoadPhases;
 }
 
 /**
@@ -169,16 +175,30 @@ function sanitizePolls(value: unknown): Record<string, number> {
   return kept;
 }
 
+/** A hard load's posted phases, field by field; null where it posted none. */
+function sanitizePhases(value: unknown): LoadPhases | null {
+  const phases = record(value);
+  if (phases === null) return null;
+  return {
+    wait_ms: millis(phases['wait_ms']),
+    connect_ms: millis(phases['connect_ms']),
+    ttfb_ms: millis(phases['ttfb_ms']),
+    render_ms: millis(phases['render_ms'])
+  };
+}
+
 function sanitizeTiming(value: unknown): ReportTiming | null {
   const timing = record(value);
   if (timing === null) return null;
   const navigation = timing['navigation'];
   if (navigation !== 'hard' && navigation !== 'soft') return null;
+  const phases = navigation === 'hard' ? sanitizePhases(timing['phases']) : null;
   return {
     navigation,
     show_ms: millis(timing['show_ms']),
     inp_ms: millis(timing['inp_ms']),
-    finished_ms: millis(timing['finished_ms'])
+    finished_ms: millis(timing['finished_ms']),
+    ...(phases === null ? {} : { phases: phases })
   };
 }
 
@@ -242,6 +262,10 @@ export function reportAttributes(stamped: StampedHalf, peaks: PartPeaks): Attrib
     ['screen.show_ms', timing?.show_ms],
     ['screen.inp_ms', timing?.inp_ms],
     ['screen.loaded_ms', timing?.finished_ms],
+    ['screen.phase.wait_ms', timing?.phases?.wait_ms],
+    ['screen.phase.connect_ms', timing?.phases?.connect_ms],
+    ['screen.phase.ttfb_ms', timing?.phases?.ttfb_ms],
+    ['screen.phase.render_ms', timing?.phases?.render_ms],
     ['screen.client_rtt_ms', stamped.client_rtt_ms],
     ['screen.report.lost', stamped.lost_halves === 0 ? undefined : stamped.lost_halves],
     ['screen.release', stamped.release]

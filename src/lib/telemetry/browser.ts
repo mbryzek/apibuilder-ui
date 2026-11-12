@@ -40,6 +40,7 @@ import {
   hardLoadShowMs,
   hiddenSpansAtRegistration,
   interactionToNextPaint,
+  loadPhases,
   softNavigationShowMs,
   type HiddenSpans,
   type InteractionEntry,
@@ -180,7 +181,8 @@ export function timingOf(view: ViewState, now: number): ReportTiming {
     navigation: view.navigation,
     show_ms: show,
     inp_ms: interactionToNextPaint(view.interactions, interactionsSince(view)),
-    finished_ms: view.finishedMs
+    finished_ms: view.finishedMs,
+    ...(nav === undefined ? {} : { phases: loadPhases(nav, lcpAt, documentHidden, now) })
   };
 }
 
@@ -231,16 +233,18 @@ export function dataRequestPage(input: RequestInfo | URL): string | null {
 
 /**
  * The header value naming the browser's current view for `fetch(input)`, marked while a soft
- * navigation is entering it. Outside a navigation, a data request for a page other than the one
- * the view shows, its query included, is a preload (`data-sveltekit-preload-data`, a pointer passing over a link): it is
- * no refresh of this view, so it names none and its server half mints its own, read against the
- * load budget of the route it loads.
+ * navigation is entering it. A data request for a page other than the one the view shows or a
+ * navigation is entering, its query included, is a preload (`data-sveltekit-preload-data`, a
+ * pointer passing over a link) or the leaving page's own refresh: it is neither this view's refresh
+ * nor its navigation's load, so it names none and its server half mints its own, read against the
+ * load budget of the route it loads. A redirect is a navigation of its own, entering its own view.
+ * ISS-80682
  */
 function currentMark(input: RequestInfo | URL): string | null {
   const view = current;
   if (view === null) return null;
   const navigating = view.navigation === 'soft' && view.recorder.enteredAt === null;
-  if (!navigating && view.page !== null) {
+  if (view.page !== null) {
     const loads = dataRequestPage(input);
     if (loads !== null && loads !== view.page) return null;
   }

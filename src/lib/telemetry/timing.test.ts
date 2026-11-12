@@ -7,6 +7,7 @@ import {
   hardLoadShowMs,
   hiddenSpansAtRegistration,
   interactionToNextPaint,
+  loadPhases,
   softNavigationShowMs
 } from './timing';
 
@@ -17,8 +18,14 @@ describe('time to show', () => {
   });
 
   it('starts after the redirects that led to the document', () => {
-    expect(documentStart({ startTime: 0, fetchStart: 250, redirectEnd: 240 })).toBe(250);
-    expect(documentStart({ startTime: 0, fetchStart: 5, redirectEnd: 0 })).toBe(0);
+    expect(documentStart({ startTime: 0, fetchStart: 250 })).toBe(250);
+    expect(documentStart({ startTime: 0, fetchStart: 0 })).toBe(0);
+  });
+
+  it('starts after a cross-origin redirect chain, whose redirect marks the browser zeroes', () => {
+    const nav = { startTime: 0, fetchStart: 18_700, redirectStart: 0, redirectEnd: 0 };
+    expect(documentStart(nav)).toBe(18_700);
+    expect(hardLoadShowMs(19_200, documentStart(nav), null, 20_000)).toBe(500);
   });
 
   it('is absent, never zero, when the browser reported no LCP', () => {
@@ -41,6 +48,31 @@ describe('time to show', () => {
 
   it('bills a document opened out of sight from its first byte as hidden', () => {
     expect(hiddenSpansAtRegistration(500, true, null, 80).within({ start: 0, end: 500 }, 500)).toBe(420);
+  });
+});
+
+describe('loadPhases', () => {
+  const nav = {
+    startTime: 0,
+    fetchStart: 18_700,
+    domainLookupStart: 18_710,
+    connectEnd: 18_950,
+    requestStart: 18_960,
+    responseStart: 19_072
+  };
+
+  it('names where a hard load reached through a redirect chain spent its time', () => {
+    expect(loadPhases(nav, 19_452, null, 20_000)).toEqual({ wait_ms: 18_700, connect_ms: 240, ttfb_ms: 112, render_ms: 380 });
+  });
+
+  it('is zero for a navigation nothing led to, over a reused connection', () => {
+    const direct = { startTime: 0, fetchStart: 0, domainLookupStart: 0, connectEnd: 0, requestStart: 4, responseStart: 90 };
+    expect(loadPhases(direct, 300, null, 400)).toEqual({ wait_ms: 0, connect_ms: null, ttfb_ms: 86, render_ms: 210 });
+  });
+
+  it('has no render phase without an LCP, and leaves out the time the document spent hidden', () => {
+    const hidden = new HiddenSpans([{ start: 1000, end: 11_000 }]);
+    expect(loadPhases(nav, null, hidden, 20_000)).toEqual({ wait_ms: 8700, connect_ms: 240, ttfb_ms: 112, render_ms: null });
   });
 });
 
