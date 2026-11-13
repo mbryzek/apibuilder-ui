@@ -34,7 +34,7 @@ import { throwIfUnavailable } from '#lib/api/load-error.ts';
 export type FetchPage<T> = (limit: number, offset: number) => Promise<ApiResponse<T[]>>;
 
 /**
- * Rows per request. A round number just under what these endpoints accept, matching the
+ * Rows per request. A round number within what every scanned endpoint accepts, matching the
  * `limit: 100` the existing loaders use — NOT the ceiling itself, which is each operation's spec to
  * declare and the generated client's to emit. `scoped-id.test.ts` checks this against the declared
  * bound of every operation a caller scans, so a limit the API would reject fails there rather than
