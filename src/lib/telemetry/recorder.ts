@@ -38,7 +38,7 @@ export const VIEW_HEADER = 'x-screen-view-id';
 export const PART_HEADER = 'x-screen-part';
 
 /** A part the API logs as it stands; any other is not sent, since a header value fetch refuses would cost the call. */
-const SENDABLE_PART = /^[A-Za-z0-9._:\/[\]()=@+-]{1,128}$/;
+const SENDABLE_PART = /^[A-Za-z0-9._:/[\]()=@+-]{1,128}$/;
 
 /** The headers naming `view` and, where it can travel as a header, `part`. */
 function viewHeaders(view: string, part: string): Record<string, string> {
