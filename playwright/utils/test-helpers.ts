@@ -10,7 +10,7 @@ import { config } from '../config';
 import { explainingFetch } from '../backendUnreachable';
 import type { ContextOrPage } from '../types';
 import { ApiClient as PlatformClient, isTenantSession } from '../generated/com-bryzek-platform';
-import type { PersonForm, TenantSession } from '../generated/com-bryzek-platform';
+import type { CallContext, PersonForm, TenantSession } from '../generated/com-bryzek-platform';
 import { UnauthorizedErrorResponse } from '../generated/generated-error-unauthorized-error-response';
 import { VoidResponse } from '../generated/generated-error-void-response';
 
@@ -24,6 +24,19 @@ const TEST_PASSWORD = 'testpassword';
  * `{ session, user }` object the old helper declared.
  */
 const platform = new PlatformClient({ baseUrl: config.API_BASE_URL, fetch: explainingFetch });
+
+/**
+ * The context every generated operation takes. The specs view no screen, so nothing is recorded:
+ * the recorder runs each call as is, adding no headers, the same as calling the client bare.
+ */
+const DETACHED_CALL: CallContext = {
+  route: null,
+  view: 'detached',
+  part: 'load',
+  recorder: {
+    call: (_context, _operation, run) => run({ headers: () => ({}), response: () => {} })
+  }
+};
 
 /** A full run signs up dozens of throwaway accounts; without this the platform rate-limits it. */
 const BYPASS_RATE_LIMIT: Record<string, string> = { 'X-Bypass-Rate-Limit': 'true' };
@@ -51,7 +64,7 @@ export function generateRandomEmail(): string {
 export async function createUserViaApi(email: string, password: string, name?: string): Promise<TenantSession> {
   const person: PersonForm = name ? { email, name } : { email };
 
-  const state = await platform.createTenantSessionSignups({
+  const state = await platform.createTenantSessionSignups(DETACHED_CALL, {
     tenantId: config.TENANT_ID,
     body: { user: { person }, password },
     headers: BYPASS_RATE_LIMIT
@@ -72,7 +85,7 @@ export async function createUserViaApi(email: string, password: string, name?: s
  */
 export async function sessionIsValid(sessionId: string): Promise<boolean> {
   try {
-    await platform.getTenantSession(config.TENANT_ID, {
+    await platform.getTenantSession(DETACHED_CALL, config.TENANT_ID, {
       headers: { ...BYPASS_RATE_LIMIT, session_id: sessionId }
     });
     return true;
