@@ -285,6 +285,8 @@ export function reportAttributes(stamped: StampedHalf, peaks: PartPeaks): Attrib
       'screen.poll.count',
       Object.values(stamped.polls).reduce((sum, ticks) => sum + ticks, 0)
     ),
+    attribute('screen.poll.refresh.count', stamped.polls[REFRESH_POLL] ?? 0),
+    ...pollTicks(stamped.polls),
     attribute('screen.calls', stamped.calls.length + stamped.dropped_calls),
     attribute('screen.budget.show_ms', stamped.budget.showMs),
     attribute('screen.budget.load.calls', stamped.budget.load.calls),
@@ -292,6 +294,20 @@ export function reportAttributes(stamped: StampedHalf, peaks: PartPeaks): Attrib
     attribute('screen.budget.parts', stamped.budget.parts),
     attribute('screen.budget.poll', stamped.budget.poll)
   ];
+}
+
+/**
+ * Each poll's ticks, as one JSON array monitoring unrolls into a row per poll
+ * (`[{"poll":"status","ticks":40}]`): a named poll calls a lighter endpoint than the load, so its
+ * queries are read per tick of their own, never averaged into the load's rounds, which are the first
+ * load and each `refresh` tick (`screen.poll.refresh.count`). Absent from a half that ticked no poll.
+ * ISS-85636
+ */
+function pollTicks(polls: Record<string, number>): Attribute[] {
+  const ticked = Object.entries(polls)
+    .filter(([, ticks]) => ticks > 0)
+    .map(([poll, ticks]) => ({ poll, ticks: Math.round(ticks) }));
+  return ticked.length === 0 ? [] : [attribute('screen.polls', JSON.stringify(ticked))];
 }
 
 /**
