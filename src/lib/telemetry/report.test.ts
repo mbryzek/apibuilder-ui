@@ -94,6 +94,7 @@ describe('the record monitoring reads', () => {
       'screen.later.max_calls': 2,
       'screen.poll.max_calls': 0,
       'screen.poll.count': 0,
+      'screen.poll.refresh.count': 0,
       'screen.calls': 6,
       'screen.budget.show_ms': 500,
       'screen.budget.load.calls': 3,
@@ -101,6 +102,25 @@ describe('the record monitoring reads', () => {
       'screen.budget.parts': 1,
       'screen.budget.poll': 1
     });
+  });
+
+  it("carries the refresh's ticks apart, and every poll's ticks as one array a rule unrolls", () => {
+    const polled = {
+      ...server,
+      polls: { refresh: 2, status: 40, idle: 0 },
+      app: 'idempotent',
+      repo: 'mbryzek/idempotent',
+      budget: globalBudget
+    };
+    const attributes = Object.fromEntries(reportAttributes(polled, peaksOfCalls(polled)).map((a) => [a.key, a.value]));
+    expect(attributes['screen.poll.count']).toBe(42);
+    expect(attributes['screen.poll.refresh.count']).toBe(2);
+    expect(JSON.parse(String(attributes['screen.polls']))).toEqual([
+      { poll: 'refresh', ticks: 2 },
+      { poll: 'status', ticks: 40 }
+    ]);
+    const quiet = { ...polled, polls: {} };
+    expect(reportAttributes(quiet, peaksOfCalls(quiet)).map((a) => a.key)).not.toContain('screen.polls');
   });
 
   it('carries the client round trip only where one was measured', () => {
