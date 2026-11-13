@@ -30,12 +30,27 @@
 /** The view id's header, sent only where it costs no round trip (see `ViewRecorder.headers`). */
 export const VIEW_HEADER = 'x-screen-view-id';
 
+/**
+ * The call's part's header, sent beside the view id: the API logs it with the call's query count, so
+ * monitoring reads a view's load apart from its named polls' ticks, which call lighter endpoints and
+ * would otherwise average into it. ISS-85636
+ */
+export const PART_HEADER = 'x-screen-part';
+
+/** A part the API logs as it stands; any other is not sent, since a header value fetch refuses would cost the call. */
+const SENDABLE_PART = /^[A-Za-z0-9._:\/[\]()=@+-]{1,128}$/;
+
+/** The headers naming `view` and, where it can travel as a header, `part`. */
+function viewHeaders(view: string, part: string): Record<string, string> {
+  return SENDABLE_PART.test(part) ? { [VIEW_HEADER]: view, [PART_HEADER]: part } : { [VIEW_HEADER]: view };
+}
+
 /** The most calls one report carries; the count beyond it is reported, the calls are not. */
 export const MAX_CALLS = 500;
 
 /** What a generated operation is handed to describe its own call. */
 export interface CallNote {
-  /** The headers this call adds for `url`: the view id, where sending it costs no CORS preflight. */
+  /** The headers this call adds for `url`: the view id and the call's part, where sending them costs no CORS preflight. */
   headers(url: string): Record<string, string>;
   /** The call's answer, for its status and size. */
   response(response: Response): void;
@@ -244,7 +259,7 @@ export class ViewRecorder implements CallRecorder {
         try {
           const counted = this.countsQueries(url);
           if (record !== null) record.queries_counted = counted;
-          return counted ? { [VIEW_HEADER]: this.view } : {};
+          return counted ? viewHeaders(this.view, context.part) : {};
         } catch {
           return {};
         }
