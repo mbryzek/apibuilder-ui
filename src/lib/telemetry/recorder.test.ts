@@ -1,6 +1,6 @@
 // dry-copy: sveltekit/screen-report/recorder-test — every copy of this region must match; `dev repo copies` checks it (DES-65431)
 import { describe, expect, it } from 'vitest';
-import { MAX_CALLS, VIEW_HEADER, ViewRecorder, type CallContext } from './recorder';
+import { MAX_CALLS, PART_HEADER, VIEW_HEADER, ViewRecorder, type CallContext } from './recorder';
 
 const VIEW = 'sv_0123456789abcdef0123456789abcdef';
 
@@ -85,7 +85,7 @@ describe('the view id header', () => {
   it('goes on every server call', async () => {
     const recorder = new ViewRecorder(VIEW, '/r', { side: 'server' });
     await recorder.call(context(recorder), 'op', async (note) => {
-      expect(note.headers('https://api.elsewhere.test/x')).toEqual({ [VIEW_HEADER]: VIEW });
+      expect(note.headers('https://api.elsewhere.test/x')).toEqual({ [VIEW_HEADER]: VIEW, [PART_HEADER]: 'load' });
       return 1;
     });
   });
@@ -93,7 +93,7 @@ describe('the view id header', () => {
   it('goes on a browser call to the page origin and not on one elsewhere, which counts no queries', async () => {
     const recorder = new ViewRecorder(VIEW, '/r', { side: 'browser', origin: 'https://admin.test' });
     await recorder.call(context(recorder), 'same', async (note) => {
-      expect(note.headers('/api/x')).toEqual({ [VIEW_HEADER]: VIEW });
+      expect(note.headers('/api/x')).toEqual({ [VIEW_HEADER]: VIEW, [PART_HEADER]: 'load' });
       return 1;
     });
     await recorder.call(context(recorder), 'cross', async (note) => {
@@ -101,6 +101,24 @@ describe('the view id header', () => {
       return 1;
     });
     expect(recorder.calls.map((call) => call.queries_counted)).toEqual([true, false]);
+  });
+
+  it("names the call's part beside it, so a named poll's queries are read apart from the load's", async () => {
+    const recorder = new ViewRecorder(VIEW, '/r', { side: 'server' });
+    for (const part of ['poll:status', 'later:counts', 'endpoint:/issues/[number]']) {
+      await recorder.call(context(recorder, part), 'op', async (note) => {
+        expect(note.headers('https://api.test/x')).toEqual({ [VIEW_HEADER]: VIEW, [PART_HEADER]: part });
+        return 1;
+      });
+    }
+  });
+
+  it('sends the view id alone for a part no header can carry as it stands', async () => {
+    const recorder = new ViewRecorder(VIEW, '/r', { side: 'server' });
+    await recorder.call(context(recorder, 'poll:état'), 'op', async (note) => {
+      expect(note.headers('https://api.test/x')).toEqual({ [VIEW_HEADER]: VIEW });
+      return 1;
+    });
   });
 });
 
