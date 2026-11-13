@@ -190,6 +190,7 @@ describe('screenReportHandle', () => {
     expect(record.attributes['screen.navigation']).toBeUndefined();
     expect(record.attributes['screen.load.calls']).toBe(0);
     expect(record.attributes['screen.poll.count']).toBe(1);
+    expect(record.attributes['screen.poll.refresh.count']).toBe(1);
     expect(record.attributes['screen.poll.max_calls']).toBe(2);
   });
 
