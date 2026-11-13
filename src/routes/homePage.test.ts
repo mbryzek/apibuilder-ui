@@ -9,6 +9,7 @@ import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 import { mount, unmount, flushSync } from 'svelte';
 import Page from './+page.svelte';
 import { session } from '#lib/test-support/fixtures.ts';
+import { parameterBounds } from '#generated/com-bryzek-apibuilder.ts';
 import { mockApiClients } from '#lib/test-support/mocks.ts';
 
 const client = vi.hoisted(() => ({
@@ -70,7 +71,11 @@ describe('home page load', () => {
   it('reads the memberships of a signed-in member and reports a failure', async () => {
     const data = await invokeLoad({ session: session() });
 
-    expect(client.getMemberships).toHaveBeenCalledWith({ userId: 'user-1', limit: 100, offset: 0 });
+    expect(client.getMemberships).toHaveBeenCalledWith({
+      userId: 'user-1',
+      limit: parameterBounds.getMemberships.limit.maximum,
+      offset: 0
+    });
     expect(data).toMatchObject({ myOrgs: [], loadError: { status: 401 } });
   });
 
