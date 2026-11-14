@@ -101,4 +101,10 @@ describe('updating visibility changes visibility and nothing else', () => {
 
     expect(client.updateApplicationByAppKey).not.toHaveBeenCalled();
   });
+
+  it('refuses a visibility the page does not offer, before the API sees it', async () => {
+    await invokeUpdate({ visibility: 'user' });
+
+    expect(client.updateApplicationByAppKey).not.toHaveBeenCalled();
+  });
 });

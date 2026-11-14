@@ -9,6 +9,7 @@ import { optionalString, requiredEnum, requiredString } from '#lib/server/form.t
 import { redirectWithFlash } from '#lib/server/flash.ts';
 import type { Organization, OrganizationForm } from '#generated/com-bryzek-apibuilder.ts';
 import { Visibility } from '#generated/com-bryzek-apibuilder.ts';
+import { OFFERED_VISIBILITIES } from '#lib/utils/visibility.ts';
 
 export const load: PageServerLoad = requireAuthLoad;
 
@@ -23,7 +24,7 @@ export const actions: Actions = {
     const name = requiredString(formData, 'name');
     const namespace = requiredString(formData, 'namespace');
     const key = optionalString(formData, 'key');
-    const visibility = requiredEnum(formData, 'visibility', Object.values(Visibility)) ?? Visibility.Organization;
+    const visibility = requiredEnum(formData, 'visibility', OFFERED_VISIBILITIES) ?? Visibility.Organization;
     // Travels back with every refusal, so a submission the server turns down keeps what was typed.
     const values = { name: name ?? '', namespace: namespace ?? '', key: key ?? '', visibility };
 

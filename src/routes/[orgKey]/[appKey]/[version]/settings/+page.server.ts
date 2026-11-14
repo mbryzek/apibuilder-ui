@@ -10,7 +10,7 @@ import { requireAuth, adminClient } from '#lib/server/auth.ts';
 import { requiredEnum } from '#lib/server/form.ts';
 import { redirectWithFlash } from '#lib/server/flash.ts';
 import type { Application } from '#generated/com-bryzek-apibuilder.ts';
-import { Visibility } from '#generated/com-bryzek-apibuilder.ts';
+import { OFFERED_VISIBILITIES } from '#lib/utils/visibility.ts';
 
 /**
  * The application itself, not the org and not the spec.
@@ -44,7 +44,7 @@ export const actions: Actions = {
     const { session, client } = await adminClient(ctx(event, 'form'), locals, params.orgKey);
     const formData = await request.formData();
 
-    const visibility = requiredEnum(formData, 'visibility', Object.values(Visibility));
+    const visibility = requiredEnum(formData, 'visibility', OFFERED_VISIBILITIES);
     if (!visibility) {
       return fail(400, { errors: [{ message: 'Visibility is required' }] });
     }
