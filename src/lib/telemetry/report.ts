@@ -84,6 +84,25 @@ export interface ReportHalf {
    * half a browser bundle older than the field posted.
    */
   release?: string;
+  /**
+   * Whether the browser said it is driven by automation (`navigator.webdriver`), posted by the browser
+   * half and present only when it is. A claim the client makes; `/_telemetry` reads it into
+   * `automated` and no rule reads it by itself.
+   */
+  webdriver?: true;
+  /**
+   * What marked this half's client as automated, not a person (`clientMarksOf` in `server.ts`): the
+   * browser's own `navigator.webdriver`, or an automation token in, or the absence of, the user agent
+   * of the request the half arrived by. Stamped on the server, never taken from a client; absent for
+   * a client nothing marked.
+   */
+  automated?: 'webdriver' | 'user-agent';
+  /**
+   * A short hash of the user agent of the request this half arrived by, stamped on the server. A
+   * person's browser sends one user agent for every request of a view, so a view whose halves carry
+   * two is a scanner rotating its claims, which the rules leave out. Absent from a request with none.
+   */
+  agent?: string;
 }
 
 /** A half as it leaves for the door: stamped with the app, its repository and the budget its screen was held to. */
@@ -226,7 +245,8 @@ export function sanitizeBrowserHalf(body: unknown): ReportHalf | null {
     polls: sanitizePolls(half['polls']),
     poll_peaks: sanitizePolls(half['poll_peaks']),
     timing,
-    ...withRelease(half['release'])
+    ...withRelease(half['release']),
+    ...(half['webdriver'] === true ? { webdriver: true as const } : {})
   };
 }
 
@@ -268,7 +288,9 @@ export function reportAttributes(stamped: StampedHalf, peaks: PartPeaks): Attrib
     ['screen.phase.render_ms', timing?.phases?.render_ms],
     ['screen.client_rtt_ms', stamped.client_rtt_ms],
     ['screen.report.lost', stamped.lost_halves === 0 ? undefined : stamped.lost_halves],
-    ['screen.release', stamped.release]
+    ['screen.release', stamped.release],
+    ['screen.client.automated', stamped.automated],
+    ['screen.client.agent', stamped.agent]
   ];
   return [
     attribute('screen.report', stamped.half),

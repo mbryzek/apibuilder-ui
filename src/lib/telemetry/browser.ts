@@ -186,9 +186,18 @@ export function timingOf(view: ViewState, now: number): ReportTiming {
   };
 }
 
+/** `webdriver` when the browser says automation drives it (`navigator.webdriver`): the half is a scanner's or a test's, no person's. */
+function webdriverOf(): { webdriver?: true } {
+  try {
+    return navigator.webdriver === true ? { webdriver: true } : {};
+  } catch {
+    return {};
+  }
+}
+
 /** The half to send: a hard load's `load` calls before hydration finished are replays the server half already holds. */
 export function browserHalfOf(view: ViewState, now: number): ReturnType<typeof halfOf> {
-  const half = halfOf(view.recorder, { timing: timingOf(view, now) });
+  const half = { ...halfOf(view.recorder, { timing: timingOf(view, now) }), ...webdriverOf() };
   const entered = view.recorder.enteredAt;
   if (view.navigation !== 'hard' || entered === null) return half;
   return { ...half, calls: half.calls.filter((call) => !(call.part === 'load' && call.start_ms <= entered)) };

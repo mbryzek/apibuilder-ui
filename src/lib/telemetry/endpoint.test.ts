@@ -59,6 +59,27 @@ describe('/_telemetry', () => {
     expect(decodeLogs(fetch.mock.calls[1]![1]?.body as Uint8Array).attributes).not.toHaveProperty('screen.client_rtt_ms');
   });
 
+  it("marks a client automated from the post's own user agent or the browser's webdriver claim, never a mark the body claims", async () => {
+    const { fetch, config } = door();
+    const chrome = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36';
+    const headless = chrome.replace('Chrome/', 'HeadlessChrome/');
+    const attributes = (i: number) => decodeLogs(fetch.mock.calls[i]![1]?.body as Uint8Array).attributes;
+    const forged = JSON.stringify({ ...half, automated: 'user-agent', agent: 'deadbeef' });
+    await telemetryHandler(config)(post(forged, { 'user-agent': chrome }));
+    await telemetryHandler(config)(post(JSON.stringify(half), { 'user-agent': headless }));
+    await telemetryHandler(config)(post(JSON.stringify({ ...half, webdriver: true }), { 'user-agent': chrome }));
+    await telemetryHandler(config)(post(JSON.stringify(half)));
+    expect(attributes(0)).not.toHaveProperty('screen.client.automated');
+    expect(attributes(0)['screen.client.agent']).toMatch(/^[0-9a-f]{8}$/);
+    expect(attributes(0)['screen.client.agent']).not.toBe('deadbeef');
+    expect(attributes(1)['screen.client.automated']).toBe('user-agent');
+    expect(attributes(1)['screen.client.agent']).not.toBe(attributes(0)['screen.client.agent']);
+    expect(attributes(2)['screen.client.automated']).toBe('webdriver');
+    expect(attributes(2)['screen.client.agent']).toBe(attributes(0)['screen.client.agent']);
+    expect(attributes(3)['screen.client.automated']).toBe('user-agent');
+    expect(attributes(3)).not.toHaveProperty('screen.client.agent');
+  });
+
   it('answers 413 over 64 KB, declared or not', async () => {
     const { config } = door();
     const big = JSON.stringify({ ...half, pad: 'x'.repeat(MAX_REPORT_BYTES) });
