@@ -16,7 +16,8 @@ interface Navigation {
 }
 
 let before: ((navigation: Required<Navigation>) => void) | null = null;
-let after: ((navigation: { type: string; to?: { url: URL } }) => void) | null = null;
+type Entered = { type: string; to?: { route?: { id: string | null }; url: URL } };
+let after: ((navigation: Entered) => void) | null = null;
 let clock = 0;
 const page = { route: { id: '/issues/[id]' as string | null }, data: {} as Record<string, unknown> };
 
@@ -27,7 +28,7 @@ vi.mock('$app/navigation', () => ({
   beforeNavigate: (fn: (navigation: Required<Navigation>) => void) => {
     before = fn;
   },
-  afterNavigate: (fn: (navigation: { type: string; to?: { url: URL } }) => void) => {
+  afterNavigate: (fn: (navigation: Entered) => void) => {
     after = fn;
   }
 }));
@@ -289,8 +290,32 @@ describe('a soft navigation', () => {
     // A pointer passing over a link to another page, or the leaving page's poll, before the navigation enters.
     expect(await headerOf('/issues/2/__data.json')).toBeNull();
     expect(await headerOf('/issues/1/__data.json?x-sveltekit-invalidated=01')).toBeNull();
-    expect(await headerOf('/other/__data.json?x-sveltekit-trailing-slash=1')).toBe(`${id}.nav`);
     expect(await headerOf('/other?/save', { method: 'POST', headers: { 'x-sveltekit-action': 'true' } })).toBe(`${id}.nav`);
+  });
+
+  it("reads SvelteKit's own query parameters as no part of the page a navigation enters", async () => {
+    const { browser } = await load();
+    browser.registerScreenReport({ view: VIEW });
+    after?.({ type: 'enter' });
+    navigate({ type: 'link' });
+    expect(await headerOf('/other/__data.json?x-sveltekit-trailing-slash=1')).toMatch(/^sv_[0-9a-f]{32}\.nav$/);
+  });
+
+  it("marks only a navigation's own data request, so a preload of the page it is entering is not booked as a second load", async () => {
+    const { browser } = await load();
+    browser.registerScreenReport({ view: VIEW });
+    after?.({ type: 'enter' });
+    navigate({ type: 'link' });
+    const id = /^(sv_[0-9a-f]{32})\.nav$/.exec((await headerOf('/other/__data.json')) ?? '')?.[1];
+    expect(id).toBeDefined();
+    // The pointer still moving over the link it clicked: SvelteKit preloads the same page again.
+    expect(await headerOf('/other/__data.json')).toBeNull();
+    expect(await headerOf('/other?/save', { method: 'POST', headers: { 'x-sveltekit-action': 'true' } })).toBe(`${id}.nav`);
+    after?.({ type: 'link' });
+    // Once entered, a data request for the page is the view's refresh.
+    expect(await headerOf('/other/__data.json?x-sveltekit-invalidated=01')).toBe(id);
+    navigate({ type: 'link' });
+    expect(await headerOf('/other/__data.json')).toMatch(/^sv_[0-9a-f]{32}\.nav$/);
   });
 
   it('reports no time to show for a navigation that entered its view within the tick it began', async () => {
@@ -361,6 +386,30 @@ describe('a soft navigation', () => {
     after?.({ type: 'link' });
     expect(await headerOf('/other/__data.json')).toBe(id);
     expect((await sent()).map((half) => half['view'])).toEqual([VIEW]);
+  });
+
+  it('enters a view of its own on the page a navigation it did not start ends on, a link overtaking it or a redirect', async () => {
+    const { browser } = await load();
+    browser.registerScreenReport({ view: VIEW });
+    after?.({ type: 'enter' });
+    clock = 1000;
+    navigate({ type: 'link' });
+    const overtaken = (await headerOf('/other/__data.json'))?.replace('.nav', '');
+    // A link followed while the navigation is in flight: SvelteKit starts it without beforeNavigate,
+    // and its data request, for a page the view does not show, names none.
+    expect(await headerOf('/notices/7/__data.json')).toBeNull();
+    clock = 1400;
+    after?.({ type: 'link', to: { route: { id: '/notices/[n]' }, url: new URL('/notices/7', location.href) } });
+    const shown = await headerOf('/notices/7?/acknowledge', { method: 'POST', headers: { 'x-sveltekit-action': 'true' } });
+    expect(shown).toMatch(/^sv_[0-9a-f]{32}$/);
+    expect(shown).not.toBe(overtaken);
+    // The reload after the form action is the shown view's refresh; the page that never showed has none.
+    expect(await headerOf('/notices/7/__data.json?x-sveltekit-invalidated=01')).toBe(shown);
+    expect(await headerOf('/other/__data.json')).toBeNull();
+    hide();
+    const halves = await sent();
+    expect(halves.map((half) => half['view'])).toEqual([VIEW, shown]);
+    expect(halves[1]).toMatchObject({ route: '/notices/[n]', timing: { navigation: 'soft', show_ms: 400 } });
   });
 
   it('sends the view a navigation is leaving when the document goes away mid-navigation', async () => {
