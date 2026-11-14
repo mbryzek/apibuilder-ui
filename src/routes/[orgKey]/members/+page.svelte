@@ -2,7 +2,7 @@
   import PendingForm from '#lib/components/PendingForm.svelte';
   import { Submission } from 'ui/submission.ts';
   import type { Organization, Membership } from '#generated/com-bryzek-apibuilder.ts';
-  import { MembershipRole } from '#generated/com-bryzek-apibuilder.ts';
+  import { MembershipRole, MembershipStatus } from '#generated/com-bryzek-apibuilder.ts';
   import type { ApiErrorItem } from '#lib/api/error-handler.ts';
   import type { LoadError } from '#lib/api/load-error.ts';
   import LoadErrorBanner from '#lib/components/LoadErrorBanner.svelte';
@@ -21,7 +21,7 @@
       pendingRequestsCapped: boolean;
       loadError: LoadError | null;
     };
-    form: { errors?: ApiErrorItem[]; success?: boolean } | null;
+    form: { errors?: ApiErrorItem[]; success?: boolean; invited?: string } | null;
   }
 
   let { data, form: formResult }: Props = $props();
@@ -53,6 +53,12 @@
   {/if}
 
   <FormErrors errors={formResult?.errors} />
+
+  {#if formResult?.invited}
+    <p class="mb-6 rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-800" data-testid="member-invited">
+      Invitation sent to {formResult.invited}
+    </p>
+  {/if}
 
   {#if data.isAdmin}
     <div class="card mb-6">
@@ -101,6 +107,12 @@
               </td>
               <td class="py-3">
                 <span class="text-ab-dark-gray text-sm">{membership.role}</span>
+                {#if membership.status === MembershipStatus.Invited}
+                  <span
+                    class="ml-2 inline-block rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800"
+                    data-testid="member-invited-status">Invited</span
+                  >
+                {/if}
               </td>
               {#if data.isAdmin}
                 <td class="py-3 text-right">

@@ -11,7 +11,7 @@ import { requiredEnum, requiredString } from '#lib/server/form.ts';
 import { PAGE_FETCH_LIMIT, PAGE_LIMIT, parseOffset, toPage } from '#lib/pagination.ts';
 import { adminGuidAction, type AdminActionEvent, type OrgScope } from '#lib/server/scoped-action.ts';
 import type { Membership, User, MembershipRequest, Organization } from '#generated/com-bryzek-apibuilder.ts';
-import { MembershipRole } from '#generated/com-bryzek-apibuilder.ts';
+import { MembershipRole, MembershipStatus } from '#generated/com-bryzek-apibuilder.ts';
 
 export const load: PageServerLoad = async (event) => {
   const session = requireAuth(event);
@@ -62,6 +62,24 @@ export const load: PageServerLoad = async (event) => {
 const membershipsInOrg: OrgScope<Membership> = (context, client, orgKey) => (limit, offset) =>
   handleApiCall<Membership[]>(() => client.getMemberships(context, { orgKey, limit, offset }));
 
+type MembersEvent = Parameters<Actions['addMember']>[0];
+type ApiBuilderClient = Awaited<ReturnType<typeof adminClient>>['client'];
+
+/**
+ * Add a member by email address. `invited` names the address when the platform created the
+ * account and sent the invitation, so the page can say an email went out rather than imply the
+ * person can already sign in.
+ */
+async function addByEmail(event: MembersEvent, client: ApiBuilderClient, email: string, role: MembershipRole) {
+  const response = await handleApiCall<Membership>(() =>
+    client.createMembership(ctx(event, 'form'), { body: { org_key: event.params.orgKey, email, role } })
+  );
+  if (isApiError(response)) {
+    return actionFail(response);
+  }
+  return response.data.status === MembershipStatus.Invited ? { success: true, invited: email } : { success: true };
+}
+
 /**
  * Promotion and demotion are the same act: a role change on the membership the table already
  * shows, which keeps its id and leaves the person in the organization either way.
@@ -91,16 +109,14 @@ export const actions: Actions = {
       return fail(400, { errors: [{ message: 'Email or nickname is required' }] });
     }
 
-    // Find user by email or nickname. The email lookup is allowed to fail — an `emailOrNickname`
-    // that is a nickname is not a valid email — so the last lookup is the one that decides, and
-    // `actionFailMissing` keeps an unanswered one from reading as "no such user".
-    let lookup = await handleApiCall<User[]>(() => client.getUsers(ctx(event, 'form'), { email: emailOrNickname }));
-    let user = isApiSuccess(lookup) ? lookup.data[0] : undefined;
-
-    if (!user) {
-      lookup = await handleApiCall<User[]>(() => client.getUsers(ctx(event, 'form'), { nickname: emailOrNickname }));
-      user = isApiSuccess(lookup) ? lookup.data[0] : undefined;
+    // An address goes to the platform whole: it adds the person with an account at once, and
+    // creates one for an address that has none and emails them an invitation to set its password.
+    if (emailOrNickname.includes('@')) {
+      return addByEmail(event, client, emailOrNickname, role);
     }
+
+    const lookup = await handleApiCall<User[]>(() => client.getUsers(ctx(event, 'form'), { nickname: emailOrNickname }));
+    const user = isApiSuccess(lookup) ? lookup.data[0] : undefined;
 
     if (!user) {
       return actionFailMissing(lookup, `User not found: ${emailOrNickname}`);
