@@ -6,7 +6,7 @@ API Builder is an API-first development platform. You define your API in a simpl
 
 ## Core Workflow
 
-1. Install: `api init`
+1. Install: `curl -fsSL https://apibuilder.org/install.sh | sh`, then `api init`
 2. Define: Write your API in api.json format
 3. Generate: Run `api` to produce code
 4. Verify: Compile — if it builds, it matches the spec

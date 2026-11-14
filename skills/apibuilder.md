@@ -14,13 +14,14 @@ Activate when:
 - Building a new REST API from requirements
 - Adding endpoints to an existing API
 - Generating client libraries, server stubs, or test mocks
-- The project has a `.api/config` file or `spec/*.json` files
+- The project has a `.api/config.pkl` file or `spec/*.json` files
 
 ## Prerequisites
 
-1. The `api` CLI must be on your `$PATH`. Install from https://github.com/apicollective/apibuilder-cli or your project's devops tooling.
-2. Config exists at `~/.apibuilder/config` with a valid token
-3. If no config exists, run `api init` to create an anonymous org and token
+1. The `api` CLI must be on your `$PATH`. Install it with `curl -fsSL https://apibuilder.org/install.sh | sh` (macOS arm64 or Linux x86_64), which puts `api` in `~/.local/bin` with the `ApiConfig.pkl` its configs amend beside it. Run the same line again to upgrade.
+2. [pkl](https://pkl-lang.org/main/current/pkl-cli/index.html#installation) is on your `$PATH`: `api` evaluates `.api/config.pkl` with it.
+3. Config exists at `~/.apibuilder/config` with a valid token
+4. If no config exists, run `api init` to create an anonymous org and token
 
 ## Core Workflow
 
@@ -114,7 +115,7 @@ Fix any errors and re-validate until clean.
 api
 ```
 
-This auto-detects operations: uploads specs if they exist locally, then generates code. The tool reads `.api/config` for generator mappings.
+This auto-detects operations: uploads specs if they exist locally, then generates code. The tool reads `.api/config.pkl` for generator mappings.
 
 For specific apps only:
 
@@ -182,20 +183,29 @@ If tests fail, fix your implementation and re-run. The spec is the source of tru
 | OpenAPI 3             | `openapi_3`                    |
 | JSON Schema           | `json_schema`                  |
 
-## .api/config Format
+## .api/config.pkl Format
 
-Create `.api/config` in the project root to map generators to output directories:
+Create `.api/config.pkl` in the project root to map generators to output directories (`api init` writes a starter):
 
-```yaml
-my-org:
-  - generators:
-      bryzek_play_controller: generated/app/apibuilder
-      bryzek_play_client: generated/app/apibuilder
-      bryzek_play_mock_client: generated/test/apibuilder
-      bryzek_play_routes: api/conf
-    applications:
-      my-service:
+```pkl
+amends "modulepath:/api/ApiConfig.pkl"
+
+org = "my-org"
+
+applications = new Listing<AppGroup> {
+  new {
+    names { "my-service" }
+    generators = new Listing<Generator> {
+      new { key = "bryzek_play_controller"; target = "generated/app/apibuilder" }
+      new { key = "bryzek_play_client"; target = "generated/app/apibuilder" }
+      new { key = "bryzek_play_mock_client"; target = "generated/test/apibuilder" }
+      new { key = "bryzek_play_routes"; target = "api/conf" }
+    }
+  }
+}
 ```
+
+`modulepath:/api/ApiConfig.pkl` resolves to the copy installed beside `api`, so the config does not depend on where the repository is checked out.
 
 ## Using Spec Data for UX Planning
 

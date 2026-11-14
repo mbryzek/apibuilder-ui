@@ -157,26 +157,29 @@
 
   <!-- Config Example -->
   <div class="card mb-8">
-    <h2 class="text-ab-dark-blue mb-3 text-lg font-semibold">Using Generators in .api/config</h2>
+    <h2 class="text-ab-dark-blue mb-3 text-lg font-semibold">Using Generators in .api/config.pkl</h2>
     <p class="text-ab-dark-blue mb-3 text-sm">
-      Reference generators by their key in your <code class="rounded bg-gray-100 px-1.5 py-0.5">.api/config</code> file, mapping each to the output
-      directory where generated files should be written:
+      Reference generators by their key in your <code class="rounded bg-gray-100 px-1.5 py-0.5">.api/config.pkl</code> file, mapping each to the
+      output directory where generated files should be written:
     </p>
     <CodeBlock
-      code={`myorg:
-  - generators:
-      typescript: ./src/generated
-    applications:
-      my-api:
+      code={`amends "modulepath:/api/ApiConfig.pkl"
 
-  - generators:
-      bryzek_play_model: generated/app/apibuilder
-      bryzek_play_client: generated/app/apibuilder
-      bryzek_play_mock_client: generated/test/apibuilder
-      bryzek_play_controller: generated/app/apibuilder
-      bryzek_play_routes: conf
-    applications:
-      my-api:`}
+org = "myorg"
+
+applications = new Listing<AppGroup> {
+  new {
+    names { "my-api" }
+    generators = new Listing<Generator> {
+      new { key = "typescript"; target = "./src/generated" }
+      new { key = "bryzek_play_model"; target = "generated/app/apibuilder" }
+      new { key = "bryzek_play_client"; target = "generated/app/apibuilder" }
+      new { key = "bryzek_play_mock_client"; target = "generated/test/apibuilder" }
+      new { key = "bryzek_play_controller"; target = "generated/app/apibuilder" }
+      new { key = "bryzek_play_routes"; target = "conf" }
+    }
+  }
+}`}
     />
   </div>
 
