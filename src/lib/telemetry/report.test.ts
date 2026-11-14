@@ -42,6 +42,14 @@ describe('sanitizeBrowserHalf', () => {
     expect(half?.calls[0]).not.toHaveProperty('extra');
   });
 
+  it("keeps the browser's webdriver claim only as true, and never a mark the server stamps", () => {
+    expect(sanitizeBrowserHalf({ ...browserHalf, webdriver: true })?.webdriver).toBe(true);
+    expect(sanitizeBrowserHalf({ ...browserHalf, webdriver: 'yes' })).not.toHaveProperty('webdriver');
+    const forged = sanitizeBrowserHalf({ ...browserHalf, automated: 'user-agent', agent: 'deadbeef' });
+    expect(forged).not.toHaveProperty('automated');
+    expect(forged).not.toHaveProperty('agent');
+  });
+
   it('drops a call that names no operation and turns nonsense numbers into nulls', () => {
     const half = sanitizeBrowserHalf({
       ...browserHalf,
@@ -129,6 +137,22 @@ describe('the record monitoring reads', () => {
     expect(keys(stamped)).not.toContain('screen.client_rtt_ms');
     const far = reportAttributes({ ...stamped, client_rtt_ms: 753 }, peaksOfCalls(stamped));
     expect(far.find((a) => a.key === 'screen.client_rtt_ms')?.value).toBe(753);
+  });
+
+  it("carries the client's marks only where the server stamped them", () => {
+    const stamped = { ...server, app: 'idempotent', repo: 'mbryzek/idempotent', budget: globalBudget };
+    const keys = (half: typeof stamped) => reportAttributes(half, peaksOfCalls(half)).map((a) => a.key);
+    expect(keys(stamped)).not.toContain('screen.client.automated');
+    expect(keys(stamped)).not.toContain('screen.client.agent');
+    const marked = Object.fromEntries(
+      reportAttributes({ ...stamped, automated: 'webdriver', agent: '0a1b2c3d', webdriver: true }, peaksOfCalls(stamped)).map((a) => [
+        a.key,
+        a.value
+      ])
+    );
+    expect(marked['screen.client.automated']).toBe('webdriver');
+    expect(marked['screen.client.agent']).toBe('0a1b2c3d');
+    expect(Object.keys(marked)).not.toContain('screen.webdriver');
   });
 
   it("carries a hard load's phases, each only where the browser recorded it", () => {

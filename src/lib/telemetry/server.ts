@@ -165,6 +165,39 @@ export function clientRttOf(platform: unknown, request?: Request): number | null
   return rtts.length === 0 ? null : Math.round(Math.max(...rtts));
 }
 
+/** An automation's own name in a user agent: a headless or driven browser, a lab or uptime tester, a crawler, an HTTP library. */
+const AUTOMATION_AGENT =
+  /HeadlessChrome|PhantomJS|Puppeteer|Playwright|Selenium|WebDriver|Lighthouse|PTST\/|GTmetrix|Pingdom|bot\/|crawler|spider|curl\/|Wget\/|python-|Go-http-client|okhttp|axios\/|node-fetch|undici/i;
+
+/** The marks a half carries of the client it came from: `automated` and `agent` (`ReportHalf`). */
+export type ClientMarks = Pick<ReportHalf, 'automated' | 'agent'>;
+
+/** FNV-1a over the text, eight hex digits: short enough to carry on every half, enough to tell two agents apart. */
+function agentHash(agent: string): string {
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < agent.length; i += 1) {
+    hash ^= agent.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return (hash >>> 0).toString(16).padStart(8, '0');
+}
+
+/**
+ * What the request a half arrived by shows of its client: `automated` when the browser said it is
+ * driven (`webdriver`, the browser half's own `navigator.webdriver`) or the user agent names an
+ * automation or is missing, and the user agent's hash. A screen's time is a person's wait, and a
+ * scanner's headless browser in a datacenter is no person: the rules leave a marked view out
+ * (ISS-88846).
+ */
+export function clientMarksOf(request: Request, webdriver = false): ClientMarks {
+  const agent = request.headers.get('user-agent') ?? '';
+  const automated = webdriver ? 'webdriver' : agent === '' || AUTOMATION_AGENT.test(agent) ? 'user-agent' : undefined;
+  return {
+    ...(automated === undefined ? {} : { automated: automated }),
+    ...(agent === '' ? {} : { agent: agentHash(agent) })
+  };
+}
+
 /** The view id a hard load's root layout hands the browser; null for a request with no view. */
 export function screenViewId(event: { locals: object }): string | null {
   return viewOfLocals(event.locals)?.view ?? null;
@@ -234,9 +267,15 @@ export class Forwards {
 const forwards = new Forwards();
 
 /** Forward the half once the view's later parts settle. A document or data request reports even with no call. */
-async function forward(view: ViewRecorder, kind: ServerRequest, config: ScreenReportConfig, clientRtt: number | null): Promise<void> {
+async function forward(
+  view: ViewRecorder,
+  kind: ServerRequest,
+  config: ScreenReportConfig,
+  clientRtt: number | null,
+  client: ClientMarks
+): Promise<void> {
   await settledWithin(view);
-  const taken = halfOf(view, { request: kind, client_rtt_ms: clientRtt });
+  const taken = { ...halfOf(view, { request: kind, client_rtt_ms: clientRtt }), ...client };
   const half = kind === 'refresh' ? asRefresh(taken) : taken;
   if (half.calls.length === 0 && half.dropped_calls === 0 && kind !== 'document' && kind !== 'data') return;
   await postReport(half, budgetFor(view.route, config.budgets), config);
@@ -270,7 +309,7 @@ export function screenReportHandle(
         console.warn('screen report: nothing keeps this runtime alive for the server half; a half may be lost as the response ends');
       }
       const finish = forwards.start();
-      const sent = forward(view, kind, config, clientRttOf(event.platform, event.request))
+      const sent = forward(view, kind, config, clientRttOf(event.platform, event.request), clientMarksOf(event.request))
         .catch(() => undefined)
         .finally(finish);
       keepAlive?.(sent);

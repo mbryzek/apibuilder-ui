@@ -10,11 +10,12 @@
  * limit stops one page looping its beacon rather than metering the fleet; the payload cap and the
  * door's token are the hard bounds. The server half never comes here: the hook forwards it in
  * process. The budget the half is stamped with is the server's, resolved from the route, and so is
- * the client round trip: Cloudflare's measure of the post's own connection.
+ * the client round trip: Cloudflare's measure of the post's own connection, and what marks the client
+ * automated: the post's own user agent, and the `webdriver` the browser half says it ran under.
  */
 import { budgetFor } from './budget';
 import { postReport, sanitizeBrowserHalf, withClientRtt } from './report';
-import { clientRttOf, keepAliveOf, type ScreenReportConfig } from './server';
+import { clientMarksOf, clientRttOf, keepAliveOf, type ScreenReportConfig } from './server';
 
 /** The largest browser half accepted, in bytes. */
 export const MAX_REPORT_BYTES = 64 * 1024;
@@ -111,7 +112,11 @@ export function telemetryHandler(
     if (text === null) return new Response(null, { status: 413 });
     const posted = sanitizeBrowserHalf(parse(text));
     if (posted === null) return new Response(null, { status: 400 });
-    const half = { ...posted, ...withClientRtt(clientRttOf(event.platform, event.request)) };
+    const half = {
+      ...posted,
+      ...withClientRtt(clientRttOf(event.platform, event.request)),
+      ...clientMarksOf(event.request, posted.webdriver === true)
+    };
     const sent = postReport(half, budgetFor(half.route, config.budgets), config);
     const waitUntil = await keepAliveOf(event.platform, config);
     if (waitUntil === null) await sent;
