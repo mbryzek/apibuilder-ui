@@ -97,6 +97,8 @@ interface ViewState {
   navigation: 'hard' | 'soft';
   /** The page the view shows (`pageOf`), which a refresh's data request reloads; null where the navigation named none. */
   page: string | null;
+  /** Whether a soft navigation has sent its own data request for the page it is entering: it sends one. */
+  loadSent: boolean;
   showMs: number | null;
   finishedMs: number | null;
   interactions: InteractionEntry[];
@@ -146,6 +148,7 @@ function newView(id: string, route: string | null, url: URL | null, navigation: 
     recorder: new BrowserViewRecorder(id, route, { side: 'browser', startedAt, origin: location.origin }),
     navigation,
     page: url === null ? null : pageOf(url.pathname, url.search),
+    loadSent: false,
     showMs: null,
     finishedMs: null,
     interactions: [],
@@ -248,14 +251,21 @@ export function dataRequestPage(input: RequestInfo | URL): string | null {
  * nor its navigation's load, so it names none and its server half mints its own, read against the
  * load budget of the route it loads. A redirect is a navigation of its own, entering its own view.
  * ISS-80682
+ *
+ * A navigation sends one data request for the page it enters. Another for the same page before it
+ * enters is a preload SvelteKit starts while the navigation's own load is in flight (the pointer
+ * still moving over the link it clicked, a tap, a second link to the page), since a navigation's
+ * load is no preload a later one could reuse: it names no view either. ISS-82768
  */
 function currentMark(input: RequestInfo | URL): string | null {
   const view = current;
   if (view === null) return null;
   const navigating = view.navigation === 'soft' && view.recorder.enteredAt === null;
-  if (view.page !== null) {
-    const loads = dataRequestPage(input);
-    if (loads !== null && loads !== view.page) return null;
+  const loads = dataRequestPage(input);
+  if (view.page !== null && loads !== null && loads !== view.page) return null;
+  if (navigating && loads !== null) {
+    if (view.loadSent) return null;
+    view.loadSent = true;
   }
   return viewMark(view.recorder.view, navigating);
 }
@@ -382,6 +392,27 @@ export function cancelled(error: unknown): boolean {
   return error instanceof Error && error.message === 'navigation cancelled';
 }
 
+/**
+ * The view a navigation enters, made current. A soft navigation ending on another page than the one
+ * its view was minted for is a navigation of its own that SvelteKit started without `beforeNavigate`:
+ * a link followed while another navigation is in flight overtakes it, and a redirect in a load moves
+ * it. Its data request went out for a page the view does not show, so it named no view and its server
+ * half holds an id of its own; the page on screen is a new view, and every later refresh and form
+ * action names that one, never the view of a page that never showed. That view is dropped unsent:
+ * it has no time to show. ISS-86736
+ */
+function enteredView(view: ViewState | null, to: { route?: { id: string | null } | null; url: URL } | null | undefined): ViewState | null {
+  if (view === null || !to?.url) return view;
+  const entered = pageOf(to.url.pathname, to.url.search);
+  if (view.navigation === 'soft' && view.recorder.enteredAt === null && view.page !== null && entered !== view.page) {
+    view.sent = true;
+    current = newView(mintViewId(), to.route?.id ?? null, to.url, 'soft', view.recorder.startedAt);
+    return current;
+  }
+  view.page = entered;
+  return view;
+}
+
 /** Start the browser half. Must run during component init: call it from the root layout. */
 export function registerScreenReport(options: ScreenReportOptions): void {
   const endpoint = options.endpoint ?? TELEMETRY_ENDPOINT;
@@ -414,10 +445,8 @@ export function registerScreenReport(options: ScreenReportOptions): void {
   });
 
   afterNavigate(({ type, to }) => {
-    const view = current;
+    const view = enteredView(current, to);
     if (view === null) return;
-    // The page the view entered, which a redirect in its load can have moved from where the navigation began.
-    if (to?.url) view.page = pageOf(to.url.pathname, to.url.search);
     sendLeaving(endpoint);
     view.recorder.enteredAt = view.recorder.elapsed();
     if (type !== 'enter') view.showMs = softNavigationShowMs(softNav.elapsed(performance.now()));
