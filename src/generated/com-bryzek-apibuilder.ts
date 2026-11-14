@@ -18,6 +18,11 @@ export enum MembershipRole {
   Admin = 'admin'
 }
 
+export enum MembershipStatus {
+  Active = 'active',
+  Invited = 'invited'
+}
+
 export enum OriginalType {
   ApiJson = 'api_json',
   ServiceJson = 'service_json'
@@ -158,12 +163,22 @@ export interface Membership {
   user: User;
   organization: Organization;
   role: MembershipRole;
+  status: MembershipStatus;
 }
 
 /**
  * The mutable part of a membership. A membership's organization and user are fixed at creation -- only the role can change, and changing it is how a member is promoted or demoted without leaving the organization.
  */
 export interface MembershipForm {
+  role: MembershipRole;
+}
+
+/**
+ * Add somebody to an organization by email address. A person with an account for that address is added at once; a person with none gets an account created for them and an emailed invitation to set its password, and is a member, invited, until they do.
+ */
+export interface MembershipInvitationForm {
+  org_key: string;
+  email: string;
   role: MembershipRole;
 }
 
@@ -462,6 +477,12 @@ export interface GetMembershipsOptions {
   orgKey?: string;
   userId?: string;
   role?: MembershipRole;
+  headers?: Record<string, string>;
+  signal?: AbortSignal;
+}
+
+export interface CreateMembershipOptions {
+  body: MembershipInvitationForm;
   headers?: Record<string, string>;
   signal?: AbortSignal;
 }
@@ -1126,6 +1147,38 @@ export class ApiClient {
 
       if (response.status === 200) {
         return await Util.mustParseArray<Membership>(response, 'Membership');
+      }
+
+      if (response.status === 401) {
+        throw new UnauthorizedErrorResponse(response);
+      }
+
+      if (response.status === 422) {
+        throw new ValidationErrorsResponse(response);
+      }
+
+      throw new ApiException(response, `Request failed with status ${response.status}`);
+    });
+  }
+
+  async createMembership(context: CallContext, params: CreateMembershipOptions): Promise<Membership> {
+    return context.recorder.call(context, 'POST /apibuilder/memberships', async (note) => {
+      const url = `${this.baseUrl}/apibuilder/memberships`;
+
+      const response = await this.request(
+        url,
+        {
+          method: 'POST',
+          body: JSON.stringify(params.body)
+        },
+        'application/json',
+        { ...note.headers(url), ...params.headers },
+        params.signal
+      );
+      note.response(response);
+
+      if (response.status === 201) {
+        return await Util.mustParse<Membership>(response, 'Membership');
       }
 
       if (response.status === 401) {
