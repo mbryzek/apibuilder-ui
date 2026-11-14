@@ -15,7 +15,9 @@ function button(testid: string): HTMLButtonElement {
   return el as HTMLButtonElement;
 }
 
-function render(props: { onSettled?: () => void; refreshes?: `${string}:${string}` } = {}): void {
+function render(
+  props: { onSettled?: () => void; refreshes?: `${string}:${string}`; applies?: (data: Record<string, unknown> | undefined) => void } = {}
+): void {
   component = mount(PendingFormPair, { target, props });
   // `use:enhance` is applied by a mount effect, which is queued rather than run inline.
   flushSync();
@@ -108,6 +110,27 @@ describe('PendingForm', () => {
 
     expect(updates).toEqual([{ refreshAll: false }]);
     expect(invalidated).toEqual(['apibuilder:subscriptions']);
+  });
+
+  it('hands what a success answered to applies and re-runs no load', async () => {
+    const applied: unknown[] = [];
+    render({ refreshes: 'apibuilder:subscriptions', applies: (data) => void applied.push(data) });
+    const settled = await submitFunctions[0]!();
+    const updates: unknown[] = [];
+    await settled({ update: async (opts) => void updates.push(opts), result: { type: 'success', data: { removed: 'row-1' } } });
+
+    expect(updates).toEqual([{ refreshAll: false }]);
+    expect(applied).toEqual([{ removed: 'row-1' }]);
+    expect(invalidated).toEqual([]);
+  });
+
+  it('applies nothing after a failure', async () => {
+    const applied: unknown[] = [];
+    render({ applies: (data) => void applied.push(data) });
+    const settled = await submitFunctions[0]!();
+    await settled({ update: async () => {}, result: { type: 'failure' } });
+
+    expect(applied).toEqual([]);
   });
 
   it('re-runs nothing after a failure, whose errors the form shows over the data it has', async () => {

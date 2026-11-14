@@ -8,10 +8,13 @@
   import LoadErrorBanner from '#lib/components/LoadErrorBanner.svelte';
   import Pagination from '#lib/components/Pagination.svelte';
   import FormErrors from '#lib/components/FormErrors.svelte';
+  import { refreshAll } from '$app/navigation';
+  import { applyChange, changeOf, changesOwnAccess } from './changes.ts';
 
   interface Props {
     data: {
       org: Organization;
+      session?: { user: { id: string } } | undefined;
       isAdmin: boolean;
       memberships: Membership[];
       offset: number;
@@ -27,7 +30,15 @@
   let { data, form: formResult }: Props = $props();
 
   const org = $derived(data.org);
-  const memberships = $derived(data.memberships);
+  // The load's rows, with every change a form answered since applied in place: an add, a role
+  // change or a removal re-runs no load (./changes.ts). A navigation's new data resets it.
+  let memberships = $derived(data.memberships);
+
+  async function apply(answer: Record<string, unknown> | undefined): Promise<void> {
+    const change = changeOf(answer);
+    if (changesOwnAccess(memberships, change, data.session?.user.id)) return refreshAll();
+    memberships = applyChange(memberships, change);
+  }
   let confirmRemoveId = $state<string | null>(null);
   // A member's role change and removal answer the same membership: one Submission keyed by
   // membership, so either request disables every action on that row and no other row.
@@ -63,7 +74,7 @@
   {#if data.isAdmin}
     <div class="card mb-6">
       <h2 class="text-ab-dark-blue mb-3 text-lg font-semibold">Add Member</h2>
-      <PendingForm action="?/addMember" class="flex flex-col gap-3 sm:flex-row">
+      <PendingForm action="?/addMember" applies={apply} class="flex flex-col gap-3 sm:flex-row">
         {#snippet children(pending)}
           <input
             type="text"
@@ -118,7 +129,7 @@
                 <td class="py-3 text-right">
                   <div class="flex justify-end gap-2">
                     {#if membership.role === MembershipRole.Admin}
-                      <PendingForm action="?/revokeAdmin" submission={rowActions} key={membership.id} act="role">
+                      <PendingForm action="?/revokeAdmin" submission={rowActions} key={membership.id} act="role" applies={apply}>
                         {#snippet children(pending)}
                           <input type="hidden" name="guid" value={membership.id} />
                           <button type="submit" class="text-ab-blue hover:text-ab-dark-blue text-sm" disabled={pending}>
@@ -127,7 +138,7 @@
                         {/snippet}
                       </PendingForm>
                     {:else}
-                      <PendingForm action="?/makeAdmin" submission={rowActions} key={membership.id} act="role">
+                      <PendingForm action="?/makeAdmin" submission={rowActions} key={membership.id} act="role" applies={apply}>
                         {#snippet children(pending)}
                           <input type="hidden" name="guid" value={membership.id} />
                           <button type="submit" class="text-ab-blue hover:text-ab-dark-blue text-sm" disabled={pending}>
@@ -143,6 +154,7 @@
                         submission={rowActions}
                         key={membership.id}
                         act="remove"
+                        applies={apply}
                         onSettled={() => (confirmRemoveId = null)}
                       >
                         {#snippet children(pending)}

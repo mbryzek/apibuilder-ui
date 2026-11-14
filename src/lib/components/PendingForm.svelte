@@ -32,11 +32,17 @@
      * layout's too: a layout's calls are then not repeated for an answer they cannot change.
      */
     refreshes?: `${string}:${string}` | undefined;
+    /**
+     * Applies what a success answered to the page itself, so no load re-runs at all: for an action
+     * that answers with the row it changed. Handed the action's data; it may still re-run a load
+     * itself when the answer shows one is needed. Takes precedence over `refreshes`.
+     */
+    applies?: ((data: Record<string, unknown> | undefined) => void | Promise<void>) | undefined;
     /** The form body. Receives whether this form's request (or its item's) is on its way. */
     children: Snippet<[boolean]>;
   }
 
-  let { onSettled, submission: shared, key, act, refreshes, children, ...rest }: Props = $props();
+  let { onSettled, submission: shared, key, act, refreshes, applies, children, ...rest }: Props = $props();
 
   // Scoped to this component instance unless shared, which is what makes the flag per-FORM rather
   // than per-page: a page declaring one `isSubmitting` for several forms disables all of them on any
@@ -45,7 +51,7 @@
   const submission = $derived(shared ?? own);
 
   // The flag is cleared only after `update()` has run (Submission's `finally`), never before:
-  // `update()` runs `applyAction` and `refreshAll` (or `invalidate(refreshes)`), further
+  // `update()` runs `applyAction` and `refreshAll` (or `invalidate(refreshes)`, or `applies`), further
   // round-trips during which the old markup is still mounted. A flag cleared first re-enables the
   // submit button over that window, and on /tokens/create a second click there mints a second real
   // API token.
@@ -55,6 +61,11 @@
         () =>
         async ({ update, result }) => {
           onSettled?.();
+          if (applies !== undefined) {
+            await update({ refreshAll: false });
+            if (result.type === 'success') await applies(result.data);
+            return;
+          }
           if (refreshes === undefined) return update();
           await update({ refreshAll: false });
           if (result.type === 'success') await invalidate(refreshes);
