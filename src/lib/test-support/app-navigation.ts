@@ -4,7 +4,8 @@
  * Navigation needs SvelteKit's client router, which a mounted component does not have. A spec that
  * mounts a page still renders the components that import from here (LoadErrorBanner's Try again,
  * AccountMenu's close on navigation), so each export is an inert stand-in. `invalidate` records the
- * dependency it was handed in `invalidated`, so a spec can tell which loads a form re-runs.
+ * dependency it was handed in `invalidated`, so a spec can tell which loads a form re-runs,
+ * and `refreshAll` counts itself in `refreshes`.
  */
 
 /** Every resource `invalidate` was handed, in order; a spec clears it. */
@@ -16,6 +17,11 @@ export async function invalidate(resource: unknown, _keepState?: boolean): Promi
 
 export async function goto(_url: string | URL, _opts?: unknown): Promise<void> {}
 
-export async function refreshAll(_opts?: unknown): Promise<void> {}
+/** How many times `refreshAll` ran; a spec resets it. */
+export const refreshes = { all: 0 };
+
+export async function refreshAll(_opts?: unknown): Promise<void> {
+  refreshes.all += 1;
+}
 
 export function afterNavigate(_callback: (navigation: unknown) => void): void {}

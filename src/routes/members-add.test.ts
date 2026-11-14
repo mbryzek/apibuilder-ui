@@ -41,6 +41,7 @@ describe('addMember by email', () => {
 
     expect(await addMember({ email_or_nickname: 'roman@example.com', role: 'admin' })).toEqual({
       success: true,
+      membership: { id: 'membership-1', status: MembershipStatus.Invited },
       invited: 'roman@example.com'
     });
     expect(client.createMembership).toHaveBeenCalledWith({
@@ -51,7 +52,10 @@ describe('addMember by email', () => {
   it('says nothing was sent when the address already had an account', async () => {
     client.createMembership.mockResolvedValue({ id: 'membership-1', status: MembershipStatus.Active });
 
-    expect(await addMember({ email_or_nickname: 'colleague@example.com', role: 'member' })).toEqual({ success: true });
+    expect(await addMember({ email_or_nickname: 'colleague@example.com', role: 'member' })).toEqual({
+      success: true,
+      membership: { id: 'membership-1', status: MembershipStatus.Active }
+    });
   });
 
   it('never answers "User not found" for an address', async () => {
@@ -71,7 +75,8 @@ describe('addMember by nickname', () => {
     client.createMembershipRequest.mockResolvedValue({ id: 'request-1' });
     client.createMembershipRequestAcceptById.mockResolvedValue({ id: 'membership-2' });
 
-    expect(await addMember({ email_or_nickname: 'roman', role: 'member' })).toEqual({ success: true });
+    // It answers with the membership it made, which the page adds to its table without a reload (ISS-87642).
+    expect(await addMember({ email_or_nickname: 'roman', role: 'member' })).toEqual({ success: true, membership: { id: 'membership-2' } });
     expect(client.getUsers).toHaveBeenCalledWith({ nickname: 'roman' });
     expect(client.createMembership).not.toHaveBeenCalled();
   });

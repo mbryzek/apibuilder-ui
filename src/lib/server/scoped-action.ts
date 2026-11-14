@@ -31,11 +31,17 @@ export type AdminActionEvent = {
 /** The listing that defines the scope, for the org that was authorized. */
 export type OrgScope<T> = (context: CallContext, client: AuthorizedClient['client'], orgKey: string) => FetchPage<T>;
 
-export async function adminGuidAction<T extends { id: string }>(
+/**
+ * `answer` is what a success says besides `success: true`, built from the row and what `act`
+ * returned: a page that applies the change itself (the row it now holds, the id it dropped) needs
+ * to re-run no load to show it.
+ */
+export async function adminGuidAction<T extends { id: string }, R = unknown, A extends object = object>(
   context: CallContext,
   { request, locals, params }: AdminActionEvent,
   scope: OrgScope<T>,
-  act: (row: T, client: AuthorizedClient['client']) => Promise<unknown>
+  act: (row: T, client: AuthorizedClient['client']) => Promise<R>,
+  answer?: (row: T, result: R) => A
 ) {
   const { client } = await adminClient(context, locals, params.orgKey);
   const guid = requiredString(await request.formData(), 'guid');
@@ -49,11 +55,11 @@ export async function adminGuidAction<T extends { id: string }>(
     return outOfScope();
   }
 
-  const response = await handleApiCall<unknown>(() => act(row, client));
+  const response = await handleApiCall<R>(() => act(row, client));
 
   if (isApiError(response)) {
     return actionFail(response);
   }
 
-  return { success: true };
+  return { success: true as const, ...answer?.(row, response.data) };
 }

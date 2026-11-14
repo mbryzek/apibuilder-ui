@@ -47,7 +47,11 @@ beforeEach(() => {
 
 describe('revokeAdmin', () => {
   it('lowers the role on the existing membership', async () => {
-    expect(await invoke(actions['revokeAdmin'], { guid: 'membership-1' })).toEqual({ success: true });
+    // It answers with the row it changed, which the page applies without a reload (ISS-87642).
+    expect(await invoke(actions['revokeAdmin'], { guid: 'membership-1' })).toEqual({
+      success: true,
+      membership: { id: 'membership-1', role: MembershipRole.Member }
+    });
     expect(client.updateMembershipById).toHaveBeenCalledWith({
       id: 'membership-1',
       body: { role: MembershipRole.Member }
@@ -82,7 +86,10 @@ describe('makeAdmin', () => {
   it('raises the role on the existing membership', async () => {
     client.updateMembershipById.mockResolvedValue({ id: 'membership-1', role: MembershipRole.Admin });
 
-    expect(await invoke(actions['makeAdmin'], { guid: 'membership-1' })).toEqual({ success: true });
+    expect(await invoke(actions['makeAdmin'], { guid: 'membership-1' })).toEqual({
+      success: true,
+      membership: { id: 'membership-1', role: MembershipRole.Admin }
+    });
     expect(client.updateMembershipById).toHaveBeenCalledWith({
       id: 'membership-1',
       body: { role: MembershipRole.Admin }

@@ -97,7 +97,10 @@ describe('removeMember', () => {
     client.getMemberships.mockResolvedValue([{ id: 'own-membership' }]);
     client.deleteMembershipById.mockResolvedValue(undefined);
 
-    expect(await invoke(memberActions['removeMember'], { form: { guid: 'own-membership' } })).toEqual({ success: true });
+    expect(await invoke(memberActions['removeMember'], { form: { guid: 'own-membership' } })).toEqual({
+      success: true,
+      removed: 'own-membership'
+    });
     expect(client.deleteMembershipById).toHaveBeenCalledWith('own-membership');
   });
 });
@@ -113,7 +116,10 @@ describe('makeAdmin / revokeAdmin', () => {
     client.getMemberships.mockResolvedValue([{ id: 'own-membership' }]);
     client.updateMembershipById.mockResolvedValue({ id: 'own-membership' });
 
-    expect(await invoke(memberActions['revokeAdmin'], { form: { guid: 'own-membership' } })).toEqual({ success: true });
+    expect(await invoke(memberActions['revokeAdmin'], { form: { guid: 'own-membership' } })).toEqual({
+      success: true,
+      membership: { id: 'own-membership' }
+    });
     expect(client.updateMembershipById).toHaveBeenCalledWith({ id: 'own-membership', body: { role: 'member' } });
   });
 });

@@ -66,6 +66,13 @@ type MembersEvent = Parameters<Actions['addMember']>[0];
 type ApiBuilderClient = Awaited<ReturnType<typeof adminClient>>['client'];
 
 /**
+ * Every success below answers with the membership it changed (`membership`, or `removed` naming the
+ * one it deleted), and the page applies that to the table itself (`./changes.ts`): none of these
+ * can move the pending-requests badge or the org, so re-running the page's and the org layout's
+ * loads to show one row would be four calls spent on nothing. ISS-87642
+ */
+
+/**
  * Add a member by email address. `invited` names the address when the platform created the
  * account and sent the invitation, so the page can say an email went out rather than imply the
  * person can already sign in.
@@ -77,7 +84,8 @@ async function addByEmail(event: MembersEvent, client: ApiBuilderClient, email: 
   if (isApiError(response)) {
     return actionFail(response);
   }
-  return response.data.status === MembershipStatus.Invited ? { success: true, invited: email } : { success: true };
+  const membership = response.data;
+  return membership.status === MembershipStatus.Invited ? { success: true, membership, invited: email } : { success: true, membership };
 }
 
 /**
@@ -92,8 +100,12 @@ async function addByEmail(event: MembersEvent, client: ApiBuilderClient, email: 
  * before ISS-4833.
  */
 function changeRole(context: CallContext, event: AdminActionEvent, role: MembershipRole) {
-  return adminGuidAction(context, event, membershipsInOrg, (membership, client) =>
-    client.updateMembershipById(context, { id: membership.id, body: { role } })
+  return adminGuidAction(
+    context,
+    event,
+    membershipsInOrg,
+    (membership, client) => client.updateMembershipById(context, { id: membership.id, body: { role } }),
+    (_, membership) => ({ membership })
   );
 }
 
@@ -145,12 +157,16 @@ export const actions: Actions = {
       return actionFail(acceptResponse);
     }
 
-    return { success: true };
+    return { success: true, membership: acceptResponse.data };
   },
 
   removeMember: (event) =>
-    adminGuidAction(ctx(event, 'form'), event, membershipsInOrg, (membership, client) =>
-      client.deleteMembershipById(ctx(event, 'form'), membership.id)
+    adminGuidAction(
+      ctx(event, 'form'),
+      event,
+      membershipsInOrg,
+      (membership, client) => client.deleteMembershipById(ctx(event, 'form'), membership.id),
+      (membership) => ({ removed: membership.id })
     ),
 
   makeAdmin: (event) => changeRole(ctx(event, 'form'), event, MembershipRole.Admin),
