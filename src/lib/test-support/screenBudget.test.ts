@@ -81,7 +81,7 @@ describe('the generic answer', () => {
         organization.domains.map((domain) => client.getApplications(ctx(event, 'load'), { orgKey: domain.name, limit: 10, offset: 0 }))
       );
     };
-    const run = await expectWithinBudget(load, hardLoadEvent('/screen-budget-harness') as never, (input) => answer(input), {
+    const run = await expectWithinBudget(load, hardLoadEvent('/screen-budget-harness').event as never, (input) => answer(input), {
       budgets: new Map([['/screen-budget-harness', { load: { calls: 10, waits: 10 } }]])
     });
     expect(run.calls.map((call) => call.operation)).toEqual([

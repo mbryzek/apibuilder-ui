@@ -23,6 +23,11 @@
  * (both runs read them); one whose load redirects on purpose sets `redirects: true` in its own stub,
  * and then must end in a redirect.
  *
+ * A route whose loads read a query parameter its hard load did not carry fails, naming it: it was
+ * measured on the branch that parameter's absence takes. Its `budgetStub.ts` names the value people
+ * open it with in `search`, or a parameter read on purpose with no value in `bareParams`
+ * (`#lib/test-support/screenQuery.ts`). ISS-80720
+ *
  * `SCREEN_BUDGET_MEASURE=<file>` measures instead of holding: every route runs against an unlimited
  * budget and its counts are written to the file, which is how an override is first measured.
  */
@@ -46,6 +51,7 @@ import {
   unexpectedEnd,
   type ScreenStubModule
 } from '#lib/test-support/screenBudget.ts';
+import { unsetParameters, unsetParametersMessage } from '#lib/test-support/screenQuery.ts';
 
 const pages = Object.keys(import.meta.glob('/src/routes/**/+page.svelte'));
 const modules = import.meta.glob([
@@ -79,30 +85,36 @@ describe('every screen stays within its budget', () => {
     const load = hardLoad(await routeLoads(route, modules), thrown);
     const table = measuring ? new Map([[route, unlimited]]) : budgets;
     const stub = stubs.get(route);
-    const run = await expectWithinBudget(load, hardLoadEvent(route), answerWith(stub?.fields), { budgets: table });
+    const { event, read } = hardLoadEvent(route, stub);
+    const run = await expectWithinBudget(load, event, answerWith(stub?.fields), { budgets: table });
     measure(route, run, thrown);
-    if (!measuring)
-      expect(
-        unexpectedEnd(thrown, stub?.redirects),
-        `${route}'s hard load did not reach its end, so its budget counted only part of it`
-      ).toEqual([]);
+    if (measuring) return;
+    expect(
+      unexpectedEnd(thrown, stub?.redirects),
+      `${route}'s hard load did not reach its end, so its budget counted only part of it`
+    ).toEqual([]);
+    const unset = unsetParameters(read, event['url'] as URL, stub?.bareParams);
+    expect(unset, unsetParametersMessage(route, unset, 'budgetStub.ts')).toEqual([]);
   });
 
   it.each(routes)('%s, every list empty', async (route) => {
     const thrown: unknown[] = [];
     const loads = await routeLoads(route, modules);
     const shell = new Set<string>();
-    const fields = stubs.get(route)?.fields;
+    const stub = stubs.get(route);
+    const fields = stub?.fields;
     const asLayouts = { budgets: new Map([[route, unlimited]]) };
-    await expectWithinBudget(hardLoad(layoutsOf(loads)), hardLoadEvent(route), noting(answerWith(fields), shell), asLayouts);
+    await expectWithinBudget(hardLoad(layoutsOf(loads)), hardLoadEvent(route, stub).event, noting(answerWith(fields), shell), asLayouts);
     const table = measuring ? new Map([[route, unlimited]]) : budgets;
-    const run = await expectWithinBudget(hardLoad(loads, thrown), hardLoadEvent(route), emptyAnswer(shell, fields), { budgets: table });
+    const run = await expectWithinBudget(hardLoad(loads, thrown), hardLoadEvent(route, stub).event, emptyAnswer(shell, fields), {
+      budgets: table
+    });
     measure(`${route} (empty)`, run, thrown);
   });
 
   it('counts the reads a version screen makes, its layouts included', async () => {
     const route = '/[orgKey]/[appKey]/[version]';
-    const run = await expectWithinBudget(hardLoad(await routeLoads(route, modules)), hardLoadEvent(route), (input) => answer(input), {
+    const run = await expectWithinBudget(hardLoad(await routeLoads(route, modules)), hardLoadEvent(route).event, (input) => answer(input), {
       budgets
     });
     expect(run.load.calls).toBeGreaterThan(0);
