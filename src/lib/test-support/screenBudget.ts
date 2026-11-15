@@ -33,9 +33,20 @@
  * ISS-78653
  */
 import { isHttpError, isRedirect } from '@sveltejs/kit';
+import { readingUrl } from './screenQuery.ts';
 
 /** What a route's `budgetStub.ts` changes about its hard load, where the generic answer stops the load short of the page. */
 export interface ScreenStub {
+  /**
+   * The query string the screen is opened with (`?customer=1`), where its load reads one. A load
+   * reading a parameter the hard load did not carry fails the route (`unsetParameters`, ISS-80720).
+   */
+  search?: string;
+  /**
+   * The query parameters a load reads on purpose with no value, where the screen people open carries
+   * none: `['page']` for a list that starts on its first page.
+   */
+  bareParams?: string[];
   /**
    * Fields answered with this value wherever any answer is read, at any depth, where the generic
    * answer reaches the wrong branch: `{ id: '1' }` for a load that finds its row by the route's param.
@@ -253,10 +264,22 @@ function cookieJar(): Record<string, unknown> {
   };
 }
 
-/** The event a hard load of `route` hands each load, with the fields SvelteKit gives it. */
-export function hardLoadEvent(route: string): Record<string, unknown> {
-  const url = new URL(`https://apibuilder.org${pathOf(route)}`);
-  return {
+/**
+ * A hard load of `route` opened with its stub: the event it hands each load, and the query parameters
+ * its loads read through `event.url.searchParams`, filled as they run (`readingUrl`).
+ */
+export interface HardLoadEvent {
+  event: Record<string, unknown>;
+  read: ReadonlySet<string>;
+}
+
+/**
+ * The event a hard load of `route` hands each load, with the fields SvelteKit gives it, opened with
+ * the stub's query, beside the query parameters its loads read.
+ */
+export function hardLoadEvent(route: string, stub: ScreenStub = {}): HardLoadEvent {
+  const { url, read } = readingUrl(new URL(`https://apibuilder.org${pathOf(route)}${stub.search ?? ''}`));
+  const event = {
     url,
     params: paramsOf(route),
     route: { id: route },
@@ -272,6 +295,7 @@ export function hardLoadEvent(route: string): Record<string, unknown> {
     getClientAddress: () => '127.0.0.1',
     tracing: { enabled: false, root: undefined, current: undefined }
   };
+  return { event, read };
 }
 
 // dry-copy: sveltekit/screen-budget/unexpected-end — every copy of this region must match; `dev repo copies` checks it (ISS-80742)

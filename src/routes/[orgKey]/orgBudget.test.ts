@@ -29,7 +29,7 @@ function asAdmin(input: RequestInfo | URL): Response {
 
 describe('the organization page for an admin', () => {
   it('shows after its three reads, none waiting on another, the pending requests filling in after', async () => {
-    const run = await expectWithinBudget(hardLoad(await routeLoads(route, modules)), hardLoadEvent(route), asAdmin, { budgets });
+    const run = await expectWithinBudget(hardLoad(await routeLoads(route, modules)), hardLoadEvent(route).event, asAdmin, { budgets });
 
     const operations = run.calls.map((call) => `${call.part} ${call.operation}`);
     expect(operations).toContain('later:pendingRequests GET /apibuilder/membership/requests');
