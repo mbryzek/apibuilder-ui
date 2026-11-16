@@ -18,6 +18,9 @@
  * header still writes; the server reads it only for a request that carries no header.
  */
 
+/** The path the browser half is posted to, in every app: `browser.ts` posts there and `server.ts` opens no view for it. */
+export const TELEMETRY_PATH = '/_telemetry';
+
 /** The cookie an older browser bundle hands its view id to the server through. */
 export const VIEW_COOKIE = 'sv';
 

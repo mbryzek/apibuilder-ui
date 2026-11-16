@@ -46,10 +46,7 @@ import {
   type InteractionEntry,
   type VisibilityStateEntry
 } from './timing';
-import { VIEW_COOKIE, isViewId, mintViewId, viewMark } from './view';
-
-/** Where the browser half is posted. */
-export const TELEMETRY_ENDPOINT = '/_telemetry';
+import { TELEMETRY_PATH, VIEW_COOKIE, isViewId, mintViewId, viewMark } from './view';
 
 /** The slowest an interaction can be and still go unrecorded: the `event` entries' own floor. */
 const EVENT_THRESHOLD_MS = 40;
@@ -415,7 +412,7 @@ function enteredView(view: ViewState | null, to: { route?: { id: string | null }
 
 /** Start the browser half. Must run during component init: call it from the root layout. */
 export function registerScreenReport(options: ScreenReportOptions): void {
-  const endpoint = options.endpoint ?? TELEMETRY_ENDPOINT;
+  const endpoint = options.endpoint ?? TELEMETRY_PATH;
   if (browser) {
     const nav = navigationEntry();
     const id = isViewId(options.view) ? options.view : mintViewId();

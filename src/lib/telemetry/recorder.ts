@@ -27,7 +27,7 @@
  * loses a record, never a response. An error the call itself raises is the caller's, rethrown as is.
  */
 
-/** The view id's header, sent only where it costs no round trip (see `ViewRecorder.headers`). */
+/** The view id's header, sent only where it costs no round trip (see `CallNote.headers`). */
 export const VIEW_HEADER = 'x-screen-view-id';
 
 /**
@@ -185,14 +185,10 @@ export class ViewRecorder implements CallRecorder {
   }
 
   /**
-   * The view id header for a call to `url`: always on the server, and in a browser only to the page's
-   * own origin. A custom header on a cross-origin call forces a CORS preflight, so it is not sent
-   * there, and the report marks that call's query count missing.
+   * Whether a call to `url` carries the view headers: always on the server, and in a browser only to
+   * the page's own origin. A custom header on a cross-origin call forces a CORS preflight, so it is not
+   * sent there, and the report marks that call's query count missing.
    */
-  headers(url: string): Record<string, string> {
-    return this.countsQueries(url) ? { [VIEW_HEADER]: this.view } : {};
-  }
-
   private countsQueries(url: string): boolean {
     if (this.side === 'server') return true;
     if (this.origin === null) return false;

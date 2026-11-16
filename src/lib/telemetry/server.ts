@@ -45,7 +45,7 @@ import {
   type ReportHalf,
   type ServerRequest
 } from './report';
-import { VIEW_COOKIE, mintViewId, readViewMark } from './view';
+import { TELEMETRY_PATH, VIEW_COOKIE, mintViewId, readViewMark } from './view';
 
 /** One app's screen report: where its halves go, and what it holds its screens to. */
 export interface ScreenReportConfig extends ReportDoor {
@@ -59,8 +59,7 @@ export interface ScreenReportConfig extends ReportDoor {
 /** Keeps the runtime alive until a promise settles. */
 export type KeepAlive = (promise: Promise<unknown>) => void;
 
-/** The path the browser half is posted to, in every app. */
-export const TELEMETRY_PATH = '/_telemetry';
+export { TELEMETRY_PATH };
 
 /** The fields of a request event the hook reads and writes, declared by shape. */
 export interface HookEvent {
