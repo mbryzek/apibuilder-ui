@@ -26,7 +26,11 @@
 
 /** What a screen is held to. */
 export interface Budget {
-  /** Time to show, in milliseconds, held at p90 and p95: LCP for a hard load, the navigation's own time for a soft one. */
+  /**
+   * Time to show, in milliseconds, held at p90 and p95: for a hard load, LCP less its connect phase
+   * (`screen.phase.connect_ms`: DNS, TCP and TLS, the client's network rather than the screen's);
+   * for a soft one, the navigation's own time.
+   */
   showMs: number;
   /** What the screen waits for before it shows, layouts included. */
   load: {
