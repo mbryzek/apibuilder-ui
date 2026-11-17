@@ -37,6 +37,7 @@ npx playwright install chromium
 
 # THE WHOLE LIFECYCLE, and the teardown is inside it rather than in a `trap` here: ports, the
 # session database and the container are machine-wide state, and all three leak if this script is
-# killed between two lines of its own. See devops/lib/e2e.rb.
-exec dev e2e run --app platform "${E2E_TENANT[@]}" -- npm run test:e2e
+# killed between two lines of its own. See devops/lib/e2e.rb. The backend app is `platform` unless
+# the repo sets E2E_APP above this region (playbook's frontends set playbook-api).
+exec dev e2e run --app "${E2E_APP:-platform}" "${E2E_TENANT[@]}" -- npm run test:e2e
 # dry-copy-end
