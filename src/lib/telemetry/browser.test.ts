@@ -438,10 +438,17 @@ describe('a soft navigation', () => {
     let release: () => void = () => {};
     page.data = { comments: new Promise<void>((resolve) => (release = resolve)) };
     clock = 200;
-    after?.({ type: 'enter' });
-    clock = 700;
-    release();
-    await new Promise((resolve) => setTimeout(resolve, 5));
+    // The frame is a setTimeout (stubbed above): fake it, so the paint runs when the test says, not
+    // when a loaded worker gets to it.
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    try {
+      after?.({ type: 'enter' });
+      clock = 700;
+      release();
+      await vi.runAllTimersAsync();
+    } finally {
+      vi.useRealTimers();
+    }
     hide();
     page.data = {};
     expect((await sent())[0]?.['timing']).toMatchObject({ finished_ms: 700 });
