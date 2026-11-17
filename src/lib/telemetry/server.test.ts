@@ -11,6 +11,7 @@ import {
   ABANDONED_AFTER_MS,
   Forwards,
   SETTLE_LIMIT_MS,
+  clientMarksOf,
   clientRttOf,
   keepAliveOf,
   requestKind,
@@ -119,6 +120,41 @@ describe('the client round trip', () => {
   });
 });
 
+describe("the client's marks", () => {
+  const request = (agent?: string) => new Request('https://admin.test/', agent === undefined ? {} : { headers: { 'user-agent': agent } });
+  const chrome = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36';
+
+  it("hashes a person's browser's user agent and marks nothing", () => {
+    const marks = clientMarksOf(request(chrome));
+    expect(marks.automated).toBeUndefined();
+    expect(marks.agent).toMatch(/^[0-9a-f]{8}$/);
+    expect(clientMarksOf(request(chrome)).agent).toBe(marks.agent);
+    expect(clientMarksOf(request(chrome.replace('117', '33'))).agent).not.toBe(marks.agent);
+  });
+
+  it('marks an automation named in the user agent, a missing user agent, and a webdriver claim', () => {
+    for (const agent of [
+      chrome.replace('Chrome/', 'HeadlessChrome/'),
+      'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
+      'Mozilla/5.0 (compatible; UptimeRobot/2.0; http://www.uptimerobot.com/)',
+      'curl/8.4.0',
+      'python-requests/2.31.0'
+    ]) {
+      expect(clientMarksOf(request(agent)).automated, agent).toBe('user-agent');
+    }
+    expect(clientMarksOf(request()).automated).toBe('user-agent');
+    expect(clientMarksOf(request()).agent).toBeUndefined();
+    expect(clientMarksOf(request(chrome), true).automated).toBe('webdriver');
+  });
+
+  it('marks no phone whose model ends in bot', () => {
+    expect(
+      clientMarksOf(request('Mozilla/5.0 (Linux; Android 12; CUBOT_X30 Build/SP1A) AppleWebKit/537.36 Chrome/120.0 Mobile Safari/537.36'))
+        .automated
+    ).toBeUndefined();
+  });
+});
+
 describe('screenReportHandle', () => {
   it('opens the view, and forwards the server half once every later part settles', async () => {
     const fetch = vi.fn(async (_url: string | URL | Request, _init?: RequestInit) => new Response(null, { status: 204 }));
@@ -130,7 +166,7 @@ describe('screenReportHandle', () => {
     });
     const waitUntil = vi.fn();
     const event = {
-      ...hookEvent('/issues/1', { headers: { accept: 'text/html' } }),
+      ...hookEvent('/issues/1', { headers: { accept: 'text/html', 'user-agent': 'HeadlessChrome/150' } }),
       platform: { ctx: { waitUntil }, cf: { clientTcpRtt: 0, clientQuicRtt: 753 } }
     };
     let release: () => void = () => {};
@@ -157,6 +193,8 @@ describe('screenReportHandle', () => {
     expect(record.attributes['screen.load.calls']).toBe(1);
     expect(record.attributes['screen.later.max_calls']).toBe(1);
     expect(record.attributes['screen.client_rtt_ms']).toBe(753);
+    expect(record.attributes['screen.client.automated']).toBe('user-agent');
+    expect(record.attributes['screen.client.agent']).toMatch(/^[0-9a-f]{8}$/);
     expect(record.attributes['screen.release']).toBe('0.3.97');
   });
 
