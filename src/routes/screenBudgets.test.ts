@@ -15,7 +15,7 @@
  * Each screen runs a second time against empty answers (`emptyAnswer`), every list its own loads read
  * with no rows while its layouts' calls answer in full, held to the same budget: a call a load makes
  * only when a list is empty is counted there. That run may stop at a 404 or a redirect, since it only
- * adds a branch to the full run. ISS-78653
+ * adds a branch to the full run, and fails on any other throw (`unearnedEnd`). ISS-78653
  *
  * The full run's hard load that throws fails its route, naming what it threw (`unexpectedEnd`): a load
  * that stopped at a redirect or a 403 made only the calls before it, so its count says nothing about
@@ -48,6 +48,7 @@ import {
   routeLoads,
   routeOfPage,
   stubTable,
+  unearnedEnd,
   unexpectedEnd,
   type ScreenStubModule
 } from '#lib/test-support/screenBudget.ts';
@@ -110,6 +111,11 @@ describe('every screen stays within its budget', () => {
       budgets: table
     });
     measure(`${route} (empty)`, run, thrown);
+    if (measuring) return;
+    expect(
+      unearnedEnd(thrown),
+      `${route}'s hard load with every list empty ended in a throw other than a 404 or a redirect, so its budget counted only part of it`
+    ).toEqual([]);
   });
 
   it('counts the reads a version screen makes, its layouts included', async () => {
