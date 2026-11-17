@@ -320,6 +320,16 @@ export function unexpectedEnd(thrown: unknown[], redirects = false): string[] {
   if (thrown.length > 0) return thrown.filter((caught) => !isRedirect(caught)).map((caught) => `threw ${describeThrown(caught)}`);
   return ['declares redirects in its budgetScene.ts but its load ended without one'];
 }
+/**
+ * Why a `lean` or `empty` run ended somewhere its answer does not earn, one line per reason, or none
+ * when it did: such a run may stop at a redirect or a 404 and need reach neither, and any other throw
+ * (a 500, a TypeError on an empty list) cut short the very path the run exists to count.
+ */
+export function unearnedEnd(thrown: unknown[]): string[] {
+  return thrown
+    .filter((caught) => !isRedirect(caught) && !(isHttpError(caught) && caught.status === 404))
+    .map((caught) => `threw ${describeThrown(caught)}`);
+}
 // dry-copy-end
 
 async function settle(run: () => unknown, thrown: unknown[]): Promise<Record<string, unknown>> {

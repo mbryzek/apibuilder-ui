@@ -13,6 +13,7 @@ import {
   layoutsOf,
   noting,
   stubTable,
+  unearnedEnd,
   unexpectedEnd
 } from './screenBudget.ts';
 
@@ -134,6 +135,28 @@ describe('unexpectedEnd', () => {
     };
     await hardLoad({ route: '/x', levels: [{ server: { load: notThere } }] }, thrown)({});
     expect(unexpectedEnd(thrown)).toEqual(['threw error 404: gone']);
+  });
+});
+
+describe('unearnedEnd', () => {
+  const toLogin = thrownBy(() => redirect(303, '/login'));
+  const notFound = thrownBy(() => error(404, 'No such row.'));
+
+  it('passes a lean or empty run that ended in a 404, a redirect, or nothing', () => {
+    expect(unearnedEnd([])).toEqual([]);
+    expect(unearnedEnd([notFound])).toEqual([]);
+    expect(unearnedEnd([toLogin])).toEqual([]);
+  });
+
+  it('names a throw only the empty answers reach, and any error other than a 404', async () => {
+    const thrown: unknown[] = [];
+    const rows: { id: string }[] = [];
+    const emptyOnly = () => (rows.length === 0 ? { id: rows[0]!.id } : { id: 'a' });
+    await hardLoad({ route: '/x', levels: [{ server: { load: emptyOnly } }] }, thrown)({});
+    expect(unearnedEnd([...thrown, notFound, thrownBy(() => error(500, 'boom'))])).toEqual([
+      expect.stringMatching(/^threw TypeError: /),
+      'threw error 500: boom'
+    ]);
   });
 });
 
