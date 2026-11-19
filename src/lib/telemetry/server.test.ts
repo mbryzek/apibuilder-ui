@@ -13,6 +13,7 @@ import {
   SETTLE_LIMIT_MS,
   clientMarksOf,
   clientRttOf,
+  EDGE_CLIENT_RTT_HEADER,
   keepAliveOf,
   requestKind,
   screenReportHandle,
@@ -110,6 +111,17 @@ describe('the client round trip', () => {
     expect(clientRttOf({ cf: { clientTcpRtt: 0, clientQuicRtt: 753.4 } })).toBe(753);
     const request = Object.assign(new Request('https://admin.test/'), { cf: { clientTcpRtt: 61 } });
     expect(clientRttOf(undefined, request)).toBe(61);
+  });
+
+  it("reads the round trip an edge Worker carried on, when the request is the edge's subrequest", () => {
+    const passedOn = (headers: Record<string, string>) =>
+      Object.assign(new Request('https://admin.test/', { headers }), { cf: { clientTcpRtt: 0, clientQuicRtt: 0 } });
+    expect(clientRttOf(undefined, passedOn({ 'cf-worker': 'idempotent.app', [EDGE_CLIENT_RTT_HEADER]: '88' }))).toBe(88);
+    expect(clientRttOf({ cf: { clientTcpRtt: 0 } }, passedOn({ 'cf-worker': 'idempotent.app', [EDGE_CLIENT_RTT_HEADER]: '88' }))).toBe(88);
+    expect(clientRttOf({ cf: { clientTcpRtt: 30 } }, passedOn({ 'cf-worker': 'idempotent.app', [EDGE_CLIENT_RTT_HEADER]: '88' }))).toBe(30);
+    expect(clientRttOf(undefined, passedOn({ [EDGE_CLIENT_RTT_HEADER]: '88' }))).toBeNull();
+    expect(clientRttOf(undefined, passedOn({ 'cf-worker': 'idempotent.app', [EDGE_CLIENT_RTT_HEADER]: 'slow' }))).toBeNull();
+    expect(clientRttOf(undefined, passedOn({ 'cf-worker': 'idempotent.app', [EDGE_CLIENT_RTT_HEADER]: '-4' }))).toBeNull();
   });
 
   it('is null off Cloudflare and where nothing was measured', () => {
