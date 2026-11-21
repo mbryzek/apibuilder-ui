@@ -135,6 +135,14 @@ export interface LoginLinkRequestForm {
 }
 
 /**
+ * A sign-in code was asked for: the wait before this tenant takes another request for the same number. The same answer whether or not the number belongs to an account, so it says nothing about one.
+ */
+export interface LoginPhoneCodeSent {
+  /** Seconds from this answer until another code for the same number is accepted; a request before then is refused with a 422. */
+  resend_after_seconds: number;
+}
+
+/**
  * Form to request a phone login code via SMS
  */
 export interface LoginPhoneRequestForm {
@@ -516,6 +524,13 @@ export interface GetTenantSessionPasswordAndResetsByIdOptions {
 export interface CreateTenantSessionLoginAndLinkAndRequestsOptions {
   tenantId: string;
   body: LoginLinkRequestForm;
+  headers?: Record<string, string>;
+  signal?: AbortSignal;
+}
+
+export interface CreateTenantSessionLoginAndPhoneAndCodesOptions {
+  tenantId: string;
+  body: LoginPhoneRequestForm;
   headers?: Record<string, string>;
   signal?: AbortSignal;
 }
@@ -935,6 +950,37 @@ export class ApiClient {
 
       if (response.status === 204) {
         return;
+      }
+
+      if (response.status === 422) {
+        throw new ValidationErrorsResponse(response);
+      }
+
+      throw new ApiException(response, `Request failed with status ${response.status}`);
+    });
+  }
+
+  async createTenantSessionLoginAndPhoneAndCodes(
+    context: CallContext,
+    params: CreateTenantSessionLoginAndPhoneAndCodesOptions
+  ): Promise<LoginPhoneCodeSent> {
+    return context.recorder.call(context, 'POST /tenant/:tenant_id/session/login/phone/codes', async (note) => {
+      const url = `${this.baseUrl}/tenant/${encodeURIComponent(params.tenantId)}/session/login/phone/codes`;
+
+      const response = await this.request(
+        url,
+        {
+          method: 'POST',
+          body: JSON.stringify(params.body)
+        },
+        'application/json',
+        { ...note.headers(url), ...params.headers },
+        params.signal
+      );
+      note.response(response);
+
+      if (response.status === 201) {
+        return await Util.mustParse<LoginPhoneCodeSent>(response, 'LoginPhoneCodeSent');
       }
 
       if (response.status === 422) {
