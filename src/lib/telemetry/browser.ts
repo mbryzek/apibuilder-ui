@@ -46,7 +46,7 @@ import {
   type InteractionEntry,
   type VisibilityStateEntry
 } from './timing';
-import { TELEMETRY_PATH, VIEW_COOKIE, isViewId, mintViewId, viewMark } from './view';
+import { TELEMETRY_PATH, isViewId, mintViewId, viewMark } from './view';
 
 /** The slowest an interaction can be and still go unrecorded: the `event` entries' own floor. */
 const EVENT_THRESHOLD_MS = 40;
@@ -291,15 +291,6 @@ function wrapFetch(): void {
   };
 }
 
-/** Expire the origin's `sv` cookie, which a bundle older than the header wrote: this document names its view per request. */
-function clearViewCookie(): void {
-  try {
-    document.cookie = `${VIEW_COOKIE}=; Path=/; Max-Age=0; SameSite=Lax`;
-  } catch {
-    // A cookie left behind is read only for a request with no header, which this document never sends.
-  }
-}
-
 function beacon(half: ReturnType<typeof browserHalfOf>, endpoint: string): void {
   try {
     navigator.sendBeacon(endpoint, new Blob([JSON.stringify(half)], { type: 'application/json' }));
@@ -417,7 +408,6 @@ export function registerScreenReport(options: ScreenReportOptions): void {
     const nav = navigationEntry();
     const id = isViewId(options.view) ? options.view : mintViewId();
     current = newView(id, page.route.id, new URL(location.href), 'hard', nav === undefined ? 0 : documentStart(nav));
-    clearViewCookie();
     setViewLookup(() => current?.recorder);
     registerDocument(endpoint);
     wrapFetch();

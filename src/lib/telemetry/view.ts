@@ -14,15 +14,11 @@
  *   view, not a new one.
  *
  * The header is per request, so each window of an app names its own view, whatever the others
- * show. The `sv` cookie is the same mark held per origin, which a browser bundle older than the
- * header still writes; the server reads it only for a request that carries no header.
+ * show.
  */
 
 /** The path the browser half is posted to, in every app: `browser.ts` posts there and `server.ts` opens no view for it. */
 export const TELEMETRY_PATH = '/_telemetry';
-
-/** The cookie an older browser bundle hands its view id to the server through. */
-export const VIEW_COOKIE = 'sv';
 
 const VIEW_ID = /^sv_[0-9a-f]{32}$/;
 
@@ -36,15 +32,15 @@ export function isViewId(value: unknown): value is string {
   return typeof value === 'string' && VIEW_ID.test(value);
 }
 
-/** The suffix that marks the cookie's view as one a navigation is still entering. */
+/** The suffix that marks a header's view as one a navigation is still entering. */
 const NAVIGATION_MARK = '.nav';
 
-/** A header or cookie value naming `view`, marked when a navigation is entering it; unmarked, it is the view the page shows. */
+/** A header value naming `view`, marked when a navigation is entering it; unmarked, it is the view the page shows. */
 export function viewMark(view: string, navigation = false): string {
   return `${view}${navigation ? NAVIGATION_MARK : ''}`;
 }
 
-/** What a header or cookie value says: the view, and whether a navigation is entering it. Null for anything this region did not write. */
+/** What a header value says: the view, and whether a navigation is entering it. Null for anything this region did not write. */
 export function readViewMark(value: string | null | undefined): { view: string; navigation: boolean } | null {
   if (value === undefined || value === null) return null;
   const navigation = value.endsWith(NAVIGATION_MARK);
