@@ -59,6 +59,17 @@ describe('/_telemetry', () => {
     expect(decodeLogs(fetch.mock.calls[1]![1]?.body as Uint8Array).attributes).not.toHaveProperty('screen.client_rtt_ms');
   });
 
+  it('stamps the network the post itself came from, never one the body claims', async () => {
+    const { fetch, config } = door();
+    const forged = JSON.stringify({ ...half, asn: 7922, as_org: 'Comcast Cable Communications, LLC' });
+    await telemetryHandler(config)({ ...post(forged), platform: { cf: { asn: 396982, asOrganization: 'Google LLC' } } });
+    const attributes = decodeLogs(fetch.mock.calls[0]![1]?.body as Uint8Array).attributes;
+    expect(attributes['screen.client.asn']).toBe(396982);
+    expect(attributes['screen.client.as_org']).toBe('Google LLC');
+    await telemetryHandler(config)(post(forged));
+    expect(decodeLogs(fetch.mock.calls[1]![1]?.body as Uint8Array).attributes).not.toHaveProperty('screen.client.asn');
+  });
+
   it("marks a client automated from the post's own user agent or the browser's webdriver claim, never a mark the body claims", async () => {
     const { fetch, config } = door();
     const chrome = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36';

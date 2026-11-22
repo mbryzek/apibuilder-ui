@@ -147,6 +147,8 @@ export async function keepAliveOf(platform: unknown, config: { waitUntil?: KeepA
 interface ClientConnection {
   clientTcpRtt?: unknown;
   clientQuicRtt?: unknown;
+  asn?: unknown;
+  asOrganization?: unknown;
 }
 
 /**
@@ -215,6 +217,30 @@ export function clientMarksOf(request: Request, webdriver = false): ClientMarks 
   return {
     ...(automated === undefined ? {} : { automated: automated }),
     ...(agent === '' ? {} : { agent: agentHash(agent) })
+  };
+}
+
+/** The network a half carries of the client it came from: `asn` and `as_org` (`ReportHalf`). */
+export type ClientNetwork = Pick<ReportHalf, 'asn' | 'as_org'>;
+
+/** The longest network name a half carries: Cloudflare's names are short, and a half never grows on one. */
+const MAX_AS_ORG = 100;
+
+/**
+ * The network Cloudflare saw the request come from: its autonomous system's number (`cf.asn`) and
+ * name (`cf.asOrganization`), read from `platform.cf` (SvelteKit's adapter) or the request's own `cf`.
+ * A scanner driving a real browser on a hosting network carries no automation mark, and its network
+ * is what the rules can tell it by (ISS-88967). Empty off Cloudflare and on a Worker's subrequest
+ * (`cf-worker`), whose network is the Worker's own, never the client's.
+ */
+export function clientNetworkOf(platform: unknown, request?: Request): ClientNetwork {
+  if (request?.headers.has('cf-worker')) return {};
+  const cf = (platform as { cf?: ClientConnection } | undefined)?.cf ?? (request as { cf?: ClientConnection } | undefined)?.cf;
+  const asn = cf?.asn;
+  const org = cf?.asOrganization;
+  return {
+    ...(typeof asn === 'number' && Number.isInteger(asn) && asn > 0 ? { asn: asn } : {}),
+    ...(typeof org === 'string' && org.trim() !== '' ? { as_org: org.trim().slice(0, MAX_AS_ORG) } : {})
   };
 }
 
@@ -292,7 +318,7 @@ async function forward(
   kind: ServerRequest,
   config: ScreenReportConfig,
   clientRtt: number | null,
-  client: ClientMarks
+  client: ClientMarks & ClientNetwork
 ): Promise<void> {
   await settledWithin(view);
   const taken = { ...halfOf(view, { request: kind, client_rtt_ms: clientRtt }), ...client };
@@ -329,7 +355,10 @@ export function screenReportHandle(
         console.warn('screen report: nothing keeps this runtime alive for the server half; a half may be lost as the response ends');
       }
       const finish = forwards.start();
-      const sent = forward(view, kind, config, clientRttOf(event.platform, event.request), clientMarksOf(event.request))
+      const sent = forward(view, kind, config, clientRttOf(event.platform, event.request), {
+        ...clientMarksOf(event.request),
+        ...clientNetworkOf(event.platform, event.request)
+      })
         .catch(() => undefined)
         .finally(finish);
       keepAlive?.(sent);

@@ -12,6 +12,7 @@ import {
   Forwards,
   SETTLE_LIMIT_MS,
   clientMarksOf,
+  clientNetworkOf,
   clientRttOf,
   EDGE_CLIENT_RTT_HEADER,
   keepAliveOf,
@@ -164,6 +165,25 @@ describe("the client's marks", () => {
       clientMarksOf(request('Mozilla/5.0 (Linux; Android 12; CUBOT_X30 Build/SP1A) AppleWebKit/537.36 Chrome/120.0 Mobile Safari/537.36'))
         .automated
     ).toBeUndefined();
+  });
+});
+
+describe("the client's network", () => {
+  const cf = { asn: 396982, asOrganization: 'Google LLC' };
+
+  it("reads the autonomous system Cloudflare saw from the platform's cf, else the request's own", () => {
+    expect(clientNetworkOf({ cf: cf })).toEqual({ asn: 396982, as_org: 'Google LLC' });
+    expect(clientNetworkOf(undefined, Object.assign(new Request('https://admin.test/'), { cf: { asn: 7922 } }))).toEqual({ asn: 7922 });
+  });
+
+  it("carries nothing off Cloudflare, nothing malformed, and never a Worker subrequest's own network", () => {
+    expect(clientNetworkOf(undefined, new Request('https://admin.test/'))).toEqual({});
+    expect(clientNetworkOf({ cf: { asn: 0, asOrganization: ' ' } })).toEqual({});
+    expect(clientNetworkOf({ cf: { asn: '396982', asOrganization: 42 } })).toEqual({});
+    expect(clientNetworkOf({ cf: { asn: 13335.5 } })).toEqual({});
+    expect(clientNetworkOf({ cf: { asOrganization: 'x'.repeat(300) } }).as_org).toHaveLength(100);
+    const passedOn = new Request('https://admin.test/', { headers: { 'cf-worker': 'idempotent.app' } });
+    expect(clientNetworkOf({ cf: cf }, passedOn)).toEqual({});
   });
 });
 
