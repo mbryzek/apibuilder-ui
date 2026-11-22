@@ -103,6 +103,14 @@ export interface ReportHalf {
    * two is a scanner rotating its claims, which the rules leave out. Absent from a request with none.
    */
   agent?: string;
+  /**
+   * The autonomous system Cloudflare saw the request this half arrived by come from (`cf.asn`),
+   * stamped on the server. A hosting network's number marks a scanner driving a real browser, which
+   * no user agent gives away (ISS-88967). Absent off Cloudflare and on a Worker's subrequest.
+   */
+  asn?: number;
+  /** That autonomous system's name (`cf.asOrganization`), for a person reading the reports; no rule matches on it. */
+  as_org?: string;
 }
 
 /** A half as it leaves for the door: stamped with the app, its repository and the budget its screen was held to. */
@@ -290,7 +298,9 @@ export function reportAttributes(stamped: StampedHalf, peaks: PartPeaks): Attrib
     ['screen.report.lost', stamped.lost_halves === 0 ? undefined : stamped.lost_halves],
     ['screen.release', stamped.release],
     ['screen.client.automated', stamped.automated],
-    ['screen.client.agent', stamped.agent]
+    ['screen.client.agent', stamped.agent],
+    ['screen.client.asn', stamped.asn],
+    ['screen.client.as_org', stamped.as_org]
   ];
   return [
     attribute('screen.report', stamped.half),

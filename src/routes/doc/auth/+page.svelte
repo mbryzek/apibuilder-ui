@@ -36,7 +36,7 @@
 ]`}
     />
     <p class="text-ab-dark-blue text-sm">
-      The reserved value <code>none</code> cannot be used as a scheme type &mdash; it is the explicit-public marker on operations.
+      The reserved value <code>public</code> cannot be used as a scheme type &mdash; it is the explicit-public marker on operations.
     </p>
   </div>
 
@@ -81,14 +81,14 @@
       {
         "method": "GET",
         "path": "/admin/events/public-feed",
-        "auth": "none"
+        "auth": "public"
       }
     ]
   }
 }`}
     />
     <p class="text-ab-dark-blue text-sm">
-      Use <code>"auth": "none"</code> to opt a single operation out of an otherwise-protected resource. The generated controller emits no auth
+      Use <code>"auth": "public"</code> to opt a single operation out of an otherwise-protected resource. The generated controller emits no auth
       check for that op.
     </p>
   </div>
@@ -118,11 +118,11 @@
     <SectionHeading badge="!">Key Rules</SectionHeading>
     <ul class="text-ab-dark-blue ml-2 space-y-2">
       <li>
-        <strong>Declare before reference</strong> &mdash; every <code>operation.auth</code> value (other than <code>none</code>) must appear
-        in <code>service.auth_schemes</code>. Generators reject unknown references.
+        <strong>Declare before reference</strong> &mdash; every <code>operation.auth</code> value (other than <code>public</code>) must
+        appear in <code>service.auth_schemes</code>. Generators reject unknown references.
       </li>
       <li>
-        <strong>Reserved value</strong> &mdash; <code>none</code> cannot be used as an auth_scheme type; it is the per-operation public marker.
+        <strong>Reserved value</strong> &mdash; <code>public</code> cannot be used as an auth_scheme type; it is the per-operation public marker.
       </li>
       <li>
         <strong>Inheritance is materialized</strong> &mdash; resource-level defaults are flattened into each operation before the spec is
