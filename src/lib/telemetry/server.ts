@@ -17,13 +17,12 @@
  * WHICH VIEW A REQUEST BELONGS TO:
  *
  * - a document request mints a view (a hard load);
- * - a `__data.json` request takes the view its `x-screen-view-id` header names (`view.ts`), or,
- *   with no header, the `sv` cookie an older browser bundle writes. Marked as a navigation, it is a
- *   soft navigation's server half; unmarked, it is a refresh of the view the page shows
+ * - a `__data.json` request takes the view its `x-screen-view-id` header names (`view.ts`).
+ *   Marked as a navigation, it is a soft navigation's server half; unmarked, it is a refresh of the view the page shows
  *   (`invalidate`, a poll, the reload after a form action), and its load's calls are one tick of
  *   that view's `refresh` poll, never a second first load. Naming no view, it mints one;
- * - a form action or an app endpoint takes the id the page's script sent as `x-screen-view-id`
- *   (or, for a form, the cookie). One that names no view records nothing: it is not a screen's.
+ * - a form action or an app endpoint takes the id the page's script sent as `x-screen-view-id`.
+ *   One that names no view records nothing: it is not a screen's.
  *
  * The half is forwarded in process, never through a rate-limited route, and on Cloudflare through
  * the request's `waitUntil` so the Worker lives until the post is made (`keepAliveOf`). The wait on
@@ -45,7 +44,7 @@ import {
   type ReportHalf,
   type ServerRequest
 } from './report';
-import { TELEMETRY_PATH, VIEW_COOKIE, mintViewId, readViewMark } from './view';
+import { TELEMETRY_PATH, mintViewId, readViewMark } from './view';
 
 /** One app's screen report: where its halves go, and what it holds its screens to. */
 export interface ScreenReportConfig extends ReportDoor {
@@ -68,7 +67,6 @@ export interface HookEvent {
   route: { id: string | null };
   locals: object;
   isDataRequest: boolean;
-  cookies: { get(name: string): string | undefined };
   platform?: unknown;
 }
 
@@ -83,15 +81,9 @@ setViewLookup(() => {
 
 export { REFRESH_POLL } from './report';
 
-/**
- * The view `event` names and whether a navigation is entering it: its `x-screen-view-id` header,
- * else, where `cookie` allows, the `sv` cookie. A header always wins: it is the requesting
- * document's own, the cookie is the origin's.
- */
-export function viewMarkOf(event: HookEvent, cookie = true): { view: string; navigation: boolean } | null {
-  const header = event.request.headers.get(VIEW_HEADER);
-  if (header !== null) return readViewMark(header);
-  return cookie ? readViewMark(event.cookies.get(VIEW_COOKIE)) : null;
+/** The view `event` names in its `x-screen-view-id` header, and whether a navigation is entering it. */
+export function viewMarkOf(event: HookEvent): { view: string; navigation: boolean } | null {
+  return readViewMark(event.request.headers.get(VIEW_HEADER));
 }
 
 /** What request `event` is, as far as the report cares. */
@@ -109,7 +101,7 @@ export function requestKind(event: HookEvent): ServerRequest {
 /** The view `event` belongs to: minted for a document, else the one the browser named, else none. */
 export function viewIdFor(event: HookEvent, kind: ServerRequest): string | null {
   if (kind === 'document') return mintViewId();
-  const mark = viewMarkOf(event, kind !== 'endpoint');
+  const mark = viewMarkOf(event);
   if (mark !== null) return mark.view;
   return kind === 'data' ? mintViewId() : null;
 }
