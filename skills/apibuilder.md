@@ -32,7 +32,7 @@ Create an `api.json` file in the `spec/` directory. Use this structure:
 ```json
 {
   "name": "my-service",
-  "namespace": "com.example.myservice.v0",
+  "namespace": "com.example.myservice",
   "imports": [],
   "enums": {},
   "models": {
@@ -77,7 +77,7 @@ Create an `api.json` file in the `spec/` directory. Use this structure:
           "body": { "type": "user_form" },
           "responses": {
             "201": { "type": "user" },
-            "422": { "type": "[com.bryzek.platform.error.v0.models.validation_error]" }
+            "422": { "type": "[com.bryzek.platform.error.models.validation_error]" }
           }
         }
       ]
@@ -88,7 +88,7 @@ Create an `api.json` file in the `spec/` directory. Use this structure:
 
 ### Key Rules for Specs
 
-- **Namespace**: Always define a namespace (e.g., `com.example.service.v0`)
+- **Namespace**: Always define a namespace (e.g., `com.example.service`)
 - **Resources**: Resource names must match a locally defined model or enum
 - **Arrays**: Use `[type]` syntax (e.g., `[user]` for an array of users)
 - **Forms**: Create `_form` models for POST/PUT request bodies
