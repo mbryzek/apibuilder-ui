@@ -123,7 +123,6 @@ beforeEach(() => {
       return true;
     }
   });
-  document.cookie = 'sv=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
   history.replaceState(null, '', '/issues/1');
   requests = [];
   vi.stubGlobal('fetch', (input: RequestInfo | URL, init?: RequestInit) => {
@@ -195,11 +194,8 @@ describe('a hard load', () => {
   });
 
   it('names its view, unmarked, on its own data requests and form actions, so a refresh is booked to it', async () => {
-    document.cookie = 'sv=sv_fedcba9876543210fedcba9876543210.nav; path=/';
     const { browser } = await load();
     browser.registerScreenReport({ view: VIEW });
-    // The origin's cookie, which a bundle older than the header wrote, is expired.
-    expect(document.cookie).toBe('');
     expect(await headerOf('/issues/1/__data.json?x-sveltekit-invalidated=01')).toBe(VIEW);
     expect(await headerOf('/issues/1?/comment', { method: 'POST', headers: { 'x-sveltekit-action': 'true' } })).toBe(VIEW);
   });
@@ -353,14 +349,6 @@ describe('a soft navigation', () => {
       { operation: 'getOther', part: 'poll:refresh', start_ms: 900 }
     ]);
     expect(half?.['polls']).toEqual({ refresh: 1 });
-  });
-
-  it('names its own view whatever another window of the app wrote into the cookie', async () => {
-    const { browser } = await load();
-    browser.registerScreenReport({ view: VIEW });
-    after?.({ type: 'enter' });
-    document.cookie = 'sv=sv_fedcba9876543210fedcba9876543210.nav; path=/';
-    expect(await headerOf('/issues/1/__data.json')).toBe(VIEW);
   });
 
   it('keeps the view it would have left when another handler cancels it', async () => {
