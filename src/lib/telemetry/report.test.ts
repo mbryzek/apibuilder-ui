@@ -45,9 +45,11 @@ describe('sanitizeBrowserHalf', () => {
   it("keeps the browser's webdriver claim only as true, and never a mark the server stamps", () => {
     expect(sanitizeBrowserHalf({ ...browserHalf, webdriver: true })?.webdriver).toBe(true);
     expect(sanitizeBrowserHalf({ ...browserHalf, webdriver: 'yes' })).not.toHaveProperty('webdriver');
-    const forged = sanitizeBrowserHalf({ ...browserHalf, automated: 'user-agent', agent: 'deadbeef' });
+    const forged = sanitizeBrowserHalf({ ...browserHalf, automated: 'user-agent', agent: 'deadbeef', asn: 7922, as_org: 'Comcast' });
     expect(forged).not.toHaveProperty('automated');
     expect(forged).not.toHaveProperty('agent');
+    expect(forged).not.toHaveProperty('asn');
+    expect(forged).not.toHaveProperty('as_org');
   });
 
   it('drops a call that names no operation and turns nonsense numbers into nulls', () => {
@@ -153,6 +155,12 @@ describe('the record monitoring reads', () => {
     expect(marked['screen.client.automated']).toBe('webdriver');
     expect(marked['screen.client.agent']).toBe('0a1b2c3d');
     expect(Object.keys(marked)).not.toContain('screen.webdriver');
+    expect(keys(stamped)).not.toContain('screen.client.asn');
+    const network = Object.fromEntries(
+      reportAttributes({ ...stamped, asn: 16509, as_org: 'Amazon.com, Inc.' }, peaksOfCalls(stamped)).map((a) => [a.key, a.value])
+    );
+    expect(network['screen.client.asn']).toBe(16509);
+    expect(network['screen.client.as_org']).toBe('Amazon.com, Inc.');
   });
 
   it("carries a hard load's phases, each only where the browser recorded it", () => {

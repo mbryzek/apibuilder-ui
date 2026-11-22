@@ -11,11 +11,12 @@
  * door's token are the hard bounds. The server half never comes here: the hook forwards it in
  * process. The budget the half is stamped with is the server's, resolved from the route, and so is
  * the client round trip: Cloudflare's measure of the post's own connection, and what marks the client
- * automated: the post's own user agent, and the `webdriver` the browser half says it ran under.
+ * automated: the post's own user agent, and the `webdriver` the browser half says it ran under, and
+ * the network the post came from.
  */
 import { budgetFor } from './budget';
 import { postReport, sanitizeBrowserHalf, withClientRtt } from './report';
-import { clientMarksOf, clientRttOf, keepAliveOf, type ScreenReportConfig } from './server';
+import { clientMarksOf, clientNetworkOf, clientRttOf, keepAliveOf, type ScreenReportConfig } from './server';
 
 /** The largest browser half accepted, in bytes. */
 export const MAX_REPORT_BYTES = 64 * 1024;
@@ -115,7 +116,8 @@ export function telemetryHandler(
     const half = {
       ...posted,
       ...withClientRtt(clientRttOf(event.platform, event.request)),
-      ...clientMarksOf(event.request, posted.webdriver === true)
+      ...clientMarksOf(event.request, posted.webdriver === true),
+      ...clientNetworkOf(event.platform, event.request)
     };
     const sent = postReport(half, budgetFor(half.route, config.budgets), config);
     const waitUntil = await keepAliveOf(event.platform, config);
