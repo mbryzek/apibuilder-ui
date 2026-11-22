@@ -37,7 +37,6 @@ export enum Publication {
 }
 
 export enum Visibility {
-  User = 'user',
   Organization = 'organization',
   Public = 'public'
 }
