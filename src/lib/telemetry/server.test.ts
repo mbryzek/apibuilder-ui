@@ -24,7 +24,6 @@ import {
   type HookEvent
 } from './server';
 import { ViewRecorder } from './recorder';
-import { VIEW_COOKIE } from './view';
 
 const VIEW = 'sv_0123456789abcdef0123456789abcdef';
 
@@ -32,15 +31,14 @@ vi.mock('$app/env/public', () => ({ PUBLIC_VERSION: '0.3.97' }));
 
 function hookEvent(
   path: string,
-  init: { method?: string; headers?: Record<string, string>; cookie?: string; isDataRequest?: boolean; route?: string | null } = {}
+  init: { method?: string; headers?: Record<string, string>; isDataRequest?: boolean; route?: string | null } = {}
 ): HookEvent {
   return {
     url: new URL(`https://admin.test${path}`),
     request: new Request(`https://admin.test${path}`, { method: init.method ?? 'GET', headers: init.headers ?? {} }),
     route: { id: init.route === undefined ? '/issues/[id]' : init.route },
     locals: {},
-    isDataRequest: init.isDataRequest ?? false,
-    cookies: { get: (name) => (name === VIEW_COOKIE ? init.cookie : undefined) }
+    isDataRequest: init.isDataRequest ?? false
   };
 }
 
@@ -52,43 +50,33 @@ function getIssue(context: CallContext): Promise<number> {
 }
 
 describe('which view a request belongs to', () => {
-  it('mints one for a document, whatever cookie it carries', () => {
-    const event = hookEvent('/issues/1', { headers: { accept: 'text/html' }, cookie: VIEW });
+  it('mints one for a document, whatever view header it carries', () => {
+    const event = hookEvent('/issues/1', { headers: { accept: 'text/html', [VIEW_HEADER]: VIEW } });
     expect(requestKind(event)).toBe('document');
     expect(viewIdFor(event, 'document')).not.toBe(VIEW);
   });
 
-  it("takes a soft navigation's id from the cookie an older bundle's beforeNavigate marked", () => {
-    const event = hookEvent('/issues/1/__data.json', { isDataRequest: true, cookie: `${VIEW}.nav` });
+  it("takes a soft navigation's id from the header its beforeNavigate marked", () => {
+    const event = hookEvent('/issues/1/__data.json', { isDataRequest: true, headers: { [VIEW_HEADER]: `${VIEW}.nav` } });
     expect(requestKind(event)).toBe('data');
     expect(viewIdFor(event, 'data')).toBe(VIEW);
   });
 
-  it('reads a data request under an unmarked cookie as a refresh of the view the page shows', () => {
-    const event = hookEvent('/issues/1/__data.json', { isDataRequest: true, cookie: VIEW });
+  it('reads a data request under an unmarked header as a refresh of the view the page shows', () => {
+    const event = hookEvent('/issues/1/__data.json', { isDataRequest: true, headers: { [VIEW_HEADER]: VIEW } });
     expect(requestKind(event)).toBe('refresh');
     expect(viewIdFor(event, 'refresh')).toBe(VIEW);
   });
 
-  it("takes a data request's view from its own header first, marked or not, whatever the cookie says", () => {
-    const OTHER = 'sv_fedcba9876543210fedcba9876543210';
-    const entering = hookEvent('/issues/1/__data.json', { isDataRequest: true, headers: { [VIEW_HEADER]: `${VIEW}.nav` }, cookie: OTHER });
-    expect(requestKind(entering)).toBe('data');
-    expect(viewIdFor(entering, 'data')).toBe(VIEW);
-    const refresh = hookEvent('/issues/1/__data.json', { isDataRequest: true, headers: { [VIEW_HEADER]: VIEW }, cookie: `${OTHER}.nav` });
-    expect(requestKind(refresh)).toBe('refresh');
-    expect(viewIdFor(refresh, 'refresh')).toBe(VIEW);
-  });
-
-  it("takes a form action's view from its header before the cookie", () => {
-    const OTHER = 'sv_fedcba9876543210fedcba9876543210';
-    const event = hookEvent('/issues/1', { method: 'POST', headers: { 'x-sveltekit-action': 'true', [VIEW_HEADER]: VIEW }, cookie: OTHER });
+  it("takes a form action's view from its header, and records nothing without one", () => {
+    const event = hookEvent('/issues/1', { method: 'POST', headers: { 'x-sveltekit-action': 'true', [VIEW_HEADER]: VIEW } });
     expect(viewIdFor(event, 'form')).toBe(VIEW);
+    expect(viewIdFor(hookEvent('/issues/1', { method: 'POST', headers: { 'x-sveltekit-action': 'true' } }), 'form')).toBeNull();
   });
 
-  it('mints a view for a data request with no cookie it can read', () => {
-    for (const cookie of [{}, { cookie: 'sv_nope' }, { cookie: 'sv_nope.nav' }]) {
-      const event = hookEvent('/issues/1/__data.json', { isDataRequest: true, ...cookie });
+  it('mints a view for a data request with no header it can read', () => {
+    for (const headers of [{}, { [VIEW_HEADER]: 'sv_nope' }, { [VIEW_HEADER]: 'sv_nope.nav' }]) {
+      const event = hookEvent('/issues/1/__data.json', { isDataRequest: true, headers });
       expect(requestKind(event)).toBe('data');
       expect(viewIdFor(event, 'data')).toMatch(/^sv_[0-9a-f]{32}$/);
     }
@@ -98,7 +86,7 @@ describe('which view a request belongs to', () => {
     const named = hookEvent('/search', { headers: { [VIEW_HEADER]: VIEW, accept: 'application/json' } });
     expect(requestKind(named)).toBe('endpoint');
     expect(viewIdFor(named, 'endpoint')).toBe(VIEW);
-    expect(viewIdFor(hookEvent('/search', { cookie: VIEW }), 'endpoint')).toBeNull();
+    expect(viewIdFor(hookEvent('/search'), 'endpoint')).toBeNull();
   });
 
   it('reads a form action as a form', () => {
@@ -240,7 +228,7 @@ describe('screenReportHandle', () => {
     });
     const waitUntil = vi.fn();
     const refresh = () => ({
-      ...hookEvent('/issues/1/__data.json', { isDataRequest: true, cookie: VIEW }),
+      ...hookEvent('/issues/1/__data.json', { isDataRequest: true, headers: { [VIEW_HEADER]: VIEW } }),
       platform: { ctx: { waitUntil } }
     });
     await handle({ event: refresh(), resolve: async () => new Response('{}') });
