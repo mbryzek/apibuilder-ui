@@ -19,8 +19,8 @@
 set -euo pipefail
 
 # `--frontend apibuilder` names the TENANT ID this repo serves (a key of platform's
-# `TenantHosts.DefaultDevFrontendUrls`), so this build's allocated vite port is pointed at that
-# one tenant and the other ten are left on their defaults.
+# `ProductHosts.DefaultDevFrontendUrls`), so this build's allocated vite port is pointed at that
+# one tenant and every other tenant is left on its default.
 E2E_REPO=apibuilder-ui
 E2E_TENANT=(--frontend apibuilder)
 
