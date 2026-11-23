@@ -176,7 +176,7 @@ function observe(type: string, onEntries: (entries: PerformanceEntry[]) => void,
 /** The view's timing as of now. */
 export function timingOf(view: ViewState, now: number): ReportTiming {
   const nav = view.navigation === 'hard' ? navigationEntry() : undefined;
-  const show = nav === undefined ? view.showMs : hardLoadShowMs(lcpAt, documentStart(nav), documentHidden, now);
+  const show = nav === undefined ? view.showMs : hardLoadShowMs(lcpAt, nav, documentHidden, now);
   return {
     navigation: view.navigation,
     show_ms: show,
