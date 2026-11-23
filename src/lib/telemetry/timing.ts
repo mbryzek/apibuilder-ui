@@ -4,7 +4,7 @@
  * document. `browser.ts` holds the observers that feed it.
  *
  * - Time to show: LCP for a hard load, timed from the document's own request, less the time the
- *   document spent hidden; for a soft navigation, which has no LCP, `beforeNavigate` to
+ *   document spent hidden, and none where the browser recorded no network marks to time it from; for a soft navigation, which has no LCP, `beforeNavigate` to
  *   `afterNavigate` less the time the tab spent hidden. A soft navigation that loaded nothing has
  *   no time to show at all, never a zero.
  * - INP: the slowest interaction of the view, skipping one per fifty interactions, as the metric
@@ -195,13 +195,23 @@ export function loadPhases(nav: PhaseEntry, lcpAt: number | null, hidden: Hidden
   };
 }
 
+/** A navigation entry, as far as time to show reads it. */
+export interface ShowEntry extends DocumentEntry {
+  responseStart: number;
+}
+
 /**
- * A hard load's time to show: its largest contentful paint, from the document's own start, less the
- * hidden time inside. Null where the browser reported no LCP (Safari before 26, a page painting
- * nothing contentful): an absent number, never a zero.
+ * A hard load's time to show: its largest contentful paint, from the document's own start
+ * (`documentStart`), less the hidden time inside. Null, an absent number and never a zero, where
+ * the browser reported no LCP (Safari before 26, a page painting nothing contentful), and where it
+ * recorded no `responseStart`: an entry without network marks (Safari, reached through a
+ * cross-origin redirect) reads `fetchStart` 0 too, so the document's own start is unknown and timing
+ * from navigation start would count the redirects that led here as this screen's cost. ISS-135686
  */
-export function hardLoadShowMs(lcpAt: number | null, start: number, hidden: HiddenSpans | null, now: number): number | null {
-  if (lcpAt === null || lcpAt < start) return null;
+export function hardLoadShowMs(lcpAt: number | null, nav: ShowEntry, hidden: HiddenSpans | null, now: number): number | null {
+  if (lcpAt === null || nav.responseStart <= 0) return null;
+  const start = documentStart(nav);
+  if (lcpAt < start) return null;
   return clamp(lcpAt - start - (hidden?.within({ start, end: lcpAt }, now) ?? 0));
 }
 

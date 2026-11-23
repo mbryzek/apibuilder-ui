@@ -14,7 +14,7 @@ import {
 describe('time to show', () => {
   it("is a hard load's LCP from the document's own start, less the time it spent hidden", () => {
     const hidden = new HiddenSpans([{ start: 100, end: 400 }]);
-    expect(hardLoadShowMs(900, 0, hidden, 1000)).toBe(600);
+    expect(hardLoadShowMs(900, { startTime: 0, fetchStart: 0, responseStart: 80 }, hidden, 1000)).toBe(600);
   });
 
   it('starts after the redirects that led to the document', () => {
@@ -23,13 +23,18 @@ describe('time to show', () => {
   });
 
   it('starts after a cross-origin redirect chain, whose redirect marks the browser zeroes', () => {
-    const nav = { startTime: 0, fetchStart: 18_700, redirectStart: 0, redirectEnd: 0 };
+    const nav = { startTime: 0, fetchStart: 18_700, redirectStart: 0, redirectEnd: 0, responseStart: 18_900 };
     expect(documentStart(nav)).toBe(18_700);
-    expect(hardLoadShowMs(19_200, documentStart(nav), null, 20_000)).toBe(500);
+    expect(hardLoadShowMs(19_200, nav, null, 20_000)).toBe(500);
+  });
+
+  it('is absent, never the redirect that led here, when the browser recorded no network marks', () => {
+    const unmarked = { startTime: 0, fetchStart: 0, domainLookupStart: 0, connectEnd: 0, requestStart: 0, responseStart: 0 };
+    expect(hardLoadShowMs(3061, unmarked, null, 4000)).toBeNull();
   });
 
   it('is absent, never zero, when the browser reported no LCP', () => {
-    expect(hardLoadShowMs(null, 0, null, 1000)).toBeNull();
+    expect(hardLoadShowMs(null, { startTime: 0, fetchStart: 0, responseStart: 80 }, null, 1000)).toBeNull();
   });
 
   it("is a soft navigation's visible time from beforeNavigate to afterNavigate", () => {
