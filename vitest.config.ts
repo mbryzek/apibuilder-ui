@@ -35,6 +35,8 @@ export default defineConfig({
     conditions: ['browser']
   },
   test: {
+    // The screen budget record, read once before the first spec (DES-139972).
+    globalSetup: ['src/lib/test/budgetRecord.setup.ts'],
     // playwright/ is in here for its helpers only: the e2e specs themselves need two running
     // servers and never run unattended, but the helpers that talk to the platform API are plain
     // modules, and this is the only place their behavior gets executed.

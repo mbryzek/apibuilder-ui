@@ -9,13 +9,12 @@
  *   app's own `/_telemetry` when the view ends (`browser.ts`, `endpoint.ts`).
  *
  * Each half is one OTLP log record (`otlpRecord`, the attributes monitoring's rules read) posted to `obs-report.idempotent.io`, the report door, as the
- * writer whose token is the Worker secret `OBS_REPORT_TOKEN`. A browser never holds the token. The
- * budget a half is stamped with is resolved on the server from the route, never taken from a client.
+ * writer whose token is the Worker secret `OBS_REPORT_TOKEN`. A browser never holds the token. A half
+ * carries no budget: the rules read what each screen is held to from the platform record (DES-139972).
  * Each half names the release its own code was built as (`screen.release`), so a rule reads a fix
  * from the views the fixed release served and no other.
  */
 import { PUBLIC_VERSION } from '$app/env/public';
-import type { Budget } from './budget';
 import { MAX_CALLS, type RecordedCall, type ViewRecorder } from './recorder';
 import { encodeLogs, type Attribute, type LogRecordInput } from './otlp';
 import type { LoadPhases } from './timing';
@@ -113,11 +112,10 @@ export interface ReportHalf {
   as_org?: string;
 }
 
-/** A half as it leaves for the door: stamped with the app, its repository and the budget its screen was held to. */
+/** A half as it leaves for the door: stamped with the app and its repository. */
 export interface StampedHalf extends ReportHalf {
   app: string;
   repo: string;
-  budget: Budget;
 }
 
 /** The half a recorder holds now. */
@@ -279,7 +277,7 @@ function navigationOf(half: ReportHalf): 'hard' | 'soft' | null {
 /**
  * The attributes monitoring's rules read (ISS-65875), dotted keys as its rules spell them. Each half
  * carries only what it made itself; a view's numbers are its two halves summed (calls, waits) or
- * maxed (later, poll, budget).
+ * maxed (later, poll).
  */
 export function reportAttributes(stamped: StampedHalf, peaks: PartPeaks): Attribute[] {
   const load = stamped.calls.filter((call) => call.part === 'load');
@@ -319,12 +317,7 @@ export function reportAttributes(stamped: StampedHalf, peaks: PartPeaks): Attrib
     ),
     attribute('screen.poll.refresh.count', stamped.polls[REFRESH_POLL] ?? 0),
     ...pollTicks(stamped.polls),
-    attribute('screen.calls', stamped.calls.length + stamped.dropped_calls),
-    attribute('screen.budget.show_ms', stamped.budget.showMs),
-    attribute('screen.budget.load.calls', stamped.budget.load.calls),
-    attribute('screen.budget.load.waits', stamped.budget.load.waits),
-    attribute('screen.budget.parts', stamped.budget.parts),
-    attribute('screen.budget.poll', stamped.budget.poll)
+    attribute('screen.calls', stamped.calls.length + stamped.dropped_calls)
   ];
 }
 
@@ -426,19 +419,14 @@ const POST_TIMEOUT_MS = 5_000;
  * Post one stamped half to the report door as OTLP protobuf. Never throws: a failed send is dropped,
  * says so by `false`, and is counted on the next half delivered (`screen.report.lost`).
  */
-export async function postReport(
-  half: ReportHalf,
-  budget: Budget,
-  door: ReportDoor,
-  peaks: PartPeaks = peaksOfCalls(half)
-): Promise<boolean> {
+export async function postReport(half: ReportHalf, door: ReportDoor, peaks: PartPeaks = peaksOfCalls(half)): Promise<boolean> {
   const lost = door.lost ?? lostHalves;
   try {
     const token = door.token();
     if (token === undefined || token === '') return false;
     const send = door.fetch ?? fetch;
     const carried = lost.pending();
-    const stamped: StampedHalf = { ...half, app: door.app, repo: door.repo, budget, lost_halves: carried };
+    const stamped: StampedHalf = { ...half, app: door.app, repo: door.repo, lost_halves: carried };
     const body = encodeLogs(otlpRecord(stamped, peaks, Date.now()));
     const response = await send(door.endpoint ?? REPORT_ENDPOINT, {
       method: 'POST',

@@ -1,6 +1,6 @@
 // dry-copy: sveltekit/screen-report/testing-test — every copy of this region must match; `dev repo copies` checks it (DES-65431)
 import { describe, expect, it, vi } from 'vitest';
-import { budgetTable } from './budget';
+import { budgetRecord } from './budget';
 import { ctx, later, poll, type CallContext } from './context';
 import { expectWithinBudget, orderedFetch } from './testing';
 
@@ -22,6 +22,25 @@ const getUser = operation('getUser');
 
 const answer = (): Response => Response.json({ ok: true });
 
+const GLOBAL = [
+  { measure: 'show_ms', value: 500 },
+  { measure: 'load_calls', value: 3 },
+  { measure: 'load_waits', value: 2 },
+  { measure: 'parts', value: 1 },
+  { measure: 'poll', value: 1 }
+];
+
+/** The record with `rows` for app `idempotent`: each a route, a measure, its kind and its value. */
+function recordWith(...rows: { route: string; measure: string; kind: string; value: number }[]) {
+  return budgetRecord('idempotent', {
+    repository: 'mbryzek/idempotent',
+    global: GLOBAL,
+    budgets: rows.map((row) => ({ app: 'idempotent', ...row }))
+  });
+}
+
+const record = recordWith();
+
 interface Event {
   route: { id: string };
   parent: () => Promise<unknown>;
@@ -37,7 +56,8 @@ describe('expectWithinBudget', () => {
     const run = await expectWithinBudget(
       async (e: Event) => Promise.all([getTenant(ctx(e)), getIssue(ctx(e)), getComments(ctx(e))]),
       event(),
-      answer
+      answer,
+      { budgets: record }
     );
     expect(run.load).toEqual({ calls: 3, waits: 0 });
   });
@@ -48,7 +68,7 @@ describe('expectWithinBudget', () => {
       await Promise.all([getIssue(ctx(e)), getComments(ctx(e))]);
     };
     for (let i = 0; i < 5; i += 1) {
-      const run = await expectWithinBudget(load, event(), answer);
+      const run = await expectWithinBudget(load, event(), answer, { budgets: record });
       expect(run.calls.map((call) => [call.operation, call.waited])).toEqual([
         ['getTenant', false],
         ['getIssue', true],
@@ -72,7 +92,8 @@ describe('expectWithinBudget', () => {
         await getIssue(ctx(page));
       },
       e,
-      answer
+      answer,
+      { budgets: record }
     );
     expect(run.calls.map((call) => [call.operation, call.waited])).toEqual([
       ['getUser', false],
@@ -84,16 +105,41 @@ describe('expectWithinBudget', () => {
     const load = async (e: Event): Promise<void> => {
       await Promise.all([getTenant(ctx(e)), getIssue(ctx(e)), getComments(ctx(e)), getUser(ctx(e))]);
     };
-    await expect(expectWithinBudget(load, event(), answer)).rejects.toThrow(/4 calls before showing, budget 3[\s\S]*getUser/);
+    await expect(expectWithinBudget(load, event(), answer, { budgets: record })).rejects.toThrow(
+      /4 calls before showing, budget 3[\s\S]*getUser/
+    );
   });
 
-  it('holds a route to its own override', async () => {
+  it('holds a route to its own row in the record', async () => {
     const load = async (e: Event): Promise<void> => {
       await Promise.all([getTenant(ctx(e)), getIssue(ctx(e)), getComments(ctx(e)), getUser(ctx(e))]);
     };
-    const budgets = budgetTable({ '/src/routes/issues/[id]/budget.ts': { budget: { load: { calls: 4 } } } });
+    const budgets = recordWith({ route: '/issues/[id]', measure: 'load_calls', kind: 'debt', value: 4 });
     const run = await expectWithinBudget(load, event(), answer, { budgets });
     expect(run.budget.load.calls).toBe(4);
+  });
+
+  it('names the measure, the budget, what holds it, the count and the request line of a load over its budget', async () => {
+    const load = async (e: Event): Promise<void> => {
+      await Promise.all([getTenant(ctx(e)), getIssue(ctx(e)), getComments(ctx(e)), getUser(ctx(e)), getUser(ctx(e))]);
+    };
+    const budgets = recordWith({ route: '/issues/[id]', measure: 'load_calls', kind: 'debt', value: 4 });
+    const failure = await expectWithinBudget(load, event(), answer, { budgets }).catch((error: unknown) => String(error));
+    expect(failure).toContain('/issues/[id] is over its budget');
+    expect(failure).toContain('load_calls: 5 calls before showing, budget 4, held by its debt row (global 3), which only goes down');
+    expect(failure).toContain("dev budgets request idempotent '/issues/[id]' --measure load_calls --value 5");
+  });
+
+  it('notes what every run counted, over its budget or not', async () => {
+    const noted: { route: string | null; calls: number }[] = [];
+    const counts = { note: (route: string | null, run: { load: { calls: number } }) => noted.push({ route, calls: run.load.calls }) };
+    const four = async (e: Event): Promise<void> => {
+      await Promise.all([getTenant(ctx(e)), getIssue(ctx(e)), getComments(ctx(e)), getUser(ctx(e))]);
+    };
+    await expect(expectWithinBudget(four, event(), answer, { budgets: record, counts: counts as never })).rejects.toThrow(
+      /held by the global budget/
+    );
+    expect(noted).toEqual([{ route: '/issues/[id]', calls: 4 }]);
   });
 
   it('holds a part that fills in after to its own budget, and waits for it', async () => {
@@ -101,7 +147,7 @@ describe('expectWithinBudget', () => {
       await getIssue(ctx(e));
       return { comments: later(ctx(e), 'comments', async (c) => Promise.all([getComments(c), getUser(c)])) };
     };
-    await expect(expectWithinBudget(load, event(), answer)).rejects.toThrow(/2 calls in one later part, budget 1/);
+    await expect(expectWithinBudget(load, event(), answer, { budgets: record })).rejects.toThrow(/2 calls in one later part, budget 1/);
   });
 
   it('reads a poll per tick', async () => {
@@ -110,7 +156,8 @@ describe('expectWithinBudget', () => {
         for (let tick = 0; tick < 3; tick += 1) await poll(ctx(e), 'status', (c) => getIssue(c));
       },
       event(),
-      answer
+      answer,
+      { budgets: record }
     );
     expect(run.peaks.poll).toBe(1);
   });
@@ -123,7 +170,9 @@ describe('expectWithinBudget', () => {
       const comments = await getComments(ctx(e));
       return { issue, comments };
     };
-    await expect(expectWithinBudget(load, event(), answer)).rejects.toThrow(/not opened by later\(\.\.\.\)[^\n]*: issue/);
+    await expect(expectWithinBudget(load, event(), answer, { budgets: record })).rejects.toThrow(
+      /not opened by later\(\.\.\.\)[^\n]*: issue/
+    );
   });
 
   it('passes the same load once later opens the streamed part, chained or not', async () => {
@@ -133,7 +182,7 @@ describe('expectWithinBudget', () => {
       const comments = await getComments(ctx(e));
       return { issue, user, comments };
     };
-    const run = await expectWithinBudget(load, event(), answer);
+    const run = await expectWithinBudget(load, event(), answer, { budgets: record });
     expect(run.undeclared).toEqual([]);
     expect(run.calls.map((call) => call.part)).toEqual(['later:issue', 'later:user', 'load']);
   });
@@ -143,7 +192,9 @@ describe('expectWithinBudget', () => {
       await getTenant(ctx(e));
       return { issue: getIssue(ctx(e)) };
     };
-    await expect(expectWithinBudget(load, event(), answer)).rejects.toThrow(/not opened by later\(\.\.\.\)[^\n]*: issue$/m);
+    await expect(expectWithinBudget(load, event(), answer, { budgets: record })).rejects.toThrow(
+      /not opened by later\(\.\.\.\)[^\n]*: issue$/m
+    );
   });
 
   it('does not judge a load call the load neither awaited nor returned, as when it threw first', async () => {
@@ -151,7 +202,7 @@ describe('expectWithinBudget', () => {
       void getIssue(ctx(e)).catch(() => undefined);
       return Promise.resolve({});
     };
-    const run = await expectWithinBudget(load, event(), answer);
+    const run = await expectWithinBudget(load, event(), answer, { budgets: record });
     expect(run.undeclared).toEqual([]);
   });
 
@@ -161,7 +212,9 @@ describe('expectWithinBudget', () => {
       await getIssue(ctx(e));
       return [{ tenant }, { comments: later(ctx(e), 'comments', (c) => getComments(c)) }];
     };
-    await expect(expectWithinBudget(load, event(), answer)).rejects.toThrow(/not opened by later\(\.\.\.\)[^\n]*: tenant$/m);
+    await expect(expectWithinBudget(load, event(), answer, { budgets: record })).rejects.toThrow(
+      /not opened by later\(\.\.\.\)[^\n]*: tenant$/m
+    );
   });
 
   it('returns from a load that awaits its own later part', async () => {
@@ -169,7 +222,7 @@ describe('expectWithinBudget', () => {
       const issue = await later(ctx(e), 'issue', (c) => getIssue(c));
       return { issue };
     };
-    const run = await expectWithinBudget(load, event(), answer);
+    const run = await expectWithinBudget(load, event(), answer, { budgets: record });
     expect(run.calls.map((call) => call.part)).toEqual(['later:issue']);
   });
 
@@ -177,7 +230,7 @@ describe('expectWithinBudget', () => {
     const load = async (): Promise<void> => {
       await fetch('https://api.test/untyped');
     };
-    await expect(expectWithinBudget(load, event(), answer)).rejects.toThrow(/1 fetches no call context noted/);
+    await expect(expectWithinBudget(load, event(), answer, { budgets: record })).rejects.toThrow(/1 fetches no call context noted/);
   });
 });
 

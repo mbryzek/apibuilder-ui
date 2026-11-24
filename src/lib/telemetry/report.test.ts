@@ -1,6 +1,5 @@
 // dry-copy: sveltekit/screen-report/report-test — every copy of this region must match; `dev repo copies` checks it (DES-65431)
 import { describe, expect, it, vi } from 'vitest';
-import { globalBudget } from './budget';
 import { decodeLogs } from './otlp.test.decode';
 import { MAX_CALLS, type RecordedCall } from './recorder';
 import { LostHalves, peaksOfCalls, postReport, reportAttributes, sanitizeBrowserHalf, type ReportHalf } from './report';
@@ -88,9 +87,7 @@ describe('the record monitoring reads', () => {
 
   it('carries the keys its rules read, each half only what it made', () => {
     const attributes = Object.fromEntries(
-      reportAttributes({ ...server, app: 'idempotent', repo: 'mbryzek/idempotent', budget: globalBudget }, peaksOfCalls(server)).map(
-        (a) => [a.key, a.value]
-      )
+      reportAttributes({ ...server, app: 'idempotent', repo: 'mbryzek/idempotent' }, peaksOfCalls(server)).map((a) => [a.key, a.value])
     );
     expect(attributes).toEqual({
       'screen.report': 'server',
@@ -105,12 +102,7 @@ describe('the record monitoring reads', () => {
       'screen.poll.max_calls': 0,
       'screen.poll.count': 0,
       'screen.poll.refresh.count': 0,
-      'screen.calls': 6,
-      'screen.budget.show_ms': 500,
-      'screen.budget.load.calls': 3,
-      'screen.budget.load.waits': 2,
-      'screen.budget.parts': 1,
-      'screen.budget.poll': 1
+      'screen.calls': 6
     });
   });
 
@@ -119,8 +111,7 @@ describe('the record monitoring reads', () => {
       ...server,
       polls: { refresh: 2, status: 40, idle: 0 },
       app: 'idempotent',
-      repo: 'mbryzek/idempotent',
-      budget: globalBudget
+      repo: 'mbryzek/idempotent'
     };
     const attributes = Object.fromEntries(reportAttributes(polled, peaksOfCalls(polled)).map((a) => [a.key, a.value]));
     expect(attributes['screen.poll.count']).toBe(42);
@@ -134,7 +125,7 @@ describe('the record monitoring reads', () => {
   });
 
   it('carries the client round trip only where one was measured', () => {
-    const stamped = { ...server, app: 'idempotent', repo: 'mbryzek/idempotent', budget: globalBudget };
+    const stamped = { ...server, app: 'idempotent', repo: 'mbryzek/idempotent' };
     const keys = (half: typeof stamped) => reportAttributes(half, peaksOfCalls(half)).map((a) => a.key);
     expect(keys(stamped)).not.toContain('screen.client_rtt_ms');
     const far = reportAttributes({ ...stamped, client_rtt_ms: 753 }, peaksOfCalls(stamped));
@@ -142,7 +133,7 @@ describe('the record monitoring reads', () => {
   });
 
   it("carries the client's marks only where the server stamped them", () => {
-    const stamped = { ...server, app: 'idempotent', repo: 'mbryzek/idempotent', budget: globalBudget };
+    const stamped = { ...server, app: 'idempotent', repo: 'mbryzek/idempotent' };
     const keys = (half: typeof stamped) => reportAttributes(half, peaksOfCalls(half)).map((a) => a.key);
     expect(keys(stamped)).not.toContain('screen.client.automated');
     expect(keys(stamped)).not.toContain('screen.client.agent');
@@ -179,16 +170,13 @@ describe('the record monitoring reads', () => {
         phases: { wait_ms: 18_700, connect_ms: 240, ttfb_ms: 112, render_ms: null }
       }
     };
-    const attributes = reportAttributes(
-      { ...browser, app: 'account', repo: 'playbook-systems/account', budget: globalBudget },
-      peaksOfCalls(browser)
-    );
+    const attributes = reportAttributes({ ...browser, app: 'account', repo: 'playbook-systems/account' }, peaksOfCalls(browser));
     const phases = Object.fromEntries(attributes.filter((a) => a.key.startsWith('screen.phase.')).map((a) => [a.key, a.value]));
     expect(phases).toEqual({ 'screen.phase.wait_ms': 18_700, 'screen.phase.connect_ms': 240, 'screen.phase.ttfb_ms': 112 });
   });
 
   it('names the release the half was built as, and nothing for a build no release made', () => {
-    const stamped = { ...server, app: 'idempotent', repo: 'mbryzek/idempotent', budget: globalBudget };
+    const stamped = { ...server, app: 'idempotent', repo: 'mbryzek/idempotent' };
     const release = (half: typeof stamped) => reportAttributes(half, peaksOfCalls(half)).find((a) => a.key === 'screen.release');
     expect(release(stamped)).toBeUndefined();
     expect(release({ ...stamped, release: '0.3.96' })?.value).toBe('0.3.96');
@@ -235,7 +223,7 @@ describe('postReport', () => {
 
   it('posts one protobuf record with the writer token', async () => {
     const fetch = vi.fn(async (_url: string | URL | Request, _init?: RequestInit) => new Response(null, { status: 204 }));
-    const sent = await postReport(half, globalBudget, {
+    const sent = await postReport(half, {
       app: 'idempotent',
       repo: 'mbryzek/idempotent',
       token: () => 'tok',
@@ -256,16 +244,14 @@ describe('postReport', () => {
     const fetch = vi.fn(async () => new Response(null, { status: 400 }));
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const door = { app: 'a', repo: 'mbryzek/a', fetch: fetch as unknown as typeof globalThis.fetch };
-    expect(await postReport(half, globalBudget, { ...door, token: () => undefined })).toBe(false);
+    expect(await postReport(half, { ...door, token: () => undefined })).toBe(false);
     expect(fetch).not.toHaveBeenCalled();
-    expect(await postReport(half, globalBudget, { ...door, token: () => 'tok' })).toBe(false);
+    expect(await postReport(half, { ...door, token: () => 'tok' })).toBe(false);
     expect(warn).toHaveBeenCalledWith('screen report: the report door answered 400');
     const throwing = vi.fn(async () => {
       throw new Error('offline');
     });
-    expect(
-      await postReport(half, globalBudget, { ...door, token: () => 'tok', fetch: throwing as unknown as typeof globalThis.fetch })
-    ).toBe(false);
+    expect(await postReport(half, { ...door, token: () => 'tok', fetch: throwing as unknown as typeof globalThis.fetch })).toBe(false);
     warn.mockRestore();
   });
 
@@ -278,7 +264,7 @@ describe('postReport', () => {
     );
     const door = { app: 'a', repo: 'mbryzek/a', token: () => 'tok', fetch: fetch as unknown as typeof globalThis.fetch, lost };
     lost.lose();
-    for (let i = 0; i < 4; i += 1) await postReport(half, globalBudget, door);
+    for (let i = 0; i < 4; i += 1) await postReport(half, door);
     const lostOf = (n: number) => decodeLogs(fetch.mock.calls[n]![1]?.body as Uint8Array).attributes['screen.report.lost'];
     expect(lostOf(0)).toBe(1);
     expect(lostOf(1)).toBe(2);

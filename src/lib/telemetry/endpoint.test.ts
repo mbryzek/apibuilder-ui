@@ -1,6 +1,5 @@
 // dry-copy: sveltekit/screen-report/endpoint-test — every copy of this region must match; `dev repo copies` checks it (DES-65431)
 import { describe, expect, it, vi } from 'vitest';
-import { budgetTable } from './budget';
 import { MAX_REPORT_BYTES, PostLimiter, telemetryHandler } from './endpoint';
 import { decodeLogs } from './otlp.test.decode';
 
@@ -33,19 +32,18 @@ function door(fetch = vi.fn(async (_url: string | URL | Request, _init?: Request
       app: 'idempotent',
       repo: 'mbryzek/idempotent',
       token: () => 'tok',
-      fetch: fetch as unknown as typeof globalThis.fetch,
-      budgets: budgetTable({ '/src/routes/issues/[id]/budget.ts': { budget: { showMs: 800 } } })
+      fetch: fetch as unknown as typeof globalThis.fetch
     }
   };
 }
 
 describe('/_telemetry', () => {
-  it("forwards a browser half stamped with the server's budget for its route", async () => {
+  it('forwards a browser half with no budget of its own, whatever the client sent', async () => {
     const { fetch, config } = door();
     const response = await telemetryHandler(config)(post(JSON.stringify({ ...half, budget: { showMs: 1 } })));
     expect(response.status).toBe(204);
     const record = decodeLogs(fetch.mock.calls[0]![1]?.body as Uint8Array);
-    expect(record.attributes['screen.budget.show_ms']).toBe(800);
+    expect(Object.keys(record.attributes).filter((key) => key.startsWith('screen.budget.'))).toEqual([]);
     expect(record.attributes['screen.show_ms']).toBe(640);
     expect(record.attributes['screen.report']).toBe('browser');
   });
