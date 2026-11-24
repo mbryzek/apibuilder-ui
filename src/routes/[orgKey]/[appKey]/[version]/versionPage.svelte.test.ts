@@ -22,8 +22,7 @@ const props = $state({
     }),
     version: { version: '1.0.0' },
     isMember: true,
-    isWatching: false,
-    watchLoadError: null
+    watch: Promise.resolve({ isWatching: false, loadError: null })
   },
   form: null
 });
@@ -95,7 +94,7 @@ describe('version page across a link to another spec', () => {
     filter().dispatchEvent(new Event('input'));
     flushSync();
 
-    props.data = { ...props.data, isWatching: true };
+    props.data = { ...props.data, watch: Promise.resolve({ isWatching: true, loadError: null }) };
     flushSync();
 
     expect(buttonNamed('Yes, Delete Version')).toBeDefined();

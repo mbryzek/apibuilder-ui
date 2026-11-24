@@ -8,6 +8,7 @@
   import type { Generator } from '#generated/com-bryzek-apibuilder-generator.ts';
   import type { Service } from '#generated/com-bryzek-apibuilder-spec.ts';
   import type { LoadError } from '#lib/api/load-error.ts';
+  import type { SidebarGenerators } from './+layout.server.ts';
 
   interface Props {
     data: {
@@ -16,10 +17,7 @@
       isAdmin: boolean;
       version: { version: string };
       service: Service;
-      isWatching: boolean;
-      watchLoadError: LoadError | null;
-      generators: Generator[];
-      generatorsLoadError: LoadError | null;
+      generators: Promise<SidebarGenerators>;
       session?: PublicSession;
     };
     children: Snippet;
@@ -31,21 +29,33 @@
   const service = $derived(data.service);
   const orgKey = $derived(page.params.orgKey ?? '');
   const appKey = $derived(page.params.appKey ?? '');
+
+  /**
+   * The catalog streams (`later:generators`). Until it answers the sidebar has no Clients section;
+   * a rerun of this load keeps the previous list until the new one arrives, since the catalog does
+   * not depend on the version being read.
+   */
+  let generators = $state<Generator[]>([]);
+  let generatorsLoadError = $state<LoadError | null>(null);
+  $effect(() => {
+    let current = true;
+    void data.generators.then((result) => {
+      if (!current) return;
+      generators = result.generators;
+      generatorsLoadError = result.loadError;
+    });
+    return () => {
+      current = false;
+    };
+  });
 </script>
 
 <svelte:head>
   <title>{service.name} {version.version} - {data.org.name} - API Builder</title>
 </svelte:head>
 
-{#if data.watchLoadError}
-  <!-- Previously surfaced only as a `title` on a disabled button: no hover on touch, and a
-       disabled control is not reliably reachable by assistive tech, so on a phone the entire
-       signal was a greyed-out icon with no explanation. -->
-  <LoadErrorBanner error={data.watchLoadError} />
-{/if}
-
-{#if data.generatorsLoadError}
-  <LoadErrorBanner error={data.generatorsLoadError} />
+{#if generatorsLoadError}
+  <LoadErrorBanner error={generatorsLoadError} />
 {/if}
 
 <div class="flex gap-10">
@@ -56,7 +66,7 @@
     appName={service.name}
     isMember={data.isMember}
     isAdmin={data.isAdmin}
-    generators={data.generators}
+    {generators}
   />
 
   <div class="min-w-0 flex-1">
