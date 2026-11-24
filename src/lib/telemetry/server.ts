@@ -10,9 +10,9 @@
  *     // +layout.server.ts
  *     return { screenView: screenViewId(event), ... };
  *
- * where `screenReport` is the app's one `ScreenReportConfig`: its name, its budget table
- * (`budget.ts`), the Worker secret `OBS_REPORT_TOKEN`, and the same-origin paths that are not
- * screens (an API proxy). The same config builds `/_telemetry` (`endpoint.ts`).
+ * where `screenReport` is the app's one `ScreenReportConfig`: its name and repository, the Worker
+ * secret `OBS_REPORT_TOKEN`, and the same-origin paths that are not screens (an API proxy). What each
+ * screen is held to is the platform record's, read by the rules (DES-139972), never stamped here. The same config builds `/_telemetry` (`endpoint.ts`).
  *
  * WHICH VIEW A REQUEST BELONGS TO:
  *
@@ -31,7 +31,6 @@
  * half delivered (`screen.report.lost`).
  */
 import { getRequestEvent } from '$app/server';
-import { budgetFor, type BudgetTable } from './budget';
 import { setViewLookup, viewOfLocals } from './context';
 import { VIEW_HEADER, ViewRecorder } from './recorder';
 import {
@@ -46,9 +45,8 @@ import {
 } from './report';
 import { TELEMETRY_PATH, mintViewId, readViewMark } from './view';
 
-/** One app's screen report: where its halves go, and what it holds its screens to. */
+/** One app's screen report: where its halves go. */
 export interface ScreenReportConfig extends ReportDoor {
-  budgets?: BudgetTable;
   /** Same-origin paths that are not a screen's (an API proxy the browser half already counts). */
   skip?: (pathname: string) => boolean;
   /** Keeps the Worker alive for a promise where the request's platform carries no `waitUntil`; `cloudflare:workers`' own by default. */
@@ -316,7 +314,7 @@ async function forward(
   const taken = { ...halfOf(view, { request: kind, client_rtt_ms: clientRtt }), ...client };
   const half = kind === 'refresh' ? asRefresh(taken) : taken;
   if (half.calls.length === 0 && half.dropped_calls === 0 && kind !== 'document' && kind !== 'data') return;
-  await postReport(half, budgetFor(view.route, config.budgets), config);
+  await postReport(half, config);
 }
 
 let warnedNoKeepAlive = false;

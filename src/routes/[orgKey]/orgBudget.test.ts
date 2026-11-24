@@ -5,8 +5,11 @@
  */
 import { describe, expect, it } from 'vitest';
 import { expectWithinBudget } from '#lib/telemetry/testing.ts';
-import { budgets } from '#lib/telemetry/budgets.ts';
+import { suiteRecord } from '#lib/telemetry/budgetRecord.ts';
 import { answer, hardLoad, hardLoadEvent, routeLoads } from '#lib/test-support/screenBudget.ts';
+
+// The platform record the run read before it started (`budgetRecord.ts`).
+const budgets = suiteRecord('apibuilder-ui');
 
 const route = '/[orgKey]';
 const modules = import.meta.glob([

@@ -3,14 +3,17 @@
  * A route's test holds its first load to budget before merge:
  *
  *     it('stays within its budget', async () => {
- *       await expectWithinBudget(load, event, (input) => answers(input), { budgets });
+ *       await expectWithinBudget(load, event, (input) => answers(input), { budgets: record, counts });
  *     });
  *
- * where `budgets` is the app's own `budgetTable` of its routes' overrides (`budget.ts`). It runs
+ * where `record` is the platform record the run read before it started (`budgetRecord.ts`) and
+ * `counts` the shard's per-route counts, which every run notes, over its budget or not. It runs
  * `load` with a recording context and a fake fetch and throws, naming every call, when the
  * load makes more calls, or more calls that waited on another, than the route's budget allows, when
  * a part that fills in after or a poll tick makes more than its own, or when a fetch went out that
- * no call context noted (a call the type checker cannot see).
+ * no call context noted (a call the type checker cannot see). A measure over its budget names the
+ * route, the measure, the budget, what holds it, the count, and the `dev budgets request` line that
+ * asks a person for an exception.
  *
  * IT ALSO FAILS A STREAMED PART THE LOAD DID NOT DECLARE, read from what the load returns rather than
  * from the clock: every property of the returned data holding a promise is one SvelteKit streams, so
@@ -24,7 +27,8 @@
  * order the calls were issued, and `parent` is watched before the load runs, so the waits read are
  * the load's awaits and nothing else.
  */
-import { budgetFor, type Budget, type BudgetTable } from './budget';
+import { budgetFor, describeHolder, heldFor, requestLine, type Budget, type BudgetRecord, type Measure } from './budget';
+import type { ScreenBudgetCounts } from './budgetRecord';
 import { ctx, type ContextEvent } from './context';
 import { ViewRecorder, type RecordedCall } from './recorder';
 import { halfOf, peaksOfCalls } from './report';
@@ -200,13 +204,23 @@ function describe(calls: RecordedCall[]): string {
   return calls.map((call, i) => `  ${i + 1}. ${call.part} ${call.operation}${call.waited ? ' (waited)' : ''}`).join('\n');
 }
 
-function violations(run: BudgetRun): string[] {
+/** Each call measure over its budget: what it counted, and how it reads. */
+function overMeasures(run: BudgetRun): { measure: Measure; count: number; line: string }[] {
   const { budget, load, peaks } = run;
+  const measures: { measure: Measure; count: number; budget: number; what: string }[] = [
+    { measure: 'load_calls', count: load.calls, budget: budget.load.calls, what: 'calls before showing' },
+    { measure: 'load_waits', count: load.waits, budget: budget.load.waits, what: 'calls waited on another' },
+    { measure: 'parts', count: peaks.later, budget: budget.parts, what: 'calls in one later part' },
+    { measure: 'poll', count: peaks.poll, budget: budget.poll, what: 'calls in one poll' }
+  ];
+  return measures
+    .filter((m) => m.count > m.budget)
+    .map((m) => ({ measure: m.measure, count: m.count, line: `${m.measure}: ${m.count} ${m.what}, budget ${m.budget}` }));
+}
+
+function violations(run: BudgetRun, holder: (measure: Measure) => string): string[] {
   return [
-    load.calls > budget.load.calls ? `${load.calls} calls before showing, budget ${budget.load.calls}` : null,
-    load.waits > budget.load.waits ? `${load.waits} calls waited on another, budget ${budget.load.waits}` : null,
-    peaks.later > budget.parts ? `${peaks.later} calls in one later part, budget ${budget.parts}` : null,
-    peaks.poll > budget.poll ? `${peaks.poll} calls in one poll, budget ${budget.poll}` : null,
+    ...overMeasures(run).map((over) => `${over.line}, held by ${holder(over.measure)}`),
     run.unrecorded > 0 ? `${run.unrecorded} fetches no call context noted` : null,
     run.undeclared.length > 0
       ? `returned as a promise the page streams but not opened by later(...), so its calls are billed to the load: ${run.undeclared.join(', ')}`
@@ -214,12 +228,20 @@ function violations(run: BudgetRun): string[] {
   ].filter((line): line is string => line !== null);
 }
 
+/** What a budget run is held to, and where it notes what it counted. */
+export interface BudgetOptions {
+  /** The platform record the run read before it started (`budgetRecord.ts`). */
+  budgets: BudgetRecord;
+  /** The shard's per-route counts: every run notes its own, over budget or not. */
+  counts?: ScreenBudgetCounts | undefined;
+}
+
 /** Run `load` against `respond` and throw when it is over its route's budget; the run's counts otherwise. */
 export async function expectWithinBudget<E extends ContextEvent>(
   load: (event: E) => unknown,
   event: E,
   respond: Responder,
-  options: { budgets?: BudgetTable } = {}
+  options: BudgetOptions
 ): Promise<BudgetRun> {
   const route = event.route?.id ?? null;
   const view = new ViewRecorder(mintViewId(), route, { side: 'server' });
@@ -249,9 +271,16 @@ export async function expectWithinBudget<E extends ContextEvent>(
     unrecorded: Math.max(0, fake.count() - half.calls.length - half.dropped_calls),
     undeclared
   };
-  const over = violations(run);
+  options.counts?.note(route, run);
+  const record = options.budgets;
+  const over = violations(run, (measure) => describeHolder(heldFor(route, measure, record)));
   if (over.length > 0) {
-    throw new Error(`${route ?? 'the load'} is over its budget:\n- ${over.join('\n- ')}\ncalls:\n${describe(run.calls)}`);
+    const asks = route === null ? [] : overMeasures(run).map((m) => requestLine(record.app, route, m.measure, m.count));
+    const request =
+      asks.length === 0
+        ? ''
+        : `\nfit the screen inside its budget (dev budgets show ${record.app} '${route}'), or ask a person for an exception:\n  ${asks.join('\n  ')}`;
+    throw new Error(`${route ?? 'the load'} is over its budget:\n- ${over.join('\n- ')}${request}\ncalls:\n${describe(run.calls)}`);
   }
   return run;
 }
