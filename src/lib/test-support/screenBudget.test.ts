@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { fixedRecord } from '#lib/telemetry/budget.ts';
 import { expectWithinBudget } from '#lib/telemetry/testing.ts';
 import { ctx } from '#lib/telemetry/context.ts';
 import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.ts';
@@ -83,7 +84,7 @@ describe('the generic answer', () => {
       );
     };
     const run = await expectWithinBudget(load, hardLoadEvent('/screen-budget-harness').event as never, (input) => answer(input), {
-      budgets: new Map([['/screen-budget-harness', { load: { calls: 10, waits: 10 } }]])
+      budgets: fixedRecord('test', { '/screen-budget-harness': { load_calls: 10, load_waits: 10 } })
     });
     expect(run.calls.map((call) => call.operation)).toEqual([
       'GET /apibuilder/organizations/:key',

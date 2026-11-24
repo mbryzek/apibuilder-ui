@@ -1,11 +1,14 @@
 /**
  * Every screen is held to its budget before merge (DES-65431): one test per route, each running the
  * route's hard load, layouts included, and failing, with every call named, when it makes more calls
- * than its budget allows (`globalBudget`, or the route's own `budget.ts`). `#lib/test-support/screenBudget.ts`
+ * than its budget allows: the platform record's row for the route, else the global budget (DES-139972). `#lib/test-support/screenBudget.ts`
  * says how the load is run and what the backend answers.
  *
- * A screen over the global budget gets a `budget.ts` beside its `+page` files naming only what
- * differs; that override is the screen's named debt, and lowering it is the fix.
+ * The record is read once before the first spec (`budgetRecord.ts`); a run platform cannot answer
+ * exits 75, unmeasured. A screen over its budget fails naming the measure, the budget, what holds it
+ * and the count, and the `dev budgets request` line that asks a person for an exception; fitting
+ * the screen inside it is the fix. Every route's counts are written to
+ * `ci-test-reports/screen-budget/<shard>.json`, which a full main build reads to lower a debt row.
  *
  * Each screen's loads also declare what they stream: every promise a load returns is a part the
  * page fills in after, so it must be opened by `later`, and `expectWithinBudget` fails one that is
@@ -29,13 +32,13 @@
  * (`#lib/test-support/screenQuery.ts`). ISS-80720
  *
  * `SCREEN_BUDGET_MEASURE=<file>` measures instead of holding: every route runs against an unlimited
- * budget and its counts are written to the file, which is how an override is first measured.
+ * budget and its counts are written to the file, which is how a screen's cost is measured.
  */
 import { afterAll, describe, expect, it } from 'vitest';
 import { writeFileSync } from 'node:fs';
 import { expectWithinBudget, type BudgetRun } from '#lib/telemetry/testing.ts';
-import type { BudgetOverride } from '#lib/telemetry/budget.ts';
-import { budgets } from '#lib/telemetry/budgets.ts';
+import { unlimitedRecord } from '#lib/telemetry/budget.ts';
+import { ScreenBudgetCounts, suiteRecord } from '#lib/telemetry/budgetRecord.ts';
 import {
   answer,
   answerWith,
@@ -65,7 +68,12 @@ const routes = pages.map(routeOfPage).sort();
 const stubs = stubTable(import.meta.glob<ScreenStubModule>('/src/routes/**/budgetStub.ts', { eager: true }));
 
 const measuring = process.env['SCREEN_BUDGET_MEASURE'];
-const unlimited: BudgetOverride = { load: { calls: 1_000, waits: 1_000 }, parts: 1_000, poll: 1_000 };
+const APP = 'apibuilder-ui';
+// The platform record the run read before it started (`budgetRecord.ts`), and a record holding nothing for a measuring run.
+const budgets = suiteRecord(APP);
+const unlimited = unlimitedRecord(APP);
+// What every route counted, written once the suite has run: a full main build's counts lower a debt row.
+const counts = new ScreenBudgetCounts(APP, 'all', ['all'], routes);
 const measured: Record<string, Pick<BudgetRun, 'load' | 'peaks' | 'unrecorded'> & { thrown: string[] }> = {};
 
 /** Records a route's counted run under `name` when measuring. */
@@ -84,10 +92,10 @@ describe('every screen stays within its budget', () => {
   it.each(routes)('%s', async (route) => {
     const thrown: unknown[] = [];
     const load = hardLoad(await routeLoads(route, modules), thrown);
-    const table = measuring ? new Map([[route, unlimited]]) : budgets;
+    const table = measuring ? unlimited : budgets;
     const stub = stubs.get(route);
     const { event, read } = hardLoadEvent(route, stub);
-    const run = await expectWithinBudget(load, event, answerWith(stub?.fields), { budgets: table });
+    const run = await expectWithinBudget(load, event, answerWith(stub?.fields), { budgets: table, counts });
     measure(route, run, thrown);
     if (measuring) return;
     expect(
@@ -104,11 +112,12 @@ describe('every screen stays within its budget', () => {
     const shell = new Set<string>();
     const stub = stubs.get(route);
     const fields = stub?.fields;
-    const asLayouts = { budgets: new Map([[route, unlimited]]) };
+    const asLayouts = { budgets: unlimited };
     await expectWithinBudget(hardLoad(layoutsOf(loads)), hardLoadEvent(route, stub).event, noting(answerWith(fields), shell), asLayouts);
-    const table = measuring ? new Map([[route, unlimited]]) : budgets;
+    const table = measuring ? unlimited : budgets;
     const run = await expectWithinBudget(hardLoad(loads, thrown), hardLoadEvent(route, stub).event, emptyAnswer(shell, fields), {
-      budgets: table
+      budgets: table,
+      counts
     });
     measure(`${route} (empty)`, run, thrown);
     if (measuring) return;
@@ -128,5 +137,6 @@ describe('every screen stays within its budget', () => {
 });
 
 afterAll(() => {
+  counts.write();
   if (measuring) writeFileSync(measuring, JSON.stringify(measured, null, 2));
 });
