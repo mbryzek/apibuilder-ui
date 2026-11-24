@@ -1,17 +1,44 @@
-import { ctx } from '#lib/telemetry/context.ts';
+import { ctx, later, type CallContext } from '#lib/telemetry/context.ts';
 import type { PageServerLoad, Actions } from './$types';
 import { redirect } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.ts';
 import { handleApiCall, isApiError } from '#lib/api/error-handler.ts';
+import { dataOr, loadErrorFrom, type LoadError } from '#lib/api/load-error.ts';
 import { actionFail } from '#lib/api/action-error.ts';
 import { requireAuthForAction, memberClient } from '#lib/server/auth.ts';
 import { assertSafePathParams } from '#lib/server/path-params.ts';
 import { redirectWithFlash } from '#lib/server/flash.ts';
 import type { Watch } from '#generated/com-bryzek-apibuilder.ts';
 
-export const load: PageServerLoad = async () => {
-  // Data already loaded by layout
-  return {};
+/** Whether the signed-in reader watches this application, and why the toggle is unavailable when that is unknown. */
+export interface WatchState {
+  isWatching: boolean;
+  // Without this the toggle renders "not watching" for a lookup that never
+  // answered, and pressing it would file a second watch on the same application.
+  loadError: LoadError | null;
+}
+
+async function loadWatch(context: CallContext, sessionId: string, userId: string, orgKey: string, appKey: string): Promise<WatchState> {
+  const client = apiBuilderClient({ headers: getSessionHeaders(sessionId) });
+  const response = await handleApiCall<Watch[]>(() =>
+    client.getWatches(context, { userId, organizationKey: orgKey, applicationKey: appKey, limit: 1, offset: 0 })
+  );
+  return { isWatching: dataOr(response, []).length > 0, loadError: loadErrorFrom(response) };
+}
+
+/**
+ * The spec itself comes from the layout. The watch toggle is this page's alone, so its read lives
+ * here rather than in the layout every screen under the version runs, and streams as `later:watch`:
+ * the spec never waits on it.
+ */
+export const load: PageServerLoad = async (event) => {
+  const { params, locals } = event;
+  const session = locals.session;
+  return {
+    watch: session
+      ? later(ctx(event, 'load'), 'watch', (context) => loadWatch(context, session.id, session.user.id, params.orgKey, params.appKey))
+      : undefined
+  };
 };
 
 export const actions: Actions = {
@@ -51,7 +78,7 @@ export const actions: Actions = {
    * platform as re-resolving under the caller's own authorization. `[orgKey]/subscriptions`
    * dropped its `subscription_id` field for exactly this reason; this is the same fix.
    *
-   * Nothing is lost by not trusting the form: the layout already performs this very lookup to
+   * Nothing is lost by not trusting the form: the page load already performs this very lookup to
    * decide which way to render the toggle. The toggle now unwatches whatever the server actually
    * has rather than what the browser last saw, which is what a toggle should do.
    *
