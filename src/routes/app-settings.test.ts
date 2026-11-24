@@ -3,6 +3,7 @@ import { session } from '#lib/test-support/fixtures.ts';
 import { invokeAction } from '#lib/test-support/invoke-action.ts';
 import { mockApiClients } from '#lib/test-support/mocks.ts';
 import { caughtAsync } from '#lib/test-support/throws.ts';
+import type { ApplicationState } from './[orgKey]/[appKey]/[version]/settings/+page.server.ts';
 
 /**
  * What the application Settings page edits.
@@ -52,20 +53,20 @@ beforeEach(() => {
 describe('the settings page reads the application it edits', () => {
   it('loads the application, so the control starts on the application visibility', async () => {
     const event = { params: PARAMS, locals: LOCALS, url: new URL('http://localhost/') };
-    const data = await (load as (e: typeof event) => Promise<{ application: unknown; applicationLoadError: unknown }>)(event);
+    const data = await (await (load as (e: typeof event) => Promise<{ application: Promise<ApplicationState> }>)(event)).application;
 
     expect(client.getApplicationByAppKey).toHaveBeenCalledWith({ orgKey: 'my-org', appKey: 'my-app' });
     expect(data.application).toEqual(APPLICATION);
-    expect(data.applicationLoadError).toBeNull();
+    expect(data.loadError).toBeNull();
   });
 
   it('reports a failed lookup rather than returning an application nobody read', async () => {
     client.getApplicationByAppKey.mockRejectedValue(new Error('fetch failed'));
     const event = { params: PARAMS, locals: LOCALS, url: new URL('http://localhost/') };
-    const data = await (load as (e: typeof event) => Promise<{ application: unknown; applicationLoadError: unknown }>)(event);
+    const data = await (await (load as (e: typeof event) => Promise<{ application: Promise<ApplicationState> }>)(event)).application;
 
     expect(data.application).toBeNull();
-    expect(data.applicationLoadError).not.toBeNull();
+    expect(data.loadError).not.toBeNull();
   });
 });
 

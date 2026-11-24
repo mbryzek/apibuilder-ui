@@ -91,7 +91,8 @@ describe('the history page', () => {
     const change = { id: 'chg-1' };
     client.getChanges.mockResolvedValue([change]);
 
-    const data = (await loadHistory({})) as { changes: unknown[]; loadError: unknown };
+    const { history } = (await loadHistory({})) as { history: Promise<{ changes: unknown[]; loadError: unknown }> };
+    const data = await history;
 
     expect(data.changes).toEqual([change]);
     expect(data.loadError).toBeNull();
@@ -101,7 +102,8 @@ describe('the history page', () => {
   it('reads the changes for a signed-in caller', async () => {
     client.getChanges.mockResolvedValue([]);
 
-    const data = (await loadHistory({ session: session() })) as { changes: unknown[]; loadError: unknown };
+    const { history } = (await loadHistory({ session: session() })) as { history: Promise<{ changes: unknown[]; loadError: unknown }> };
+    const data = await history;
 
     expect(data.changes).toEqual([]);
     expect(data.loadError).toBeNull();

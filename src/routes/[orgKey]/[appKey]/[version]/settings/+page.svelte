@@ -1,18 +1,16 @@
 <script lang="ts">
   import PendingForm from '#lib/components/PendingForm.svelte';
-  import type { Application } from '#generated/com-bryzek-apibuilder.ts';
   import type { Service } from '#generated/com-bryzek-apibuilder-spec.ts';
   import { OFFERED_VISIBILITIES } from '#lib/utils/visibility.ts';
   import FormErrors from '#lib/components/FormErrors.svelte';
   import LoadErrorBanner from '#lib/components/LoadErrorBanner.svelte';
-  import type { LoadError } from '#lib/api/load-error.ts';
+  import type { ApplicationState } from './+page.server.ts';
 
   interface Props {
     data: {
       isAdmin: boolean;
       service: Service;
-      application: Application | null;
-      applicationLoadError: LoadError | null;
+      application: Promise<ApplicationState>;
     };
     form: {
       errors?: { message: string }[];
@@ -22,7 +20,6 @@
   let { data, form }: Props = $props();
 
   const service = $derived(data.service);
-  const application = $derived(data.application);
   let showDeleteConfirm = $state(false);
 </script>
 
@@ -45,24 +42,29 @@
   {#if data.isAdmin}
     <div class="card">
       <h3 class="text-ab-dark-blue mb-4 text-lg font-semibold">Visibility</h3>
-      {#if data.applicationLoadError}
-        <LoadErrorBanner error={data.applicationLoadError} />
-      {:else if application}
-        <PendingForm action="?/updateVisibility" class="space-y-4">
-          {#snippet children(pending)}
-            <div>
-              <select name="visibility" class="input-field w-full" value={application.visibility}>
-                {#each OFFERED_VISIBILITIES as v}
-                  <option value={v}>{v}</option>
-                {/each}
-              </select>
-            </div>
-            <button type="submit" class="btn-primary" disabled={pending}>
-              {pending ? 'Updating…' : 'Update Visibility'}
-            </button>
-          {/snippet}
-        </PendingForm>
-      {/if}
+      <!-- The control appears once the application (`later:application`) answers: shown before it,
+           it would start on a visibility nobody read. -->
+      {#await data.application then loaded}
+        {#if loaded.loadError}
+          <LoadErrorBanner error={loaded.loadError} />
+        {:else if loaded.application}
+          {@const application = loaded.application}
+          <PendingForm action="?/updateVisibility" class="space-y-4">
+            {#snippet children(pending)}
+              <div>
+                <select name="visibility" class="input-field w-full" value={application.visibility}>
+                  {#each OFFERED_VISIBILITIES as v}
+                    <option value={v}>{v}</option>
+                  {/each}
+                </select>
+              </div>
+              <button type="submit" class="btn-primary" disabled={pending}>
+                {pending ? 'Updating…' : 'Update Visibility'}
+              </button>
+            {/snippet}
+          </PendingForm>
+        {/if}
+      {/await}
     </div>
 
     <!-- Delete -->
