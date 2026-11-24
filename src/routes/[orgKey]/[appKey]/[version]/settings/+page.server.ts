@@ -1,11 +1,10 @@
-import { ctx } from '#lib/telemetry/context.ts';
-import type { CallContext } from '#lib/telemetry/context.ts';
+import { ctx, later, type CallContext } from '#lib/telemetry/context.ts';
 import type { PageServerLoad, Actions } from './$types';
 import { fail } from '@sveltejs/kit';
 import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.ts';
 import { handleApiCall, isApiError } from '#lib/api/error-handler.ts';
 import { actionFail, actionFailMissing } from '#lib/api/action-error.ts';
-import { loadErrorFrom } from '#lib/api/load-error.ts';
+import { loadErrorFrom, type LoadError } from '#lib/api/load-error.ts';
 import { requireAuth, adminClient } from '#lib/server/auth.ts';
 import { requiredEnum } from '#lib/server/form.ts';
 import { redirectWithFlash } from '#lib/server/flash.ts';
@@ -26,15 +25,29 @@ async function loadApplication(context: CallContext, orgKey: string, appKey: str
   return handleApiCall<Application>(() => client.getApplicationByAppKey(context, { orgKey, appKey }));
 }
 
+/** The application the visibility control edits, and why the control is missing when it could not be read. */
+export interface ApplicationState {
+  application: Application | null;
+  // Without this the visibility control renders a value nobody read, and submitting it would
+  // write that guess back over whatever the application actually has.
+  loadError: LoadError | null;
+}
+
+async function loadApplicationState(context: CallContext, orgKey: string, appKey: string, sessionId: string): Promise<ApplicationState> {
+  const response = await loadApplication(context, orgKey, appKey, sessionId);
+  return { application: isApiError(response) ? null : response.data, loadError: loadErrorFrom(response) };
+}
+
+/**
+ * The layouts above already spend the screen's load on the organization, the membership and the
+ * version, so the application streams as `later:application`: only the visibility control needs
+ * it, and the control appears once it answers.
+ */
 export const load: PageServerLoad = async (event) => {
   const session = requireAuth(event);
-  const response = await loadApplication(ctx(event, 'load'), event.params.orgKey, event.params.appKey, session.id);
-
+  const { orgKey, appKey } = event.params;
   return {
-    application: isApiError(response) ? null : response.data,
-    // Without this the visibility control renders a value nobody read, and submitting it would
-    // write that guess back over whatever the application actually has.
-    applicationLoadError: loadErrorFrom(response)
+    application: later(ctx(event, 'load'), 'application', (context) => loadApplicationState(context, orgKey, appKey, session.id))
   };
 };
 
