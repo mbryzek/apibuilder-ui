@@ -79,7 +79,7 @@
           <input
             type="text"
             name="email_or_nickname"
-            placeholder="Email or nickname"
+            placeholder="Email, nickname or user ID"
             class="input-field flex-1 rounded-lg border px-3 py-2"
           />
           <select name="role" class="input-field rounded-lg border px-3 py-2">

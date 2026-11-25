@@ -4,13 +4,6 @@ import { invokeAction } from '#lib/test-support/invoke-action.ts';
 import { mockApiClients, mockServerAuth } from '#lib/test-support/mocks.ts';
 import { MembershipRole, MembershipStatus } from '#generated/com-bryzek-apibuilder.ts';
 
-/**
- * Adding a member by email address reaches the person whether or not they have an account
- * (ISS-86674): the platform adds an account holder at once, and for an address with no account it
- * creates one and emails an invitation to set its password. A nickname still names an existing
- * account and goes through the membership-request path as before.
- */
-
 const SESSION = session({ user: { id: 'admin-1' } });
 
 const client = {
@@ -32,7 +25,7 @@ function addMember(form: Record<string, string>) {
 }
 
 beforeEach(() => {
-  vi.clearAllMocks();
+  vi.resetAllMocks();
 });
 
 describe('addMember by email', () => {
@@ -78,6 +71,44 @@ describe('addMember by nickname', () => {
     // It answers with the membership it made, which the page adds to its table without a reload (ISS-87642).
     expect(await addMember({ email_or_nickname: 'roman', role: 'member' })).toEqual({ success: true, membership: { id: 'membership-2' } });
     expect(client.getUsers).toHaveBeenCalledWith({ nickname: 'roman' });
+    expect(client.getUsers).toHaveBeenCalledTimes(1);
     expect(client.createMembership).not.toHaveBeenCalled();
+  });
+});
+
+describe('addMember by user ID', () => {
+  it('falls back from nickname to ID for an account without email', async () => {
+    client.getUsers.mockResolvedValueOnce([]).mockResolvedValueOnce([{ id: 'ai-apibuilder', nickname: 'Ott' }]);
+    client.getOrganizationByKey.mockResolvedValue({ id: 'org-1' });
+    client.createMembershipRequest.mockResolvedValue({ id: 'request-1' });
+    client.createMembershipRequestAcceptById.mockResolvedValue({ id: 'membership-2' });
+
+    expect(await addMember({ email_or_nickname: 'ai-apibuilder', role: 'admin' })).toEqual({
+      success: true,
+      membership: { id: 'membership-2' }
+    });
+    expect(client.getUsers).toHaveBeenNthCalledWith(1, { nickname: 'ai-apibuilder' });
+    expect(client.getUsers).toHaveBeenNthCalledWith(2, { id: 'ai-apibuilder' });
+    expect(client.createMembershipRequest).toHaveBeenCalledWith({
+      body: { org_id: 'org-1', user_id: 'ai-apibuilder', role: MembershipRole.Admin }
+    });
+    expect(client.createMembership).not.toHaveBeenCalled();
+  });
+
+  it('reports not found only after both lookups return no match', async () => {
+    client.getUsers.mockResolvedValue([]);
+    const result = await addMember({ email_or_nickname: 'missing', role: 'member' });
+    expect(result).toMatchObject({ status: 400, data: { errors: [{ message: 'User not found: missing' }] } });
+    expect(client.getUsers).toHaveBeenCalledTimes(2);
+    expect(client.createMembershipRequest).not.toHaveBeenCalled();
+  });
+
+  it.each([0, 1])('preserves an API failure at lookup %s', async (successfulLookups) => {
+    if (successfulLookups) client.getUsers.mockResolvedValueOnce([]);
+    client.getUsers.mockRejectedValueOnce({ status: 503, message: 'Lookup unavailable' });
+    const result = await addMember({ email_or_nickname: 'ai-apibuilder', role: 'member' });
+    expect(result).toMatchObject({ status: 503 });
+    expect(client.getUsers).toHaveBeenCalledTimes(successfulLookups + 1);
+    expect(client.createMembershipRequest).not.toHaveBeenCalled();
   });
 });
