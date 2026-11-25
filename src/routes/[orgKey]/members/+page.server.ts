@@ -26,9 +26,6 @@ export const load: PageServerLoad = async (event) => {
     client.getMemberships(ctx(event, 'load'), { orgKey: params.orgKey, limit: PAGE_FETCH_LIMIT, offset })
   );
 
-  // The badge used to render the length of a limit-capped page as though it were a total, so an
-  // org with 40 pending requests read "Pending Requests (25)". Over-fetch by one and say "25+"
-  // rather than asserting a number we cannot know.
   let pendingRequestsCount = 0;
   let pendingRequestsCapped = false;
   let requestsResponse: ApiResponse<MembershipRequest[]> | null = null;
@@ -52,31 +49,12 @@ export const load: PageServerLoad = async (event) => {
   };
 };
 
-/**
- * This org's memberships, the scope a form's `guid` is resolved within.
- *
- * Every guid action below authorizes `params.orgKey` and then acts on an id that arrived
- * separately in the form body, so the id has to be resolved against the org that was authorized
- * rather than trusted. See `#lib/server/scoped-id.ts` and `#lib/server/scoped-action.ts`.
- */
 const membershipsInOrg: OrgScope<Membership> = (context, client, orgKey) => (limit, offset) =>
   handleApiCall<Membership[]>(() => client.getMemberships(context, { orgKey, limit, offset }));
 
 type MembersEvent = Parameters<Actions['addMember']>[0];
 type ApiBuilderClient = Awaited<ReturnType<typeof adminClient>>['client'];
 
-/**
- * Every success below answers with the membership it changed (`membership`, or `removed` naming the
- * one it deleted), and the page applies that to the table itself (`./changes.ts`): none of these
- * can move the pending-requests badge or the org, so re-running the page's and the org layout's
- * loads to show one row would be four calls spent on nothing. ISS-87642
- */
-
-/**
- * Add a member by email address. `invited` names the address when the platform created the
- * account and sent the invitation, so the page can say an email went out rather than imply the
- * person can already sign in.
- */
 async function addByEmail(event: MembersEvent, client: ApiBuilderClient, email: string, role: MembershipRole) {
   const response = await handleApiCall<Membership>(() =>
     client.createMembership(ctx(event, 'form'), { body: { org_key: event.params.orgKey, email, role } })
@@ -88,17 +66,6 @@ async function addByEmail(event: MembersEvent, client: ApiBuilderClient, email: 
   return membership.status === MembershipStatus.Invited ? { success: true, membership, invited: email } : { success: true, membership };
 }
 
-/**
- * Promotion and demotion are the same act: a role change on the membership the table already
- * shows, which keeps its id and leaves the person in the organization either way.
- *
- * Neither may go through the membership-request path, and demotion in particular may not go
- * through a delete. A user holds exactly ONE membership per organization — accepting a request
- * upserts that row — so accepting an `admin` request promotes the row in place, and accepting a
- * `member` one is a no-op rather than a demotion. Deleting the admin membership therefore does
- * not demote anybody: it removes them from the organization, which is what "Revoke Admin" did
- * before ISS-4833.
- */
 function changeRole(context: CallContext, event: AdminActionEvent, role: MembershipRole) {
   return adminGuidAction(
     context,
@@ -118,16 +85,17 @@ export const actions: Actions = {
     const role = requiredEnum(formData, 'role', Object.values(MembershipRole)) ?? MembershipRole.Member;
 
     if (!emailOrNickname) {
-      return fail(400, { errors: [{ message: 'Email or nickname is required' }] });
+      return fail(400, { errors: [{ message: 'Email, nickname or user ID is required' }] });
     }
 
-    // An address goes to the platform whole: it adds the person with an account at once, and
-    // creates one for an address that has none and emails them an invitation to set its password.
     if (emailOrNickname.includes('@')) {
       return addByEmail(event, client, emailOrNickname, role);
     }
 
-    const lookup = await handleApiCall<User[]>(() => client.getUsers(ctx(event, 'form'), { nickname: emailOrNickname }));
+    let lookup = await handleApiCall<User[]>(() => client.getUsers(ctx(event, 'form'), { nickname: emailOrNickname }));
+    if (isApiSuccess(lookup) && lookup.data.length === 0) {
+      lookup = await handleApiCall<User[]>(() => client.getUsers(ctx(event, 'form'), { id: emailOrNickname }));
+    }
     const user = isApiSuccess(lookup) ? lookup.data[0] : undefined;
 
     if (!user) {

@@ -105,6 +105,11 @@ describe('the members page', () => {
     return [...target.querySelectorAll('tbody tr')].map((row) => row.textContent?.replace(/\s+/g, ' ').trim() ?? '');
   }
 
+  it('names every supported member identifier', () => {
+    render([]);
+    expect(target.querySelector('input[name="email_or_nickname"]')?.getAttribute('placeholder')).toBe('Email, nickname or user ID');
+  });
+
   it("shows a colleague's new role without re-running any load", async () => {
     render([ALICE, BOB]);
 
