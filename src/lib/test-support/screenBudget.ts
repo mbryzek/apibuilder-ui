@@ -200,10 +200,44 @@ export interface LoadModule {
 
 type Importer = () => Promise<unknown>;
 
-/** The route id a `src/routes/.../+page.svelte` path is the screen of. */
+/** The route id a `src/routes/.../+page.svelte` (or `+page@<layout>.svelte`) path is the screen of. */
 export function routeOfPage(path: string): string {
-  const dir = path.replace(/^\/src\/routes/, '').replace(/\/\+page\.svelte$/, '');
+  return routeOfFile(path);
+}
+
+/** The route id of the directory a `src/routes/.../+page*.svelte` or `+layout*.svelte` path sits in. */
+function routeOfFile(path: string): string {
+  const dir = path.replace(/^\/src\/routes/, '').replace(/\/\+(?:page|layout)(?:@[^/]*)?\.svelte$/, '');
   return dir === '' ? '/' : dir;
+}
+
+/**
+ * The layout a `+page@<segment>.svelte` or `+layout@<segment>.svelte` resets to, as the route id of
+ * its directory (`@` alone is the root's): SvelteKit runs only the layouts down to that one above
+ * it. Undefined for a file that resets nothing; a segment no directory above it has throws.
+ */
+export function resetOf(path: string): string | undefined {
+  const match = /\/\+(page|layout)@([^/]*)\.svelte$/.exec(path);
+  if (!match) return undefined;
+  const target = match[2]!;
+  if (target === '') return '/';
+  // A page can keep its own directory's layout; a layout cannot reset to itself.
+  const parts = routeOfFile(path)
+    .split('/')
+    .slice(1, match[1] === 'layout' ? -1 : undefined);
+  const at = parts.lastIndexOf(target);
+  if (at < 0) throw new Error(`${path} resets to ${target}, which is no directory above it`);
+  return `/${parts.slice(0, at + 1).join('/')}`;
+}
+
+/** Every layout that resets its own layout, as its directory's route id to the one it resets to. */
+function layoutResets(layouts: readonly string[]): Map<string, string> {
+  const resets = new Map<string, string>();
+  for (const path of layouts) {
+    const target = resetOf(path);
+    if (target !== undefined) resets.set(routeOfFile(path), target);
+  }
+  return resets;
 }
 
 /** Every directory from the routes root down to `route`'s, as `/src/routes...` prefixes. */
@@ -212,18 +246,42 @@ function levelsOf(route: string): string[] {
   return ['/src/routes', ...parts.map((_, i) => `/src/routes/${parts.slice(0, i + 1).join('/')}`)];
 }
 
-/** The load modules of `route`, read through the app's globs. */
-export async function routeLoads(route: string, modules: Record<string, Importer>): Promise<RouteLoads> {
-  const levels = levelsOf(route);
+/**
+ * The directories whose layouts a hard load of `page` (its `+page*.svelte` path) runs, root first:
+ * walking up from the page, a page or a layout that resets skips straight to the layout it names.
+ * `layouts` is every `+layout*.svelte` path of the app.
+ */
+function layoutDirs(page: string, layouts: readonly string[]): string[] {
+  const dirs = levelsOf(routeOfPage(page));
+  const resets = layoutResets(layouts);
+  const depthOf = (route: string) => levelsOf(route).length - 1;
+  const used: string[] = [];
+  const reset = resetOf(page);
+  let i = reset === undefined ? dirs.length - 1 : depthOf(reset);
+  while (i >= 0) {
+    used.unshift(dirs[i]!);
+    const next = resets.get(routeOfFile(`${dirs[i]!}/+layout.svelte`));
+    i = next === undefined ? i - 1 : depthOf(next);
+  }
+  return used;
+}
+
+/**
+ * The load modules of the screen `page` (its `+page*.svelte` path), read through the app's globs: those
+ * of the layouts it runs under ({@link layoutDirs}), resets skipped, then its own. `layouts` is every
+ * `+layout*.svelte` path of the app.
+ */
+export async function routeLoads(page: string, modules: Record<string, Importer>, layouts: readonly string[]): Promise<RouteLoads> {
+  const route = routeOfPage(page);
   const read = async (path: string): Promise<LoadModule | undefined> =>
     modules[path] ? ((await modules[path]()) as LoadModule) : undefined;
   const out: RouteLoads['levels'] = [];
-  for (const [i, dir] of levels.entries()) {
-    const leaf = i === levels.length - 1;
+  for (const dir of layoutDirs(page, layouts)) {
     const layout = { server: await read(`${dir}/+layout.server.ts`), universal: await read(`${dir}/+layout.ts`) };
     if (layout.server?.load || layout.universal?.load) out.push(layout);
-    if (leaf) out.push({ server: await read(`${dir}/+page.server.ts`), universal: await read(`${dir}/+page.ts`) });
   }
+  const own = levelsOf(route).at(-1)!;
+  out.push({ server: await read(`${own}/+page.server.ts`), universal: await read(`${own}/+page.ts`) });
   return { route, levels: out };
 }
 
