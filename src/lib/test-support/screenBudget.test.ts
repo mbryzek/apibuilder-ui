@@ -13,6 +13,9 @@ import {
   hardLoadEvent,
   layoutsOf,
   noting,
+  resetOf,
+  routeLoads,
+  routeOfPage,
   stubTable,
   unearnedEnd,
   unexpectedEnd
@@ -182,5 +185,65 @@ describe('the stubs a route declares', () => {
     const empty = (await emptyAnswer(new Set(), known)('https://apibuilder.org/x').json()) as unknown[] & { role: string };
     expect(empty).toHaveLength(0);
     expect(empty.role).toBe('admin');
+  });
+});
+
+describe('a layout reset', () => {
+  const layouts = [
+    '/src/routes/+layout.svelte',
+    '/src/routes/(a)/+layout.svelte',
+    '/src/routes/(a)/b/+layout.svelte',
+    '/src/routes/(a)/free/+layout@.svelte'
+  ];
+
+  /** The load modules of every layout above and of the page itself, each named by its path. */
+  async function loadsOf(page: string): Promise<(string | undefined)[]> {
+    const named = (path: string) => async () => ({ load: () => path });
+    const paths = [
+      ...layouts.map((path) => path.replace(/\+layout.*$/, '+layout.server.ts')),
+      page.replace(/\+page.*$/, '+page.server.ts')
+    ];
+    const modules = Object.fromEntries(paths.map((path) => [path, named(path)]));
+    const { levels } = await routeLoads(page, modules, layouts);
+    return levels.map((level) => (level.server?.load as ((event: never) => string) | undefined)?.(undefined as never));
+  }
+
+  it('is a screen at the route of its directory', () => {
+    expect(routeOfPage('/src/routes/+page.svelte')).toBe('/');
+    expect(routeOfPage('/src/routes/(a)/b/+page.svelte')).toBe('/(a)/b');
+    expect(routeOfPage('/src/routes/(a)/b/+page@.svelte')).toBe('/(a)/b');
+    expect(routeOfPage('/src/routes/(a)/b/+page@(a).svelte')).toBe('/(a)/b');
+  });
+
+  it('names the layout it resets to', () => {
+    expect(resetOf('/src/routes/(a)/b/+page.svelte')).toBeUndefined();
+    expect(resetOf('/src/routes/(a)/b/+page@.svelte')).toBe('/');
+    expect(resetOf('/src/routes/(a)/b/c/+page@(a).svelte')).toBe('/(a)');
+    expect(resetOf('/src/routes/(a)/b/+page@b.svelte')).toBe('/(a)/b');
+    expect(resetOf('/src/routes/b/b/+layout@b.svelte')).toBe('/b');
+    expect(() => resetOf('/src/routes/(a)/b/+page@nowhere.svelte')).toThrow('resets to nowhere');
+  });
+
+  it('runs only the loads of the layouts the page keeps, then its own', async () => {
+    expect(await loadsOf('/src/routes/(a)/b/+page.svelte')).toEqual([
+      '/src/routes/+layout.server.ts',
+      '/src/routes/(a)/+layout.server.ts',
+      '/src/routes/(a)/b/+layout.server.ts',
+      '/src/routes/(a)/b/+page.server.ts'
+    ]);
+    expect(await loadsOf('/src/routes/(a)/b/+page@(a).svelte')).toEqual([
+      '/src/routes/+layout.server.ts',
+      '/src/routes/(a)/+layout.server.ts',
+      '/src/routes/(a)/b/+page.server.ts'
+    ]);
+    expect(await loadsOf('/src/routes/(a)/b/+page@.svelte')).toEqual([
+      '/src/routes/+layout.server.ts',
+      '/src/routes/(a)/b/+page.server.ts'
+    ]);
+    expect(await loadsOf('/src/routes/(a)/free/x/+page.svelte')).toEqual([
+      '/src/routes/+layout.server.ts',
+      '/src/routes/(a)/free/+layout.server.ts',
+      '/src/routes/(a)/free/x/+page.server.ts'
+    ]);
   });
 });

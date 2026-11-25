@@ -57,14 +57,17 @@ import {
 } from '#lib/test-support/screenBudget.ts';
 import { unsetParameters, unsetParametersMessage } from '#lib/test-support/screenQuery.ts';
 
-const pages = Object.keys(import.meta.glob('/src/routes/**/+page.svelte'));
+// `+page@<layout>.svelte` is a screen too, one that runs only the layouts down to the one it names.
+const pages = Object.keys(import.meta.glob(['/src/routes/**/+page.svelte', '/src/routes/**/+page@*.svelte']));
+const pageOf = new Map(pages.map((path) => [routeOfPage(path), path]));
+const layouts = Object.keys(import.meta.glob(['/src/routes/**/+layout.svelte', '/src/routes/**/+layout@*.svelte']));
 const modules = import.meta.glob([
   '/src/routes/**/+page.server.ts',
   '/src/routes/**/+page.ts',
   '/src/routes/**/+layout.server.ts',
   '/src/routes/**/+layout.ts'
 ]);
-const routes = pages.map(routeOfPage).sort();
+const routes = [...pageOf.keys()].sort();
 const stubs = stubTable(import.meta.glob<ScreenStubModule>('/src/routes/**/budgetStub.ts', { eager: true }));
 
 const measuring = process.env['SCREEN_BUDGET_MEASURE'];
@@ -91,7 +94,7 @@ describe('every screen stays within its budget', () => {
 
   it.each(routes)('%s', async (route) => {
     const thrown: unknown[] = [];
-    const load = hardLoad(await routeLoads(route, modules), thrown);
+    const load = hardLoad(await routeLoads(pageOf.get(route)!, modules, layouts), thrown);
     const table = measuring ? unlimited : budgets;
     const stub = stubs.get(route);
     const { event, read } = hardLoadEvent(route, stub);
@@ -108,7 +111,7 @@ describe('every screen stays within its budget', () => {
 
   it.each(routes)('%s, every list empty', async (route) => {
     const thrown: unknown[] = [];
-    const loads = await routeLoads(route, modules);
+    const loads = await routeLoads(pageOf.get(route)!, modules, layouts);
     const shell = new Set<string>();
     const stub = stubs.get(route);
     const fields = stub?.fields;
@@ -129,9 +132,14 @@ describe('every screen stays within its budget', () => {
 
   it('counts the reads a version screen makes, its layouts included', async () => {
     const route = '/[orgKey]/[appKey]/[version]';
-    const run = await expectWithinBudget(hardLoad(await routeLoads(route, modules)), hardLoadEvent(route).event, (input) => answer(input), {
-      budgets
-    });
+    const run = await expectWithinBudget(
+      hardLoad(await routeLoads(pageOf.get(route)!, modules, layouts)),
+      hardLoadEvent(route).event,
+      (input) => answer(input),
+      {
+        budgets
+      }
+    );
     expect(run.load.calls).toBeGreaterThan(0);
   });
 });

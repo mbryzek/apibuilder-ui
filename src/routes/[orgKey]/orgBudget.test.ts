@@ -12,6 +12,8 @@ import { answer, hardLoad, hardLoadEvent, routeLoads } from '#lib/test-support/s
 const budgets = suiteRecord('apibuilder-ui');
 
 const route = '/[orgKey]';
+const layouts = Object.keys(import.meta.glob(['/src/routes/**/+layout.svelte', '/src/routes/**/+layout@*.svelte']));
+const page = '/src/routes/[orgKey]/+page.svelte';
 const modules = import.meta.glob([
   '/src/routes/+layout.server.ts',
   '/src/routes/[orgKey]/+layout.server.ts',
@@ -32,7 +34,9 @@ function asAdmin(input: RequestInfo | URL): Response {
 
 describe('the organization page for an admin', () => {
   it('shows after its three reads, none waiting on another, the pending requests filling in after', async () => {
-    const run = await expectWithinBudget(hardLoad(await routeLoads(route, modules)), hardLoadEvent(route).event, asAdmin, { budgets });
+    const run = await expectWithinBudget(hardLoad(await routeLoads(page, modules, layouts)), hardLoadEvent(route).event, asAdmin, {
+      budgets
+    });
 
     const operations = run.calls.map((call) => `${call.part} ${call.operation}`);
     expect(operations).toContain('later:pendingRequests GET /apibuilder/membership/requests');
