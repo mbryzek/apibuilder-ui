@@ -68,6 +68,12 @@ event and the API client mocked. That is how
 and session behavior. **This is the level to reach for first** — it runs in seconds with no server,
 and it is where a regression gets caught.
 
+A full run (`npm run test:unit`, and `npm run check`, which ends in it) first reads this app's
+screen budget record from platform with `dev budgets show apibuilder-ui --json`, presenting the
+machine's runner identity (`src/lib/test/budgetRecord.setup.ts`, vitest's global setup). When
+platform does not answer, the run exits 75, unmeasured, and no spec runs. A run naming only spec
+files that are not screen budget specs reads nothing.
+
 **End-to-end tests (`npm run test:e2e`)** are Playwright specs in `playwright/tests/`. They need
 two servers running, and `playwright/global-setup.ts` refuses to start without both:
 
