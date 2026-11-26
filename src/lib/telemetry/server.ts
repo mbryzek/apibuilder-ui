@@ -141,14 +141,6 @@ interface ClientConnection {
   asOrganization?: unknown;
 }
 
-/**
- * The header a zone's edge Worker carries the client's round trip on in, in whole milliseconds. A
- * console behind an edge (sell-admin behind sell-backend's zone-wide route on idempotent.app) is reached
- * by the edge's subrequest, whose own `cf` round trips are 0: only the edge saw the client's
- * connection, so it stamps the round trip here, removing any copy the client sent (ISS-113619).
- */
-export const EDGE_CLIENT_RTT_HEADER = 'x-edge-client-rtt';
-
 /** The round trip of `cf`, in whole ms: the larger of TCP's and QUIC's, null when neither was measured. */
 function measuredRtt(cf: ClientConnection | undefined): number | null {
   const rtts = [cf?.clientTcpRtt, cf?.clientQuicRtt].filter(
@@ -157,24 +149,16 @@ function measuredRtt(cf: ClientConnection | undefined): number | null {
   return rtts.length === 0 ? null : Math.round(Math.max(...rtts));
 }
 
-/** The round trip an edge Worker stamped on `request`, believed only on a Worker's subrequest (`cf-worker`). */
-function edgeRtt(request: Request | undefined): number | null {
-  if (!request?.headers.has('cf-worker')) return null;
-  const rtt = Number(request.headers.get(EDGE_CLIENT_RTT_HEADER));
-  return Number.isFinite(rtt) && rtt > 0 ? Math.round(rtt) : null;
-}
-
 /**
  * The round trip, in ms, Cloudflare measured to the client on this request: `clientTcpRtt` over
  * TCP, `clientQuicRtt` over HTTP/3, each 0 or absent when the request did not come that way. Read
- * from `platform.cf` (SvelteKit's adapter) or the request's own `cf`, else from the edge's
- * `EDGE_CLIENT_RTT_HEADER` when an edge Worker passed the request on; null off Cloudflare. A
+ * from `platform.cf` (SvelteKit's adapter) or the request's own `cf`; null off Cloudflare. A
  * screen's time to show is several round trips, so the rules read it to tell a slow network from
  * a slow screen (ISS-76085).
  */
 export function clientRttOf(platform: unknown, request?: Request): number | null {
   const cf = (platform as { cf?: ClientConnection } | undefined)?.cf ?? (request as { cf?: ClientConnection } | undefined)?.cf;
-  return measuredRtt(cf) ?? edgeRtt(request);
+  return measuredRtt(cf);
 }
 
 /** An automation's own name in a user agent: a headless or driven browser, a lab or uptime tester, a crawler, an HTTP library. */

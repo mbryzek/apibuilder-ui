@@ -4,7 +4,7 @@
  * platform record's rows (`budget.ts`), read once per run by vitest's global setup, in the main
  * process, and handed to every spec with `provide`:
  *
- *     // vite.config.ts
+ *     // the vitest config (vite.config.ts or vitest.config.ts)
  *     test: { globalSetup: ['src/lib/test/budgetRecord.setup.ts'] }
  *     // src/lib/test/budgetRecord.setup.ts
  *     export default budgetRecordSetup('hoa-app');
@@ -131,7 +131,7 @@ export function suiteRecord(app: string): BudgetRecord {
   const answer = inject('screenBudgetRecord');
   if (answer === undefined)
     throw new Error(
-      `the screen budget record was not read before this run: vite.config.ts's test.globalSetup must name ${app}'s budgetRecord setup`
+      `the screen budget record was not read before this run: the vitest config's (vite.config.ts or vitest.config.ts) test.globalSetup must name ${app}'s budgetRecord setup`
     );
   return budgetRecord(app, answer);
 }
