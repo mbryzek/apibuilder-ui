@@ -2,8 +2,9 @@
  * Which query parameters a screen's hard load reads, against the ones its hard load carried. A load
  * reading a parameter the hard load did not set is measured on the branch that parameter's absence
  * takes, which is not the screen people open: `/admin/chat` was held to a new conversation's calls
- * while people open `?chat=1` (ISS-79901). The budget test fails such a route until its override
- * names the parameter. ISS-80720
+ * while people open `?chat=1` (ISS-79901). The budget test fails such a route until its
+ * `budgetStub.ts` names the parameter, in its `search` or, read on purpose with no value, its
+ * `bareParams`. ISS-80720
  */
 // dry-copy: sveltekit/screen-budget/query-params — every copy of this region must match; `dev repo copies` checks it (ISS-80720)
 

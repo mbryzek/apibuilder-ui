@@ -19,8 +19,10 @@
 # status, so any chain here that swallowed a failure would exit 0 and publish a
 # green nothing measured. One exit status, no exceptions.
 #
-# This repo's build needs nothing from the machine beyond disk — no Docker, no
-# registry credential, no session database. Nothing here declares what the build
+# This repo's build needs no Docker, no registry credential and no session
+# database. Its unit tests read the screen budget record from platform with
+# `dev budgets show apibuilder-ui --json`, presenting the runner's identity, and
+# exit 75, unmeasured, when platform does not answer. Nothing here declares what the build
 # needs: every runner is provisioned to build every repository (ISS-32381).
 #
 # TEST HEALTH'S CONTRACT (design DES-18577, "Every repository with CI"). The two lines below are
