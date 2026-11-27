@@ -203,6 +203,15 @@ export interface Organization {
   domains: Domain[];
 }
 
+/**
+ * An organization with what the signed-in viewer holds in it, read in one call by every screen of the organization. Each part is the response of the operation that already reads it alone: GET /apibuilder/organizations/:key and GET /apibuilder/memberships for the viewer.
+ */
+export interface OrganizationDetail {
+  organization: Organization;
+  /** The signed-in viewer's memberships in this organization, as GET /apibuilder/memberships answers for org_key and the viewer's user_id: empty for a signed-out viewer or a non-member. Absent only when they could not be read, so a failure is never mistaken for not being a member. */
+  memberships?: Membership[];
+}
+
 export interface OrganizationForm {
   name: string;
   key?: string;
@@ -550,6 +559,11 @@ export interface UpdateOrganizationByKeyOptions {
 }
 
 export interface DeleteOrganizationByKeyOptions {
+  headers?: Record<string, string>;
+  signal?: AbortSignal;
+}
+
+export interface GetOrganizationDetailOptions {
   headers?: Record<string, string>;
   signal?: AbortSignal;
 }
@@ -1556,6 +1570,37 @@ export class ApiClient {
 
       if (response.status === 204) {
         return;
+      }
+
+      if (response.status === 401) {
+        throw new UnauthorizedErrorResponse(response);
+      }
+
+      if (response.status === 404) {
+        throw new VoidResponse(response);
+      }
+
+      throw new ApiException(response, `Request failed with status ${response.status}`);
+    });
+  }
+
+  async getOrganizationDetail(context: CallContext, key: string, options?: GetOrganizationDetailOptions): Promise<OrganizationDetail> {
+    return context.recorder.call(context, 'GET /apibuilder/organizations/:key/detail', async (note) => {
+      const url = `${this.baseUrl}/apibuilder/organizations/${encodeURIComponent(key)}/detail`;
+
+      const response = await this.request(
+        url,
+        {
+          method: 'GET'
+        },
+        'application/json',
+        { ...note.headers(url), ...options?.headers },
+        options?.signal
+      );
+      note.response(response);
+
+      if (response.status === 200) {
+        return await Util.mustParse<OrganizationDetail>(response, 'OrganizationDetail');
       }
 
       if (response.status === 401) {
