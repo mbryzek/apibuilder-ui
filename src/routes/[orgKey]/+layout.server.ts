@@ -2,40 +2,37 @@ import { ctx } from '#lib/telemetry/context.ts';
 import type { LayoutServerLoad } from './$types';
 import { apiBuilderClient, getSessionHeaders } from '#lib/api/clients.ts';
 import { handleApiCall } from '#lib/api/error-handler.ts';
-import { dataOr, dataOrThrow, loadErrorFrom, type LoadError } from '#lib/api/load-error.ts';
-import type { Organization, Membership } from '#generated/com-bryzek-apibuilder.ts';
+import { dataOrThrow, type LoadError } from '#lib/api/load-error.ts';
+import type { OrganizationDetail } from '#generated/com-bryzek-apibuilder.ts';
 import { MembershipRole } from '#generated/com-bryzek-apibuilder.ts';
 
+/** The banner shown when the detail read answered without the viewer's memberships. */
+const MEMBERSHIPS_UNREADABLE: LoadError = {
+  status: 503,
+  message: 'We could not load your memberships in this organization. Please try again.'
+};
+
+/**
+ * One read carries the organization and the signed-in viewer's memberships in it: empty for a
+ * signed-out viewer or a non-member, absent only when the API could not read them.
+ */
 export const load: LayoutServerLoad = async (event) => {
   const { params, locals } = event;
   const headers = getSessionHeaders(locals.session?.id);
   const client = apiBuilderClient({ headers });
 
-  // Both reads go out together: the memberships read needs only the URL's key, never the organization,
-  // so neither waits on the other.
-  const orgRead = handleApiCall<Organization>(() => client.getOrganizationByKey(ctx(event, 'load'), params.orgKey));
-  const session = locals.session;
-  const membershipsRead = session
-    ? handleApiCall<Membership[]>(() =>
-        client.getMemberships(ctx(event, 'load'), { orgKey: params.orgKey, userId: session.user.id, limit: 25, offset: 0 })
-      )
-    : null;
-  const org = dataOrThrow(await orgRead, 'Organization not found');
+  const detail = dataOrThrow(
+    await handleApiCall<OrganizationDetail>(() => client.getOrganizationDetail(ctx(event, 'load'), params.orgKey)),
+    'Organization not found'
+  );
+  const memberships = detail.memberships;
 
-  let isMember = false;
-  let isAdmin = false;
   // Named apart from the pages' `loadError` on purpose: page data is merged over
   // layout data, so a shared key would silently drop whichever one the page also set.
-  let membershipLoadError: LoadError | null = null;
+  // Reading absent memberships as "not a member" would tell a member they need to request access.
+  const membershipLoadError: LoadError | null = memberships === undefined ? MEMBERSHIPS_UNREADABLE : null;
+  const isMember = (memberships?.length ?? 0) > 0;
+  const isAdmin = memberships?.some((m) => m.role === MembershipRole.Admin) ?? false;
 
-  if (membershipsRead) {
-    const membershipsResponse = await membershipsRead;
-    // Falling back to "not a member" would tell a member they need to request access.
-    membershipLoadError = loadErrorFrom(membershipsResponse);
-    const memberships = dataOr(membershipsResponse, []);
-    isMember = memberships.length > 0;
-    isAdmin = memberships.some((m) => m.role === MembershipRole.Admin);
-  }
-
-  return { org, isMember, isAdmin, membershipLoadError };
+  return { org: detail.organization, isMember, isAdmin, membershipLoadError };
 };

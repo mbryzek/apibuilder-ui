@@ -10,8 +10,7 @@ import { caughtAsync } from '#lib/test-support/throws.ts';
  */
 
 const client = {
-  getOrganizationByKey: vi.fn(),
-  getMemberships: vi.fn(),
+  getOrganizationDetail: vi.fn(),
   getChanges: vi.fn(),
   getCode: vi.fn(),
   getItems: vi.fn()
@@ -54,8 +53,8 @@ beforeEach(() => {
 });
 
 describe('the organization layout, signed out', () => {
-  it('reads a public organization and asks nothing about memberships', async () => {
-    client.getOrganizationByKey.mockResolvedValue(ORG);
+  it('reads a public organization in one call, with no membership', async () => {
+    client.getOrganizationDetail.mockResolvedValue({ organization: ORG, memberships: [] });
 
     const data = (await loadOrg({})) as { org: unknown; isMember: boolean; isAdmin: boolean; membershipLoadError: unknown };
 
@@ -63,11 +62,12 @@ describe('the organization layout, signed out', () => {
     expect(data.isMember).toBe(false);
     expect(data.isAdmin).toBe(false);
     expect(data.membershipLoadError).toBeNull();
-    expect(client.getMemberships).not.toHaveBeenCalled();
+    expect(client.getOrganizationDetail).toHaveBeenCalledTimes(1);
+    expect(client.getOrganizationDetail).toHaveBeenCalledWith('public-org');
   });
 
   it.each([401, 404])('is a 404 when the API answers %i, so a private organization cannot be confirmed', async (status) => {
-    client.getOrganizationByKey.mockRejectedValue(refusedWith(status));
+    client.getOrganizationDetail.mockRejectedValue(refusedWith(status));
 
     const thrown = await caughtAsync(() => loadOrg({}));
 
@@ -75,14 +75,55 @@ describe('the organization layout, signed out', () => {
   });
 });
 
-describe('the organization layout, signed in as a non-member', () => {
-  it('reads a public organization as not a member', async () => {
-    client.getOrganizationByKey.mockResolvedValue(ORG);
-    client.getMemberships.mockResolvedValue([]);
+describe('the organization layout, signed in', () => {
+  it('reads a public organization as not a member when the viewer holds no membership', async () => {
+    client.getOrganizationDetail.mockResolvedValue({ organization: ORG, memberships: [] });
 
-    const data = (await loadOrg({ session: session() })) as { isMember: boolean };
+    const data = (await loadOrg({ session: session() })) as { isMember: boolean; membershipLoadError: unknown };
 
     expect(data.isMember).toBe(false);
+    expect(data.membershipLoadError).toBeNull();
+  });
+
+  it('reads a member, and an admin, from the memberships the detail carries', async () => {
+    client.getOrganizationDetail.mockResolvedValue({
+      organization: ORG,
+      memberships: [
+        { guid: 'm-1', role: 'member' },
+        { guid: 'm-2', role: 'admin' }
+      ]
+    });
+
+    const data = (await loadOrg({ session: session() })) as { isMember: boolean; isAdmin: boolean; membershipLoadError: unknown };
+
+    expect(data.isMember).toBe(true);
+    expect(data.isAdmin).toBe(true);
+    expect(data.membershipLoadError).toBeNull();
+  });
+
+  it('reads a member who is not an admin', async () => {
+    client.getOrganizationDetail.mockResolvedValue({ organization: ORG, memberships: [{ guid: 'm-1', role: 'member' }] });
+
+    const data = (await loadOrg({ session: session() })) as { isMember: boolean; isAdmin: boolean };
+
+    expect(data.isMember).toBe(true);
+    expect(data.isAdmin).toBe(false);
+  });
+
+  it('reports a membership load error, never "not a member", when the memberships are absent', async () => {
+    client.getOrganizationDetail.mockResolvedValue({ organization: ORG });
+
+    const data = (await loadOrg({ session: session() })) as {
+      org: unknown;
+      isMember: boolean;
+      isAdmin: boolean;
+      membershipLoadError: { status: number; message: string } | null;
+    };
+
+    expect(data.org).toEqual(ORG);
+    expect(data.isMember).toBe(false);
+    expect(data.isAdmin).toBe(false);
+    expect(data.membershipLoadError?.message).toMatch(/could not load your memberships/);
   });
 });
 
