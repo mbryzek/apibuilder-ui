@@ -20,11 +20,12 @@ const modules = import.meta.glob([
   '/src/routes/[orgKey]/+page.server.ts'
 ]);
 
-/** Every read as the suite answers it, but the viewer's memberships name them an admin of the organization. */
+/** Every read as the suite answers it, but the organization's detail names the viewer an admin of it. */
 function asAdmin(input: RequestInfo | URL): Response {
   const url = new URL(input instanceof Request ? input.url : String(input), 'https://apibuilder.org');
-  if (url.pathname.endsWith('/memberships')) {
-    return new Response(JSON.stringify([{ guid: 'm-1', role: 'admin' }]), {
+  if (url.pathname.endsWith('/detail')) {
+    const organization = { guid: 'o-1', key: 'org', name: 'Org', namespace: 'io.org', visibility: 'organization' };
+    return new Response(JSON.stringify({ organization, memberships: [{ guid: 'm-1', role: 'admin' }] }), {
       status: 200,
       headers: { 'content-type': 'application/json' }
     });
@@ -33,14 +34,14 @@ function asAdmin(input: RequestInfo | URL): Response {
 }
 
 describe('the organization page for an admin', () => {
-  it('shows after its three reads, none waiting on another, the pending requests filling in after', async () => {
+  it('shows after its two reads, none waiting on another, the pending requests filling in after', async () => {
     const run = await expectWithinBudget(hardLoad(await routeLoads(page, modules, layouts)), hardLoadEvent(route).event, asAdmin, {
       budgets
     });
 
     const operations = run.calls.map((call) => `${call.part} ${call.operation}`);
     expect(operations).toContain('later:pendingRequests GET /apibuilder/membership/requests');
-    expect(run.load).toEqual({ calls: 3, waits: 0 });
+    expect(run.load).toEqual({ calls: 2, waits: 0 });
     expect(run.peaks.later).toBe(1);
   });
 });
