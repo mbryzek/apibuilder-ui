@@ -34,6 +34,9 @@
  * navigation goes ahead for a view a soft navigation leaves, and at the first `visibilitychange`
  * to hidden or `pagehide` for the document's last view. Interaction after that send (INP) is lost, which the report accepts. Telemetry never
  * breaks a page: every browser API here is guarded, and a failed send is dropped.
+ *
+ * A view of a page no route matched (a 404 or error page) sends no half: it names no screen a budget
+ * holds, and the server half skips its request the same way. ISS-170833
  */
 import { browser } from '$app/env';
 import { afterNavigate, beforeNavigate } from '$app/navigation';
@@ -334,6 +337,7 @@ function wrapFetch(): void {
 }
 
 function beacon(half: ReturnType<typeof browserHalfOf>, endpoint: string): void {
+  if (half.route === null) return;
   try {
     navigator.sendBeacon(endpoint, new Blob([JSON.stringify(half)], { type: 'application/json' }));
   } catch {

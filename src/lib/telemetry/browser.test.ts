@@ -170,6 +170,22 @@ describe('a hard load', () => {
     expect(halves[0]?.['calls']).toMatchObject([{ operation: 'markRead', part: 'browser', queries_counted: true }]);
   });
 
+  it('sends no half for a page no route matched, and sends the next view it navigates to', async () => {
+    page.route.id = null;
+    try {
+      const { browser } = await load();
+      browser.registerScreenReport({ view: VIEW });
+      after?.({ type: 'enter' });
+      navigate({ type: 'link' });
+      after?.({ type: 'link', to: { route: { id: '/other' }, url: new URL('/other', location.href) } });
+      hide();
+      const halves = await sent();
+      expect(halves.map((half) => half['route'])).toEqual(['/other']);
+    } finally {
+      page.route.id = '/issues/[id]';
+    }
+  });
+
   it("leaves out the load's hydration replays, which the server half already holds", async () => {
     const { browser, context } = await load();
     browser.registerScreenReport({ view: VIEW });

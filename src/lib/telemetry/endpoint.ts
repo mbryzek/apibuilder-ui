@@ -11,7 +11,8 @@
  * door's token are the hard bounds. The server half never comes here: the hook forwards it in
  * process. The client round trip is the server's: Cloudflare's measure of the post's own connection, and what marks the client
  * automated: the post's own user agent, and the `webdriver` the browser half says it ran under, and
- * the network the post came from.
+ * the network the post came from. A half of a page no route matched is answered 204 and forwarded
+ * nowhere, as the server half skips that page's request: it names no screen. ISS-170833
  */
 import { postReport, sanitizeBrowserHalf, withClientRtt } from './report';
 import { clientMarksOf, clientNetworkOf, clientRttOf, keepAliveOf, type ScreenReportConfig } from './server';
@@ -111,6 +112,7 @@ export function telemetryHandler(
     if (text === null) return new Response(null, { status: 413 });
     const posted = sanitizeBrowserHalf(parse(text));
     if (posted === null) return new Response(null, { status: 400 });
+    if (posted.route === null) return new Response(null, { status: 204 });
     const half = {
       ...posted,
       ...withClientRtt(clientRttOf(event.platform, event.request)),
