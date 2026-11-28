@@ -195,6 +195,62 @@ export function loadPhases(nav: PhaseEntry, lcpAt: number | null, hidden: Hidden
   };
 }
 
+/** A `Server-Timing` entry on the navigation entry (`PerformanceServerTiming`), as far as `serverTimings` reads it. */
+export interface ServerTimingEntry {
+  name: string;
+  duration: number;
+  description: string;
+}
+
+/**
+ * The `Server-Timing` entries a hard load reports, and no other: what the server answered the
+ * session from (`session`), the server's own time from its hook's entry to the response it returned
+ * (`app`), and whether the request started a fresh isolate (`isolate`, `cold` or `warm`). The list
+ * is bounded so a header nobody chose cannot widen the report.
+ */
+export const SERVER_TIMING_NAMES = ['session', 'app', 'isolate'] as const;
+
+export type ServerTimingName = (typeof SERVER_TIMING_NAMES)[number];
+
+/**
+ * One reported entry: its duration in whole ms, null where the entry named none (the API reads an
+ * absent `dur` as zero, so a zero is no reading), and its description, null where it named none or
+ * one that is not a short token.
+ */
+export interface ServerTiming {
+  ms: number | null;
+  desc: string | null;
+}
+
+export type ServerTimings = Partial<Record<ServerTimingName, ServerTiming>>;
+
+const SERVER_TIMING_DESC = /^[A-Za-z0-9_.-]{1,32}$/;
+
+/** A reported entry's description: a short token, or null. */
+export function serverTimingDesc(value: unknown): string | null {
+  return typeof value === 'string' && SERVER_TIMING_DESC.test(value) ? value : null;
+}
+
+/** A reported entry's duration: whole ms above zero, or null. */
+export function serverTimingMs(value: unknown): number | null {
+  return typeof value === 'number' && Number.isFinite(value) && value > 0 ? Math.round(value) : null;
+}
+
+/**
+ * The allow-listed `Server-Timing` entries of a hard load's document response, the first of each
+ * name; null where it sent none of them (a browser that keeps no `serverTiming`, a server that sends
+ * none, a cross-origin document without `Timing-Allow-Origin`).
+ */
+export function serverTimings(entries: readonly ServerTimingEntry[] | undefined): ServerTimings | null {
+  const kept: ServerTimings = {};
+  for (const entry of entries ?? []) {
+    const name = SERVER_TIMING_NAMES.find((allowed) => allowed === entry.name);
+    if (name === undefined || kept[name] !== undefined) continue;
+    kept[name] = { ms: serverTimingMs(entry.duration), desc: serverTimingDesc(entry.description) };
+  }
+  return Object.keys(kept).length === 0 ? null : kept;
+}
+
 /** A navigation entry, as far as time to show reads it. */
 export interface ShowEntry extends DocumentEntry {
   responseStart: number;

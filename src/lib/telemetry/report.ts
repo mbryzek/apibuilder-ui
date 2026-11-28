@@ -17,7 +17,7 @@
 import { PUBLIC_VERSION } from '$app/env/public';
 import { MAX_CALLS, type RecordedCall, type ViewRecorder } from './recorder';
 import { encodeLogs, type Attribute, type LogRecordInput } from './otlp';
-import type { LoadPhases } from './timing';
+import { SERVER_TIMING_NAMES, serverTimingDesc, serverTimingMs, type LoadPhases, type ServerTimings } from './timing';
 import { isViewId } from './view';
 
 /** The report door's OTLP logs path, admitted to the report writers alone. */
@@ -40,6 +40,12 @@ export interface ReportTiming {
    * browser bundle older than the field posted.
    */
   phases?: LoadPhases;
+  /**
+   * The allow-listed `Server-Timing` entries of a hard load's document response (`serverTimings`):
+   * the session answer, the server's own time, a cold isolate. Absent from a soft navigation, from a
+   * response that sent none, and from a half a browser bundle older than the field posted.
+   */
+  server?: ServerTimings;
 }
 
 /**
@@ -212,18 +218,32 @@ function sanitizePhases(value: unknown): LoadPhases | null {
   };
 }
 
+/** A hard load's posted `Server-Timing` entries, the allow-listed names alone; null where it posted none. */
+function sanitizeServer(value: unknown): ServerTimings | null {
+  const server = record(value);
+  if (server === null) return null;
+  const kept: ServerTimings = {};
+  for (const name of SERVER_TIMING_NAMES) {
+    const entry = record(server[name]);
+    if (entry !== null) kept[name] = { ms: serverTimingMs(entry['ms']), desc: serverTimingDesc(entry['desc']) };
+  }
+  return Object.keys(kept).length === 0 ? null : kept;
+}
+
 function sanitizeTiming(value: unknown): ReportTiming | null {
   const timing = record(value);
   if (timing === null) return null;
   const navigation = timing['navigation'];
   if (navigation !== 'hard' && navigation !== 'soft') return null;
   const phases = navigation === 'hard' ? sanitizePhases(timing['phases']) : null;
+  const server = navigation === 'hard' ? sanitizeServer(timing['server']) : null;
   return {
     navigation,
     show_ms: millis(timing['show_ms']),
     inp_ms: millis(timing['inp_ms']),
     finished_ms: millis(timing['finished_ms']),
-    ...(phases === null ? {} : { phases: phases })
+    ...(phases === null ? {} : { phases: phases }),
+    ...(server === null ? {} : { server: server })
   };
 }
 
@@ -292,6 +312,7 @@ export function reportAttributes(stamped: StampedHalf, peaks: PartPeaks): Attrib
     ['screen.phase.connect_ms', timing?.phases?.connect_ms],
     ['screen.phase.ttfb_ms', timing?.phases?.ttfb_ms],
     ['screen.phase.render_ms', timing?.phases?.render_ms],
+    ...serverAttributes(timing?.server),
     ['screen.client_rtt_ms', stamped.client_rtt_ms],
     ['screen.report.lost', stamped.lost_halves === 0 ? undefined : stamped.lost_halves],
     ['screen.release', stamped.release],
@@ -319,6 +340,22 @@ export function reportAttributes(stamped: StampedHalf, peaks: PartPeaks): Attrib
     ...pollTicks(stamped.polls),
     attribute('screen.calls', stamped.calls.length + stamped.dropped_calls)
   ];
+}
+
+/**
+ * A hard load's `Server-Timing` entries as `screen.server.<name>_ms` (the duration) and
+ * `screen.server.<name>` (the description), each only where the entry carried it.
+ */
+function serverAttributes(server: ServerTimings | undefined): [string, number | string | null | undefined][] {
+  return SERVER_TIMING_NAMES.flatMap((name): [string, number | string | null | undefined][] => {
+    const entry = server?.[name];
+    return entry === undefined
+      ? []
+      : [
+          [`screen.server.${name}_ms`, entry.ms],
+          [`screen.server.${name}`, entry.desc]
+        ];
+  });
 }
 
 /**

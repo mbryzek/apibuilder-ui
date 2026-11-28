@@ -8,6 +8,7 @@ import {
   hiddenSpansAtRegistration,
   interactionToNextPaint,
   loadPhases,
+  serverTimings,
   softNavigationShowMs
 } from './timing';
 
@@ -78,6 +79,39 @@ describe('loadPhases', () => {
   it('has no render phase without an LCP, and leaves out the time the document spent hidden', () => {
     const hidden = new HiddenSpans([{ start: 1000, end: 11_000 }]);
     expect(loadPhases(nav, null, hidden, 20_000)).toEqual({ wait_ms: 8700, connect_ms: 240, ttfb_ms: 112, render_ms: null });
+  });
+});
+
+describe('serverTimings', () => {
+  const entry = (name: string, duration = 0, description = '') => ({ name, duration, description });
+
+  it('keeps the allow-listed entries a document sent, each with its duration and description', () => {
+    const entries = [entry('session', 16.4, 'platform'), entry('app', 41.6), entry('isolate', 0, 'cold'), entry('db', 9, 'pg')];
+    expect(serverTimings(entries)).toEqual({
+      session: { ms: 16, desc: 'platform' },
+      app: { ms: 42, desc: null },
+      isolate: { ms: null, desc: 'cold' }
+    });
+  });
+
+  it('keeps the first of a repeated name, and no description that is not a short token', () => {
+    const entries = [
+      entry('session', 3, 'memory'),
+      entry('session', 90, 'platform'),
+      entry('app', 5, 'a b'),
+      entry('isolate', 0, 'x'.repeat(33))
+    ];
+    expect(serverTimings(entries)).toEqual({
+      session: { ms: 3, desc: 'memory' },
+      app: { ms: 5, desc: null },
+      isolate: { ms: null, desc: null }
+    });
+  });
+
+  it('is null where the document sent none of them, or the browser keeps no list', () => {
+    expect(serverTimings([entry('cfRequestDuration', 12)])).toBeNull();
+    expect(serverTimings([])).toBeNull();
+    expect(serverTimings(undefined)).toBeNull();
   });
 });
 

@@ -41,9 +41,11 @@ import {
   hiddenSpansAtRegistration,
   interactionToNextPaint,
   loadPhases,
+  serverTimings,
   softNavigationShowMs,
   type HiddenSpans,
   type InteractionEntry,
+  type ServerTimings,
   type VisibilityStateEntry
 } from './timing';
 import { TELEMETRY_PATH, isViewId, mintViewId, viewMark } from './view';
@@ -182,8 +184,16 @@ export function timingOf(view: ViewState, now: number): ReportTiming {
     show_ms: show,
     inp_ms: interactionToNextPaint(view.interactions, interactionsSince(view)),
     finished_ms: view.finishedMs,
-    ...(nav === undefined ? {} : { phases: loadPhases(nav, lcpAt, documentHidden, now) })
+    ...(nav === undefined ? {} : { phases: loadPhases(nav, lcpAt, documentHidden, now) }),
+    ...serverOf(nav)
   };
+}
+
+/** The `server` field a hard load's timing carries: the allow-listed `Server-Timing` entries of its document, where it sent any. */
+function serverOf(nav: PerformanceNavigationTiming | undefined): { server?: ServerTimings } {
+  if (nav === undefined) return {};
+  const server = serverTimings(nav.serverTiming);
+  return server === null ? {} : { server: server };
 }
 
 /** `webdriver` when the browser says automation drives it (`navigator.webdriver`): the half is a scanner's or a test's, no person's. */
