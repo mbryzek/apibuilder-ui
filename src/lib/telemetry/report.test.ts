@@ -67,6 +67,20 @@ describe('sanitizeBrowserHalf', () => {
     expect(sanitizeBrowserHalf({ ...hard, timing: { ...hard.timing, phases: undefined } })?.timing).not.toHaveProperty('phases');
   });
 
+  it("keeps a hard load's allow-listed server timings, field by field, and none a soft navigation posts", () => {
+    const server = { session: { ms: 16, desc: 'platform' }, app: { ms: 42, desc: null }, isolate: { ms: null, desc: 'cold' } };
+    const posted = {
+      session: { ms: 16.4, desc: 'platform', extra: 1 },
+      app: { ms: 42, desc: 'has space' },
+      isolate: { ms: -3, desc: 'cold' },
+      db: { ms: 9, desc: 'pg' }
+    };
+    const hard = { ...browserHalf, timing: { ...browserHalf.timing, navigation: 'hard', server: posted } };
+    expect(sanitizeBrowserHalf(hard)?.timing?.server).toEqual(server);
+    expect(sanitizeBrowserHalf({ ...browserHalf, timing: { ...browserHalf.timing, server } })?.timing).not.toHaveProperty('server');
+    expect(sanitizeBrowserHalf({ ...hard, timing: { ...hard.timing, server: { db: { ms: 9 } } } })?.timing).not.toHaveProperty('server');
+  });
+
   it('keeps at most MAX_CALLS and counts the rest as dropped', () => {
     const half = sanitizeBrowserHalf({ ...browserHalf, calls: Array.from({ length: MAX_CALLS + 7 }, () => call('load')) });
     expect(half?.calls).toHaveLength(MAX_CALLS);
@@ -173,6 +187,32 @@ describe('the record monitoring reads', () => {
     const attributes = reportAttributes({ ...browser, app: 'account', repo: 'playbook-systems/account' }, peaksOfCalls(browser));
     const phases = Object.fromEntries(attributes.filter((a) => a.key.startsWith('screen.phase.')).map((a) => [a.key, a.value]));
     expect(phases).toEqual({ 'screen.phase.wait_ms': 18_700, 'screen.phase.connect_ms': 240, 'screen.phase.ttfb_ms': 112 });
+  });
+
+  it("carries a hard load's server timings as screen.server attributes, each only where the entry carried it", () => {
+    const browser: ReportHalf = {
+      half: 'browser',
+      view: VIEW,
+      route: '/login',
+      calls: [],
+      dropped_calls: 0,
+      polls: {},
+      timing: {
+        navigation: 'hard',
+        show_ms: 900,
+        inp_ms: null,
+        finished_ms: null,
+        server: { session: { ms: 16, desc: 'platform' }, app: { ms: 42, desc: null }, isolate: { ms: null, desc: 'cold' } }
+      }
+    };
+    const attributes = reportAttributes({ ...browser, app: 'build', repo: 'mbryzek/build' }, peaksOfCalls(browser));
+    const server = Object.fromEntries(attributes.filter((a) => a.key.startsWith('screen.server.')).map((a) => [a.key, a.value]));
+    expect(server).toEqual({
+      'screen.server.session_ms': 16,
+      'screen.server.session': 'platform',
+      'screen.server.app_ms': 42,
+      'screen.server.isolate': 'cold'
+    });
   });
 
   it('names the release the half was built as, and nothing for a build no release made', () => {
