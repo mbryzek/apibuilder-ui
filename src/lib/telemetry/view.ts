@@ -9,6 +9,9 @@
  *   in the `x-screen-view-id` header (`viewMark`), marked as a navigation (`<id>.nav`) while one is
  *   entering it. The server hook, answering that navigation's `__data.json` request, reads the
  *   header instead of minting, so both halves carry one id.
+ * - A preload (`data-sveltekit-preload-data`, a tap or a hover on a link): the browser mints an id
+ *   for its data request, marked as a navigation, and the navigation to that page adopts it, since
+ *   SvelteKit reuses the preload as that navigation's load and sends no data request of its own.
  * - A refresh (`invalidate`, `invalidateAll`, the reload after a form action): the header names the
  *   view the page shows, unmarked, so a data request carrying an unmarked id is a refresh of that
  *   view, not a new one.

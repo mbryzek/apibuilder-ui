@@ -18,7 +18,7 @@
  *
  * - a document request mints a view (a hard load);
  * - a `__data.json` request takes the view its `x-screen-view-id` header names (`view.ts`).
- *   Marked as a navigation, it is a soft navigation's server half; unmarked, it is a refresh of the view the page shows
+ *   Marked as a navigation, it is a soft navigation's server half, or a preload's, which the navigation to its page adopts; unmarked, it is a refresh of the view the page shows
  *   (`invalidate`, a poll, the reload after a form action), and its load's calls are one tick of
  *   that view's `refresh` poll, never a second first load. Naming no view, it mints one;
  * - a form action or an app endpoint takes the id the page's script sent as `x-screen-view-id`.
