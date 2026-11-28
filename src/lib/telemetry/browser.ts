@@ -14,6 +14,13 @@
  * the document's own, so two windows of an app each book to their own view. A universal load or a
  * component call in the browser finds its view here (`ctx`, `viewCtx`).
  *
+ * A data request that names neither (a preload: `data-sveltekit-preload-data` on a tap or a hover, a
+ * `preloadData`) names an id of its own, minted here and marked as a navigation, and the browser
+ * keeps the last one with the page it loads. SvelteKit reuses a preload as the load of the navigation
+ * to its page and sends no data request of its own, so that navigation adopts the preload's id
+ * instead of minting one: its server half is the preload's. A preload never followed is a server
+ * half alone, as one the server minted for itself would be. ISS-175574
+ *
  * A navigation another `beforeNavigate` handler cancels (an unsaved-changes guard) never enters
  * its view: the view it would have left stays current, as if it had not started.
  *
@@ -116,6 +123,12 @@ export interface ScreenReportOptions {
 const DATA_SUFFIX = '/__data.json';
 
 let current: ViewState | null = null;
+/**
+ * The last preload: the page its data request loaded and the view id it named. SvelteKit keeps one
+ * preload and drops it once a navigation commits or an invalidation runs, so this is taken by the
+ * navigation to its page, and dropped when a navigation enters its view or a refresh goes out.
+ */
+let preloaded: { page: string; view: string } | null = null;
 /** The view a soft navigation is leaving, and its half as of `beforeNavigate`; null once the navigation commits or is cancelled. */
 let leaving: { view: ViewState; half: ReturnType<typeof browserHalfOf> } | null = null;
 const softNav = new VisibleStopwatch();
@@ -143,11 +156,15 @@ function interactionsSince(view: ViewState): number | null {
 
 function newView(id: string, route: string | null, url: URL | null, navigation: 'hard' | 'soft', startedAt: number): ViewState {
   const count = interactionCount();
+  const page = url === null ? null : pageOf(url.pathname, url.search);
+  const adopted = navigation === 'soft' && page !== null && preloaded?.page === page ? preloaded.view : null;
+  if (adopted !== null) preloaded = null;
   return {
-    recorder: new BrowserViewRecorder(id, route, { side: 'browser', startedAt, origin: location.origin }),
+    recorder: new BrowserViewRecorder(adopted ?? id, route, { side: 'browser', startedAt, origin: location.origin }),
     navigation,
-    page: url === null ? null : pageOf(url.pathname, url.search),
-    loadSent: false,
+    page,
+    // A view that adopted a preload's id has its load: the preload SvelteKit reuses.
+    loadSent: adopted !== null,
     showMs: null,
     finishedMs: null,
     interactions: [],
@@ -255,14 +272,13 @@ export function dataRequestPage(input: RequestInfo | URL): string | null {
  * navigation is entering it. A data request for a page other than the one the view shows or a
  * navigation is entering, its query included, is a preload (`data-sveltekit-preload-data`, a
  * pointer passing over a link) or the leaving page's own refresh: it is neither this view's refresh
- * nor its navigation's load, so it names none and its server half mints its own, read against the
- * load budget of the route it loads. A redirect is a navigation of its own, entering its own view.
- * ISS-80682
+ * nor its navigation's load, so it names none of the browser's views and goes out with an id of its
+ * own (`preloadMark`). A redirect is a navigation of its own, entering its own view. ISS-80682
  *
  * A navigation sends one data request for the page it enters. Another for the same page before it
  * enters is a preload SvelteKit starts while the navigation's own load is in flight (the pointer
  * still moving over the link it clicked, a tap, a second link to the page), since a navigation's
- * load is no preload a later one could reuse: it names no view either. ISS-82768
+ * load is no preload a later one could reuse: it names none of the browser's views either. ISS-82768
  */
 function currentMark(input: RequestInfo | URL): string | null {
   const view = current;
@@ -274,7 +290,23 @@ function currentMark(input: RequestInfo | URL): string | null {
     if (view.loadSent) return null;
     view.loadSent = true;
   }
+  // A refresh drops SvelteKit's preload, so a navigation after it loads afresh.
+  if (!navigating && loads !== null) preloaded = null;
   return viewMark(view.recorder.view, navigating);
+}
+
+/**
+ * The header value for a data request that names no view of the browser's (`currentMark`): a view
+ * id of its own, marked as a navigation, so its server half is read against the load budget of the
+ * route it loads, kept as the last preload for a navigation to its page to adopt. Null before the
+ * report is registered.
+ */
+function preloadMark(input: RequestInfo | URL): string | null {
+  const loads = dataRequestPage(input);
+  if (current === null || loads === null) return null;
+  const view = mintViewId();
+  preloaded = { page: loads, view };
+  return viewMark(view, true);
 }
 
 /**
@@ -286,7 +318,7 @@ function wrapFetch(): void {
   const native = window.fetch.bind(window);
   window.fetch = (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
     try {
-      const mark = namesView(input, init) ? currentMark(input) : null;
+      const mark = namesView(input, init) ? (currentMark(input) ?? preloadMark(input)) : null;
       if (mark !== null) {
         const headers = new Headers(init?.headers ?? (input instanceof Request ? input.headers : undefined));
         if (!headers.has(VIEW_HEADER)) {
@@ -395,9 +427,9 @@ export function cancelled(error: unknown): boolean {
  * its view was minted for is a navigation of its own that SvelteKit started without `beforeNavigate`:
  * a link followed while another navigation is in flight overtakes it, and a redirect in a load moves
  * it. Its data request went out for a page the view does not show, so it named no view and its server
- * half holds an id of its own; the page on screen is a new view, and every later refresh and form
- * action names that one, never the view of a page that never showed. That view is dropped unsent:
- * it has no time to show. ISS-86736
+ * half holds an id of its own (`preloadMark`), which the page on screen adopts as its new view; every
+ * later refresh and form action names that one, never the view of a page that never showed. That
+ * view is dropped unsent: it has no time to show. ISS-86736
  */
 function enteredView(view: ViewState | null, to: { route?: { id: string | null } | null; url: URL } | null | undefined): ViewState | null {
   if (view === null || !to?.url) return view;
@@ -443,6 +475,8 @@ export function registerScreenReport(options: ScreenReportOptions): void {
 
   afterNavigate(({ type, to }) => {
     const view = enteredView(current, to);
+    // SvelteKit drops its preload once a navigation commits: a later one loads afresh.
+    preloaded = null;
     if (view === null) return;
     sendLeaving(endpoint);
     view.recorder.enteredAt = view.recorder.elapsed();

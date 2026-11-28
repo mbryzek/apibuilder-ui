@@ -70,6 +70,14 @@ function navigate(navigation: Navigation): { reject: (message: string) => Promis
   };
 }
 
+/** A header value naming a view a navigation is entering, or a preload's own: `<id>.nav`. */
+const MARKED = /^(sv_[0-9a-f]{32})\.nav$/;
+
+/** The view id a marked header value names; undefined for any other value. */
+function markedId(header: string | null): string | undefined {
+  return MARKED.exec(header ?? '')?.[1];
+}
+
 /** The view header the document's next request to `url` carries. */
 async function headerOf(url: string, init?: RequestInit): Promise<string | null> {
   await window.fetch(url, init);
@@ -200,32 +208,35 @@ describe('a hard load', () => {
     expect(await headerOf('/issues/1?/comment', { method: 'POST', headers: { 'x-sveltekit-action': 'true' } })).toBe(VIEW);
   });
 
-  it("names no view on a preload of another page's data, so its first load is not booked as a refresh", async () => {
+  it("names a view of its own on a preload of another page's data, so its first load is not booked as a refresh", async () => {
     const { browser } = await load();
     browser.registerScreenReport({ view: VIEW });
     after?.({ type: 'enter' });
-    expect(await headerOf('/__data.json?x-sveltekit-invalidated=01')).toBeNull();
-    expect(await headerOf('/issues/2/__data.json')).toBeNull();
+    const root = markedId(await headerOf('/__data.json?x-sveltekit-invalidated=01'));
+    const other = markedId(await headerOf('/issues/2/__data.json'));
+    expect(root).toBeDefined();
+    expect(other).toBeDefined();
+    expect(new Set([root, other, VIEW]).size).toBe(3);
     expect(await headerOf('/issues/1/__data.json?x-sveltekit-trailing-slash=1')).toBe(VIEW);
     navigate({ type: 'link' });
     after?.({ type: 'link' });
-    expect(await headerOf('/issues/1/__data.json')).toBeNull();
-    expect(await headerOf('/other/__data.json')).not.toBeNull();
+    expect(markedId(await headerOf('/issues/1/__data.json'))).toBeDefined();
+    expect(await headerOf('/other/__data.json')).toMatch(/^sv_[0-9a-f]{32}$/);
   });
 
-  it("names no view on a preload of the same route's page under another query, a filter or pager link", async () => {
+  it("names a view of its own on a preload of the same route's page under another query, a filter or pager link", async () => {
     history.replaceState(null, '', '/issues?stage=open&page=2');
     const { browser } = await load();
     browser.registerScreenReport({ view: VIEW });
     after?.({ type: 'enter' });
-    expect(await headerOf('/issues/__data.json?stage=closed')).toBeNull();
-    expect(await headerOf('/issues/__data.json?stage=open&page=3')).toBeNull();
-    expect(await headerOf('/issues/__data.json')).toBeNull();
+    expect(markedId(await headerOf('/issues/__data.json?stage=closed'))).toBeDefined();
+    expect(markedId(await headerOf('/issues/__data.json?stage=open&page=3'))).toBeDefined();
+    expect(markedId(await headerOf('/issues/__data.json'))).toBeDefined();
     expect(await headerOf('/issues/__data.json?page=2&stage=open&x-sveltekit-invalidated=01')).toBe(VIEW);
     navigate({ type: 'link', to: { route: { id: '/issues' }, url: new URL('/issues?stage=closed', location.href) } });
     after?.({ type: 'link', to: { url: new URL('/issues?stage=closed', location.href) } });
-    expect(await headerOf('/issues/__data.json?stage=closed&x-sveltekit-invalidated=01')).not.toBeNull();
-    expect(await headerOf('/issues/__data.json?stage=open&page=2')).toBeNull();
+    expect(await headerOf('/issues/__data.json?stage=closed&x-sveltekit-invalidated=01')).toMatch(/^sv_[0-9a-f]{32}$/);
+    expect(markedId(await headerOf('/issues/__data.json?stage=open&page=2'))).toBeDefined();
   });
 
   it('leaves alone a request that is not a data request or form action of its own origin', async () => {
@@ -276,16 +287,17 @@ describe('a soft navigation', () => {
     expect(halves[1]?.['calls']).toMatchObject([{ operation: 'getOther', part: 'load' }]);
   });
 
-  it("names no view on another page's data request while it is entering, so a preload is not booked as its load", async () => {
+  it("names a view of its own on another page's data request while it is entering, so a preload is not booked as its load", async () => {
     const { browser } = await load();
     browser.registerScreenReport({ view: VIEW });
     after?.({ type: 'enter' });
     navigate({ type: 'link' });
-    const id = /^(sv_[0-9a-f]{32})\.nav$/.exec((await headerOf('/other/__data.json')) ?? '')?.[1];
+    const id = markedId(await headerOf('/other/__data.json'));
     expect(id).toBeDefined();
     // A pointer passing over a link to another page, or the leaving page's poll, before the navigation enters.
-    expect(await headerOf('/issues/2/__data.json')).toBeNull();
-    expect(await headerOf('/issues/1/__data.json?x-sveltekit-invalidated=01')).toBeNull();
+    const preload = markedId(await headerOf('/issues/2/__data.json'));
+    const poll = markedId(await headerOf('/issues/1/__data.json?x-sveltekit-invalidated=01'));
+    expect(new Set([id, preload, poll, VIEW]).size).toBe(4);
     expect(await headerOf('/other?/save', { method: 'POST', headers: { 'x-sveltekit-action': 'true' } })).toBe(`${id}.nav`);
   });
 
@@ -305,13 +317,61 @@ describe('a soft navigation', () => {
     const id = /^(sv_[0-9a-f]{32})\.nav$/.exec((await headerOf('/other/__data.json')) ?? '')?.[1];
     expect(id).toBeDefined();
     // The pointer still moving over the link it clicked: SvelteKit preloads the same page again.
-    expect(await headerOf('/other/__data.json')).toBeNull();
+    const again = markedId(await headerOf('/other/__data.json'));
+    expect(again).toBeDefined();
+    expect(again).not.toBe(id);
     expect(await headerOf('/other?/save', { method: 'POST', headers: { 'x-sveltekit-action': 'true' } })).toBe(`${id}.nav`);
     after?.({ type: 'link' });
     // Once entered, a data request for the page is the view's refresh.
     expect(await headerOf('/other/__data.json?x-sveltekit-invalidated=01')).toBe(id);
     navigate({ type: 'link' });
     expect(await headerOf('/other/__data.json')).toMatch(/^sv_[0-9a-f]{32}\.nav$/);
+  });
+
+  it("adopts the id of its page's preload, which SvelteKit reuses as its load, so its two halves join", async () => {
+    const { browser, context } = await load();
+    browser.registerScreenReport({ view: VIEW });
+    after?.({ type: 'enter' });
+    // A tap on the link: SvelteKit preloads the page's data on pointerdown, before beforeNavigate.
+    const preload = markedId(await headerOf('/other/__data.json'));
+    expect(preload).toBeDefined();
+    clock = 1000;
+    navigate({ type: 'link' });
+    await call(context.ctx({ route: { id: '/other' } }), 'getOther');
+    // The navigation reuses the preload: a further data request for the page is no load of its.
+    const later = markedId(await headerOf('/other/__data.json'));
+    expect(later).toBeDefined();
+    expect(later).not.toBe(preload);
+    expect(await headerOf('/other?/save', { method: 'POST', headers: { 'x-sveltekit-action': 'true' } })).toBe(`${preload}.nav`);
+    clock = 1250;
+    after?.({ type: 'link' });
+    expect(await headerOf('/other/__data.json?x-sveltekit-invalidated=01')).toBe(preload);
+    hide();
+    const halves = await sent();
+    expect(halves.map((half) => half['view'])).toEqual([VIEW, preload]);
+    expect(halves[1]).toMatchObject({ route: '/other', timing: { navigation: 'soft', show_ms: 250 } });
+  });
+
+  it('mints its own id when the last preload was of another page, or SvelteKit has dropped it', async () => {
+    const { browser } = await load();
+    browser.registerScreenReport({ view: VIEW });
+    after?.({ type: 'enter' });
+    // A hover over one link, then another: SvelteKit keeps the last preload alone.
+    const first = markedId(await headerOf('/other/__data.json'));
+    const last = markedId(await headerOf('/issues/2/__data.json'));
+    navigate({ type: 'link' });
+    const own = markedId(await headerOf('/other/__data.json'));
+    expect(new Set([first, last, own]).size).toBe(3);
+    after?.({ type: 'link' });
+    // A navigation's commit drops the preload: the next navigation to its page loads afresh.
+    navigate({ type: 'link', to: { route: { id: '/issues/[id]' }, url: new URL('/issues/2', location.href) } });
+    expect(markedId(await headerOf('/issues/2/__data.json'))).not.toBe(last);
+    after?.({ type: 'link', to: { url: new URL('/issues/2', location.href) } });
+    // A refresh drops it as well.
+    const dropped = markedId(await headerOf('/other/__data.json'));
+    expect(await headerOf('/issues/2/__data.json?x-sveltekit-invalidated=01')).toMatch(/^sv_[0-9a-f]{32}$/);
+    navigate({ type: 'link' });
+    expect(markedId(await headerOf('/other/__data.json'))).not.toBe(dropped);
   });
 
   it('reports no time to show for a navigation that entered its view within the tick it began', async () => {
@@ -384,16 +444,18 @@ describe('a soft navigation', () => {
     navigate({ type: 'link' });
     const overtaken = (await headerOf('/other/__data.json'))?.replace('.nav', '');
     // A link followed while the navigation is in flight: SvelteKit starts it without beforeNavigate,
-    // and its data request, for a page the view does not show, names none.
-    expect(await headerOf('/notices/7/__data.json')).toBeNull();
+    // and its data request, for a page the view does not show, names an id of its own.
+    const loaded = markedId(await headerOf('/notices/7/__data.json'));
+    expect(loaded).toBeDefined();
     clock = 1400;
     after?.({ type: 'link', to: { route: { id: '/notices/[n]' }, url: new URL('/notices/7', location.href) } });
+    // The page on screen adopts that id, so its two halves join.
     const shown = await headerOf('/notices/7?/acknowledge', { method: 'POST', headers: { 'x-sveltekit-action': 'true' } });
-    expect(shown).toMatch(/^sv_[0-9a-f]{32}$/);
+    expect(shown).toBe(loaded);
     expect(shown).not.toBe(overtaken);
     // The reload after the form action is the shown view's refresh; the page that never showed has none.
     expect(await headerOf('/notices/7/__data.json?x-sveltekit-invalidated=01')).toBe(shown);
-    expect(await headerOf('/other/__data.json')).toBeNull();
+    expect(markedId(await headerOf('/other/__data.json'))).not.toBe(overtaken);
     hide();
     const halves = await sent();
     expect(halves.map((half) => half['view'])).toEqual([VIEW, shown]);
