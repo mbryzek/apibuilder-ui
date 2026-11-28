@@ -89,6 +89,13 @@ describe('/_telemetry', () => {
     expect(attributes(3)).not.toHaveProperty('screen.client.agent');
   });
 
+  it('forwards nothing for a half of a page no route matched', async () => {
+    const { fetch, config } = door();
+    expect((await telemetryHandler(config)(post(JSON.stringify({ ...half, route: null })))).status).toBe(204);
+    expect((await telemetryHandler(config)(post(JSON.stringify({ ...half, route: '' })))).status).toBe(204);
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
   it('answers 413 over 64 KB, declared or not', async () => {
     const { config } = door();
     const big = JSON.stringify({ ...half, pad: 'x'.repeat(MAX_REPORT_BYTES) });
